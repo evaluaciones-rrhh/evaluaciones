@@ -173,74 +173,251 @@ function nivD(d){
 
 function calcular(resp){
   var ESCA=['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
-  var pd={};ESCA.forEach(function(e){pd[e]=0;});
-  for(var i=0;i<185;i++){var c=CLAVE[i+1];if(c&&resp[i]===c[0])pd[c[1]]++;}
+  var pd={};
+  ESCA.forEach(function(e){pd[e]=0;});
+
+  var CLAVE_REAL = {
+  1: {"A":{"tipo":"d"}},
+  2: {"C":{"tipo":"i"}},
+  3: {"E":{"tipo":"i"}},
+  4: {"F":{"tipo":"i"}},
+  5: {"G":{"tipo":"i"}},
+  6: {"F":{"tipo":"d"}},
+  7: {"G":{"tipo":"i"}},
+  9: {"H":{"tipo":"i"}},
+  12: {"I":{"tipo":"i"}},
+  14: {"I":{"tipo":"i"}},
+  15: {"L":{"tipo":"d"}},
+  17: {"I":{"tipo":"d"}},
+  18: {"L":{"tipo":"d"}},
+  19: {"M":{"tipo":"d"}},
+  20: {"N":{"tipo":"i"}},
+  21: {"M":{"tipo":"d"}},
+  22: {"N":{"tipo":"i"}},
+  24: {"N":{"tipo":"d"}},
+  25: {"O":{"tipo":"d"}},
+  26: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  27: {"O":{"tipo":"i"}},
+  28: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  29: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  30: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  31: {"A":{"tipo":"i"}},
+  32: {"C":{"tipo":"d"}},
+  33: {"A":{"tipo":"i"}},
+  35: {"C":{"tipo":"d"}},
+  36: {"E":{"tipo":"i"}},
+  37: {"F":{"tipo":"d"}},
+  38: {"E":{"tipo":"i"}},
+  39: {"F":{"tipo":"i"}},
+  40: {"G":{"tipo":"i"}},
+  41: {"H":{"tipo":"d"}},
+  46: {"I":{"tipo":"d"}},
+  47: {"L":{"tipo":"i"}},
+  49: {"I":{"tipo":"d"}},
+  50: {"L":{"tipo":"i"}},
+  51: {"M":{"tipo":"i"}},
+  52: {"N":{"tipo":"d"}},
+  53: {"N":{"tipo":"i"}},
+  54: {"M":{"tipo":"i"}},
+  55: {"N":{"tipo":"d"}},
+  56: {"O":{"tipo":"d"}},
+  57: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  59: {"O":{"tipo":"i"}},
+  60: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
+  61: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
+  62: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  63: {"A":{"tipo":"d"}},
+  64: {"C":{"tipo":"i"}},
+  65: {"A":{"tipo":"d"}},
+  66: {"E":{"tipo":"i"}},
+  67: {"C":{"tipo":"d"}},
+  68: {"F":{"tipo":"i"}},
+  69: {"G":{"tipo":"i"}},
+  70: {"F":{"tipo":"d"}},
+  71: {"H":{"tipo":"d"}},
+  72: {"G":{"tipo":"d"}},
+  73: {"H":{"tipo":"i"}},
+  79: {"I":{"tipo":"i"}},
+  80: {"L":{"tipo":"i"}},
+  81: {"I":{"tipo":"d"}},
+  82: {"M":{"tipo":"d"}},
+  83: {"N":{"tipo":"i"}},
+  84: {"L":{"tipo":"d"}},
+  86: {"N":{"tipo":"d"}},
+  87: {"M":{"tipo":"i"}},
+  88: {"N":{"tipo":"i"}},
+  89: {"O":{"tipo":"i"}},
+  90: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  91: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
+  92: {"O":{"tipo":"d"}},
+  93: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
+  94: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
+  96: {"A":{"tipo":"i"}},
+  97: {"C":{"tipo":"i"}},
+  98: {"A":{"tipo":"d"}},
+  99: {"E":{"tipo":"i"}},
+  100: {"F":{"tipo":"i"}},
+  102: {"E":{"tipo":"d"}},
+  103: {"F":{"tipo":"i"}},
+  104: {"G":{"tipo":"i"}},
+  105: {"H":{"tipo":"d"}},
+  106: {"G":{"tipo":"d"}},
+  107: {"H":{"tipo":"d"}},
+  111: {"I":{"tipo":"i"}},
+  113: {"L":{"tipo":"i"}},
+  114: {"I":{"tipo":"d"}},
+  116: {"M":{"tipo":"i"}},
+  117: {"L":{"tipo":"d"}},
+  118: {"N":{"tipo":"i"}},
+  119: {"M":{"tipo":"d"}},
+  120: {"N":{"tipo":"i"}},
+  121: {"O":{"tipo":"i"}},
+  122: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  123: {"O":{"tipo":"d"}},
+  124: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
+  125: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
+  126: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  127: {"A":{"tipo":"i"}},
+  128: {"C":{"tipo":"i"}},
+  129: {"A":{"tipo":"d"}},
+  130: {"E":{"tipo":"i"}},
+  131: {"C":{"tipo":"d"}},
+  132: {"E":{"tipo":"i"}},
+  133: {"G":{"tipo":"d"}},
+  134: {"F":{"tipo":"i"}},
+  135: {"H":{"tipo":"i"}},
+  136: {"G":{"tipo":"d"}},
+  137: {"H":{"tipo":"i"}},
+  142: {"I":{"tipo":"i"}},
+  143: {"L":{"tipo":"i"}},
+  145: {"I":{"tipo":"i"}},
+  146: {"M":{"tipo":"i"}},
+  147: {"N":{"tipo":"d"}},
+  148: {"L":{"tipo":"i"}},
+  149: {"N":{"tipo":"i"}},
+  150: {"M":{"tipo":"i"}},
+  151: {"N":{"tipo":"d"}},
+  152: {"O":{"tipo":"i"}},
+  154: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
+  155: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  156: {"O":{"tipo":"d"}},
+  157: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
+  158: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  159: {"A":{"tipo":"i"}},
+  160: {"C":{"tipo":"i"}},
+  161: {"A":{"tipo":"i"}},
+  162: {"C":{"tipo":"i"}},
+  163: {"E":{"tipo":"d"}},
+  164: {"F":{"tipo":"d"}},
+  165: {"E":{"tipo":"i"}},
+  166: {"G":{"tipo":"d"}},
+  167: {"H":{"tipo":"d"}},
+  168: {"G":{"tipo":"i"}},
+  169: {"H":{"tipo":"d"}},
+  177: {"B":{"tipo":"B","val":1}},
+  178: {"B":{"tipo":"B","val":3}},
+  179: {"B":{"tipo":"B","val":1}},
+  180: {"B":{"tipo":"B","val":1}},
+  181: {"B":{"tipo":"B","val":3}},
+  182: {"B":{"tipo":"B","val":1}},
+  183: {"B":{"tipo":"B","val":2}},
+  184: {"B":{"tipo":"B","val":3}},
+  185: {"B":{"tipo":"B","val":3}},
+  186: {"B":{"tipo":"B","val":3}},
+  187: {"B":{"tipo":"B","val":2}},
+  188: {"B":{"tipo":"B","val":2}},
+  189: {"B":{"tipo":"B","val":2}},
+  190: {"B":{"tipo":"B","val":2}},
+  191: {"B":{"tipo":"B","val":2}},
+};
+
+  // Calcular PD con puntuación 0,1,2 por ítem
+  for(var i=0;i<170;i++){
+    var num=i+1;
+    var r=parseInt(resp[i]);
+    if(!r||r<1||r>3) continue;
+    var item=CLAVE_REAL[num];
+    if(!item) continue;
+    Object.keys(item).forEach(function(escala){
+      var t=item[escala];
+      var pts=0;
+      if(t.tipo==='d') pts=r-1;        // 1→0, 2→1, 3→2
+      else if(t.tipo==='i') pts=(3-r); // 1→2, 2→1, 3→0
+      pd[escala]=(pd[escala]||0)+pts;
+    });
+  }
+
+  // Escala B (razonamiento): respuesta correcta = 1 punto
+  var B_ITEMS=CLAVE_REAL;
+  for(var i=170;i<185;i++){
+    var num=i+1;
+    var r=parseInt(resp[i]);
+    var item=CLAVE_REAL[num];
+    if(!item||!item.B) continue;
+    if(r===item.B.val) pd['B']=(pd['B']||0)+1;
+  }
+
+  // Decatipos según sexo
   var sexo=document.getElementById('sexo').value;
   var bar=sexo==='f'?BM:BV;
   var de={};
   ESCA.forEach(function(e){
-    var b=bar[e];var v=Math.min(pd[e],Math.max.apply(null,Object.keys(b).map(Number)));
+    var b=bar[e];
+    if(!b){de[e]=5;return;}
+    var v=Math.min(pd[e],Math.max.apply(null,Object.keys(b).map(Number)));
     de[e]=b[v]||5;
   });
+
+  // Dimensiones globales
   var ext_de=Math.min(10,Math.max(1,Math.round((de.A+de.F+de.H+(11-de.N)+(11-de.Q2)-5)/45*9+1)));
   var ans_de=Math.min(10,Math.max(1,Math.round(((11-de.C)+de.L+de.O+de.Q4-4)/36*9+1)));
   var dur_de=Math.min(10,Math.max(1,Math.round(((11-de.A)+(11-de.I)+(11-de.M)+(11-de.Q1)-4)/36*9+1)));
   var ind_de=Math.min(10,Math.max(1,Math.round((de.E+de.L+de.Q1-3)/27*9+1)));
   var auc_de=Math.min(10,Math.max(1,Math.round(((11-de.F)+de.G+(11-de.M)+de.Q3-4)/36*9+1)));
-  var pkey=document.getElementById('perfil').value;
-  var perf=PERFILES[pkey];
-  var dims={Ext:ext_de,Ans:ans_de,Dur:dur_de,Ind:ind_de,AuC:auc_de};
-  // Contar escalas en zona de alerta (decatipos 1-3 u 8-10)
-  var ESCA_NAMES=['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+
+  // Contar escalas en zona de alerta
   var alertas=[];
-  ESCA_NAMES.forEach(function(e){
+  ESCA.forEach(function(e){
     var v=de[e];
-    if(v<=3||v>=8) alertas.push(e+' ('+v+')');
-  });
-  // Tambien revisar dimensiones globales
-  var dimNames={Ext:ext_de,Ans:ans_de,Dur:dur_de,Ind:ind_de,AuC:auc_de};
-  var alertasDims=[];
-  Object.keys(dimNames).forEach(function(d){
-    var v=dimNames[d];
-    if(v<=3||v>=8) alertasDims.push(d+' ('+v+')');
+    if(v<=3||v>=8) alertas.push(e+'('+v+')');
   });
 
-  var totalAlertas=alertas.length;
-  var rec=totalAlertas+' escala(s) en zona de alejamiento significativo';
-  if(alertas.length>0) rec+=': '+alertas.join(', ');
-
+  // Fortalezas y riesgos basados en decatipos reales
   var forts=[],riesgos=[];
-  if(ext_de>=7)forts.push('Alta sociabilidad y orientación interpersonal');
-  else if(ext_de<=3)riesgos.push('Tendencia al aislamiento o introversión marcada');
-  if(ans_de<=4)forts.push('Buena estabilidad emocional y manejo del estrés');
-  else if(ans_de>=7)riesgos.push('Nivel de ansiedad elevado que puede afectar el desempeño');
-  if(de.C>=7)forts.push('Alta estabilidad emocional y madurez psicológica');
-  else if(de.C<=3)riesgos.push('Baja estabilidad emocional — posible dificultad ante la presión');
-  if(de.G>=7)forts.push('Respeto por normas y sentido del deber desarrollado');
-  else if(de.G<=3)riesgos.push('Tendencia al inconformismo y escasa atención a las normas');
-  if(de.E>=7)forts.push('Capacidad de liderazgo y asertividad');
-  else if(de.E<=3)riesgos.push('Tendencia a la sumisión — dificultad para defender sus ideas');
-  if(auc_de>=7)forts.push('Buen autocontrol y capacidad para seguir procedimientos');
-  else if(auc_de<=3)riesgos.push('Dificultad para controlar impulsos y seguir normas');
-  if(de.B>=7)forts.push('Alta capacidad de razonamiento abstracto');
-  else if(de.B<=3)riesgos.push('Capacidad de razonamiento por debajo del promedio');
-  if(de.L>=8)riesgos.push('Alta suspicacia que puede dificultar el trabajo en equipo');
-  if(de.Q4>=8)riesgos.push('Nivel de tensión elevado e irritabilidad frecuente');
-  if(de.Q3>=8)forts.push('Perfeccionismo y alta orientación al detalle y la calidad');
+  if(ext_de>=7) forts.push('Alta sociabilidad y orientación interpersonal');
+  else if(ext_de<=3) riesgos.push('Tendencia al aislamiento o introversión marcada');
+  if(ans_de<=3) forts.push('Buena estabilidad emocional y manejo del estrés');
+  else if(ans_de>=8) riesgos.push('Nivel de ansiedad elevado que puede afectar el desempeño');
+  if(de.C>=8) forts.push('Alta estabilidad emocional y madurez psicológica');
+  else if(de.C<=3) riesgos.push('Baja estabilidad emocional — posible dificultad ante la presión');
+  if(de.G>=8) forts.push('Alto respeto por normas y sentido del deber');
+  else if(de.G<=3) riesgos.push('Tendencia al inconformismo y escasa atención a normas');
+  if(de.E>=8) forts.push('Alta capacidad de liderazgo y asertividad');
+  else if(de.E<=3) riesgos.push('Tendencia a la sumisión — dificultad para defender ideas propias');
+  if(auc_de>=8) forts.push('Buen autocontrol y capacidad para seguir procedimientos');
+  else if(auc_de<=3) riesgos.push('Dificultad para controlar impulsos y seguir normas');
+  if(de.B>=8) forts.push('Alta capacidad de razonamiento abstracto');
+  else if(de.B<=3) riesgos.push('Capacidad de razonamiento por debajo del promedio');
+  if(de.L>=8) riesgos.push('Alta suspicacia que puede dificultar el trabajo en equipo');
+  if(de.Q4>=8) riesgos.push('Nivel de tensión elevado e irritabilidad frecuente');
+  if(de.H>=8) forts.push('Alta seguridad social y disposición a relacionarse con otros');
+  else if(de.H<=3) riesgos.push('Timidez social marcada — dificultad para relacionarse con personas nuevas');
 
-  var interp='El evaluado presenta un perfil de personalidad con extraversión '+nivD(ext_de).toLowerCase()+
+  // Interpretación descriptiva
+  var interp='El evaluado presenta un perfil con extraversión '+nivD(ext_de).toLowerCase()+
     ', ansiedad '+nivD(ans_de).toLowerCase()+' y estabilidad emocional '+nivD(de.C).toLowerCase()+'. ';
   interp+='Su orientación hacia las normas es '+nivD(de.G).toLowerCase()+
     ', con dominancia '+nivD(de.E).toLowerCase()+' y autocontrol '+nivD(auc_de).toLowerCase()+'. ';
-  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+', ';
-  interp+='con un nivel de tensión '+nivD(de.Q4).toLowerCase()+' y vigilancia '+nivD(de.L).toLowerCase()+'. ';
-  if(forts.length) interp+='Se destacan las siguientes características: '+forts.slice(0,3).join('; ')+'. ';
-  if(riesgos.length) interp+='Se observan las siguientes áreas de atención: '+riesgos.slice(0,3).join('; ')+'. ';
-  if(alertas.length>0) interp+='Presenta '+alertas.length+' escala(s) con alejamiento significativo de la zona promedio, lo que sugiere una evaluación complementaria por parte del evaluador.';
-  var in_pd=0;for(var i=0;i<170;i++){if(resp[i]==='2')in_pd++;}
-  // Encode decatipos como string para no usar muchas columnas
-  var deStr=[de.A,de.B,de.C,de.E,de.F,de.G,de.H,de.I,de.L,de.M,de.N,de.O,de.Q1,de.Q2,de.Q3,de.Q4].join(',');
+  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+'. ';
+  if(forts.length) interp+='Se destacan: '+forts.slice(0,3).join('; ')+'. ';
+  if(riesgos.length) interp+='Áreas de atención: '+riesgos.slice(0,3).join('; ')+'. ';
+  if(alertas.length>0) interp+='Presenta '+alertas.length+' escala(s) con alejamiento significativo: '+alertas.join(', ')+'.';
+
+  // Encode decatipos
+  var deStr=ESCA.map(function(e){return de[e];}).join(',');
   var dimStr=[ext_de,ans_de,dur_de,ind_de,auc_de].join(',');
+  var nivelStr=alertas.length+' escala(s) en zona de alejamiento'+
+    (alertas.length>0?': '+alertas.join(', '):'');
 
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
@@ -250,15 +427,15 @@ function calcular(resp){
     cargo_perfil:perf.nombre,
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
-    nivel_perfil:rec,
-    fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas en este perfil',
+    nivel_perfil:nivelStr,
+    fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas',
     areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
     interpretacion:interp
   };
+
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
   document.getElementById('s-prueba').style.display='none';
   document.getElementById('s-gracias').style.display='block';
-}
-</script>
+}</script>
 </body>
 </html>
