@@ -419,12 +419,15 @@ function calcular(resp){
   var nivelStr=alertas.length+' escala(s) en zona de alejamiento'+
     (alertas.length>0?': '+alertas.join(', '):'');
 
+  var perfilKey=document.getElementById('perfil').value;
+  var perf=PERFILES[perfilKey];
+
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
     nombre:document.getElementById('nombre').value.trim(),
     rut:document.getElementById('rut').value.trim(),
     sexo:sexo==='f'?'Femenino':'Masculino',
-    cargo_perfil:perf.nombre,
+    cargo_perfil:perf?perf.nombre:perfilKey,
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
     nivel_perfil:nivelStr,
