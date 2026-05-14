@@ -172,7 +172,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz9zLxDwI5pb_fy_29FQAySeojG4PLaaSF920uGqz4pSQRU4OL0n7e72eYJJS4iphES/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPXNIRFe26C0PgrTrnpOEh27wOf4Ae5qdV5JCSjp5ND1TUu_Ro3KYHSFEipUO3tO-XMQ/exec';
 const TOTAL_SECS = 420;
 
 const ITEMS = [
@@ -327,6 +327,7 @@ function calcularYEnviar(porTiempo){
     categoria
   };
 
+  payload.test = 'IC';
   fetch(SCRIPT_URL, {
     method:'POST',
     mode:'no-cors',
