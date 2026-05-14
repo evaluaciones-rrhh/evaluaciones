@@ -248,13 +248,19 @@ function calcular(resp){
     rut:document.getElementById('rut').value.trim(),
     sexo:sexo==='f'?'Femenino':'Masculino',
     cargo_perfil:perf.nombre,
+    // Decatipos 16 escalas primarias
+    de_A:de.A,de_B:de.B,de_C:de.C,de_E:de.E,de_F:de.F,de_G:de.G,
+    de_H:de.H,de_I:de.I,de_L:de.L,de_M:de.M,de_N:de.N,de_O:de.O,
+    de_Q1:de.Q1,de_Q2:de.Q2,de_Q3:de.Q3,de_Q4:de.Q4,
+    // Dimensiones globales
+    ext_de:ext_de,ans_de:ans_de,dur_de:dur_de,ind_de:ind_de,auc_de:auc_de,
+    // Nivel descriptivo dimensiones
     extraversion:nivD(ext_de)+' ('+ext_de+')',
     ansiedad:nivD(ans_de)+' ('+ans_de+')',
     dureza:nivD(dur_de)+' ('+dur_de+')',
     independencia:nivD(ind_de)+' ('+ind_de+')',
     autocontrol:nivD(auc_de)+' ('+auc_de+')',
-    ajuste_perfil:pct+'%',
-    recomendacion:rec,
+    nivel_perfil:rec,
     fortalezas:forts.slice(0,3).join(' | '),
     areas_riesgo:riesgos.slice(0,3).join(' | '),
     interpretacion:interp,
