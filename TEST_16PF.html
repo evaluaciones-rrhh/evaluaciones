@@ -163,7 +163,11 @@ document.getElementById('btn-env').onclick=function(){
   });
   if(inc){document.getElementById('err-inc').style.display='block';return;}
   document.getElementById('err-inc').style.display='none';
-  calcular(resp);
+  try {
+    calcular(resp);
+  } catch(err) {
+    alert('Error al enviar: ' + err.message);
+  }
 };
 
 function nivD(d){
