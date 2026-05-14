@@ -141,7 +141,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzx143mqGgQMrk6GqeSNbIzlh5ARwpFXkCBLTyoa6u1nlFEnS08xSnzAWDrDXrDbBVB3Q/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPXNIRFe26C0PgrTrnpOEh27wOf4Ae5qdV5JCSjp5ND1TUu_Ro3KYHSFEipUO3tO-XMQ/exec';
 
 // Puntajes por pregunta y alternativa: [A, B, C, D]
 const PUNTAJES = [
@@ -384,6 +384,7 @@ function enviar(){
     puntaje: puntajeTotal
   };
 
+  payload.test = 'CEAL';
   fetch(SCRIPT_URL, {
     method:'POST',
     mode:'no-cors',
