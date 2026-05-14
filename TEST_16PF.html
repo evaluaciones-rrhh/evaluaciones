@@ -211,8 +211,12 @@ function calcular(resp){
   // Penalizar ajuste por factores criticos
   pct=Math.max(0, pct - factoresCriticos*15);
 
-  var rec=pct>=75&&factoresCriticos===0?'Recomendado':
-          pct>=45&&factoresCriticos<=1?'Recomendado con reservas':'No recomendado';
+  var rec;
+  if(pct>=80&&factoresCriticos===0) rec='Alto';
+  else if(pct>=65&&factoresCriticos<=1) rec='Medio alto';
+  else if(pct>=50&&factoresCriticos<=2) rec='Medio';
+  else if(pct>=35) rec='Medio bajo';
+  else rec='Bajo';
 
   var forts=[],riesgos=[];
   if(ext_de>=7)forts.push('Alta sociabilidad y orientación interpersonal');
@@ -255,8 +259,8 @@ function calcular(resp){
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
     nivel_perfil:pct+'%',
-    fortalezas:forts.slice(0,3).join(' | '),
-    areas_riesgo:riesgos.slice(0,3).join(' | '),
+    fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas en este perfil',
+    areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
     interpretacion:interp
   };
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
