@@ -197,7 +197,7 @@ function calcular(resp){
     if(v>=r[0]&&v<=r[1])pts+=2;
     else if(v>=r[0]-1&&v<=r[1]+1)pts+=1;
   });
-  var pct=Math.round(pts/10*100);
+  var pct=Math.min(100,Math.round(pts/10*100));
 
   // Factores criticos que penalizan la recomendacion
   var factoresCriticos=0;
@@ -242,29 +242,22 @@ function calcular(resp){
   if(riesgos.length)interp+='Se identifican las siguientes áreas de atención: '+riesgos.slice(0,3).join('; ')+'.';
   if(factoresCriticos>=2)interp+=' El perfil presenta indicadores que requieren evaluación complementaria antes de tomar una decisión de selección.';
   var in_pd=0;for(var i=0;i<170;i++){if(resp[i]==='2')in_pd++;}
+  // Encode decatipos como string para no usar muchas columnas
+  var deStr=[de.A,de.B,de.C,de.E,de.F,de.G,de.H,de.I,de.L,de.M,de.N,de.O,de.Q1,de.Q2,de.Q3,de.Q4].join(',');
+  var dimStr=[ext_de,ans_de,dur_de,ind_de,auc_de].join(',');
+
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
     nombre:document.getElementById('nombre').value.trim(),
     rut:document.getElementById('rut').value.trim(),
     sexo:sexo==='f'?'Femenino':'Masculino',
     cargo_perfil:perf.nombre,
-    // Decatipos 16 escalas primarias
-    de_A:de.A,de_B:de.B,de_C:de.C,de_E:de.E,de_F:de.F,de_G:de.G,
-    de_H:de.H,de_I:de.I,de_L:de.L,de_M:de.M,de_N:de.N,de_O:de.O,
-    de_Q1:de.Q1,de_Q2:de.Q2,de_Q3:de.Q3,de_Q4:de.Q4,
-    // Dimensiones globales
-    ext_de:ext_de,ans_de:ans_de,dur_de:dur_de,ind_de:ind_de,auc_de:auc_de,
-    // Nivel descriptivo dimensiones
-    extraversion:nivD(ext_de)+' ('+ext_de+')',
-    ansiedad:nivD(ans_de)+' ('+ans_de+')',
-    dureza:nivD(dur_de)+' ('+dur_de+')',
-    independencia:nivD(ind_de)+' ('+ind_de+')',
-    autocontrol:nivD(auc_de)+' ('+auc_de+')',
-    nivel_perfil:rec,
+    decatipos_escalas:deStr,
+    decatipos_dims:dimStr,
+    nivel_perfil:pct+'%',
     fortalezas:forts.slice(0,3).join(' | '),
     areas_riesgo:riesgos.slice(0,3).join(' | '),
-    interpretacion:interp,
-    in_pd:in_pd
+    interpretacion:interp
   };
   fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(function(){});
   document.getElementById('s-prueba').style.display='none';
