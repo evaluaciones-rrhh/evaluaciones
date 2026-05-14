@@ -408,14 +408,58 @@ function calcular(resp){
   else if(de.H<=3) riesgos.push('Timidez social marcada — dificultad para relacionarse con personas nuevas');
 
   // Interpretación descriptiva
-  var interp='El evaluado presenta un perfil con extraversión '+nivD(ext_de).toLowerCase()+
-    ', ansiedad '+nivD(ans_de).toLowerCase()+' y estabilidad emocional '+nivD(de.C).toLowerCase()+'. ';
-  interp+='Su orientación hacia las normas es '+nivD(de.G).toLowerCase()+
-    ', con dominancia '+nivD(de.E).toLowerCase()+' y autocontrol '+nivD(auc_de).toLowerCase()+'. ';
-  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+'. ';
-  if(forts.length) interp+='Se destacan: '+forts.slice(0,3).join('; ')+'. ';
-  if(riesgos.length) interp+='Áreas de atención: '+riesgos.slice(0,3).join('; ')+'. ';
-  if(alertas.length>0) interp+='Presenta '+alertas.length+' escala(s) con alejamiento significativo: '+alertas.join(', ')+'.';
+  // Interpretación combinada e interpretativa
+  var parrafos = [];
+
+  // Párrafo 1: Orientación interpersonal y social
+  var social = [];
+  if(ext_de>=7 && de.A>=7) social.push('Se trata de una persona con marcada orientación hacia las personas, que disfruta del contacto social y trabaja bien en equipo.');
+  else if(ext_de<=3 && de.A<=4) social.push('Muestra una clara preferencia por el trabajo individual y los ambientes tranquilos. Puede presentar dificultades en roles que requieren alta exposición social o trabajo en equipo constante.');
+  else if(ext_de<=4) social.push('Tiende a ser más reservada en contextos sociales, prefiriendo ambientes de trabajo estructurados con interacción social moderada.');
+  else social.push('Presenta un equilibrio entre el trabajo individual y el trabajo con otros, adaptándose a distintos ambientes laborales.');
+  if(de.H<=3) social.push('Su timidez social puede ser un obstáculo en roles que requieren relacionarse con personas nuevas o hablar en público.');
+  else if(de.H>=8) social.push('Muestra alta seguridad al relacionarse con personas nuevas, lo que la hace apta para roles de representación o atención de público.');
+  parrafos.push(social.join(' '));
+
+  // Párrafo 2: Estabilidad emocional y manejo del estrés
+  var emocional = [];
+  if(de.C<=3 && ans_de>=7) emocional.push('Presenta indicadores de baja estabilidad emocional y niveles de ansiedad elevados, lo que puede afectar su desempeño en situaciones de presión o conflicto. Se recomienda un ambiente laboral estructurado y con apoyo.');
+  else if(de.C<=3) emocional.push('Puede presentar dificultades para manejar situaciones de estrés o conflicto laboral. Requiere un ambiente de trabajo estable y predecible.');
+  else if(de.C>=8 && ans_de<=4) emocional.push('Destaca por su alta estabilidad emocional y capacidad para manejar situaciones de presión sin perder el equilibrio. Es una característica valiosa en ambientes de alta demanda.');
+  else emocional.push('Muestra un nivel de estabilidad emocional dentro del rango esperado, con capacidad para manejar la mayoría de las situaciones laborales cotidianas.');
+  if(de.Q4>=8) emocional.push('Su nivel de tensión elevado puede traducirse en irritabilidad o impaciencia, especialmente bajo presión.');
+  else if(de.Q4<=3) emocional.push('Se muestra relajada y paciente, lo que contribuye a un buen clima de trabajo.');
+  if(de.O>=8) emocional.push('Presenta tendencias a la inseguridad y a la autocrítica excesiva, lo que puede afectar su confianza al tomar decisiones.');
+  parrafos.push(emocional.join(' '));
+
+  // Párrafo 3: Liderazgo, normas y autonomía
+  var liderazgo = [];
+  if(de.E>=8 && ind_de>=7) liderazgo.push('Muestra un perfil con alta capacidad de liderazgo, asertividad e independencia. Se desempeña bien en roles donde debe tomar decisiones y dirigir a otros.');
+  else if(de.E<=3) liderazgo.push('Presenta tendencia a la sumisión y puede tener dificultades para expresar sus opiniones o defender sus ideas, lo que limita su desempeño en roles de liderazgo o negociación.');
+  if(de.G<=3) liderazgo.push('Muestra escasa atención a las normas y procedimientos establecidos. Requiere supervisión en roles donde el cumplimiento de reglas es fundamental.');
+  else if(de.G>=8) liderazgo.push('Muy apegada a las normas y procedimientos, lo que la hace confiable en roles que requieren rigor y cumplimiento estricto.');
+  if(auc_de<=3) liderazgo.push('Su bajo autocontrol puede traducirse en impulsividad o dificultad para seguir procedimientos de manera consistente.');
+  else if(auc_de>=8) liderazgo.push('Muestra buen autocontrol e impulsividad baja, siendo capaz de actuar de manera disciplinada y organizada.');
+  if(liderazgo.length>0) parrafos.push(liderazgo.join(' '));
+
+  // Párrafo 4: Razonamiento y adaptación
+  var cognitivo = [];
+  if(de.B<=3) cognitivo.push('Su capacidad de razonamiento se encuentra por debajo del promedio, lo que puede dificultar el aprendizaje de tareas complejas o la resolución de problemas nuevos. Se recomienda evaluar con una prueba complementaria.');
+  else if(de.B>=8) cognitivo.push('Destaca por su alta capacidad de razonamiento abstracto, aprendiendo rápidamente y resolviendo problemas con facilidad.');
+  if(de.Q1<=3) cognitivo.push('Presenta resistencia al cambio y rigidez ante situaciones nuevas, lo que puede ser una limitación en entornos dinámicos o en constante evolución.');
+  else if(de.Q1>=8) cognitivo.push('Muestra alta apertura al cambio y disposición a aprender cosas nuevas, lo que la hace adaptable a distintos contextos laborales.');
+  if(cognitivo.length>0) parrafos.push(cognitivo.join(' '));
+
+  // Párrafo 5: Conclusión según alertas
+  if(alertas.length===0){
+    parrafos.push('En términos generales, el perfil se encuentra dentro de la zona promedio en la mayoría de las escalas evaluadas, sin indicadores que requieran atención especial. El evaluador puede complementar esta información con una entrevista en profundidad.');
+  } else if(alertas.length<=2){
+    parrafos.push('El perfil presenta algunas áreas que el evaluador debe considerar al momento de tomar una decisión. Se recomienda profundizar en estas características durante la entrevista.');
+  } else {
+    parrafos.push('El perfil presenta varios indicadores con alejamiento significativo de la zona promedio. Se recomienda una evaluación complementaria antes de tomar una decisión de selección.');
+  }
+
+  var interp = parrafos.filter(function(p){return p.trim();}).join(' ');
 
   // Encode decatipos
   var deStr=ESCA.map(function(e){return de[e];}).join(',');
