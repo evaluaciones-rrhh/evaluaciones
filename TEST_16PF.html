@@ -190,32 +190,57 @@ function calcular(resp){
   var pkey=document.getElementById('perfil').value;
   var perf=PERFILES[pkey];
   var dims={Ext:ext_de,Ans:ans_de,Dur:dur_de,Ind:ind_de,AuC:auc_de};
+  // Ajuste al perfil: evaluar cada dimension
   var pts=0;
   Object.keys(perf.dims).forEach(function(d){
     var r=perf.dims[d];var v=dims[d];
-    if(v>=r[0]&&v<=r[1])pts+=2;else if(v>=r[0]-2&&v<=r[1]+2)pts+=1;
+    if(v>=r[0]&&v<=r[1])pts+=2;
+    else if(v>=r[0]-1&&v<=r[1]+1)pts+=1;
   });
   var pct=Math.round(pts/10*100);
-  var rec=pct>=80?'Recomendado':pct>=50?'Recomendado con reservas':'No recomendado';
+
+  // Factores criticos que penalizan la recomendacion
+  var factoresCriticos=0;
+  if(de.C<=3)factoresCriticos++;  // baja estabilidad emocional
+  if(ans_de>=8)factoresCriticos++;  // ansiedad muy alta
+  if(de.B<=3)factoresCriticos++;  // razonamiento muy bajo
+  if(de.L>=8)factoresCriticos++;  // vigilancia/suspicacia extrema
+  if(de.G<=2)factoresCriticos++;  // muy bajo cumplimiento de normas
+  if(de.Q4>=8)factoresCriticos++;  // tension muy alta
+
+  // Penalizar ajuste por factores criticos
+  pct=Math.max(0, pct - factoresCriticos*15);
+
+  var rec=pct>=75&&factoresCriticos===0?'Recomendado':
+          pct>=45&&factoresCriticos<=1?'Recomendado con reservas':'No recomendado';
+
   var forts=[],riesgos=[];
   if(ext_de>=7)forts.push('Alta sociabilidad y orientación interpersonal');
   else if(ext_de<=3)riesgos.push('Tendencia al aislamiento o introversión marcada');
   if(ans_de<=4)forts.push('Buena estabilidad emocional y manejo del estrés');
-  else if(ans_de>=7)riesgos.push('Nivel de ansiedad elevado');
+  else if(ans_de>=7)riesgos.push('Nivel de ansiedad elevado que puede afectar el desempeño');
   if(de.C>=7)forts.push('Alta estabilidad emocional y madurez psicológica');
-  else if(de.C<=3)riesgos.push('Baja estabilidad emocional');
-  if(de.G>=7)forts.push('Respeto por normas y sentido del deber');
-  else if(de.G<=3)riesgos.push('Tendencia al inconformismo');
+  else if(de.C<=3)riesgos.push('Baja estabilidad emocional — posible dificultad ante la presión');
+  if(de.G>=7)forts.push('Respeto por normas y sentido del deber desarrollado');
+  else if(de.G<=3)riesgos.push('Tendencia al inconformismo y escasa atención a las normas');
   if(de.E>=7)forts.push('Capacidad de liderazgo y asertividad');
-  if(auc_de>=7)forts.push('Buen autocontrol');
-  else if(auc_de<=3)riesgos.push('Dificultad para controlar impulsos');
-  if(de.B>=7)forts.push('Alta capacidad de razonamiento');
-  else if(de.B<=3)riesgos.push('Razonamiento por debajo del promedio');
+  else if(de.E<=3)riesgos.push('Tendencia a la sumisión — dificultad para defender sus ideas');
+  if(auc_de>=7)forts.push('Buen autocontrol y capacidad para seguir procedimientos');
+  else if(auc_de<=3)riesgos.push('Dificultad para controlar impulsos y seguir normas');
+  if(de.B>=7)forts.push('Alta capacidad de razonamiento abstracto');
+  else if(de.B<=3)riesgos.push('Capacidad de razonamiento por debajo del promedio');
   if(de.L>=8)riesgos.push('Alta suspicacia que puede dificultar el trabajo en equipo');
-  var interp='El candidato presenta un perfil con extraversión '+nivD(ext_de).toLowerCase()+', ansiedad '+nivD(ans_de).toLowerCase()+' y estabilidad emocional '+nivD(de.C).toLowerCase()+'. ';
-  interp+='Su orientación a normas es '+nivD(de.G).toLowerCase()+', con dominancia '+nivD(de.E).toLowerCase()+' y autocontrol '+nivD(auc_de).toLowerCase()+'. ';
-  if(forts.length)interp+='Fortalezas: '+forts.slice(0,3).join('; ')+'. ';
-  if(riesgos.length)interp+='Áreas de atención: '+riesgos.slice(0,2).join('; ')+'.';
+  if(de.Q4>=8)riesgos.push('Nivel de tensión elevado e irritabilidad frecuente');
+  if(de.Q3>=8)forts.push('Perfeccionismo y alta orientación al detalle y la calidad');
+
+  var interp='El candidato presenta un perfil de personalidad con extraversión '+nivD(ext_de).toLowerCase()+
+    ', ansiedad '+nivD(ans_de).toLowerCase()+' y estabilidad emocional '+nivD(de.C).toLowerCase()+'. ';
+  interp+='En cuanto a su orientación a las normas muestra un nivel '+nivD(de.G).toLowerCase()+
+    ', con dominancia '+nivD(de.E).toLowerCase()+' y autocontrol '+nivD(auc_de).toLowerCase()+'. ';
+  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+'. ';
+  if(forts.length)interp+='Sus principales fortalezas incluyen: '+forts.slice(0,3).join('; ')+'. ';
+  if(riesgos.length)interp+='Se identifican las siguientes áreas de atención: '+riesgos.slice(0,3).join('; ')+'.';
+  if(factoresCriticos>=2)interp+=' El perfil presenta indicadores que requieren evaluación complementaria antes de tomar una decisión de selección.';
   var in_pd=0;for(var i=0;i<170;i++){if(resp[i]==='2')in_pd++;}
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
