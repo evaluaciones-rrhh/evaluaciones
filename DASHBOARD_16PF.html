@@ -144,7 +144,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzv96B0aj4Ad8agx-fpiPu4_8f13SGfTXORWPIbb4c5q3pTweHyxW2eMPqjFpHsPp4Ftw/exec';
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSF0_kVW4YgJ_ZYl9Gc43nPOqE51TYhiQkdFLAN3gzFgRPR0Ly4ubo2H9sWukO7r-YcBq7hX-fWfir6/pub?gid=0&single=true&output=csv';
 
 let candidatos = [];
 let chartRec = null, chartDims = null, chartRadar = null;
@@ -162,15 +162,29 @@ function badgeClass(rec) {
   return 'badge-rec';
 }
 
+function parseCSV(text) {
+  let rows = [], cur = '', inQ = false, row = [];
+  for(let i=0;i<text.length;i++) {
+    let c = text[i];
+    if(c==='"') { inQ=!inQ; }
+    else if(c===',' && !inQ) { row.push(cur); cur=''; }
+    else if((c==='
+'||c==='') && !inQ) { if(cur||row.length) { row.push(cur); rows.push(row); } cur=''; row=[]; if(c===''&&text[i+1]==='
+') i++; }
+    else { cur+=c; }
+  }
+  if(cur||row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
 async function cargarDatos() {
   document.getElementById('loading').style.display='block';
   document.getElementById('contenido').style.display='none';
   try {
-    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
-    const rows = await res.json();
-    // Primera fila son encabezados
-    const headers = rows[0];
-    candidatos = rows.slice(1).filter(r => r[1]).map(r => ({
+    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    const text = await res.text();
+    const rows = parseCSV(text);
+    candidatos = rows.slice(1).filter(r => r[1] && r[1].trim()).map(r => ({
       fecha: r[0], nombre: r[1], rut: r[2], sexo: r[3],
       perfil: r[4], extraversion: r[5], ansiedad: r[6],
       dureza: r[7], independencia: r[8], autocontrol: r[9],
@@ -180,7 +194,7 @@ async function cargarDatos() {
     renderDashboard();
     document.getElementById('ultima-act').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CL');
   } catch(e) {
-    document.getElementById('loading').textContent = 'Error al cargar datos. Verifica que el Apps Script esté publicado correctamente.';
+    document.getElementById('loading').textContent = 'Error al cargar datos. Verifica que el Sheets esté publicado correctamente.';
     return;
   }
   document.getElementById('loading').style.display='none';
