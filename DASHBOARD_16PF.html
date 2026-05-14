@@ -169,7 +169,9 @@ function parseCSV(text) {
     if(c==='"') { inQ=!inQ; }
     else if(c===',' && !inQ) { row.push(cur); cur=''; }
     else if((c==='
-'||c==='') && !inQ) { if(cur||row.length) { row.push(cur); rows.push(row); } cur=''; row=[]; if(c===''&&text[i+1]==='
+'||c==='
+') && !inQ) { if(cur||row.length) { row.push(cur); rows.push(row); } cur=''; row=[]; if(c==='
+'&&text[i+1]==='
 ') i++; }
     else { cur+=c; }
   }
@@ -179,9 +181,11 @@ function parseCSV(text) {
 
 async function cargarDatos() {
   document.getElementById('loading').style.display='block';
+  document.getElementById('loading').textContent = 'Cargando resultados...';
   document.getElementById('contenido').style.display='none';
   try {
-    const res = await fetch(CSV_URL + '&t=' + Date.now());
+    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(CSV_URL);
+    const res = await fetch(proxy);
     const text = await res.text();
     const rows = parseCSV(text);
     candidatos = rows.slice(1).filter(r => r[1] && r[1].trim()).map(r => ({
@@ -194,7 +198,7 @@ async function cargarDatos() {
     renderDashboard();
     document.getElementById('ultima-act').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CL');
   } catch(e) {
-    document.getElementById('loading').textContent = 'Error al cargar datos. Verifica que el Sheets esté publicado correctamente.';
+    document.getElementById('loading').textContent = 'Error al cargar datos: ' + e.message;
     return;
   }
   document.getElementById('loading').style.display='none';
