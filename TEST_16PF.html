@@ -107,8 +107,19 @@
     <p class="note">El cuestionario tiene 185 preguntas — duración aproximada 40 a 45 minutos</p>
   </div>
 
+  <!-- CARGANDO -->
+  <div id="screen-cargando" style="display:none;">
+    <div class="card" style="text-align:center;padding:3rem;">
+      <div style="font-size:13px;color:var(--text-muted);">Preparando el cuestionario...</div>
+      <div style="margin-top:1rem;height:3px;background:var(--border);border-radius:2px;overflow:hidden;">
+        <div style="height:100%;background:var(--accent);border-radius:2px;animation:load 1s ease-in-out infinite alternate;"></div>
+      </div>
+    </div>
+  </div>
+  <style>@keyframes load{from{width:20%}to{width:90%}}</style>
+
   <!-- PRUEBA -->
-  <div id="screen-prueba" class="hidden">
+  <div id="screen-prueba" style="display:none;">
     <div class="progreso-wrap">
       <div class="progreso-lbl">
         <span>Progreso</span>
@@ -139,7 +150,7 @@
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzx143mqGgQMrk6GqeSNbIzlh5ARwpFXkCBLTyoa6u1nlFEnS08xSnzAWDrDXrDbBVB3Q/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzv96B0aj4Ad8agx-fpiPu4_8f13SGfTXORWPIbb4c5q3pTweHyxW2eMPqjFpHsPp4Ftw/exec';
 
 const CLAVE = {
   1: {r:'3', e:'A'},
@@ -550,29 +561,35 @@ function iniciar(){
   let n = document.getElementById('nombre').value.trim();
   if(!n){ document.getElementById('err-nombre').style.display='block'; return; }
   document.getElementById('err-nombre').style.display='none';
-  document.getElementById('screen-inicio').classList.add('hidden');
-  document.getElementById('screen-prueba').classList.remove('hidden');
-  construirPreguntas();
+  document.getElementById('screen-inicio').style.display='none';
+  document.getElementById('screen-cargando').style.display='block';
+  setTimeout(function(){
+    construirPreguntas();
+    document.getElementById('screen-cargando').style.display='none';
+    document.getElementById('screen-prueba').style.display='block';
+  }, 200);
 }
 
 function construirPreguntas(){
   let wrap = document.getElementById('preguntas-wrap');
   wrap.innerHTML='';
+  let frag = document.createDocumentFragment();
   let s1=document.createElement('div'); s1.className='seccion-titulo';
-  s1.textContent='Sección 1 — Preguntas 1 a 170'; wrap.appendChild(s1);
+  s1.textContent='Sección 1 — Preguntas 1 a 170'; frag.appendChild(s1);
   PREGUNTAS.forEach((p,i)=>{
     if(i===170){
       let s2=document.createElement('div'); s2.className='seccion-titulo'; s2.style.marginTop='1.5rem';
-      s2.textContent='Sección 2 — Preguntas 171 a 185 (Razonamiento)'; wrap.appendChild(s2);
+      s2.textContent='Sección 2 — Preguntas 171 a 185 (Razonamiento)'; frag.appendChild(s2);
       let nota=document.createElement('p');
       nota.style.cssText='font-size:13px;color:var(--text-muted);margin-bottom:1rem;padding:0 .25rem;';
-      nota.textContent='En las siguientes preguntas hay una y solo una respuesta correcta.'; wrap.appendChild(nota);
+      nota.textContent='En las siguientes preguntas hay una y solo una respuesta correcta.'; frag.appendChild(nota);
     }
     let div=document.createElement('div'); div.className='pregunta-card';
     let alts=p.alts.map((alt,ai)=>`<button class="alt-btn" id="alt-${i}-${ai}" onclick="seleccionar(${i},${ai})"><span class="alt-letra">${['A','B','C'][ai]}</span>${alt}</button>`).join('');
     div.innerHTML=`<div class="pregunta-num">Pregunta ${i+1} de 185</div><div class="pregunta-txt">${p.txt}</div><div class="alternativas">${alts}</div>`;
-    wrap.appendChild(div);
+    frag.appendChild(div);
   });
+  wrap.appendChild(frag);
 }
 
 function seleccionar(pregIdx,altIdx){
