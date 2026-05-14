@@ -190,33 +190,24 @@ function calcular(resp){
   var pkey=document.getElementById('perfil').value;
   var perf=PERFILES[pkey];
   var dims={Ext:ext_de,Ans:ans_de,Dur:dur_de,Ind:ind_de,AuC:auc_de};
-  // Ajuste al perfil: evaluar cada dimension
-  var pts=0;
-  Object.keys(perf.dims).forEach(function(d){
-    var r=perf.dims[d];var v=dims[d];
-    if(v>=r[0]&&v<=r[1])pts+=2;
-    else if(v>=r[0]-1&&v<=r[1]+1)pts+=1;
+  // Contar escalas en zona de alerta (decatipos 1-3 u 8-10)
+  var ESCA_NAMES=['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+  var alertas=[];
+  ESCA_NAMES.forEach(function(e){
+    var v=de[e];
+    if(v<=3||v>=8) alertas.push(e+' ('+v+')');
   });
-  var pct=Math.min(100,Math.round(pts/10*100));
+  // Tambien revisar dimensiones globales
+  var dimNames={Ext:ext_de,Ans:ans_de,Dur:dur_de,Ind:ind_de,AuC:auc_de};
+  var alertasDims=[];
+  Object.keys(dimNames).forEach(function(d){
+    var v=dimNames[d];
+    if(v<=3||v>=8) alertasDims.push(d+' ('+v+')');
+  });
 
-  // Factores criticos que penalizan la recomendacion
-  var factoresCriticos=0;
-  if(de.C<=3)factoresCriticos++;  // baja estabilidad emocional
-  if(ans_de>=8)factoresCriticos++;  // ansiedad muy alta
-  if(de.B<=3)factoresCriticos++;  // razonamiento muy bajo
-  if(de.L>=8)factoresCriticos++;  // vigilancia/suspicacia extrema
-  if(de.G<=2)factoresCriticos++;  // muy bajo cumplimiento de normas
-  if(de.Q4>=8)factoresCriticos++;  // tension muy alta
-
-  // Penalizar ajuste por factores criticos
-  pct=Math.max(0, pct - factoresCriticos*15);
-
-  var rec;
-  if(pct>=80&&factoresCriticos===0) rec='Alto';
-  else if(pct>=65&&factoresCriticos<=1) rec='Medio alto';
-  else if(pct>=50&&factoresCriticos<=2) rec='Medio';
-  else if(pct>=35) rec='Medio bajo';
-  else rec='Bajo';
+  var totalAlertas=alertas.length;
+  var rec=totalAlertas+' escala(s) en zona de alejamiento significativo';
+  if(alertas.length>0) rec+=': '+alertas.join(', ');
 
   var forts=[],riesgos=[];
   if(ext_de>=7)forts.push('Alta sociabilidad y orientación interpersonal');
@@ -237,14 +228,15 @@ function calcular(resp){
   if(de.Q4>=8)riesgos.push('Nivel de tensión elevado e irritabilidad frecuente');
   if(de.Q3>=8)forts.push('Perfeccionismo y alta orientación al detalle y la calidad');
 
-  var interp='El candidato presenta un perfil de personalidad con extraversión '+nivD(ext_de).toLowerCase()+
+  var interp='El evaluado presenta un perfil de personalidad con extraversión '+nivD(ext_de).toLowerCase()+
     ', ansiedad '+nivD(ans_de).toLowerCase()+' y estabilidad emocional '+nivD(de.C).toLowerCase()+'. ';
-  interp+='En cuanto a su orientación a las normas muestra un nivel '+nivD(de.G).toLowerCase()+
+  interp+='Su orientación hacia las normas es '+nivD(de.G).toLowerCase()+
     ', con dominancia '+nivD(de.E).toLowerCase()+' y autocontrol '+nivD(auc_de).toLowerCase()+'. ';
-  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+'. ';
-  if(forts.length)interp+='Sus principales fortalezas incluyen: '+forts.slice(0,3).join('; ')+'. ';
-  if(riesgos.length)interp+='Se identifican las siguientes áreas de atención: '+riesgos.slice(0,3).join('; ')+'.';
-  if(factoresCriticos>=2)interp+=' El perfil presenta indicadores que requieren evaluación complementaria antes de tomar una decisión de selección.';
+  interp+='Su capacidad de razonamiento es '+nivD(de.B).toLowerCase()+', ';
+  interp+='con un nivel de tensión '+nivD(de.Q4).toLowerCase()+' y vigilancia '+nivD(de.L).toLowerCase()+'. ';
+  if(forts.length) interp+='Se destacan las siguientes características: '+forts.slice(0,3).join('; ')+'. ';
+  if(riesgos.length) interp+='Se observan las siguientes áreas de atención: '+riesgos.slice(0,3).join('; ')+'. ';
+  if(alertas.length>0) interp+='Presenta '+alertas.length+' escala(s) con alejamiento significativo de la zona promedio, lo que sugiere una evaluación complementaria por parte del evaluador.';
   var in_pd=0;for(var i=0;i<170;i++){if(resp[i]==='2')in_pd++;}
   // Encode decatipos como string para no usar muchas columnas
   var deStr=[de.A,de.B,de.C,de.E,de.F,de.G,de.H,de.I,de.L,de.M,de.N,de.O,de.Q1,de.Q2,de.Q3,de.Q4].join(',');
@@ -258,7 +250,7 @@ function calcular(resp){
     cargo_perfil:perf.nombre,
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
-    nivel_perfil:pct+'%',
+    nivel_perfil:rec,
     fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas en este perfil',
     areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
     interpretacion:interp
