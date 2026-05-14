@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard 16PF — Resultados</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+  :root{
+    --bg:#f5f4f0;--surface:#fff;--border:#d8d6ce;--text:#1a1917;--text-muted:#6b6860;--text-hint:#a09d96;
+    --accent:#1a3a5c;--accent-light:#e8f0f8;--green:#1a5c3a;--green-light:#e8f5ee;
+    --amber:#7a5c10;--amber-light:#f5f0e8;--red:#8b2020;--red-light:#f5e8e8;
+    --radius:4px;--font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+  .page{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+  .header{border-bottom:1.5px solid var(--text);padding-bottom:1rem;margin-bottom:2rem;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:.5rem;}
+  .header-sub{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.2rem;}
+  .header-title{font-size:22px;font-weight:300;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;}
+  .card-label{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-hint);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+  .card-label::after{content:'';flex:1;height:1px;background:var(--border);}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;margin-bottom:1.25rem;}
+  .stat{background:var(--bg);border-radius:var(--radius);padding:.875rem;text-align:center;}
+  .stat-num{font-size:28px;font-weight:300;font-family:var(--mono);line-height:1;}
+  .stat-lbl{font-size:11px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.04em;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:var(--radius);font-size:12px;font-weight:500;}
+  .badge-rec{background:var(--green-light);color:var(--green);}
+  .badge-res{background:var(--amber-light);color:var(--amber);}
+  .badge-no{background:var(--red-light);color:var(--red);}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  thead th{padding:8px 10px;border-bottom:1.5px solid var(--text);font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);text-align:left;white-space:nowrap;}
+  tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+  tbody tr:hover{background:var(--accent-light);}
+  tbody tr.activo{background:var(--accent-light);}
+  tbody td{padding:8px 10px;vertical-align:middle;}
+  .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+  .chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;}
+  .chart-titulo{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:1rem;}
+  .radar-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem;}
+  .candidato-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem;}
+  .candidato-nombre{font-size:18px;font-weight:300;}
+  .candidato-meta{font-size:12px;color:var(--text-muted);}
+  .interp-box{background:var(--bg);border-radius:var(--radius);padding:1rem;font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:1rem;}
+  .dims-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin:.75rem 0;}
+  .dim-card{background:var(--bg);border-radius:var(--radius);padding:.75rem;text-align:center;}
+  .dim-num{font-size:22px;font-weight:300;font-family:var(--mono);}
+  .dim-lbl{font-size:11px;color:var(--text-muted);margin-top:2px;}
+  .fortalezas-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem;}
+  .fort-item{background:var(--green-light);border-radius:var(--radius);padding:.6rem .875rem;font-size:12px;color:var(--green);}
+  .riesgo-item{background:var(--red-light);border-radius:var(--radius);padding:.6rem .875rem;font-size:12px;color:var(--red);}
+  .loading{text-align:center;padding:3rem;color:var(--text-hint);font-size:13px;}
+  .btn-refresh{padding:8px 16px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;font-family:var(--font);font-size:13px;cursor:pointer;color:var(--text);transition:background .15s;}
+  .btn-refresh:hover{background:var(--bg);}
+  .empty{text-align:center;padding:2rem;color:var(--text-hint);font-size:13px;}
+  @media(max-width:600px){.charts-grid{grid-template-columns:1fr;}.dims-grid{grid-template-columns:repeat(3,1fr);}.fortalezas-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="header-sub">Panel de evaluación</div>
+      <div class="header-title">Dashboard 16 PF-5</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <span style="font-size:12px;color:var(--text-hint);" id="ultima-act"></span>
+      <button class="btn-refresh" onclick="cargarDatos()">↻ Actualizar</button>
+    </div>
+  </div>
+
+  <div id="loading" class="loading">Cargando resultados...</div>
+  <div id="contenido" style="display:none;">
+
+    <!-- Estadísticas generales -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- Gráficos generales -->
+    <div class="charts-grid">
+      <div class="chart-wrap">
+        <div class="chart-titulo">Recomendación por candidato</div>
+        <canvas id="chart-recomendacion" height="200"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-titulo">Dimensiones globales — promedio grupo</div>
+        <canvas id="chart-dims" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabla comparativa -->
+    <div class="card">
+      <div class="card-label">Tabla comparativa de candidatos <span style="margin-left:auto;font-size:11px;color:var(--text-hint);font-weight:400;">Haz clic en un candidato para ver su perfil</span></div>
+      <div style="overflow-x:auto;">
+        <table id="tabla-candidatos">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Sexo</th>
+              <th>Perfil cargo</th>
+              <th>Extraversión</th>
+              <th>Ansiedad</th>
+              <th>Dureza</th>
+              <th>Independencia</th>
+              <th>Autocontrol</th>
+              <th>Ajuste</th>
+              <th>Recomendación</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Perfil individual -->
+    <div class="card" id="perfil-individual" style="display:none;">
+      <div class="card-label">Perfil individual</div>
+      <div class="candidato-header">
+        <div>
+          <div class="candidato-nombre" id="p-nombre"></div>
+          <div class="candidato-meta" id="p-meta"></div>
+        </div>
+        <div id="p-badge"></div>
+      </div>
+
+      <!-- Dimensiones -->
+      <div class="dims-grid" id="p-dims"></div>
+
+      <!-- Radar -->
+      <div style="max-width:420px;margin:0 auto;">
+        <canvas id="chart-radar" height="300"></canvas>
+      </div>
+
+      <!-- Fortalezas y riesgos -->
+      <div class="fortalezas-grid" id="p-fort-riesgo"></div>
+
+      <!-- Interpretación -->
+      <div class="interp-box" id="p-interp"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzv96B0aj4Ad8agx-fpiPu4_8f13SGfTXORWPIbb4c5q3pTweHyxW2eMPqjFpHsPp4Ftw/exec';
+
+let candidatos = [];
+let chartRec = null, chartDims = null, chartRadar = null;
+
+function extractNum(str) {
+  if(!str) return 0;
+  let m = String(str).match(/\d+/);
+  return m ? parseInt(m[0]) : 0;
+}
+
+function badgeClass(rec) {
+  if(!rec) return '';
+  if(rec.includes('No')) return 'badge-no';
+  if(rec.includes('reservas')) return 'badge-res';
+  return 'badge-rec';
+}
+
+async function cargarDatos() {
+  document.getElementById('loading').style.display='block';
+  document.getElementById('contenido').style.display='none';
+  try {
+    const res = await fetch(SCRIPT_URL + '?t=' + Date.now());
+    const rows = await res.json();
+    // Primera fila son encabezados
+    const headers = rows[0];
+    candidatos = rows.slice(1).filter(r => r[1]).map(r => ({
+      fecha: r[0], nombre: r[1], rut: r[2], sexo: r[3],
+      perfil: r[4], extraversion: r[5], ansiedad: r[6],
+      dureza: r[7], independencia: r[8], autocontrol: r[9],
+      ajuste: r[10], recomendacion: r[11],
+      fortalezas: r[12], riesgos: r[13], interpretacion: r[14]
+    }));
+    renderDashboard();
+    document.getElementById('ultima-act').textContent = 'Actualizado: ' + new Date().toLocaleTimeString('es-CL');
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Error al cargar datos. Verifica que el Apps Script esté publicado correctamente.';
+    return;
+  }
+  document.getElementById('loading').style.display='none';
+  document.getElementById('contenido').style.display='block';
+}
+
+function renderDashboard() {
+  let total = candidatos.length;
+  let rec = candidatos.filter(c => c.recomendacion === 'Recomendado').length;
+  let res = candidatos.filter(c => c.recomendacion === 'Recomendado con reservas').length;
+  let no = candidatos.filter(c => c.recomendacion === 'No recomendado').length;
+  let ajustePromedio = total > 0 ? Math.round(candidatos.reduce((s,c) => s + extractNum(c.ajuste), 0) / total) : 0;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat"><div class="stat-num">${total}</div><div class="stat-lbl">Candidatos</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--green)">${rec}</div><div class="stat-lbl">Recomendados</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--amber)">${res}</div><div class="stat-lbl">Con reservas</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--red)">${no}</div><div class="stat-lbl">No recomendados</div></div>
+    <div class="stat"><div class="stat-num">${ajustePromedio}%</div><div class="stat-lbl">Ajuste promedio</div></div>
+  `;
+
+  // Gráfico recomendación
+  if(chartRec) chartRec.destroy();
+  chartRec = new Chart(document.getElementById('chart-recomendacion'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Recomendado','Con reservas','No recomendado'],
+      datasets: [{data:[rec,res,no], backgroundColor:['#1a5c3a','#7a5c10','#8b2020'], borderWidth:0}]
+    },
+    options: {plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:12}}}, cutout:'65%'}
+  });
+
+  // Gráfico dimensiones promedio
+  let dims = ['Extraversión','Ansiedad','Dureza','Independencia','Autocontrol'];
+  let keys = ['extraversion','ansiedad','dureza','independencia','autocontrol'];
+  let promedios = keys.map(k => {
+    let vals = candidatos.map(c => extractNum(c[k])).filter(v => v > 0);
+    return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10 : 0;
+  });
+
+  if(chartDims) chartDims.destroy();
+  chartDims = new Chart(document.getElementById('chart-dims'), {
+    type: 'bar',
+    data: {
+      labels: dims,
+      datasets: [{
+        data: promedios,
+        backgroundColor: ['#185FA5','#8b2020','#5c4a1a','#1a3a5c','#1a5c3a'],
+        borderWidth: 0, borderRadius: 3
+      }]
+    },
+    options: {
+      plugins:{legend:{display:false}},
+      scales:{y:{min:1,max:10,ticks:{stepSize:2},grid:{color:'#d8d6ce'}},x:{grid:{display:false}}},
+      animation:{duration:400}
+    }
+  });
+
+  // Tabla
+  let tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '';
+  if(candidatos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="11" class="empty">Sin resultados aún</td></tr>';
+    return;
+  }
+  candidatos.forEach((c, i) => {
+    let tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:500">${c.nombre}</td>
+      <td style="color:var(--text-muted)">${c.fecha}</td>
+      <td>${c.sexo}</td>
+      <td>${c.perfil}</td>
+      <td>${c.extraversion}</td>
+      <td>${c.ansiedad}</td>
+      <td>${c.dureza}</td>
+      <td>${c.independencia}</td>
+      <td>${c.autocontrol}</td>
+      <td style="font-family:var(--mono);font-weight:500">${c.ajuste}</td>
+      <td><span class="badge ${badgeClass(c.recomendacion)}">${c.recomendacion}</span></td>
+    `;
+    tr.onclick = () => mostrarPerfil(i, tr);
+    tbody.appendChild(tr);
+  });
+}
+
+function mostrarPerfil(idx, tr) {
+  document.querySelectorAll('#tabla-body tr').forEach(r => r.classList.remove('activo'));
+  tr.classList.add('activo');
+  let c = candidatos[idx];
+  document.getElementById('perfil-individual').style.display='block';
+  document.getElementById('p-nombre').textContent = c.nombre;
+  document.getElementById('p-meta').textContent = `${c.rut} · ${c.sexo} · ${c.perfil} · ${c.fecha}`;
+  document.getElementById('p-badge').innerHTML = `<span class="badge ${badgeClass(c.recomendacion)}" style="font-size:14px;padding:6px 16px;">${c.recomendacion} — Ajuste ${c.ajuste}</span>`;
+
+  // Dimensiones
+  let dims = [
+    {k:'extraversion',l:'Extraversión'},
+    {k:'ansiedad',l:'Ansiedad'},
+    {k:'dureza',l:'Dureza'},
+    {k:'independencia',l:'Independencia'},
+    {k:'autocontrol',l:'Autocontrol'}
+  ];
+  document.getElementById('p-dims').innerHTML = dims.map(d => {
+    let val = extractNum(c[d.k]);
+    let color = val>=7?'var(--green)':val<=3?'var(--red)':'var(--accent)';
+    return `<div class="dim-card"><div class="dim-num" style="color:${color}">${val}</div><div class="dim-lbl">${d.l}</div></div>`;
+  }).join('');
+
+  // Radar
+  if(chartRadar) chartRadar.destroy();
+  chartRadar = new Chart(document.getElementById('chart-radar'), {
+    type: 'radar',
+    data: {
+      labels: ['Extraversión','Ansiedad','Dureza','Independencia','Autocontrol'],
+      datasets: [{
+        label: c.nombre,
+        data: dims.map(d => extractNum(c[d.k])),
+        backgroundColor: 'rgba(26,58,92,0.15)',
+        borderColor: '#1a3a5c',
+        borderWidth: 2,
+        pointBackgroundColor: '#1a3a5c',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      scales:{r:{min:1,max:10,ticks:{stepSize:2,font:{size:10}},grid:{color:'#d8d6ce'},pointLabels:{font:{size:11}}}},
+      plugins:{legend:{display:false}},
+      animation:{duration:300}
+    }
+  });
+
+  // Fortalezas y riesgos
+  let forts = c.fortalezas ? c.fortalezas.split('|').map(f=>f.trim()).filter(Boolean) : [];
+  let riesgos = c.riesgos ? c.riesgos.split('|').map(r=>r.trim()).filter(Boolean) : [];
+  let fortHtml = forts.map(f=>`<div class="fort-item">✓ ${f}</div>`).join('');
+  let riesgoHtml = riesgos.map(r=>`<div class="riesgo-item">⚠ ${r}</div>`).join('');
+  document.getElementById('p-fort-riesgo').innerHTML = fortHtml + riesgoHtml;
+
+  // Interpretación
+  document.getElementById('p-interp').innerHTML = `<strong>Interpretación:</strong> ${c.interpretacion || '—'}`;
+
+  // Scroll al perfil
+  document.getElementById('perfil-individual').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+cargarDatos();
+</script>
+</body>
+</html>
