@@ -67,6 +67,11 @@
   .gracias-sub{font-size:15px;color:var(--text-muted);max-width:420px;margin:0 auto;}
 
   footer{text-align:center;font-size:11px;color:var(--text-hint);margin-top:3rem;letter-spacing:.05em;}
+
+  /* Proteccion: deshabilitar seleccion de texto */
+  body { user-select: none; -webkit-user-select: none; -moz-user-select: none; }
+  input, textarea, select { user-select: text; -webkit-user-select: text; }
+
 </style>
 </head>
 <body>
@@ -107,7 +112,9 @@
       <div style="font-size:14px;color:#1a1917;line-height:1.8;font-style:italic;border-left:3px solid #d8d6ce;padding-left:1rem;">
         "A continuación realizarás una prueba en línea. Tienes <strong>7 minutos</strong> para leer las instrucciones y completar lo que se solicita. El cronómetro iniciará automáticamente al presionar el botón. No puedes pausarlo ni detenerlo. Al finalizar el tiempo, la prueba se cerrará sola. Trabaja de prisa y con cuidado."
       </div>
-    </div>
+    
+<div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;font-style:normal;line-height:1.65;"><strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluacion. Se recomienda mantener esta ventana en primer plano durante todo el test. El uso de buscadores, inteligencia artificial u otros recursos externos queda registrado y puede afectar la validez del resultado.</div>
+</div>
 
     <button class="btn-primary" onclick="iniciar()">Iniciar prueba</button>
     <p class="note">Una vez iniciada la prueba, no puede pausarse ni reiniciarse</p>
@@ -172,6 +179,36 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════
+// PROTECCIONES ANTI-TRAMPA
+// ═══════════════════════════════════════
+var cambiosFoco = 0;
+var alertaFoco = false;
+
+document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+
+document.addEventListener("keydown", function(e) {
+  if(e.ctrlKey && ["c","a","u","s","p"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if(e.key === "F12") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+});
+
+document.addEventListener("visibilitychange", function() {
+  if(document.hidden) {
+    cambiosFoco++;
+    if(!alertaFoco) {
+      alertaFoco = true;
+      setTimeout(function() {
+        alert("Aviso: Se ha detectado que saliste de la ventana del test. Esta accion queda registrada.");
+        alertaFoco = false;
+      }, 300);
+    }
+  }
+});
+
+window.addEventListener("blur", function() { cambiosFoco++; });
+document.addEventListener("dragstart", function(e) { e.preventDefault(); });
+
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPXNIRFe26C0PgrTrnpOEh27wOf4Ae5qdV5JCSjp5ND1TUu_Ro3KYHSFEipUO3tO-XMQ/exec';
 const TOTAL_SECS = 420;
 
