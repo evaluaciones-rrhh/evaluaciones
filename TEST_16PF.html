@@ -519,7 +519,8 @@ function calcular(resp){
     nivel_perfil:nivelStr,
     fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas',
     areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
-    interpretacion:interp
+    interpretacion:interp,
+    cambios_foco:cambiosFoco
   };
 
   payload.test = '16PF';
