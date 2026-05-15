@@ -64,6 +64,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);font
 .gracias-icon{font-size:52px;margin-bottom:20px;}
 .gracias-titulo{font-family:"Crimson Pro",serif;font-size:28px;margin-bottom:10px;}
 .gracias-txt{font-size:14px;color:var(--muted);max-width:400px;margin:0 auto;line-height:1.7;}
+
+  /* Protección: deshabilitar selección de texto durante el test */
+  #vt { user-select: none; -webkit-user-select: none; }
 </style>
 </head>
 <body>
@@ -135,6 +138,60 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);font
   </div>
 </div>
 <script>
+
+// ═══════════════════════════════════════
+// PROTECCIONES ANTI-TRAMPA
+// ═══════════════════════════════════════
+var cambiosFoco = 0;
+var alertaFoco = false;
+
+// 1 — Deshabilitar clic derecho
+document.addEventListener("contextmenu", function(e) {
+  if(document.getElementById("vt").style.display !== "none") {
+    e.preventDefault();
+  }
+});
+
+// 2 — Deshabilitar Ctrl+C, Ctrl+A, Ctrl+U, Ctrl+S, F12
+document.addEventListener("keydown", function(e) {
+  if(document.getElementById("vt").style.display !== "none") {
+    if(e.ctrlKey && ["c","a","u","s","p"].indexOf(e.key.toLowerCase()) > -1) {
+      e.preventDefault();
+    }
+    if(e.key === "F12") e.preventDefault();
+    if(e.ctrlKey && e.shiftKey && e.key === "I") e.preventDefault();
+  }
+});
+
+// 3 — Detectar cambio de pestaña/ventana
+document.addEventListener("visibilitychange", function() {
+  if(document.getElementById("vt").style.display !== "none") {
+    if(document.hidden) {
+      cambiosFoco++;
+      if(!alertaFoco) {
+        alertaFoco = true;
+        setTimeout(function() {
+          alert("Aviso: Se ha detectado que saliste de la ventana del test. Esta accion queda registrada.");
+          alertaFoco = false;
+        }, 300);
+      }
+    }
+  }
+});
+
+window.addEventListener("blur", function() {
+  if(document.getElementById("vt") && document.getElementById("vt").style.display !== "none") {
+    cambiosFoco++;
+  }
+});
+
+// 4 — Deshabilitar arrastrar texto
+document.addEventListener("dragstart", function(e) {
+  if(document.getElementById("vt").style.display !== "none") {
+    e.preventDefault();
+  }
+});
+
 var ASURL="https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec";
 
 var IT=[
@@ -384,7 +441,7 @@ function enviar(pb,aj,pa,p,nivel,tiempo,interp){
     edad:cand.edad||"",sexo:cand.sexo==="M"?"Masculino":cand.sexo==="F"?"Femenino":"",
     cargo:cand.cargo||"",
     pb:pb,ajuste:aj,pa:pa,percentil:p,nivel:nivel,
-    tiempo_usado:tiempo,interpretacion:interp
+    tiempo_usado:tiempo,interpretacion:interp,cambios_foco:cambiosFoco
   };
   fetch(ASURL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
     .catch(function(e){console.warn("Error:",e);});
