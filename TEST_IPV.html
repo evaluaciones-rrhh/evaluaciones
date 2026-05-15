@@ -904,16 +904,34 @@ function calcular(){
 }
 
 // ════ MOSTRAR RESULTADOS ════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPXNIRFe26C0PgrTrnpOEh27wOf4Ae5qdV5JCSjp5ND1TUu_Ro3KYHSFEipUO3tO-XMQ/exec';
+
 function mostrar(PD,PT){
   document.getElementById("view-test").style.display="none";
   document.getElementById("view-res").style.display="block";
   document.getElementById("res-nombre").textContent=cand.nombre;
-  const meta=[cand.rut,cand.edad&&cand.edad+" años",cand.sexo==="M"?"Masculino":cand.sexo==="F"?"Femenino":"",cand.cargo,cand.empresa].filter(Boolean).join(" · ");
+  const meta=[cand.rut,cand.edad&&cand.edad+" años",cand.sexo==="M"?"Masculino":cand.sexo==="F"?"Femenino":"",cand.cargo].filter(Boolean).join(" · ");
   document.getElementById("res-meta").textContent=meta;
   setFechas();
 
   const dgvN=nivel(PT.DGV);
   const dgvT=INTERP.DGV;
+
+  // Perfil R/A
+  let perfilRA;
+  if(PT.R>PT.A+2) perfilRA="Receptivo";
+  else if(PT.A>PT.R+2) perfilRA="Agresivo";
+  else perfilRA="Equilibrado";
+
+  // Fortalezas y áreas
+  const fort=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]>=7).map(e=>INTERP[e].nombre);
+  const des=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]<=3).map(e=>INTERP[e].nombre);
+
+  // Interpretación en texto
+  const interp=generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des);
+
+  // Enviar a Sheets
+  enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp);
 
   let html=`
   <div class="dgv-banner">
@@ -968,6 +986,50 @@ function mostrar(PD,PT){
 
   document.getElementById("res-body").innerHTML=html;
   setTimeout(()=>radar(PT),80);
+}
+
+function generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des){
+  let txt='';
+  txt+=`DGV PT ${PT.DGV} (${dgvN}): `;
+  txt+=dgvN==="Alto"?INTERP.DGV.alto:dgvN==="Bajo"?INTERP.DGV.bajo:INTERP.DGV.medio;
+  txt+=' | ';
+  txt+=`Perfil ${perfilRA} — Receptividad PT ${PT.R}, Agresividad PT ${PT.A}. `;
+  if(perfilRA==="Receptivo") txt+="Mayor orientación a mantención de cartera y fidelización.";
+  else if(perfilRA==="Agresivo") txt+="Mayor orientación a apertura de mercados y nuevos negocios.";
+  else txt+="Adaptable a roles de mantención y apertura comercial.";
+  txt+=' | ';
+  if(fort.length) txt+=`Fortalezas: ${fort.join(", ")}. | `;
+  if(des.length) txt+=`Áreas de desarrollo: ${des.join(", ")}. | `;
+  ["I","II","III","IV","V","VI","VII","VIII","IX"].forEach(e=>{
+    const n=nivel(PT[e]);
+    txt+=`${INTERP[e].nombre} PT ${PT[e]} (${n}): `;
+    txt+=n==="Alto"?INTERP[e].alto:n==="Bajo"?INTERP[e].bajo:INTERP[e].medio;
+    txt+=' | ';
+  });
+  return txt;
+}
+
+function enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp){
+  const payload={
+    test:'IPV',
+    fecha: new Date().toLocaleDateString('es-CL'),
+    nombre:  cand.nombre,
+    rut:     cand.rut||'',
+    edad:    cand.edad||'',
+    sexo:    cand.sexo==='M'?'Masculino':cand.sexo==='F'?'Femenino':'',
+    cargo:   cand.cargo||'',
+    pt_dgv:  PT.DGV,
+    nivel_dgv: dgvN,
+    perfil_ra: perfilRA,
+    fortalezas:       fort.length?fort.join(', '):'Sin fortalezas destacadas',
+    areas_desarrollo: des.length?des.join(', '):'Sin áreas críticas',
+    interpretacion:   interp
+  };
+  fetch(APPS_SCRIPT_URL,{
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  }).catch(err=>console.warn('Error enviando a Sheets:',err));
 }
 
 function scCard(e,PD,PT){
