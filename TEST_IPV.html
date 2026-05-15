@@ -896,7 +896,7 @@ function renderTest(){
 
   document.getElementById("btn-prv").style.visibility=pagina===0?"hidden":"visible";
   const ultima=pagina===totalPags()-1;
-  document.getElementById("btn-nxt").textContent=ultima?"Ver resultados →":"Siguiente →";
+  document.getElementById("btn-nxt").textContent=ultima?"Finalizar prueba →":"Siguiente →";
 
   // pips
   let pipsHtml="";
@@ -928,7 +928,7 @@ function navPage(dir){
   const ultima=pagina===totalPags()-1;
   if(dir===1&&ultima){
     const falt=ITEMS.filter(it=>!resp[it.n]).length;
-    if(falt>0&&!confirm(`Quedan ${falt} ítems sin responder. ¿Ver resultados de todas formas?`)) return;
+    if(falt>0&&!confirm(`Quedan ${falt} ítems sin responder. ¿Finalizar y enviar de todas formas?`)) return;
     calcular(); return;
   }
   pagina=Math.max(0,Math.min(totalPags()-1,pagina+dir));
