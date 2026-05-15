@@ -1003,8 +1003,11 @@ function enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp){
     nivel_dgv: dgvN,
     perfil_ra: perfilRA,
     fortalezas:       fort.length?fort.join(', '):'Sin fortalezas destacadas',
-    areas_desarrollo: des.length?des.join(', '):'Sin áreas críticas',
-    interpretacion:   interp
+    areas_desarrollo: des.length?des.join(', '):'Sin areas criticas',
+    interpretacion:   interp,
+    escalas_pt: [PT.I,PT.II,PT.III,PT.IV,PT.V,PT.VI,PT.VII,PT.VIII,PT.IX].join(','),
+    pt_r: PT.R,
+    pt_a: PT.A
   };
   fetch(APPS_SCRIPT_URL,{
     method:'POST', mode:'no-cors',
