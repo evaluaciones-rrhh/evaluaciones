@@ -266,21 +266,25 @@ function renderTest(){
   var html="";
   for(var i=s;i<e;i++){
     var it=IT[i], r=resp[it.n];
-    html+="<div class="item-block"+(r!==undefined?" ok":"")+"" id="ib"+it.n+"">";
-    html+="<div class="item-n">Item "+it.n+"</div>";
-    html+="<div class="item-q">"+it.q+"</div>";
+    var cls="item-block"+(r!==undefined?" ok":"");
+    html+='<div class="'+cls+'" id="ib'+it.n+'">';
+    html+='<div class="item-n">Item '+it.n+'</div>';
+    html+='<div class="item-q">'+it.q+'</div>';
     if(it.t==="o"){
-      html+="<div class="opts">";
+      html+='<div class="opts">';
       for(var j=0;j<it.o.length;j++){
         var sel=r===(j+1).toString();
-        html+="<div class="opt"+(sel?" sel":"")+"" onclick="elegir("+it.n+","+(j+1)+",this)"><span class="opt-n">"+(j+1)+".</span><span>"+it.o[j]+"</span></div>";
+        var ocls="opt"+(sel?" sel":"");
+        html+='<div class="'+ocls+'" onclick="elegir('+it.n+','+(j+1)+',this)"><span class="opt-n">'+(j+1)+'.</span><span>'+it.o[j]+'</span></div>';
       }
-      html+="</div>";
+      html+='</div>';
     } else {
-      html+="<input class="inp-r" type="text" id="ir"+it.n+"" placeholder=""+(it.h||"Su respuesta")+"" value=""+(r||"")+"" oninput="elegirT("+it.n+",this.value)">";
-      html+="<div class="inp-hint">"+(it.h||"")+"</div>";
+      var hnt=it.h||"Su respuesta";
+      var val=r||"";
+      html+='<input class="inp-r" type="text" id="ir'+it.n+'" placeholder="'+hnt+'" value="'+val+'" oninput="elegirT('+it.n+',this.value)">';
+      html+='<div class="inp-hint">'+hnt+'</div>';
     }
-    html+="</div>";
+    html+='</div>';
   }
   document.getElementById("iw").innerHTML=html;
   document.getElementById("bprv").style.visibility=pag===0?"hidden":"visible";
@@ -318,7 +322,8 @@ function renderPips(){
     var s=i*PPP,e=Math.min(s+PPP,IT.length);
     var done=true;
     for(var j=s;j<e;j++){if(resp[IT[j].n]===undefined){done=false;break;}}
-    html+="<div class="pip"+(i===pag?" cur":done?" ok":"")+"" ></div>";
+    var cls="pip"+(i===pag?" cur":done?" ok":"");
+    html+='<div class="'+cls+'"></div>';
   }
   document.getElementById("pips").innerHTML=html;
 }
