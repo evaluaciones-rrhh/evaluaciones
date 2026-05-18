@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analizador de CVs — Grupo Cygnus</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root {
+  --bg: #f2ede6;
+  --white: #fff;
+  --ink: #1c1c1c;
+  --muted: #888070;
+  --border: #ddd5c4;
+  --accent: #c4432a;
+  --btn: #1e2d3d;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+
+.header{background:var(--btn);padding:16px 32px;display:flex;align-items:center;gap:14px;}
+.header-icon{width:40px;height:40px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.header-title{color:#fff;font-family:"Crimson Pro",serif;font-size:20px;font-weight:600;}
+.header-sub{color:rgba(255,255,255,0.45);font-size:10px;letter-spacing:2px;text-transform:uppercase;}
+
+.container{max-width:960px;margin:0 auto;padding:28px 20px 60px;}
+
+.section{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow);}
+.sec-label{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border);border-radius:8px;padding:28px 20px;text-align:center;cursor:pointer;transition:all 0.2s;background:#faf8f4;position:relative;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:#fdf4f2;}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:28px;margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.upload-hint{font-size:12px;color:var(--muted);}
+
+.file-preview{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0ece4;border-radius:6px;margin-top:10px;}
+.file-icon{font-size:20px;}
+.file-name{font-size:13px;font-weight:500;flex:1;color:var(--ink);}
+.file-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:2px 4px;}
+.file-remove:hover{color:var(--accent);}
+.file-ok{color:#2e7d52;font-size:12px;font-weight:600;}
+
+/* CVs lista */
+.cv-item{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden;}
+.cv-header{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f7f4ef;}
+.cv-num{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.cv-name{font-size:13px;font-weight:500;flex:1;color:var(--ink);}
+.cv-status{font-size:11px;color:#2e7d52;font-weight:600;}
+.cv-status.error{color:var(--accent);}
+.cv-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;padding:2px 6px;}
+.cv-remove:hover{color:var(--accent);}
+
+.btn-add{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:var(--white);border:1px dashed var(--border);border-radius:6px;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--muted);width:100%;margin-top:4px;position:relative;}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);}
+.btn-add input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+
+.btn-main{width:100%;padding:15px;background:var(--btn);color:#fff;border:none;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;}
+.btn-main:hover{background:#162330;}
+.btn-main:disabled{background:#aaa;cursor:not-allowed;}
+
+/* LOADING */
+.loading-box{text-align:center;padding:48px 20px;}
+.spinner{display:inline-block;width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-titulo{font-family:"Crimson Pro",serif;font-size:20px;margin-bottom:6px;}
+.loading-sub{font-size:13px;color:var(--muted);}
+.loading-progress{height:3px;background:var(--border);border-radius:2px;margin:16px 0 0;overflow:hidden;}
+.loading-bar{height:100%;background:var(--accent);border-radius:2px;transition:width 0.5s;}
+
+/* RESULTADOS */
+.res-hero{background:var(--btn);border-radius:10px;padding:22px 26px;margin-bottom:16px;color:#fff;}
+.res-hero h2{font-family:"Crimson Pro",serif;font-size:22px;margin-bottom:4px;}
+.res-hero p{font-size:12px;color:rgba(255,255,255,0.45);}
+
+.cand-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid var(--border);}
+.cand-card.r1{border-left-color:#2e7d52;}
+.cand-card.r2{border-left-color:#d4830a;}
+.cand-card.r3{border-left-color:var(--btn);}
+
+.cand-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.cand-rank{font-size:24px;font-weight:800;font-family:"Crimson Pro",serif;min-width:36px;color:var(--muted);}
+.r1 .cand-rank{color:#2e7d52;}
+.r2 .cand-rank{color:#d4830a;}
+.r3 .cand-rank{color:var(--btn);}
+.cand-nombre{font-size:15px;font-weight:600;flex:1;}
+.score-box{text-align:center;background:#f7f4ef;border-radius:8px;padding:6px 14px;}
+.score-val{font-family:"Crimson Pro",serif;font-size:26px;font-weight:600;line-height:1;}
+.score-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+
+.bar-wrap{height:4px;background:#f0ece4;border-radius:2px;margin-bottom:14px;}
+.bar-fill{height:100%;border-radius:2px;}
+
+.rec-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.rec-alta{background:#eaf4ee;color:#2e7d52;}
+.rec-media{background:#fef3e2;color:#c07a00;}
+.rec-baja{background:#fdecea;color:#c0392b;}
+
+.cand-sec{margin-bottom:10px;}
+.cand-sec-lbl{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.cand-text{font-size:13px;color:#444;line-height:1.65;}
+
+.tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{padding:3px 9px;border-radius:10px;font-size:11px;font-weight:500;}
+.tag-ok{background:#eaf4ee;color:#2e7d52;}
+.tag-gap{background:#fdecea;color:#c0392b;}
+
+.error-box{background:#fdecea;border:1px solid #e0b0b0;border-radius:8px;padding:12px 16px;color:#c0392b;font-size:13px;margin-top:10px;}
+.btn-nuevo{display:block;margin:16px auto 0;padding:11px 28px;background:var(--white);border:1px solid var(--border);border-radius:6px;font-family:"DM Sans",sans-serif;font-size:13px;color:var(--ink);cursor:pointer;}
+.btn-nuevo:hover{background:#f0ece4;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">📋</div>
+  <div>
+    <div class="header-sub">Grupo Cygnus</div>
+    <div class="header-title">Analizador de CVs con IA</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- FORMULARIO -->
+  <div id="vista-form">
+    <div class="section">
+      <div class="sec-label">Perfil del cargo</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Sube el documento con la descripcion del cargo (PDF o Word)</p>
+      <div class="upload-zone" id="zone-perfil">
+        <input type="file" accept=".pdf,.doc,.docx" onchange="cargarPerfil(this)">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Haz clic o arrastra el perfil del cargo</div>
+        <div class="upload-hint">PDF o Word (.doc, .docx)</div>
+      </div>
+      <div id="perfil-preview" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-label">CVs de candidatos</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Sube un CV por candidato (PDF o Word)</p>
+      <div id="cvs-list"></div>
+      <div class="btn-add">
+        <input type="file" accept=".pdf,.doc,.docx" onchange="agregarCV(this)" multiple>
+        + Agregar CV(s)
+      </div>
+    </div>
+
+    <div id="error-msg" class="error-box" style="display:none;"></div>
+    <button class="btn-main" onclick="analizar()">Analizar candidatos con IA</button>
+    <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px;">El analisis toma entre 15 y 60 segundos segun la cantidad de CVs</p>
+  </div>
+
+  <!-- LOADING -->
+  <div id="vista-loading" style="display:none;">
+    <div class="section loading-box">
+      <div class="spinner"></div>
+      <div class="loading-titulo">Analizando candidatos</div>
+      <div class="loading-sub" id="loading-msg">Preparando analisis...</div>
+      <div class="loading-progress"><div class="loading-bar" id="loading-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div id="vista-resultados" style="display:none;"></div>
+
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const GEMINI_KEY = "AIzaSyAYBK0tXs9rVdHhXD1fFmSe3JFG_vzYDdg";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY;
+
+var perfilTexto = "";
+var candidatos = []; // {nombre, texto}
+var cvIdCounter = 0;
+
+// ─── LEER ARCHIVO ───
+async function leerArchivo(file) {
+  var ext = file.name.split(".").pop().toLowerCase();
+  if (ext === "pdf") {
+    return await leerPDF(file);
+  } else if (ext === "docx" || ext === "doc") {
+    return await leerDOCX(file);
+  }
+  throw new Error("Formato no soportado: " + ext);
+}
+
+async function leerPDF(file) {
+  var ab = await file.arrayBuffer();
+  var pdf = await pdfjsLib.getDocument({data: ab}).promise;
+  var texto = "";
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var content = await page.getTextContent();
+    texto += content.items.map(function(item){ return item.str; }).join(" ") + "\n";
+  }
+  return texto.trim();
+}
+
+async function leerDOCX(file) {
+  var ab = await file.arrayBuffer();
+  var result = await mammoth.extractRawText({arrayBuffer: ab});
+  return result.value.trim();
+}
+
+// ─── CARGAR PERFIL ───
+async function cargarPerfil(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var preview = document.getElementById("perfil-preview");
+  preview.style.display = "flex";
+  preview.className = "file-preview";
+  preview.innerHTML = "<div class=\"file-icon\">⏳</div><div class=\"file-name\">Leyendo " + file.name + "...</div>";
+  try {
+    perfilTexto = await leerArchivo(file);
+    preview.innerHTML = "<div class=\"file-icon\">📄</div><div class=\"file-name\">" + file.name + "</div><div class=\"file-ok\">✓ Leido</div>";
+    document.getElementById("zone-perfil").style.display = "none";
+    preview.innerHTML += "<button class=\"file-remove\" onclick=\"quitarPerfil()\">✕</button>";
+  } catch(e) {
+    preview.innerHTML = "<div class=\"file-icon\">❌</div><div class=\"file-name\" style=\"color:var(--accent)\">Error: " + e.message + "</div>";
+    perfilTexto = "";
+  }
+}
+
+function quitarPerfil() {
+  perfilTexto = "";
+  document.getElementById("perfil-preview").style.display = "none";
+  document.getElementById("zone-perfil").style.display = "block";
+}
+
+// ─── AGREGAR CVs ───
+async function agregarCV(input) {
+  var files = Array.from(input.files);
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    cvIdCounter++;
+    var id = cvIdCounter;
+    var nombre = file.name.replace(/\.(pdf|docx|doc)$/i, "");
+
+    var div = document.createElement("div");
+    div.className = "cv-item";
+    div.id = "cv-" + id;
+    div.innerHTML =
+      "<div class=\"cv-header\">" +
+        "<div class=\"cv-num\">" + (document.querySelectorAll(".cv-item").length) + "</div>" +
+        "<div class=\"cv-name\">" + nombre + "</div>" +
+        "<span class=\"cv-status\" id=\"cv-status-" + id + "\">⏳ Leyendo...</span>" +
+        "<button class=\"cv-remove\" onclick=\"eliminarCV(" + id + ")\">✕</button>" +
+      "</div>";
+    document.getElementById("cvs-list").appendChild(div);
+
+    candidatos.push({id: id, nombre: nombre, texto: "", archivo: file});
+
+    // Leer en background
+    (async function(cvId, cvFile, cvNombre) {
+      try {
+        var texto = await leerArchivo(cvFile);
+        var cand = candidatos.find(function(c){ return c.id === cvId; });
+        if (cand) {
+          cand.texto = texto;
+          var el = document.getElementById("cv-status-" + cvId);
+          if (el) { el.textContent = "✓ Leido"; el.className = "cv-status"; }
+        }
+      } catch(e) {
+        var el = document.getElementById("cv-status-" + cvId);
+        if (el) { el.textContent = "✗ Error"; el.className = "cv-status error"; }
+      }
+    })(id, file, nombre);
+  }
+  input.value = "";
+}
+
+function eliminarCV(id) {
+  var el = document.getElementById("cv-" + id);
+  if (el) el.remove();
+  candidatos = candidatos.filter(function(c){ return c.id !== id; });
+}
+
+// ─── ANALIZAR ───
+async function analizar() {
+  var errEl = document.getElementById("error-msg");
+  errEl.style.display = "none";
+
+  if (!perfilTexto) {
+    errEl.textContent = "Por favor sube el perfil del cargo.";
+    errEl.style.display = "block"; return;
+  }
+
+  var validos = candidatos.filter(function(c){ return c.texto; });
+  if (validos.length === 0) {
+    errEl.textContent = "Por favor sube al menos un CV. Espera a que termine de leer.";
+    errEl.style.display = "block"; return;
+  }
+
+  document.getElementById("vista-form").style.display = "none";
+  document.getElementById("vista-loading").style.display = "block";
+
+  try {
+    var resultados = [];
+    for (var i = 0; i < validos.length; i++) {
+      var c = validos[i];
+      var pct = Math.round((i / validos.length) * 100);
+      document.getElementById("loading-msg").textContent = "Analizando " + (i+1) + " de " + validos.length + ": " + c.nombre;
+      document.getElementById("loading-bar").style.width = pct + "%";
+
+      var prompt = "Eres un experto en seleccion de personal. Analiza el siguiente CV comparandolo con el perfil del cargo. Responde SOLO con JSON valido, sin texto adicional, sin backticks, sin bloques de codigo.\n\n" +
+        "PERFIL DEL CARGO:\n" + perfilTexto.substring(0, 2000) + "\n\n" +
+        "CV DE " + c.nombre + ":\n" + c.texto.substring(0, 3000) + "\n\n" +
+        "Responde exactamente con este JSON:\n" +
+        "{" +
+        "\"puntaje\": 85," +
+        "\"recomendacion\": \"Alta\"," +
+        "\"resumen\": \"2-3 oraciones sobre el candidato\"," +
+        "\"fortalezas\": [\"fortaleza 1\", \"fortaleza 2\", \"fortaleza 3\"]," +
+        "\"brechas\": [\"brecha 1\", \"brecha 2\"]," +
+        "\"analisis\": \"Parrafo detallado de ajuste al cargo\"" +
+        "}" +
+        "\n\nDonde puntaje es 0-100 y recomendacion es Alta, Media o Baja.";
+
+      var resp = await fetch(GEMINI_URL, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          contents: [{parts: [{text: prompt}]}],
+          generationConfig: {temperature: 0.2, maxOutputTokens: 800}
+        })
+      });
+
+      if (!resp.ok) throw new Error("Error API Gemini: " + resp.status);
+
+      var data = await resp.json();
+      var txt = data.candidates[0].content.parts[0].text.trim();
+      txt = txt.replace(/```json/g,"").replace(/```/g,"").trim();
+      var r = JSON.parse(txt);
+      r.nombre = c.nombre;
+      resultados.push(r);
+    }
+
+    document.getElementById("loading-bar").style.width = "100%";
+    resultados.sort(function(a,b){ return b.puntaje - a.puntaje; });
+    mostrarResultados(resultados);
+
+  } catch(e) {
+    document.getElementById("vista-loading").style.display = "none";
+    document.getElementById("vista-form").style.display = "block";
+    errEl.textContent = "Error: " + e.message;
+    errEl.style.display = "block";
+  }
+}
+
+// ─── MOSTRAR RESULTADOS ───
+function mostrarResultados(resultados) {
+  document.getElementById("vista-loading").style.display = "none";
+  var el = document.getElementById("vista-resultados");
+  el.style.display = "block";
+
+  var html = "<div class=\"res-hero\">" +
+    "<h2>Ranking de candidatos</h2>" +
+    "<p>" + resultados.length + " candidato(s) analizados</p></div>";
+
+  resultados.forEach(function(r, i) {
+    var rc = i===0?"r1":i===1?"r2":i===2?"r3":"";
+    var rn = "#"+(i+1);
+    var recCls = r.recomendacion==="Alta"?"rec-alta":r.recomendacion==="Media"?"rec-media":"rec-baja";
+    var barColor = i===0?"#2e7d52":i===1?"#d4830a":"#c4432a";
+
+    html += "<div class=\"cand-card " + rc + "\">";
+    html += "<div class=\"cand-top\">";
+    html += "<div class=\"cand-rank\">" + rn + "</div>";
+    html += "<div class=\"cand-nombre\">" + r.nombre + "</div>";
+    html += "<div class=\"score-box\"><div class=\"score-val\">" + r.puntaje + "</div><div class=\"score-lbl\">/100</div></div>";
+    html += "</div>";
+    html += "<div class=\"bar-wrap\"><div class=\"bar-fill\" style=\"width:" + r.puntaje + "%;background:" + barColor + "\"></div></div>";
+    html += "<span class=\"rec-badge " + recCls + "\">" + r.recomendacion + "</span>";
+
+    html += "<div class=\"cand-sec\"><div class=\"cand-sec-lbl\">Resumen</div><div class=\"cand-text\">" + (r.resumen||"") + "</div></div>";
+
+    if (r.fortalezas && r.fortalezas.length) {
+      html += "<div class=\"cand-sec\"><div class=\"cand-sec-lbl\">Fortalezas</div><div class=\"tags\">";
+      r.fortalezas.forEach(function(f){ html += "<span class=\"tag tag-ok\">✓ " + f + "</span>"; });
+      html += "</div></div>";
+    }
+    if (r.brechas && r.brechas.length) {
+      html += "<div class=\"cand-sec\"><div class=\"cand-sec-lbl\">Brechas</div><div class=\"tags\">";
+      r.brechas.forEach(function(b){ html += "<span class=\"tag tag-gap\">✗ " + b + "</span>"; });
+      html += "</div></div>";
+    }
+    html += "<div class=\"cand-sec\"><div class=\"cand-sec-lbl\">Analisis detallado</div><div class=\"cand-text\">" + (r.analisis||"") + "</div></div>";
+    html += "</div>";
+  });
+
+  html += "<button class=\"btn-nuevo\" onclick=\"nuevoAnalisis()\">← Nuevo analisis</button>";
+  el.innerHTML = html;
+}
+
+function nuevoAnalisis() {
+  document.getElementById("vista-resultados").style.display = "none";
+  document.getElementById("vista-form").style.display = "block";
+  perfilTexto = "";
+  candidatos = [];
+  document.getElementById("cvs-list").innerHTML = "";
+  document.getElementById("perfil-preview").style.display = "none";
+  document.getElementById("zone-perfil").style.display = "block";
+  document.getElementById("error-msg").style.display = "none";
+}
+</script>
+</body>
+</html>
