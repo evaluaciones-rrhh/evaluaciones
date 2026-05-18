@@ -538,37 +538,7 @@
             <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
           </div>
         </div>
-        <div class="form-row-3">
-          <div class="form-group">
-            <label>Edad</label>
-            <input type="number" id="inp-edad" placeholder="Ej: 32" min="16" max="80">
-          </div>
-          <div class="form-group">
-            <label>Sexo</label>
-            <select id="inp-sexo">
-              <option value="">Seleccionar</option>
-              <option value="M">Masculino</option>
-              <option value="F">Femenino</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Nivel de estudios</label>
-            <select id="inp-estudios">
-              <option value="">Seleccionar</option>
-              <option>Básica / Primaria</option>
-              <option>Media / Secundaria</option>
-              <option>Técnico / Superior</option>
-              <option>Universitaria</option>
-              <option>Posgrado</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Cargo / Actividad actual</label>
-            <input type="text" id="inp-cargo" placeholder="Ej: Ejecutivo Comercial">
-          </div>
-        </div>
+
       </div>
     </div>
 
@@ -906,10 +876,6 @@ function iniciar(){
   cand = {
     nombre,
     rut: document.getElementById("inp-rut").value.trim(),
-    edad: document.getElementById("inp-edad").value,
-    sexo: document.getElementById("inp-sexo").value,
-    estudios: document.getElementById("inp-estudios").value,
-    cargo: document.getElementById("inp-cargo").value.trim(),
   };
   document.getElementById("view-portada").style.display = "none";
   var test = document.getElementById("view-test");
