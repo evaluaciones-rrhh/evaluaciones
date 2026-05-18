@@ -481,7 +481,7 @@
   }
 
   /* hidden - manejado por JS */
-  #view-test.activo {
+  #view-test.activo, #view-res.activo {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -1018,9 +1018,11 @@ function mostrar(PD,PT){
   const des=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]<=3).map(e=>INTERP[e].nombre);
   const interp=generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des);
   enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp);
-  document.getElementById("view-test").style.display="none";
-  document.getElementById("view-res").style.display="block";
-  window.scrollTo(0,0);
+  var vtest = document.getElementById("view-test");
+  var vres = document.getElementById("view-res");
+  vtest.classList.remove("activo");
+  vres.classList.add("activo");
+  vres.scrollTop=0;
 }
 
 function generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des){
