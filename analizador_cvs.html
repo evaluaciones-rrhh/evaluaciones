@@ -334,7 +334,10 @@ async function analizar() {
         })
       });
 
-      if (!resp.ok) throw new Error("Error API Gemini: " + resp.status);
+      if (!resp.ok) {
+        var errBody = await resp.text();
+        throw new Error("Error API Gemini: " + resp.status + " | URL: " + GEMINI_URL.substring(0,80) + " | " + errBody.substring(0,200));
+      }
 
       var data = await resp.json();
       var txt = data.candidates[0].content.parts[0].text.trim();
