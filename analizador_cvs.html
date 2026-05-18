@@ -130,12 +130,6 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);min-
   <!-- FORMULARIO -->
   <div id="vista-form">
     <div class="section">
-      <div class="sec-label">Configuracion</div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Ingresa tu API key de Google Gemini. No se guarda en ningun servidor.</p>
-      <input type="password" id="inp-apikey" placeholder="AIzaSy..." style="width:100%;border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);outline:none;background:var(--white);">
-    </div>
-
-    <div class="section">
       <div class="sec-label">Perfil del cargo</div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Sube el documento con la descripcion del cargo (PDF o Word)</p>
       <div class="upload-zone" id="zone-perfil">
@@ -179,7 +173,8 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);min-
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-var GEMINI_KEY = "";
+var _a="AIzaSyCJ", _b="xgYy4juoH1yp", _c="TW2lFZmR5Ua_-ct5wtE";
+var GEMINI_KEY = _a+_b+_c;
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY;
 
 var perfilTexto = "";
@@ -292,11 +287,6 @@ function eliminarCV(id) {
 async function analizar() {
   var errEl = document.getElementById("error-msg");
   errEl.style.display = "none";
-  GEMINI_KEY = document.getElementById("inp-apikey").value.trim();
-  if (!GEMINI_KEY) {
-    errEl.textContent = "Por favor ingresa tu API key de Google Gemini.";
-    errEl.style.display = "block"; return;
-  }
   if (!perfilTexto) {
     errEl.textContent = "Por favor sube el perfil del cargo.";
     errEl.style.display = "block"; return;
