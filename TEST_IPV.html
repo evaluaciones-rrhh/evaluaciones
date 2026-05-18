@@ -958,6 +958,8 @@ function renderTest(){
     pipsHtml+=`<div class="pip ${i===pagina?"cur":allDone?"ok":""}"></div>`;
   }
   document.getElementById("pips").innerHTML=pipsHtml;
+  var vtest = document.getElementById("view-test");
+  if(vtest) vtest.scrollTop=0;
   window.scrollTo(0,0);
 }
 
