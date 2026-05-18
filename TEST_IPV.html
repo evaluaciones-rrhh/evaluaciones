@@ -890,7 +890,9 @@ window.addEventListener("load",()=>{ setFechas(); });
 
 // ════ INICIAR ════
 function iniciar(){
+  console.log("iniciar() llamado");
   const nombre = document.getElementById("inp-nombre").value.trim();
+  console.log("nombre:", nombre);
   if(!nombre){ alert("Por favor ingresa el nombre del evaluado."); return; }
   cand = {
     nombre,
@@ -900,9 +902,13 @@ function iniciar(){
     estudios: document.getElementById("inp-estudios").value,
     cargo: document.getElementById("inp-cargo").value.trim(),
   };
+  console.log("ocultando portada, mostrando test");
   document.getElementById("view-portada").style.display="none";
   document.getElementById("view-test").style.display="block";
-  pagina=0; renderTest();
+  pagina=0; 
+  console.log("llamando renderTest");
+  renderTest();
+  console.log("renderTest completado");
 }
 
 // ════ RENDER TEST ════
