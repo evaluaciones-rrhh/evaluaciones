@@ -480,8 +480,7 @@
     .dgv-badge { margin-left: 0; }
   }
 
-  /* hidden */
-  #view-test, #view-res { display: none; }
+  /* hidden - manejado por JS */
 
   /* Proteccion: deshabilitar seleccion de texto */
   body { user-select: none; -webkit-user-select: none; -moz-user-select: none; }
@@ -579,7 +578,7 @@
 </div>
 
 <!-- ════════════ TEST ════════════ -->
-<div id="view-test">
+<div id="view-test" style="display:none;">
 
   <div class="progress-header">
     <span class="progress-label">Progreso</span>
@@ -630,8 +629,8 @@ document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
 
 document.addEventListener("keydown", function(e) {
   if(e.ctrlKey && ["c","a","u","s","p"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
-  // if(e.key === "F12") e.preventDefault();
-  // if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if(e.key === "F12") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
 });
 
 document.addEventListener("visibilitychange", function() {
@@ -890,9 +889,7 @@ window.addEventListener("load",()=>{ setFechas(); });
 
 // ════ INICIAR ════
 function iniciar(){
-  console.log("iniciar() llamado");
   const nombre = document.getElementById("inp-nombre").value.trim();
-  console.log("nombre:", nombre);
   if(!nombre){ alert("Por favor ingresa el nombre del evaluado."); return; }
   cand = {
     nombre,
@@ -902,13 +899,10 @@ function iniciar(){
     estudios: document.getElementById("inp-estudios").value,
     cargo: document.getElementById("inp-cargo").value.trim(),
   };
-  console.log("ocultando portada, mostrando test");
   document.getElementById("view-portada").style.display="none";
   document.getElementById("view-test").style.display="block";
   pagina=0; 
-  console.log("llamando renderTest");
   renderTest();
-  console.log("renderTest completado");
 }
 
 // ════ RENDER TEST ════
