@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPV — Inventario de Personalidad para Vendedores</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2ede6;
+    --white: #ffffff;
+    --ink: #1c1c1c;
+    --muted: #888070;
+    --border: #ddd5c4;
+    --accent: #c4432a;
+    --btn-bg: #1e2d3d;
+    --btn-hover: #162330;
+    --low: #c0392b;
+    --mid: #d4830a;
+    --high: #2e7d52;
+    --tag-color: #7a6e60;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+  }
+
+  /* ─── HEADER ─── */
+  .site-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .header-icon img { width: 44px; height: 44px; border-radius: 50%; }
+  .header-titles { display: flex; flex-direction: column; }
+  .header-supertitle {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .header-test-name {
+    font-family: 'Crimson Pro', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .header-logo img { height: 44px; border-radius: 6px; }
+  .header-date {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .header-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+  }
+
+  /* ─── LAYOUT ─── */
+  .page-content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 20px;
+  }
+  .card-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--tag-color);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  /* ─── FORMS ─── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group label { font-size: 13px; color: var(--muted); font-weight: 400; }
+  .form-group input, .form-group select {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  .form-group input::placeholder { color: #bbb; }
+  .form-group input:focus, .form-group select:focus { border-color: #a09080; }
+
+  /* ─── CONSIGNA ─── */
+  .consigna-box {
+    border-left: 3px solid var(--border);
+    padding: 16px 20px;
+    background: #faf8f4;
+    border-radius: 0 6px 6px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #555;
+    font-style: italic;
+  }
+  .consigna-box strong { font-style: normal; color: var(--ink); }
+
+  /* ─── BOTÓN ─── */
+  .btn-main {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: var(--btn-bg);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: background 0.18s;
+    margin-bottom: 10px;
+  }
+  .btn-main:hover { background: var(--btn-hover); }
+  .btn-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ─── PROGRESS HEADER (test activo) ─── */
+  .progress-header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .progress-label { font-size: 13px; color: var(--muted); }
+  .progress-count { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 0 24px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  /* ─── ÍTEMS ─── */
+  .items-wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 24px 20px;
+  }
+  .page-tag {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .item-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+    box-shadow: var(--card-shadow);
+    transition: border-color 0.15s;
+  }
+  .item-block.is-done { border-color: #b8d4b0; }
+  .item-n {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 9px;
+  }
+  .item-q {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .opts { display: flex; flex-direction: column; gap: 7px; }
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.13s;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .opt:hover { border-color: #b0a090; background: #faf8f4; }
+  .opt.chosen { border-color: var(--accent); background: #fdf4f2; }
+  .opt-letter {
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 18px;
+    font-size: 13px;
+    margin-top: 1px;
+  }
+
+  /* ─── NAV ─── */
+  .nav-row {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .btn-sec {
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: none;
+  }
+  .btn-prev-sec {
+    background: var(--white);
+    border: 1px solid var(--border) !important;
+    color: var(--ink);
+  }
+  .btn-prev-sec:hover { background: #f0ece4; }
+  .btn-next-sec { background: var(--btn-bg); color: white; }
+  .btn-next-sec:hover { background: var(--btn-hover); }
+  .page-pips { display: flex; gap: 5px; }
+  .pip {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.15s;
+  }
+  .pip.cur { background: var(--accent); }
+  .pip.ok { background: #8fbe8a; }
+
+  /* ─── RESULTADOS ─── */
+  .res-hero {
+    background: var(--btn-bg);
+    color: white;
+    padding: 48px 40px 40px;
+    text-align: center;
+  }
+  .res-hero-tag {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 10px;
+  }
+  .res-hero-name {
+    font-family: 'Crimson Pro', serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .res-hero-meta { font-size: 13px; color: rgba(255,255,255,0.5); }
+
+  .res-body { max-width: 900px; margin: 0 auto; padding: 36px 24px 60px; }
+
+  /* DGV destacado */
+  .dgv-banner {
+    background: var(--btn-bg);
+    border-radius: 10px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 20px;
+    color: white;
+  }
+  .dgv-ring {
+    width: 76px; height: 76px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dgv-ring-val {
+    font-family: 'Crimson Pro', serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .dgv-ring-lbl { font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+  .dgv-info h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 19px;
+    margin-bottom: 5px;
+  }
+  .dgv-info p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+  .dgv-badge {
+    margin-left: auto;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .lvl-bajo { background: rgba(192,57,43,0.25); color: #ff8a7a; }
+  .lvl-promedio { background: rgba(212,131,10,0.25); color: #f5c842; }
+  .lvl-alto { background: rgba(46,125,82,0.25); color: #72d4a0; }
+
+  /* Sección dimensión */
+  .dim-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dim-pill {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--ink);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  .dim-title-text {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .dim-pt {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* Scale cards */
+  .scale-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); gap: 12px; margin-bottom: 24px; }
+  .sc-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    border-top: 3px solid var(--border);
+    box-shadow: var(--card-shadow);
+  }
+  .sc-card.low { border-top-color: var(--low); }
+  .sc-card.mid { border-top-color: var(--mid); }
+  .sc-card.high { border-top-color: var(--high); }
+  .sc-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .sc-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .sc-name { font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+  .sc-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 10px;
+  }
+  .b-low { background: #fdecea; color: var(--low); }
+  .b-mid { background: #fef3e2; color: var(--mid); }
+  .b-high { background: #eaf4ee; color: var(--high); }
+  .sc-track { height: 5px; background: #f0ece4; border-radius: 3px; margin-bottom: 8px; }
+  .sc-fill { height: 100%; border-radius: 3px; }
+  .f-low { background: var(--low); }
+  .f-mid { background: var(--mid); }
+  .f-high { background: var(--high); }
+  .sc-scores { font-size: 12px; color: var(--muted); display: flex; gap: 14px; }
+  .sc-scores strong { color: var(--ink); }
+  .sc-text { font-size: 12px; color: var(--muted); line-height: 1.55; margin-top: 8px; border-top: 1px solid #f0ece4; padding-top: 8px; }
+
+  /* Radar */
+  .radar-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+  }
+  .radar-card h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  /* Narrativa */
+  .narr-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    box-shadow: var(--card-shadow);
+  }
+  .narr-card h3 {
+    font-family: 'Crimson Pro', serif;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .narr-item { display: flex; gap: 12px; margin-bottom: 14px; }
+  .narr-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .narr-text { font-size: 13.5px; color: #555; line-height: 1.65; }
+  .narr-text strong { color: var(--ink); }
+
+  .btn-nuevo {
+    display: block;
+    margin: 0 auto;
+    padding: 13px 36px;
+    background: var(--btn-bg);
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-nuevo:hover { background: var(--btn-hover); }
+
+  @media (max-width: 640px) {
+    .site-header { padding: 0 16px; }
+    .header-date { display: none; }
+    .page-content { padding: 24px 16px 48px; }
+    .form-row, .form-row-3 { grid-template-columns: 1fr; }
+    .dgv-banner { flex-direction: column; text-align: center; }
+    .dgv-badge { margin-left: 0; }
+  }
+
+  /* hidden - manejado por JS */
+  #view-test.activo, #view-res.activo {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100vh !important;
+    overflow-y: auto !important;
+    background: var(--bg) !important;
+    z-index: 9999 !important;
+    display: block !important;
+  }
+
+  /* Proteccion: deshabilitar seleccion de texto */
+  body { user-select: none; -webkit-user-select: none; -moz-user-select: none; }
+  input, textarea, select { user-select: text; -webkit-user-select: text; }
+
+</style>
+</head>
+<body onload="window.scrollTo(0,0)">
+<div id="screen-bloqueado" style="display:none;position:fixed;inset:0;background:#f5f4f0;z-index:9999;align-items:center;justify-content:center;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;">
+  <div style="max-width:480px;text-align:center;padding:2rem;">
+    <div style="font-size:56px;margin-bottom:1rem;">&#128274;</div>
+    <h2 style="font-size:22px;font-weight:300;margin-bottom:.75rem;color:#1a1917;">Este test ya fue completado</h2>
+    <p style="font-size:14px;color:#6b6860;line-height:1.7;">Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
+  </div>
+</div>
+
+<!-- ════════════ PORTADA ════════════ -->
+<div id="view-portada">
+
+  <header class="site-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <img src="data:image/png;base64,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" alt="Icono">
+      </div>
+      <div class="header-titles">
+        <div class="header-supertitle">Evaluación Psicolaboral</div>
+        <div class="header-test-name">Inventario de Personalidad para Vendedores</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-logo">
+        <img src="data:image/jpeg;base64,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" alt="PostulaAquí.cl">
+      </div>
+      <div class="header-divider"></div>
+      <div class="header-date" id="fecha-header"></div>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <div class="card">
+      <div class="card-label">Datos del candidato</div>
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" id="inp-nombre" placeholder="Apellido Nombre">
+          </div>
+          <div class="form-group">
+            <label>RUT</label>
+            <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Consigna — Leer en voz alta al candidato</div>
+      <div class="consigna-box">
+        "En las páginas siguientes encontrará cierto número de situaciones y de preguntas seguidas de varias respuestas posibles. <strong>Se le pide que escoja una alternativa —y una sola— para cada pregunta</strong>, la que de manera espontánea le parezca preferible. En realidad, no hay respuestas buenas ni malas; cada uno piensa y actúa como cree conveniente en función de su carácter, de sus intereses, etc. Responda lo más espontánea y sinceramente posible con la contestación que se le ocurra inmediatamente al leer las alternativas. <strong>No dé más que una sola respuesta a cada pregunta.</strong>"
+
+      <div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;font-style:normal;line-height:1.65;">
+        <strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluacion. Se recomienda mantener esta ventana en primer plano durante todo el test. El uso de buscadores, inteligencia artificial u otros recursos externos queda registrado y puede afectar la validez del resultado.
+      </div>
+    </div>
+    </div>
+
+    <button class="btn-main" onclick="iniciar()">Iniciar prueba</button>
+    <div class="btn-hint">Una vez iniciada la prueba, no puede pausarse ni reiniciarse</div>
+
+  </div>
+</div>
+
+<!-- ════════════ TEST ════════════ -->
+<div id="view-test" style="display:none;min-height:100vh;width:100%;">
+
+  <div class="progress-header">
+    <span class="progress-label">Progreso</span>
+    <div class="progress-track">
+      <div class="progress-fill" id="pbar" style="width:0%"></div>
+    </div>
+    <span class="progress-count" id="pcnt">0 / 87</span>
+  </div>
+
+  <div class="items-wrap" id="items-wrap"></div>
+
+  <div class="nav-row">
+    <button class="btn-sec btn-prev-sec" id="btn-prv" onclick="navPage(-1)">← Anterior</button>
+    <div class="page-pips" id="pips"></div>
+    <button class="btn-sec btn-next-sec" id="btn-nxt" onclick="navPage(1)">Siguiente →</button>
+  </div>
+
+</div>
+
+<!-- ════════════ GRACIAS ════════════ -->
+<div id="view-res" style="display:none;">
+  <header class="site-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <img src="data:image/png;base64,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" alt="Icono">
+      </div>
+      <div class="header-titles">
+        <div class="header-supertitle">Evaluación Psicolaboral</div>
+        <div class="header-test-name">Inventario de Personalidad para Vendedores</div>
+      </div>
+    </div>
+  </header>
+  <div style="text-align:center; padding: 80px 24px;">
+    <div style="font-size:52px; margin-bottom:20px;">✓</div>
+    <div style="font-family:'Crimson Pro',serif; font-size:28px; color:var(--ink); margin-bottom:12px;">Evaluación finalizada</div>
+    <div style="font-size:14px; color:var(--muted); max-width:400px; margin:0 auto; line-height:1.7;">Gracias por participar. Tus respuestas han sido registradas correctamente.<br>Puedes cerrar esta ventana.</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// PROTECCIONES ANTI-TRAMPA
+// ═══════════════════════════════════════
+var cambiosFoco = 0;
+var alertaFoco = false;
+
+document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+
+document.addEventListener("keydown", function(e) {
+  if(e.ctrlKey && ["c","a","u","s","p"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if(e.key === "F12") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+});
+
+document.addEventListener("visibilitychange", function() {
+  if(document.hidden) {
+    cambiosFoco++;
+    if(!alertaFoco) {
+      alertaFoco = true;
+      setTimeout(function() {
+        alert("Aviso: Se ha detectado que saliste de la ventana del test. Esta accion queda registrada.");
+        alertaFoco = false;
+      }, 300);
+    }
+  }
+});
+
+window.addEventListener("blur", function() { cambiosFoco++; });
+document.addEventListener("dragstart", function(e) { e.preventDefault(); });
+
+// ════════════════════════════════════════
+// DATOS: 87 ÍTEMS
+// ════════════════════════════════════════
+const ITEMS = [
+  {n:1,  q:'T... debe salir de viaje con una persona de la que no conoce nada. ¿Sobre cuál de los siguientes aspectos de esa persona es preferible informar a T. para que el viaje resulte mejor?', A:'Su estilo de vida.', B:'Los puntos que tengan en común.', C:'Su actividad y responsabilidades profesionales.'},
+  {n:2,  q:'Entre los siguientes tipos de vendedores de prendas de vestir, ¿cuál es el que tiene más probabilidades de éxito?', A:'El que presente las últimas novedades.', B:'El que, tratando de conocer el estilo de su cliente, se interese por su modo de vida.', C:'El que posea una buena capacidad de convencer.'},
+  {n:3,  q:'B... tiene un proyecto importante para la promoción de un nuevo producto y va a exponerlo ante el Comité de Dirección. ¿Cuál de las siguientes cualidades le será más útil para persuadir a su auditorio?', A:'Competencia técnica y un conocimiento perfecto del tema.', B:'Capacidad para modificar sus razonamientos según la actitud del auditorio.', C:'Facultad para mantener el orden de sus ideas a pesar de las interrupciones.'},
+  {n:4,  q:'Se envía a G..., contra su voluntad, a un país extranjero, por el cual no se siente atraído en principio, para una estancia de varias semanas. ¿Cuál será su actitud?', A:'Estimar que la duración de su estancia es demasiado corta para conseguir integrarse.', B:'Tratar de aprender la lengua para comprender mejor a ese país y vivir más a gusto en él.', C:'No tener más que los contactos estrictamente necesarios para la buena marcha de su trabajo.'},
+  {n:5,  q:'Según su opinión, las personas que siempre dicen sus verdades a los demás, aunque éstas sean desagradables, lo hacen, en general, porque...', A:'no saben controlar sus impulsos y dicen espontáneamente lo que piensan.', B:'no les gusta la hipocresía.', C:'piensan que esto simplifica las relaciones.'},
+  {n:6,  q:'Un buen amigo de C... había comenzado bastante brillantemente su carrera profesional, pero los resultados no han sido los que cabría esperar y terminó teniendo numerosos fracasos. ¿Qué piensa C... acerca de esto?', A:'Que las condiciones no le han sido favorables.', B:'Que no estaba a la altura necesaria.', C:'Que no ha utilizado bien los medios para salir adelante.'},
+  {n:7,  q:'B... encuentra, en casa de unos amigos, a una persona que aparenta una edad muy inferior a la que realmente tiene. ¿Qué opinará B...?', A:'Probablemente ha encontrado en la vida lo que le convenía.', B:'Tiene buena suerte; es cuestión de naturaleza.', C:'Seguramente ha tenido una vida fácil.'},
+  {n:8,  q:'Para distraerse, S... decide aprender karate. Después de unos meses de entrenamiento se da cuenta de que progresa muy lentamente. ¿Cuál será su reacción?', A:'Pensando que realmente no está hecho para el karate, elegirá otro deporte.', B:'Convencido de que no está dotado para las actividades corporales buscará otra forma de actividad.', C:'Continuará sus esfuerzos con la esperanza de que seguramente un día serán coronados por el éxito.'},
+  {n:9,  q:'P... se acuesta una noche muy fatigado, pero no puede dormirse porque sus vecinos del piso superior han organizado una fiesta muy ruidosa. ¿Qué hará?', A:'Subir y advertir a sus vecinos.', B:'Dar con la escoba algunos golpes en el techo.', C:'Tomar un somnífero y tratar de dormir cueste lo que cueste.'},
+  {n:10, q:'G..., quien carece de teléfono, llega a una oficina de telégrafos para enviar un telegrama a la hora de cerrar. El encargado le dice que es demasiado tarde, que va a cerrar. ¿Qué hará G...?', A:'Ir a casa de un amigo que tiene teléfono para poner el telegrama por teléfono.', B:'Convencer al encargado de que su telegrama es muy urgente y que debe salir inmediatamente.', C:'Ir a una oficina de telégrafos que cierra más tarde.'},
+  {n:11, q:'X... hace un viaje de turismo por un país en que es costumbre regatear los precios. ¿Cuál será su actitud?', A:'Hará pocas compras porque le molesta tener que regatear siempre.', B:'Hará numerosas compras, incluso un poco inútiles, porque le encanta regatear los precios.', C:'Convencido de que le timarían, preferirá los almacenes de precios fijos.'},
+  {n:12, q:'Sin tener en cuenta la formación ni las habilidades necesarias, ¿cuál de las siguientes áreas directivas le gustaría tener a su cargo?', A:'Administración.', B:'Personal.', C:'Publicidad.'},
+  {n:13, q:'Un escritor poco conocido acaba de recibir un premio de renombre internacional. ¿Qué cree usted que preferirá hacer?', A:'Escribir menos y aprovecharse de su éxito para salir, recibir a la gente y hacer una vida de sociedad.', B:'Intentar escribir una obra maestra.', C:'Dedicarse a la pintura e intentar triunfar también en ella.'},
+  {n:14, q:'Si usted se encontrara en una situación de examen en la que pudiera elegir entre dos temas, ¿cuál escogería?', A:'Un tema ampliamente tratado durante el curso con el que tiene, casi, la plena seguridad de alcanzar la calificación media necesaria.', B:'Un tema que le permita, con un mínimo de conocimiento, pero con mucha lógica e imaginación, obtener una calificación muy buena pero, quizá, también muy mala.'},
+  {n:15, q:'Entre las siguientes actividades de descanso físico en la naturaleza, ¿cuál prefiere usted?', A:'Una vuelta por la bahía cuando el mar está agitado.', B:'Un baño de sol en una playa de arena fina, en un hermoso día de verano con el aire en calma.', C:'Un paseo por el campo en primavera.'},
+  {n:16, q:'¿Qué es, a su juicio, lo que atrae más a la gente en los viajes o estancias en el extranjero?', A:'Los paisajes nuevos.', B:'El descubrimiento de otra civilización artística.', C:'El contacto con una población de costumbres muy diferentes.'},
+  {n:17, q:'P... camina rápidamente por la calle y parece que tiene prisa. Un joven que realiza una encuesta lo detiene para hacerle algunas preguntas extrañas, pero divertidas. ¿Qué hará P...?', A:'Rehusar con firmeza contestar a las preguntas.', B:'Responder rápidamente, porque lo encuentra divertido.', C:'Excusarse de no tener tiempo para responder, sintiendo de verdad no poder hacerlo.'},
+  {n:18, q:'L... trabaja en una empresa en la que recibe muy pocas informaciones de manera oficial. ¿Qué opina usted de ello?', A:'Que será muy difícil obtener información.', B:'Que con los rumores de pasillo, eso no constituye un problema.', C:'Que, de hecho, es muy fácil estar informado; basta conocer a algunas personas bien situadas.'},
+  {n:19, q:'Son las 11 de la noche. Hay numerosos vehículos estacionados en la calle; P... ve desde su ventana a uno que trata de abrir la puerta de un coche; parece que no tiene llave y utiliza un desarmador. ¿Qué pensará P...?', A:'Probablemente es un ratero que trata de robar un coche. ¿Y si yo llamara a la policía?', B:'Alguien ha quedado atrapado en la acera y trata de mover un coche para salir.', C:'¿Qué estará haciendo? Parece que utiliza un desarmador.'},
+  {n:20, q:'Cuando un niño ha cometido una gran tontería, ¿cuál es, a su modo de ver, la mejor reacción?', A:'Castigarlo, explicándole por qué se hace.', B:'Explicarle la significación de su tontería situándola en su contexto.', C:'Apelar al amor propio del niño.'},
+  {n:21, q:'B... tiene varios hijos y ha decidido intervenir en la educación sexual de cada uno de ellos. ¿Qué procedimiento le parece a usted que adoptará probablemente?', A:'Reflexionar sobre el asunto y preparar, para el hijo mayor, un tipo de intervención que luego mantendrá con los demás hijos.', B:'Seguir su intuición o sus sentimientos.', C:'Adoptar un modo de proceder distinto para cada hijo.'},
+  {n:22, q:'¿Cuál es para un niño la manera más astuta de presentar unas calificaciones escolares poco brillantes?', A:'Enseñarlas lo antes posible para librarse de ello.', B:'Presentarlas el lunes a la hora del desayuno.', C:'Presentarlas en el momento en que pueda aportar, además, alguna compensación.'},
+  {n:23, q:'El hijo de G... ha entrado en el despacho de su padre a pesar de que éste se lo tiene prohibido, y ha derramado un frasco de tinta sobre papeles importantes. G..., furioso, le da una bofetada. ¿Qué pensará G... algún tiempo después?', A:'Que un buen golpe de vez en cuando no viene mal.', B:'Que tal vez se ha excedido un poco.', C:'Que es conveniente enfadarse de verdad una vez para no tener que volver a hacerlo.'},
+  {n:24, q:'Una persona con la que D... se relaciona muy frecuentemente acaba de jugarle una mala pasada. ¿Cuál será la reacción de D...?', A:'No muestra ninguna, pero se da cuenta de que le será muy difícil ocultar su resentimiento durante mucho tiempo.', B:'No dice nada porque piensa que el daño causado es tal vez menor del que había creído.', C:'Se esfuerza por ocultar su resentimiento para no entorpecer sus futuras relaciones.'},
+  {n:25, q:'N... asiste a una comida. Se da cuenta de que, a causa de una opinión que se le ha escapado, acaba de provocar una situación tensa en el grupo. ¿Qué le parece a usted que será para él lo más desagradable?', A:'El sentimiento de que algo va a dificultar notablemente el contacto.', B:'El pensamiento de que se le va a juzgar a causa de esa observación.', C:'El disgusto de haber hablado sin pensar.'},
+  {n:26, q:'P... está jugando a las cartas con sus amigos; a pesar de sus esfuerzos, pierde varias veces seguidas. ¿Cuál es, según usted, su reacción más probable?', A:'Después de todo, esta tarde he aprendido bastante. Seguramente ganaré la próxima vez.', B:'Siempre ocurre lo mismo; no se me dan bien los juegos de cartas.', C:'Realmente no estoy en forma esta tarde.'},
+  {n:27, q:'R... está sentado en un cine al lado de personas que no se callan y hacen frecuentes comentarios. ¿Qué hará R...?', A:'Rogarles que se callen.', B:'Cambiarse de lugar.', C:'Concentrarse más en la película para evitar la molestia.'},
+  {n:28, q:'T... trabaja en una gran empresa. Ha efectuado algunos cambios en la organización del trabajo y es muy criticado por muchos de sus compañeros. ¿Cuál será la reacción de T...?', A:'Tratar de justificar su posición ante sus compañeros.', B:'Pensar que, en cualquier caso, nunca se consigue la unanimidad.', C:'Replantearse el problema.'},
+  {n:29, q:'¿Qué piensa usted cuando ve a un niño enfrentarse a los adultos?', A:'Está mal educado.', B:'Probablemente tiene serias dificultades en sus relaciones con los demás.', C:'Posee una fuerte personalidad.'},
+  {n:30, q:'M... debe contratar a un colaborador que se encargará de la dirección de un servicio. Teniendo en cuenta el hecho de que tendrá responsabilidades jerárquicas, ¿a cuál de las siguientes cualidades dará M... más importancia?', A:'Tener autoridad.', B:'Ser convincente.', C:'Ser justo.'},
+  {n:31, q:'Entre los siguientes estilos de conducir un automóvil en carretera, ¿cuál, a su parecer, es el más frecuentemente adoptado por los automovilistas?', A:'Pensando en la mecánica y en la seguridad, apenas fuerzan la velocidad de su vehículo.', B:'Estimando que es tan peligroso circular demasiado despacio como demasiado deprisa, rebasan a los vehículos que los obligan a ir lentamente.', C:'Toleran de mala gana no tener vía libre y rebasan sistemáticamente a los vehículos que van delante de ellos.'},
+  {n:32, q:'¿Qué es lo que más valora cuando usted va a un restaurante?', A:'Una buena cocina.', B:'Un ambiente agradable.', C:'La posibilidad de comer el plato especial de la casa.'},
+  {n:33, q:'Una señora va de compras a un almacén que se encuentra bastante lejos de su casa. En la puerta del almacén se da cuenta de que ha olvidado su monedero y su tarjeta de crédito. ¿Qué piensa usted que hará?', A:'Volver a su casa a buscar lo que ha olvidado.', B:'Ver si conoce a alguien por la zona que pueda prestarle dinero o tratar de que en la tienda le dejen pagar después lo que desea adquirir.', C:'Dejar las compras para otra ocasión y aprovechar la oportunidad para dar un paseo por el barrio.'},
+  {n:34, q:'M... está soltero. Ha tenido un año de trabajo muy fuerte y debe tomar una decisión sobre sus vacaciones. ¿Qué elegirá?', A:'Pasar un mes en la costa para poder leer, caminar y descansar.', B:'Visitar una región del país que no conoce.', C:'Hacer una larga marcha a pie o en bicicleta porque piensa que el deporte es el mejor de los descansos.'},
+  {n:35, q:'¿Cuál es, a su modo de ver, la mejor manera de descansar durante el fin de semana para un hombre que trabaja todos los demás días?', A:'Reunirse con los amigos.', B:'Ir al cine.', C:'Leer.'},
+  {n:36, q:'Si usted dispusiera de un año de libertad y de los medios necesarios para hacer lo que quisiera, ¿cuál elegiría entre las actividades siguientes?', A:'Dar la vuelta al mundo en solitario a bordo de un velero.', B:'Participar en una carrera automovilística México-Argentina.', C:'Visitar el mayor número posible de países.'},
+  {n:37, q:'Un empleado administrativo, incorporado recientemente a la empresa, pide a X..., uno de sus compañeros, que le preste una pequeña suma de dinero hasta el mes siguiente. ¿Qué hará X...?', A:'Le prestará el dinero sin hacerle ninguna pregunta para no ponerlo en un aprieto.', B:'Le prestará el dinero porque a él le gustaría que le hicieran lo mismo si lo necesitara.', C:'No le dará el dinero, considerando que su compañero tiene, probablemente, buenos amigos dispuestos a ayudarlo.'},
+  {n:38, q:'B... se ha puesto, sin quererlo, fuera de la ley y debe escoger a un abogado para que lo defienda. ¿Sobre cuál de los siguientes criterios basará su elección?', A:'Su reputación de elocuencia.', B:'Sus buenas relaciones con la magistratura.', C:'Su perspicacia psicológica.'},
+  {n:39, q:'E... ha sido nombrado recientemente para un puesto que implica responsabilidades jerárquicas importantes. ¿Qué actitud tomará probablemente frente a sus subordinados?', A:'Modificar su forma de mandar según las personas y las circunstancias.', B:'Fijarse un sistema de mando bien elaborado e idéntico para todos.', C:'Basándose en la experiencia, dejarse guiar por su intuición.'},
+  {n:40, q:'R... tiene que hablar sobre informática a empleados que no tienen ningún conocimiento en este campo. ¿Cuál de las siguientes alternativas le planteará menos problemas?', A:'Utilizar un vocabulario comprensible para todo el mundo.', B:'Interesar al auditorio y mantener su atención.', C:'Hacer participar a todos los asistentes.'},
+  {n:41, q:'L... asiste a un partido de fútbol entre dos equipos muy conocidos. El partido es muy disputado y los dos equipos rinden al máximo. Entre los espectadores el entusiasmo es tremendo y...', A:'L... se contenta con aplaudir las jugadas más brillantes.', B:'L... es dominado por la agitación general, grita y gesticula como los otros.', C:'L... discute con sus vecinos sobre las jugadas de los futbolistas.'},
+  {n:42, q:'B... atraviesa la calle por un paso de peatones con el semáforo en rojo para los autos. Un coche llega a gran velocidad y se detiene repentinamente a pocos centímetros de B.... ¿Cuál será la reacción inmediata de éste?', A:'Hará una observación irónica al mismo tiempo que maldice interiormente al conductor.', B:'Dará airadamente su opinión al conductor sobre su manera de conducir.', C:'Lanzará al conductor algunos insultos que no puede reprimir.'},
+  {n:43, q:'A su modo de ver, ¿cuál es, entre los siguientes aspectos, el más desatendido actualmente en la educación de los hijos?', A:'La aceptación de responsabilidades.', B:'El gusto por el trabajo bien hecho.', C:'La capacidad para desenvolverse solo rápidamente.'},
+  {n:44, q:'T... acaba de reprobar un examen. Uno de sus amigos le dice que algunos fracasos son útiles en la vida. ¿Qué responderá él?', A:'Se ve que no estás en mi lugar; yo preferiría no pasar por esto.', B:'Puede que tengas razón.', C:'Admite, por lo menos, que cuando ocurre es difícil de aceptar.'},
+  {n:45, q:'L... se encuentra en una reunión amistosa. Sabe muy bien que la mayoría de las personas presentes tiene opiniones muy diferentes a las suyas. ¿Qué piensa usted que hará?', A:'Evitar toda discusión.', B:'Provocar la discusión.', C:'Dar su opinión si no puede evitarlo.'},
+  {n:46, q:'¿Qué cualidad le parece más útil en las relaciones sociales?', A:'La tolerancia.', B:'La sinceridad.', C:'La aceptación de compromisos.'},
+  {n:47, q:'M... acaba de modificar totalmente su departamento. Invita a sus amigos a la inauguración. Entre los cumplidos que le hagan, ¿cuál será el más agradable para él?', A:'Una felicitación por su buen gusto.', B:'Un elogio sobre la forma en que se ha sacado partido de la distribución de las habitaciones.', C:'Una alabanza a su originalidad, porque su decoración no se parece a ninguna otra ya vista.'},
+  {n:48, q:'S... llega en el momento de una discusión entre dos personas a las que conoce poco. El tema del que hablan, muy específico, le es totalmente desconocido y apenas le interesa. ¿Cuál será su reacción?', A:'Interviene para informarse, aun a riesgo de parecer ignorante.', B:'Trata de interesarse porque no quiere parecer incorrecto.', C:'No interviene, porque no puede aportar un punto de vista interesante sobre el asunto.'},
+  {n:49, q:'R... llega con retraso a una reunión de copropietarios. ¿Qué es lo que probablemente le molestará más?', A:'La idea de que hayan podido aprovecharse de su ausencia para tomar una decisión con la que él no esté de acuerdo.', B:'El temor de tener dificultad para integrarse en la discusión.', C:'La perspectiva de parecer descortés.'},
+  {n:50, q:'Se ha pedido a F... un informe lo más objetivo posible sobre su modo de ser. ¿Quién decidirá él que lo haga?', A:'Su mujer.', B:'Un grupo de amigos.', C:'Él mismo.'},
+  {n:51, q:'X... quiere construir una casa. ¿Cuál de las siguientes soluciones elegirá?', A:'Llamar a un arquitecto.', B:'Hacer los planos él mismo y trabajar directamente con un constructor.', C:'Hacer los planos con un amigo que acaba de hacer una casa.'},
+  {n:52, q:'T... es un hombre de negocios generalmente muy ocupado. Una cita cancelada a última hora le permite tener una mañana libre imprevista. ¿Cómo cree usted que la utilizará?', A:'Aprovechará para levantarse pronto y pasar la mañana practicando su deporte favorito.', B:'Hará el balance de la semana que acaba de pasar.', C:'Constituirá para él una ocasión muy poco habitual de poder perder el tiempo y la aprovechará.'},
+  {n:53, q:'D... va a ir a un país del que no conoce nada. Para preparar su viaje, ¿qué cree usted que hará?', A:'Leer libros y guías sobre ese país.', B:'Preguntar a amigos o parientes que conocen bien el país.', C:'Esperar a estar en el país para ver e informarse.'},
+  {n:54, q:'Se oye frecuentemente decir que si una persona se cae de repente en la acera a las seis de la tarde, ningún peatón se detiene para ofrecer su ayuda. ¿A qué cree usted que se debe esta conducta?', A:'A una total indiferencia por lo que puede ocurrir a los demás.', B:'Al miedo ante una situación inesperada.', C:'Al temor de ocuparse de lo que no le compete a uno.'},
+  {n:55, q:'Una señora va a consultar a un médico sobre una infección que le parece bastante banal. El médico la interroga ampliamente antes de examinarla. En el fondo, ¿qué pensará?', A:'En su lugar, yo comenzaría por hacer el examen y preguntaría después.', B:'Él debe intentar conocer en qué circunstancias adquirí esta enfermedad.', C:'Está bien que me haga preguntas, pero hay algunas en las que no veo relación ninguna con lo que yo tengo.'},
+  {n:56, q:'C... tiene que contratar empleados de oficina y dispone de poco tiempo. ¿Qué método empleará?', A:'Tener una entrevista con los candidatos.', B:'Examinar cada currículum vitae y sus referencias.', C:'Hacerles una prueba práctica en el trabajo.'},
+  {n:57, q:'El mejor representante del personal es aquel que...', A:'es un buen negociador.', B:'está convencido de la justicia de la reclamación.', C:'está bien integrado con el personal.'},
+  {n:58, q:'La señora D... trata inútilmente de hacer que coma su hijo de cinco años; éste se resiste violentamente. ¿Qué hará ella?', A:'Forzarlo a comer considerando que el niño lo hace por capricho.', B:'Hacerle un pequeño chantaje del tipo: Demuestra a mamá que eres bueno y que la quieres.', C:'Dejar al niño, pensando que comerá más en la siguiente comida.'},
+  {n:59, q:'Se habla frecuentemente del respeto a las reglas del juego. En general, se trata de...', A:'una disposición profunda, estable y claramente definida.', B:'la aceptación de desempeñar en cada instante el papel que conviene.', C:'una sumisión sincera a las costumbres de un grupo.'},
+  {n:60, q:'E... quien es aficionado a hacer reparaciones por sí mismo, decide tapizar un sillón valioso. Cuando llega a la mitad de su trabajo se da cuenta de que corre el peligro de fracasar en su intento. ¿Cuál será su decisión?', A:'Confiar el sillón a un especialista que realizará un trabajo impecable.', B:'Deshacer lo que ya ha hecho y comenzar otra vez desde cero.', C:'Dejar durante unos días su trabajo para reemprenderlo cuando esté en mejores condiciones.'},
+  {n:61, q:'S... va a ir de vacaciones con su mujer durante los días de Semana Santa. Ha comprado con anticipación los boletos. Salen de su casa a la hora justa, pero un embotellamiento los hace perder el autobús. ¿Cómo cree usted que reaccionará?', A:'Siempre pasa lo mismo. Si hubieras estado preparada antes no hubiera ocurrido esto.', B:'Se han fastidiado las vacaciones. No tengo ganas de viajar de pie en el siguiente autobús.', C:'Qué le vamos a hacer. Voy a devolver los boletos y nos quedaremos en casa.'},
+  {n:62, q:'A su juicio, la mayoría de los fracasos son debidos a...', A:'incapacidad.', B:'coincidencia de circunstancias negativas.', C:'fallas ocasionales.'},
+  {n:63, q:'F... encargó un refrigerador. En su ausencia, lo dejan con el conserje. El empaque está estropeado, por lo cual el refrigerador ha sufrido algunos daños. F... decide poner una queja ante los servicios de entrega. ¿De qué forma se comportará?', A:'Escribirá a los citados servicios conservando una copia de la carta.', B:'Irá personalmente a reclamar.', C:'Rogará a uno de sus amigos, empleado en esa casa, que intervenga.'},
+  {n:64, q:'Con ocasión de un viaje organizado, B... se encuentra con personas que no conoce. Al cabo de unos días se da cuenta de que la mayoría de las personas le tienen poca simpatía. ¿Cómo cree usted que reaccionará?', A:'Le tiene sin cuidado, porque para él lo importante es que el viaje esté bien organizado y que el guía sea eficaz.', B:'Está un poco molesto y trata de hacer un esfuerzo para resultar más simpático.', C:'Esto le amarga, en parte, sus vacaciones y se propone que, para la próxima ocasión, se irá con sus amigos.'},
+  {n:65, q:'R... hace un viaje con algunos amigos. Una tarde descubre un monumento que le interesa mucho visitar, pero si lo hace, le será imposible llegar a la cita. ¿Qué hará?', A:'Hace la visita porque piensa que no tendrá ya ocasión de volver a este lugar y que de todas maneras habrá otros que llegarán tarde también.', B:'Renuncia a esta visita porque le parece más importante no hacer esperar a los demás.', C:'Trata de encontrar a sus amigos para persuadirlos de que hagan la visita con él, aun a riesgo de desorganizar la última parte del viaje.'},
+  {n:66, q:'¿Cuál de estas actividades profesionales le parece a usted la más envidiable?', A:'Gerente de una pequeña empresa.', B:'Director adjunto de una empresa internacional.', C:'Asesor científico de alto nivel.'},
+  {n:67, q:'Debido a un accidente que ha causado la muerte de los padres de un niño pequeño, J... tiene que encargarse del niño de manera definitiva. ¿Cuál será la actitud más probable que tendrá a este respecto?', A:'Teme verse obligado a revisar su sistema de educación.', B:'Confía en el buen carácter del niño.', C:'Busca otras alternativas para el niño.'},
+  {n:68, q:'Un amigo propone a T... llevarlo en su velero para hacer un pequeño viaje. T... nunca ha practicado la navegación a vela. ¿Qué cree usted que decidirá?', A:'Aceptar, pensando que podrá desenvolverse bien.', B:'Arreglárselas para tomar antes algunas clases de navegación a vela.', C:'No aceptar, ante el temor de ser una molestia para su amigo.'},
+  {n:69, q:'M... va hacia el trabajo por su camino habitual. Una camioneta de reparto lo bloquea durante un buen rato en una calle estrecha. A juicio de usted, ¿qué será lo más desagradable para M...?', A:'La perspectiva de llegar con retraso a su despacho.', B:'El hecho de tener que esperar sin poder moverse ni hacer nada.', C:'Los toques de claxon inútiles de otros automovilistas.'},
+  {n:70, q:'G... trabaja en una empresa para la que debe efectuar frecuentes desplazamientos. Acostumbra hacer dos horas de atletismo todas las semanas en una sesión de entrenamiento colectivo. ¿Cuál es su actitud en el curso de esta sesión?', A:'Insiste en ciertas especialidades que le permitan mantenerse en buena forma.', B:'Realiza todas las actividades propuestas, pero sin esforzarse demasiado, porque tiene un trabajo cansado.', C:'Se entrega a fondo y frecuentemente termina agotado, porque no concibe el deporte de otra manera.'},
+  {n:71, q:'Según su criterio, ¿cuál es la ventaja de tener un perro en un departamento de la ciudad?', A:'Permite sentirse menos solo.', B:'Favorece la ocasión de caminar un poco cada día paseando al perro.', C:'Vigila el departamento.'},
+  {n:72, q:'En el transcurso de una reunión en que S... se ha encontrado con amigos, les propone terminar la velada en su casa. Al enterarse, se une a ellos una persona que se mantenía alejada del grupo y a la que él estima poco. ¿Cuál será la reacción de S...?', A:'Piensa que, después de todo, tendrá ocasión de conocer mejor a esta persona.', B:'Estimando que se ha invitado a sí misma, no se ocupará de ella en toda la noche.', C:'Lamenta haber hablado demasiado alto.'},
+  {n:73, q:'El director de un centro de rehabilitación de delincuentes debe contratar a un nuevo educador. ¿A cuál de estas cualidades dará más importancia?', A:'Ser irreprochable y poder servir de modelo.', B:'Tener buenos conocimientos pedagógicos.', C:'Saber escuchar.'},
+  {n:74, q:'Según su opinión, ¿qué es más importante en una persona que da una fiesta?', A:'Permitir a todos expresarse.', B:'Invitar a personas que puedan coincidir con sus intereses.', C:'Cuidar de que a nadie le falte nada.'},
+  {n:75, q:'R... debe exponer un proyecto a un compañero que no conoce. Para que R... pueda hacerse comprender por su interlocutor, es preferible que...', A:'sepa cuál es su formación académica.', B:'conozca sus antecedentes.', C:'lea el informe sobre un trabajo hecho por su compañero.'},
+  {n:76, q:'Si tuviera que hacer algún reproche a la profesión médica, ¿cuál escogería?', A:'No consagra suficiente tiempo a cada enfermo.', B:'Da demasiada importancia al dinero.', C:'Utiliza a menudo un vocabulario incomprensible.'},
+  {n:77, q:'N... tiene que escoger un plan de formación para las personas de su Departamento. Desearía una formación interesante para todos, pero, a la vez, eficaz y rentable. ¿Qué elegirá?', A:'Un plan organizado en función de las necesidades del Departamento y en el que todas las fases estén definidas de antemano.', B:'Un plan que tenga en cuenta a cada participante.', C:'Un plan que incluya de manera regular exámenes de control.'},
+  {n:78, q:'M... está enfermo del hígado. Sin embargo, un amigo le llama para invitarlo a comer, precisando que le ha preparado su platillo favorito. Suponiendo que este plato está contraindicado para él en este momento, ¿cuál será la reacción de M...?', A:'Aceptar la invitación pensando que por una vez no hará caso de su régimen.', B:'Proponer que se aplace esta invitación para más adelante, cuando acabe su régimen.'},
+  {n:79, q:'M... no está satisfecho con la Seguridad Social. Lo que más le desagrada es...', A:'lo absurdo de algunas disposiciones de esta entidad.', B:'la gran dificultad de atenerse a la complejidad de su reglamentación.', C:'la falta de atención a aspectos que él cree fundamentales.'},
+  {n:80, q:'N... ha decidido consagrar una parte de su tiempo libre a ayudar a las personas de la tercera edad. Existen varias posibilidades. ¿Cuál elegirá en último lugar, cuando no hay otras alternativas?', A:'Acompañar a las personas ancianas durante los paseos.', B:'Visitar a una persona mayor cada semana.', C:'Hacer colectas para la construcción de un hogar de ancianos.'},
+  {n:81, q:'Entre los siguientes argumentos publicitarios, ¿cuál tiene más probabilidades de influir en el público?', A:'El muestrario.', B:'El eslogan.', C:'El testimonio de una estrella.'},
+  {n:82, q:'En el transcurso de un viaje en tren, D... se encuentra en un compartimento abarrotado. Su vecino fuma y el humo le molesta mucho. Ya le ha rogado que dejara de fumar, sin resultado. ¿Qué hará?', A:'Pedir el parecer de otros viajeros del compartimento.', B:'Abrir la ventana.', C:'Hablar de nuevo con su vecino con el objeto de convencerlo de que deje de fumar.'},
+  {n:83, q:'El director del departamento de una empresa de productos alimenticios desea lanzar al mercado un nuevo postre. Dispone de un presupuesto que puede repartir en tres conceptos. ¿En cuál de ellos empleará más dinero?', A:'En estudios de mercado para conocer los gustos de los futuros compradores.', B:'En publicidad para dar a conocer su producto.', C:'En la investigación de envases y presentación del producto.'},
+  {n:84, q:'B... toma parte en una discusión muy animada, en el transcurso de la cual sus opiniones son muy atacadas. Entre las actitudes siguientes, ¿cuál será la que adopte?', A:'Tratar por todos los medios de convencer a los demás.', B:'Divertirse simplemente en el juego de la discusión.', C:'Dejarse convencer cuando vea que sus posiciones son poco defendibles.'},
+  {n:85, q:'Cuando usted va a un restaurante, ¿qué tipo de plato prefiere?', A:'Uno que ya conoce y que le gusta de modo especial.', B:'La especialidad de la casa.', C:'Un plato exótico que usted desconoce en absoluto.'},
+  {n:86, q:'Después de un naufragio, C... llega solo a una isla desierta. El clima es muy agradable y la vegetación le permitirá encontrar el alimento necesario. ¿Qué es, a su modo de ver, lo que probablemente le planteará menos problemas?', A:'El carácter nuevo e insólito de la situación.', B:'La soledad.', C:'La falta de algunos atractivos de la vida anterior.'},
+  {n:87, q:'J... dirige una importante firma de automóviles. Puede escoger entre varias políticas comerciales. ¿Cuál elegirá?', A:'Orientar sus esfuerzos para sacar de vez en cuando modelos especiales.', B:'Buscar los efectos de moda y atender a una clientela particular.', C:'Ofrecer de manera regular modelos clásicos.'}
+];
+
+// ════ CLAVE DE CORRECCIÓN ════
+const CLAVES = {
+  1:{DGV:"B", I:"B"},
+  2:{DGV:"B", I:"B"},
+  3:{DGV:"B", II:"B"},
+  4:{DGV:"B", II:"B"},
+  5:{DGV:"A", III:"A"},
+  6:{DGV:"C", III:"C"},
+  7:{DGV:"A", III:"A"},
+  8:{DGV:"C", IV_r:"B"},
+  9:{DGV:"A", V:"A"},
+  10:{DGV:"B", V:"B"},
+  11:{DGV:"B", V:"B"},
+  12:{DGV:"C", VI:"C"},
+  13:{DGV:"B", VI:"B"},
+  14:{DGV:"B", VII:"B"},
+  15:{DGV:"A", VIII:"A"},
+  16:{DGV:"C", IX:"C"},
+  17:{DGV:"B", IX:"B"},
+  18:{DGV:"C", IX:"C"},
+  19:{I:"C"},
+  20:{I:"B"},
+  21:{II:"C"},
+  22:{II:"C"},
+  23:{III:"B"},
+  24:{III:"C"},
+  25:{III:"C"},
+  26:{IV_r:"B"},
+  27:{DGV:"A", V:"A"},
+  28:{V:"C"},
+  29:{V:"C"},
+  30:{VI:"B"},
+  31:{VI:"C"},
+  32:{VII:"C"},
+  33:{VIII:"B"},
+  34:{VIII:"C"},
+  35:{DGV:"A", IX:"A"},
+  36:{IX:"C"},
+  37:{I:"A"},
+  38:{I:"C"},
+  39:{II:"A"},
+  40:{II:"A"},
+  41:{III:"A"},
+  42:{III:"A"},
+  43:{III:"B"},
+  44:{IV_r:"A"},
+  45:{V:"B"},
+  46:{V:"B"},
+  47:{VI:"C"},
+  48:{VI:"A"},
+  49:{VI:"A"},
+  50:{VII:"C"},
+  51:{VIII:"B"},
+  52:{VIII:"A"},
+  53:{IX:"B"},
+  54:{IX:"A"},
+  55:{I:"B"},
+  56:{I:"A"},
+  57:{II:"A"},
+  58:{II:"C"},
+  59:{II:"B"},
+  60:{III:"B"},
+  61:{IV_r:"B"},
+  62:{IV_r:"A"},
+  63:{V:"B"},
+  64:{V:"A"},
+  65:{VI:"C"},
+  66:{VI:"A"},
+  67:{VII:"B"},
+  68:{VII:"A"},
+  69:{VIII:"B"},
+  70:{VIII:"C"},
+  71:{VIII:"B"},
+  72:{IX:"A"},
+  73:{I:"C"},
+  74:{I:"A"},
+  75:{I:"C"},
+  76:{II:"C"},
+  77:{II:"B"},
+  78:{III:"B"},
+  79:{IV_r:"B"},
+  80:{IV_r:"C"},
+  81:{IV_r:"C"},
+  82:{V:"C"},
+  83:{VI:"B"},
+  84:{VI:"A"},
+  85:{VII:"C"},
+  86:{VII:"A"},
+  87:{VII:"A"},
+};
+
+// ════ NORMAS DECATIPOS (muestra mexicana N=300) ════
+const NORMAS = {
+  DGV:[5,7,8,9,10,11,13,14,15,21],
+  R:  [12,14,16,18,20,22,24,26,28,41],
+  A:  [6,8,10,12,13,15,17,19,21,38],
+  I:  [1,2,3,4,4,5,6,7,8,11],
+  II: [1,2,3,4,4,5,6,7,8,11],
+  III:[2,3,3,4,5,6,7,7,8,11],
+  IV: [2,2,3,4,4,5,6,6,7,8],
+  V:  [2,3,3,4,5,6,7,7,8,11],
+  VI: [2,3,3,4,5,6,7,7,8,11],
+  VII:[1,2,2,3,4,5,6,6,7,8],
+  VIII:[0,1,1,2,2,3,3,4,4,8],
+  IX: [1,2,2,3,4,5,5,6,7,8]
+};
+
+const INTERP = {
+  DGV:{nombre:"Disposición General para la Venta",alto:"Vocación comercial clara: combina habilidad relacional con ímpetu persuasivo y autocontrol. Perfil orientado al cierre y a la generación de relaciones duraderas.",medio:"Capacidades comerciales dentro del rango esperado. Con motivación adecuada puede desempeñarse bien en roles de venta.",bajo:"Baja orientación a la venta en este momento. Conviene explorar otras áreas o trabajar el desarrollo de competencias comerciales."},
+  I:{nombre:"Comprensión",alto:"Alta empatía y escucha activa. Se sitúa fácilmente en el lugar del cliente, generando confianza.",medio:"Capacidad empática dentro de lo esperado. Comprende al cliente en situaciones habituales.",bajo:"Menor tendencia a ponerse en el lugar del otro. Puede mostrar dificultades en situaciones que requieren alta sintonía emocional."},
+  II:{nombre:"Adaptabilidad",alto:"Alta flexibilidad conductual. Ajusta su estilo según el tipo de cliente y contexto.",medio:"Flexibilidad adecuada. Se adapta a la mayoría de situaciones sin dificultad.",bajo:"Menor facilidad para cambiar de enfoque ante situaciones inesperadas o clientes con estilos distintos."},
+  III:{nombre:"Control de sí mismo",alto:"Disciplinado, perseverante y organizado. Maneja bien sus emociones incluso bajo presión.",medio:"Autocontrol adecuado. Maneja razonablemente bien las situaciones de tensión cotidiana.",bajo:"Puede experimentar dificultades en la gestión emocional ante presión. Menor perseverancia ante obstáculos."},
+  IV:{nombre:"Tolerancia a la Frustración",alto:"Alta capacidad para sobreponerse a rechazos y fracasos sin personalizarlos. Fundamental en ventas.",medio:"Tolerancia a la frustración dentro del rango esperado. Se recupera ante fracasos sin mayor dificultad.",bajo:"Mayor sensibilidad al fracaso y rechazo. Puede desmotivarse ante resultados negativos reiterados."},
+  V:{nombre:"Combatividad",alto:"Competitivo y orientado al logro. Disfruta el desafío comercial y no evita el conflicto cuando debe defender una posición.",medio:"Nivel adecuado. Puede sostener posiciones y negociar sin dificultad en la mayoría de los casos.",bajo:"Menor orientación al conflicto. Puede ceder rápidamente en negociaciones o evitar confrontaciones necesarias."},
+  VI:{nombre:"Dominio",alto:"Alta capacidad de influencia y ascendencia natural. Persuade con convicción y lidera interacciones.",medio:"Capacidad de influencia dentro de lo esperado. Puede generar cierta ascendencia sobre el cliente.",bajo:"Menor tendencia al dominio interpersonal. Puede mostrarse deferente en situaciones que requieren conducción firme."},
+  VII:{nombre:"Seguridad",alto:"Alta confianza en sí mismo. Enfrenta situaciones novedosas o de riesgo sin inhibición.",medio:"Nivel adecuado. Se desenvuelve bien en la mayoría de situaciones sin inseguridad marcada.",bajo:"Menor confianza personal. Puede dudar en situaciones de riesgo, afectando la proactividad."},
+  VIII:{nombre:"Actividad",alto:"Persona dinámica y enérgica. Le resulta difícil la pasividad; busca acción constante.",medio:"Nivel adecuado. Mantiene un ritmo de trabajo estable sin tendencia a la pasividad.",bajo:"Menor orientación a la actividad dinámica. Puede limitar el desempeño en roles de alta actividad comercial."},
+  IX:{nombre:"Sociabilidad",alto:"Extravertida, con facilidad para crear vínculos y disfrutar del contacto social. Base esencial para roles comerciales.",medio:"Sociabilidad adecuada. Establece contactos sin dificultad y mantiene relaciones funcionales.",bajo:"Menor orientación al contacto social. Puede preferir trabajar de forma más independiente."}
+};
+
+// ════ ESTADO ════
+const PPP = 9; // items por pagina
+let resp = {}, pagina = 0, cand = {};
+
+function pdToDec(esc, pd) {
+  const n = NORMAS[esc]; if(!n) return 5;
+  for(let i=0;i<n.length;i++) if(pd<=n[i]) return i+1;
+  return 10;
+}
+function nivel(pt){ return pt<=3?"Bajo":pt<=7?"Promedio":"Alto"; }
+function lvlCls(pt){ return pt<=3?"low":pt<=7?"mid":"high"; }
+function bCls(pt){ return pt<=3?"b-low":pt<=7?"b-mid":"b-high"; }
+function fCls(pt){ return pt<=3?"f-low":pt<=7?"f-mid":"f-high"; }
+function lvlBadge(pt){ return pt<=3?"lvl-bajo":pt<=7?"lvl-promedio":"lvl-alto"; }
+
+// ════ FECHA ════
+function setFechas(){
+  const d = new Date();
+  const opts = {day:"numeric",month:"long",year:"numeric"};
+  const txt = d.toLocaleDateString("es-CL",opts);
+  document.querySelectorAll("#fecha-header,#fecha-res").forEach(el=>{ if(el) el.textContent=txt; });
+}
+
+window.addEventListener("load",()=>{ setFechas(); });
+
+// ════ INICIAR ════
+function iniciar(){
+  const nombre = document.getElementById("inp-nombre").value.trim();
+  if(!nombre){ alert("Por favor ingresa el nombre del evaluado."); return; }
+  cand = {
+    nombre,
+    rut: document.getElementById("inp-rut").value.trim(),
+  };
+  document.getElementById("view-portada").style.display = "none";
+  var test = document.getElementById("view-test");
+  test.classList.add("activo");
+  pagina=0;
+  renderTest();
+  test.scrollTop = 0;
+}
+
+// ════ RENDER TEST ════
+function totalPags(){ return Math.ceil(ITEMS.length/PPP); }
+
+function renderTest(){
+  const s=pagina*PPP, e=Math.min(s+PPP,ITEMS.length);
+  const done=Object.keys(resp).length;
+  document.getElementById("pbar").style.width=Math.round(done/87*100)+"%";
+  document.getElementById("pcnt").textContent=done+" / 87";
+
+  let html=`<div class="page-tag">Página ${pagina+1} de ${totalPags()}</div>`;
+  for(let i=s;i<e;i++){
+    const it=ITEMS[i], r=resp[it.n];
+    const letras=["A","B","C"].filter(l=>it[l]);
+    html+=`<div class="item-block ${r?"is-done":""}" id="ib-${it.n}">
+      <div class="item-n">Ítem ${it.n}</div>
+      <div class="item-q">${it.q}</div>
+      <div class="opts">
+        ${letras.map(l=>`
+          <div class="opt ${r===l?"chosen":""}" onclick="elegir(${it.n},'${l}',this)">
+            <span class="opt-letter">${l}.</span>
+            <span>${it[l]}</span>
+          </div>`).join("")}
+      </div>
+    </div>`;
+  }
+  document.getElementById("items-wrap").innerHTML=html;
+
+  document.getElementById("btn-prv").style.visibility=pagina===0?"hidden":"visible";
+  const ultima=pagina===totalPags()-1;
+  document.getElementById("btn-nxt").textContent=ultima?"Finalizar prueba →":"Siguiente →";
+
+  // pips
+  let pipsHtml="";
+  for(let i=0;i<totalPags();i++){
+    const ps=i*PPP, pe=Math.min(ps+PPP,ITEMS.length);
+    const allDone=ITEMS.slice(ps,pe).every(it=>resp[it.n]);
+    pipsHtml+=`<div class="pip ${i===pagina?"cur":allDone?"ok":""}"></div>`;
+  }
+  document.getElementById("pips").innerHTML=pipsHtml;
+  var vtest = document.getElementById("view-test");
+  if(vtest) vtest.scrollTop=0;
+  window.scrollTo(0,0);
+}
+
+function elegir(n,l,el){
+  resp[n]=l;
+  const block=document.getElementById("ib-"+n);
+  block.classList.add("is-done");
+  block.querySelectorAll(".opt").forEach(o=>o.classList.remove("chosen"));
+  el.classList.add("chosen");
+  const done=Object.keys(resp).length;
+  document.getElementById("pbar").style.width=Math.round(done/87*100)+"%";
+  document.getElementById("pcnt").textContent=done+" / 87";
+  // actualizar pip de página actual
+  const s=pagina*PPP,e=Math.min(s+PPP,ITEMS.length);
+  const allDone=ITEMS.slice(s,e).every(it=>resp[it.n]);
+  document.querySelectorAll(".pip")[pagina].className="pip "+(allDone?"ok":"cur");
+}
+
+function navPage(dir){
+  const ultima=pagina===totalPags()-1;
+  if(dir===1&&ultima){
+    const falt=ITEMS.filter(it=>!resp[it.n]).length;
+    if(falt>0&&!confirm(`Quedan ${falt} ítems sin responder. ¿Finalizar y enviar de todas formas?`)) return;
+    calcular(); return;
+  }
+  pagina=Math.max(0,Math.min(totalPags()-1,pagina+dir));
+  renderTest();
+}
+
+// ════ CALCULAR ════
+function calcular(){
+  const PD={DGV:0,I:0,II:0,III:0,IV_r:0,V:0,VI:0,VII:0,VIII:0,IX:0};
+  ITEMS.forEach(it=>{
+    const r=resp[it.n]; if(!r) return;
+    const cl=CLAVES[it.n]||{};
+    Object.entries(cl).forEach(([esc,l])=>{ if(r===l){ if(esc==="IV_r") PD.IV_r++; else PD[esc]=(PD[esc]||0)+1; } });
+  });
+  PD.IV=Math.max(0,8-PD.IV_r);
+  PD.R=PD.I+PD.II+PD.III+PD.IV;
+  PD.A=PD.V+PD.VI+PD.VII+PD.VIII;
+  const PT={};
+  ["DGV","R","A","I","II","III","IV","V","VI","VII","VIII","IX"].forEach(e=>{ PT[e]=pdToDec(e,PD[e]||0); });
+  mostrar(PD,PT);
+}
+
+// ════ MOSTRAR RESULTADOS ════
+window.scrollTo(0,0);
+// ── VALIDACION TOKEN ──
+const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
+const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
+(async function validarAcceso() {
+  if (!TOKEN_URL) return;
+  try {
+    const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL);
+    const d = await r.json();
+    if (!d.valido) {
+      document.querySelectorAll('#view-portada,#view-test,#view-res').forEach(el => el.style.display='none');
+      const bloq = document.getElementById('screen-bloqueado');
+      bloq.style.display = 'flex';
+    }
+  } catch(e) {}
+})();
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
+
+function mostrar(PD,PT){
+  const dgvN=nivel(PT.DGV);
+  let perfilRA;
+  if(PT.R>PT.A+2) perfilRA="Receptivo";
+  else if(PT.A>PT.R+2) perfilRA="Agresivo";
+  else perfilRA="Equilibrado";
+  const fort=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]>=7).map(e=>INTERP[e].nombre);
+  const des=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]<=3).map(e=>INTERP[e].nombre);
+  const interp=generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des);
+  enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp);
+  var vtest = document.getElementById("view-test");
+  var vres = document.getElementById("view-res");
+  vtest.classList.remove("activo");
+  vres.classList.add("activo");
+  vres.scrollTop=0;
+}
+
+function generarTextoInterpretacion(PD,PT,dgvN,perfilRA,fort,des){
+  let txt='';
+  txt+=`DGV PT ${PT.DGV} (${dgvN}): `;
+  txt+=dgvN==="Alto"?INTERP.DGV.alto:dgvN==="Bajo"?INTERP.DGV.bajo:INTERP.DGV.medio;
+  txt+=' | ';
+  txt+=`Perfil ${perfilRA} — Receptividad PT ${PT.R}, Agresividad PT ${PT.A}. `;
+  if(perfilRA==="Receptivo") txt+="Mayor orientación a mantención de cartera y fidelización.";
+  else if(perfilRA==="Agresivo") txt+="Mayor orientación a apertura de mercados y nuevos negocios.";
+  else txt+="Adaptable a roles de mantención y apertura comercial.";
+  txt+=' | ';
+  if(fort.length) txt+=`Fortalezas: ${fort.join(", ")}. | `;
+  if(des.length) txt+=`Áreas de desarrollo: ${des.join(", ")}. | `;
+  ["I","II","III","IV","V","VI","VII","VIII","IX"].forEach(e=>{
+    const n=nivel(PT[e]);
+    txt+=`${INTERP[e].nombre} PT ${PT[e]} (${n}): `;
+    txt+=n==="Alto"?INTERP[e].alto:n==="Bajo"?INTERP[e].bajo:INTERP[e].medio;
+    txt+=' | ';
+  });
+  return txt;
+}
+
+function enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp){
+  const payload={
+    test:'IPV',
+    fecha: new Date().toLocaleDateString('es-CL'),
+    nombre:  cand.nombre,
+    rut:     cand.rut||'',
+    edad:    cand.edad||'',
+    sexo:    cand.sexo==='M'?'Masculino':cand.sexo==='F'?'Femenino':'',
+    cargo:   cand.cargo||'',
+    pt_dgv:  PT.DGV,
+    nivel_dgv: dgvN,
+    perfil_ra: perfilRA,
+    fortalezas:       fort.length?fort.join(', '):'Sin fortalezas destacadas',
+    areas_desarrollo: des.length?des.join(', '):'Sin areas criticas',
+    interpretacion:   interp,
+    escalas_pt: [PT.I,PT.II,PT.III,PT.IV,PT.V,PT.VI,PT.VII,PT.VIII,PT.IX].join(','),
+    pt_r: PT.R,
+    pt_a: PT.A,
+    cambios_foco: cambiosFoco
+  };
+  payload.token = TOKEN_URL;
+  fetch(APPS_SCRIPT_URL,{
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload)
+  }).catch(err=>console.warn('Error enviando a Sheets:',err));
+}
+
+function scCard(e,PD,PT){
+  const ip=INTERP[e], pt=PT[e], pd=PD[e]||0, niv=nivel(pt);
+  const pct=Math.round(pt/10*100);
+  const txt=niv==="Alto"?ip.alto:niv==="Bajo"?ip.bajo:ip.medio;
+  return `<div class="sc-card ${lvlCls(pt)}">
+    <div class="sc-head">
+      <div><div class="sc-label">Escala ${e}</div><div class="sc-name">${ip.nombre}</div></div>
+      <div class="sc-badge ${bCls(pt)}">${niv}</div>
+    </div>
+    <div class="sc-track"><div class="sc-fill ${fCls(pt)}" style="width:${pct}%"></div></div>
+    <div class="sc-scores">PD: <strong>${pd}</strong>&nbsp;&nbsp;PT: <strong>${pt}</strong></div>
+    <div class="sc-text">${txt}</div>
+  </div>`;
+}
+
+function narrativa(PD,PT){
+  const items=[];
+  const dgvN=nivel(PT.DGV);
+  items.push({i:"🎯",t:`<strong>Disposición General para la Venta (PT ${PT.DGV} — ${dgvN}):</strong> ${dgvN==="Alto"?INTERP.DGV.alto:dgvN==="Bajo"?INTERP.DGV.bajo:INTERP.DGV.medio}`});
+  const fort=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]>=7);
+  if(fort.length) items.push({i:"✅",t:`<strong>Fortalezas:</strong> ${fort.map(e=>INTERP[e].nombre).join(", ")}. Recursos sólidos para el desempeño en ventas.`});
+  const des=["I","II","III","IV","V","VI","VII","VIII","IX"].filter(e=>PT[e]<=3);
+  if(des.length) items.push({i:"🔧",t:`<strong>Áreas de desarrollo:</strong> ${des.map(e=>INTERP[e].nombre).join(", ")}. Se recomienda profundizar en entrevista.`});
+  if(PT.R>PT.A+2) items.push({i:"📊",t:`<strong>Perfil Receptivo:</strong> Mayor orientación a la mantención de cartera (R PT ${PT.R}) que a la apertura agresiva (A PT ${PT.A}). Más adecuado para roles de fidelización.`});
+  else if(PT.A>PT.R+2) items.push({i:"📊",t:`<strong>Perfil Agresivo:</strong> Mayor orientación a la apertura de mercados (A PT ${PT.A}) que a la venta receptiva (R PT ${PT.R}). Más adecuado para prospección y nuevos negocios.`});
+  else items.push({i:"📊",t:`<strong>Perfil Equilibrado:</strong> Niveles similares de Receptividad (PT ${PT.R}) y Agresividad (PT ${PT.A}). Adaptable a diferentes roles comerciales.`});
+  return items.map(it=>`<div class="narr-item"><div class="narr-icon">${it.i}</div><div class="narr-text">${it.t}</div></div>`).join("");
+}
+
+function radar(PT){
+  const cv=document.getElementById("rc"); if(!cv) return;
+  const ctx=cv.getContext("2d"), W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=W*0.37;
+  const ESC=["I","II","III","IV","V","VI","VII","VIII","IX"];
+  const LBL=["I","II","III","IV","V","VI","VII","VIII","IX"];
+  const n=ESC.length;
+  const vals=ESC.map(e=>(PT[e]||1)/10);
+  ctx.clearRect(0,0,W,H);
+  function ang(i){ return Math.PI*2*i/n-Math.PI/2; }
+  function pt(i,r){ return {x:cx+r*Math.cos(ang(i)),y:cy+r*Math.sin(ang(i))}; }
+  // grillas
+  [.2,.4,.6,.8,1].forEach(f=>{
+    ctx.beginPath();
+    for(let i=0;i<n;i++){ const p=pt(i,R*f); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }
+    ctx.closePath();
+    ctx.strokeStyle=f===1?"#ddd5c4":"#ece8e0"; ctx.lineWidth=f===1?1.2:.7; ctx.stroke();
+  });
+  for(let i=0;i<n;i++){ const p=pt(i,R); ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p.x,p.y); ctx.strokeStyle="#ece8e0"; ctx.lineWidth=.7; ctx.stroke(); }
+  // area
+  ctx.beginPath();
+  vals.forEach((v,i)=>{ const p=pt(i,R*v); i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); });
+  ctx.closePath();
+  ctx.fillStyle="rgba(196,67,42,0.12)"; ctx.fill();
+  ctx.strokeStyle="#c4432a"; ctx.lineWidth=2; ctx.stroke();
+  vals.forEach((v,i)=>{ const p=pt(i,R*v); ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fillStyle="#c4432a"; ctx.fill(); });
+  // labels
+  ctx.fillStyle="#555"; ctx.font="11px DM Sans,sans-serif"; ctx.textAlign="center";
+  LBL.forEach((l,i)=>{ const p=pt(i,R*1.18); ctx.fillText(l,p.x,p.y+4); });
+}
+</script>
+</body>
+</html>
