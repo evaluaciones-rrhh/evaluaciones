@@ -342,7 +342,30 @@ function volverLista(){
   document.getElementById("sec-lista").style.display="block";
 }
 
-var DATOS_SERVIDOR=__DATOS_WONDERLIC__;
+(async function() {
+  var rawData = `__DATOS_WONDERLIC__`;
+  if (rawData && !rawData.includes('DATOS_WONDERLIC')) {
+    candidatos = JSON.parse(rawData);
+    renderLista();
+    document.getElementById("loading").style.display="none";
+    document.getElementById("sec-lista").style.display="block";
+  } else {
+    try {
+      var resp = await fetch("https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec?action=getDatosWONDERLIC", {redirect:"follow"});
+      var data = await resp.json();
+      if(data && data.length) {
+        candidatos = data;
+        renderLista();
+        document.getElementById("loading").style.display="none";
+        document.getElementById("sec-lista").style.display="block";
+      } else {
+        document.getElementById("loading").innerHTML = "No hay evaluaciones registradas.";
+      }
+    } catch(e) {
+      document.getElementById("loading").innerHTML = "Error al cargar: " + e.message;
+    }
+  }
+})();
 if(DATOS_SERVIDOR){
   candidatos=DATOS_SERVIDOR;
   renderLista();
