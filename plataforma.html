@@ -647,7 +647,7 @@ function renderTablaComun(datos, tbodyId, cols) {
     var testCls = "badge-"+(d.test||"").toLowerCase().replace("pf","pf").replace("wonderlic","wonderlic");
     var niv = (d.nivel||"").toLowerCase();
     var nivCls = niv.includes("alto")||niv.includes("sup")?"badge-alto":niv.includes("bajo")||niv.includes("inf")?"badge-bajo":"badge-promedio";
-    var dashUrl = DASH_LINKS[d.test];
+    var dashUrl = DASH_HTML[d.test];
     var btnVer = dashUrl
       ? "<button class='btn btn-ghost btn-sm' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver informe</button>"
       : "<span style='color:var(--muted);font-size:11px;'>—</span>";
