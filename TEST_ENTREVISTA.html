@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrevista por Competencias — Grupo Cygnus</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -369,11 +370,31 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <div class="pregunta-texto" id="gr-pregunta"></div>
     </div>
 
-    <div class="video-wrap">
+    <div class="video-wrap" style="position:relative;">
       <video id="video-live" autoplay muted playsinline></video>
+      <canvas id="canvas-facial" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;"></canvas>
       <div class="rec-dot" id="rec-dot"></div>
       <div class="rec-label" id="rec-label">● REC</div>
       <div class="timer-video" id="timer-video">3:00</div>
+    </div>
+
+    <!-- Panel emocional en tiempo real -->
+    <div id="panel-emocional" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;">Análisis en tiempo real</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;">
+        <div style="text-align:center;">
+          <div id="emo-expresion" style="font-size:24px;margin-bottom:4px;">😐</div>
+          <div style="font-size:10px;color:var(--muted);">Expresión</div>
+        </div>
+        <div style="text-align:center;">
+          <div id="emo-contacto" style="font-size:24px;margin-bottom:4px;">👁️</div>
+          <div style="font-size:10px;color:var(--muted);">Contacto visual</div>
+        </div>
+        <div style="text-align:center;">
+          <div id="emo-confianza" style="font-size:24px;margin-bottom:4px;">📊</div>
+          <div style="font-size:10px;color:var(--muted);">Confianza</div>
+        </div>
+      </div>
     </div>
 
     <!-- Transcripción en tiempo real -->
@@ -474,6 +495,10 @@ let chunks = [];
 let blobActual = null;
 let videosGuardados = [];
 let transcripciones = [];   // guarda texto transcrito por pregunta
+let datosEmocionales = [];  // análisis emocional por pregunta
+let intervaloFacial = null; // intervalo de análisis facial
+let faceApiCargado = false; // si face-api.js está listo
+let contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
 let recognition = null;     // Web Speech API
 let textoActual = '';       // texto acumulado de la pregunta actual
 let timerGrabacion = null;
@@ -504,6 +529,25 @@ window.addEventListener('load', async function() {
 
   // Cargar competencias según cargo
   await cargarCompetencias();
+
+  // Cargar modelos de face-api.js en segundo plano
+  cargarModelosFacial();
+}
+
+async function cargarModelosFacial() {
+  try {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
+    ]);
+    faceApiCargado = true;
+    console.log('Face API cargada OK');
+  } catch(e) {
+    console.log('Face API no disponible:', e.message);
+    faceApiCargado = false;
+  }
 });
 
 async function cargarCompetencias() {
@@ -622,6 +666,13 @@ function iniciarGrabacion() {
   iniciarTranscripcion();
 
   document.getElementById('transcripcion-wrap').style.display = 'block';
+
+  // Iniciar análisis facial si está disponible
+  contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
+  if (faceApiCargado) {
+    document.getElementById('panel-emocional').style.display = 'block';
+    iniciarAnalisisFacial();
+  }
   document.getElementById('controles-grabacion').style.display = 'none';
   document.getElementById('controles-grabando').style.display = 'flex';
   document.getElementById('rec-dot').classList.add('show');
@@ -694,6 +745,8 @@ function detenerTranscripcion() {
     recognition = null;
   }
   document.getElementById('transcripcion-wrap').style.display = 'none';
+  detenerAnalisisFacial();
+  document.getElementById('panel-emocional').style.display = 'none';
 }
 
 function actualizarTimerVideo() {
@@ -743,6 +796,13 @@ async function siguientePregunta() {
     url: urlVideo,
     transcripcion: textoActual.trim()
   });
+  const resumenEmo = generarResumenEmocional();
+  if (resumenEmo) datosEmocionales.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    ...resumenEmo
+  });
+
   transcripciones.push({
     pregunta: preguntaActual + 1,
     competencia_id: competencias[preguntaActual].id,
@@ -835,6 +895,7 @@ async function finalizarEntrevista() {
     competencias: competencias.map(function(c) { return c.nombre; }),
     videos: videosGuardados,
     transcripciones: transcripciones,
+    emociones: datosEmocionales,
     respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url, transcripcion: v.transcripcion }; }),
     token: token
   };
@@ -849,6 +910,104 @@ async function finalizarEntrevista() {
   } catch(e) {}
 
   mostrarPantalla('screen-gracias');
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS FACIAL CON FACE-API.JS
+// ══════════════════════════════════════
+function iniciarAnalisisFacial() {
+  const video = document.getElementById('video-live');
+  const canvas = document.getElementById('canvas-facial');
+  clearInterval(intervaloFacial);
+
+  intervaloFacial = setInterval(async function() {
+    if (!faceApiCargado || !video || video.paused) return;
+    try {
+      const detecciones = await faceapi
+        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 }))
+        .withFaceLandmarks(true)
+        .withFaceExpressions();
+
+      if (!detecciones || detecciones.length === 0) return;
+
+      const det = detecciones[0];
+      const exp = det.expressions;
+      contadorFrames.totalFrames++;
+
+      // Clasificar expresión dominante
+      const positivo = (exp.happy || 0) + (exp.surprised || 0) * 0.3;
+      const negativo = (exp.sad || 0) + (exp.angry || 0) + (exp.fearful || 0) + (exp.disgusted || 0);
+      const neutro = exp.neutral || 0;
+
+      if (positivo > 0.3) {
+        contadorFrames.positivo++;
+        document.getElementById('emo-expresion').textContent = '😊';
+      } else if (negativo > 0.3) {
+        contadorFrames.negativo++;
+        document.getElementById('emo-expresion').textContent = '😟';
+      } else {
+        contadorFrames.neutro++;
+        document.getElementById('emo-expresion').textContent = '😐';
+      }
+
+      // Contacto visual — landmarks de ojos apuntando hacia cámara
+      const landmarks = det.landmarks;
+      const leftEye = landmarks.getLeftEye();
+      const rightEye = landmarks.getRightEye();
+      if (leftEye && rightEye) {
+        const centerX = video.videoWidth / 2;
+        const eyeCenterX = (leftEye[0].x + rightEye[0].x) / 2;
+        const desviacion = Math.abs(eyeCenterX - centerX) / centerX;
+        if (desviacion < 0.25) {
+          contadorFrames.contacto++;
+          document.getElementById('emo-contacto').textContent = '👁️';
+        } else {
+          document.getElementById('emo-contacto').textContent = '👀';
+        }
+      }
+
+      // Confianza general
+      const score = det.detection.score;
+      if (score > 0.8) {
+        document.getElementById('emo-confianza').textContent = '💪';
+      } else if (score > 0.5) {
+        document.getElementById('emo-confianza').textContent = '📊';
+      } else {
+        document.getElementById('emo-confianza').textContent = '🔍';
+      }
+
+    } catch(e) {}
+  }, 1500); // analizar cada 1.5 segundos
+}
+
+function detenerAnalisisFacial() {
+  clearInterval(intervaloFacial);
+  intervaloFacial = null;
+}
+
+function generarResumenEmocional() {
+  if (contadorFrames.totalFrames === 0) return null;
+  const total = contadorFrames.totalFrames;
+  const pctPositivo = Math.round((contadorFrames.positivo / total) * 100);
+  const pctNegativo = Math.round((contadorFrames.negativo / total) * 100);
+  const pctNeutro = Math.round((contadorFrames.neutro / total) * 100);
+  const pctContacto = Math.round((contadorFrames.contacto / total) * 100);
+
+  let disposicion, emoji;
+  if (pctPositivo >= 40) { disposicion = 'Positiva'; emoji = '😊'; }
+  else if (pctNegativo >= 40) { disposicion = 'Tensa / Ansiosa'; emoji = '😟'; }
+  else { disposicion = 'Neutral / Serena'; emoji = '😐'; }
+
+  return {
+    disposicion, emoji,
+    pct_positivo: pctPositivo,
+    pct_negativo: pctNegativo,
+    pct_neutro: pctNeutro,
+    pct_contacto_visual: pctContacto,
+    alerta_tension: pctNegativo >= 50,
+    alerta_sin_contacto: pctContacto < 30,
+    frames_analizados: total
+  };
 }
 
 // ══════════════════════════════════════
