@@ -376,6 +376,12 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <div class="timer-video" id="timer-video">3:00</div>
     </div>
 
+    <!-- Transcripción en tiempo real -->
+    <div id="transcripcion-wrap" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;min-height:60px;">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;">Transcripción en tiempo real</div>
+      <div id="transcripcion-texto" style="font-size:13px;color:rgba(240,236,228,0.7);line-height:1.6;font-style:italic;"></div>
+    </div>
+
     <div class="controls" id="controles-grabacion">
       <button class="btn btn-record" id="btn-grabar" onclick="iniciarGrabacion()">
         ● Iniciar grabación
@@ -467,6 +473,9 @@ let mediaRecorder = null;
 let chunks = [];
 let blobActual = null;
 let videosGuardados = [];
+let transcripciones = [];   // guarda texto transcrito por pregunta
+let recognition = null;     // Web Speech API
+let textoActual = '';       // texto acumulado de la pregunta actual
 let timerGrabacion = null;
 let timerCountdown = null;
 let segundosRestantes = TIEMPO_GRABACION;
@@ -594,6 +603,9 @@ function mostrarGrabacion(idx) {
 
 function iniciarGrabacion() {
   chunks = [];
+  textoActual = '';
+  document.getElementById('transcripcion-texto').textContent = '';
+
   mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
   mediaRecorder.ondataavailable = function(e) {
     if (e.data.size > 0) chunks.push(e.data);
@@ -601,10 +613,15 @@ function iniciarGrabacion() {
   mediaRecorder.onstop = function() {
     const mimeType = getSupportedMimeType();
     blobActual = new Blob(chunks, { type: mimeType });
+    detenerTranscripcion();
     mostrarPreview();
   };
   mediaRecorder.start(1000);
 
+  // Iniciar transcripción Web Speech API
+  iniciarTranscripcion();
+
+  document.getElementById('transcripcion-wrap').style.display = 'block';
   document.getElementById('controles-grabacion').style.display = 'none';
   document.getElementById('controles-grabando').style.display = 'flex';
   document.getElementById('rec-dot').classList.add('show');
@@ -632,6 +649,51 @@ function detenerGrabacion() {
   document.getElementById('rec-dot').classList.remove('show');
   document.getElementById('rec-label').classList.remove('show');
   document.getElementById('timer-video').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+// WEB SPEECH API — TRANSCRIPCIÓN
+// ══════════════════════════════════════
+function iniciarTranscripcion() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-CL';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        textoActual += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('transcripcion-texto').textContent = textoActual + interim;
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
+  };
+
+  recognition.onend = function() {
+    // Reiniciar si aún se está grabando
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  try { recognition.start(); } catch(e) {}
+}
+
+function detenerTranscripcion() {
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+  }
+  document.getElementById('transcripcion-wrap').style.display = 'none';
 }
 
 function actualizarTimerVideo() {
@@ -678,7 +740,15 @@ async function siguientePregunta() {
     pregunta: preguntaActual + 1,
     competencia: competencias[preguntaActual].nombre,
     competencia_id: competencias[preguntaActual].id,
-    url: urlVideo
+    url: urlVideo,
+    transcripcion: textoActual.trim()
+  });
+  transcripciones.push({
+    pregunta: preguntaActual + 1,
+    competencia_id: competencias[preguntaActual].id,
+    competencia: competencias[preguntaActual].nombre,
+    texto: textoActual.trim(),
+    analisis: analizarSTAR(textoActual.trim(), competencias[preguntaActual])
   });
 
   preguntaActual++;
@@ -764,7 +834,8 @@ async function finalizarEntrevista() {
     cargo: cargo,
     competencias: competencias.map(function(c) { return c.nombre; }),
     videos: videosGuardados,
-    respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url }; }),
+    transcripciones: transcripciones,
+    respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url, transcripcion: v.transcripcion }; }),
     token: token
   };
 
@@ -778,6 +849,60 @@ async function finalizarEntrevista() {
   } catch(e) {}
 
   mostrarPantalla('screen-gracias');
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS STAR AUTOMÁTICO
+// ══════════════════════════════════════
+function analizarSTAR(texto, competencia) {
+  if (!texto || texto.length < 20) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin respuesta registrada.' };
+  }
+
+  const t = texto.toLowerCase();
+
+  // ── SITUACIÓN (S): contexto, cuándo, dónde, escenario
+  const palabrasS = ['cuando','en ese momento','en esa época','trabajaba en','estaba en','el contexto','la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa','en el área','en el equipo','había una vez','hubo un'];
+  const s = palabrasS.some(p => t.includes(p)) ? 1 : 0;
+
+  // ── TAREA (T): rol, responsabilidad, mi función
+  const palabrasT = ['mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea','debía','tenía que','me correspondía','mi función','fui designado','me pidieron','me asignaron','era responsable'];
+  const tarea = palabrasT.some(p => t.includes(p)) ? 1 : 0;
+
+  // ── ACCIÓN (A): qué hice yo — verbos de acción en primera persona
+  const palabrasA = ['hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté','llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté','negocié','hablé','expliqué','trabajé','ayudé','apoyé','lideré','diseñé','ejecuté','apliqué','busqué'];
+  const accionesEncontradas = palabrasA.filter(p => t.includes(p)).length;
+  const a = accionesEncontradas >= 3 ? 2 : accionesEncontradas >= 1 ? 1 : 0;
+
+  // ── RESULTADO (R): qué pasó, impacto, logro
+  const palabrasR = ['resultado','logramos','conseguimos','pudimos','mejoró','aumentó','redujo','bajó','subió','el cliente quedó','se solucionó','se resolvió','finalmente','al final','gracias a','como resultado','el impacto','se cumplió','se alcanzó','exitoso','aprendí','aprendimos','%','porciento','en menos tiempo','antes de','después'];
+  const resultadoEncontrado = palabrasR.filter(p => t.includes(p)).length;
+  const r = resultadoEncontrado >= 2 ? 2 : resultadoEncontrado >= 1 ? 1 : 0;
+
+  const total = s + tarea + a + r;
+
+  let grado, observacion;
+  if (total >= 5) {
+    grado = 'A';
+    observacion = 'Respuesta completa con situación, rol, acciones concretas y resultado medible. Alto nivel de competencia.';
+  } else if (total >= 3) {
+    grado = 'B';
+    observacion = 'Respuesta sólida. Describe la situación y acciones. El resultado podría ser más específico.';
+  } else if (total === 2) {
+    grado = 'C';
+    observacion = 'Respuesta básica. Falta especificar mejor el rol o el resultado concreto.';
+  } else {
+    grado = 'D';
+    observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR.';
+  }
+
+  // Longitud mínima — respuesta muy corta baja grado
+  if (texto.split(' ').length < 30 && grado !== 'D') {
+    grado = grado === 'A' ? 'B' : grado === 'B' ? 'C' : 'D';
+    observacion += ' Nota: la respuesta fue muy breve.';
+  }
+
+  return { s, t: tarea, a, r, total, grado, observacion };
 }
 
 // ══════════════════════════════════════
