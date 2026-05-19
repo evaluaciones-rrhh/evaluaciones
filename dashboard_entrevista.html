@@ -3,731 +3,959 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Entrevistas — Grupo Cygnus</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<title>Entrevista por Competencias — Grupo Cygnus</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #f7f5f0;
-  --surface: #ffffff;
-  --surface2: #f0ede6;
-  --border: #e2ddd4;
-  --border2: #c8c2b6;
-  --text: #1a1714;
-  --muted: #6b6458;
-  --hint: #a09890;
+  --bg: #0f1419;
+  --surface: #1a2230;
+  --surface2: #222d3d;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.15);
+  --text: #f0ece4;
+  --muted: rgba(240,236,228,0.5);
+  --hint: rgba(240,236,228,0.3);
   --accent: #c4432a;
   --accent2: #e8593c;
-  --green: #2a5c3a;
-  --green2: #3a8c56;
-  --amber: #b07820;
-  --amber2: #d4962a;
-  --blue: #1e3a5c;
-  --blue2: #2a5a8c;
-  --red: #8b1a1a;
-  --font: 'Syne', sans-serif;
-  --serif: 'Playfair Display', serif;
-  --mono: 'DM Mono', monospace;
+  --green: #2a6e47;
+  --green2: #3a9e67;
+  --amber: #c07a00;
   --radius: 12px;
-  --shadow: 0 2px 12px rgba(26,23,20,0.08);
-  --shadow2: 0 8px 32px rgba(26,23,20,0.12);
+  --font: 'DM Sans', sans-serif;
+  --serif: 'Fraunces', serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input, textarea { user-select: text; -webkit-user-select: text; }
+
+/* ══ LAYOUT ══ */
+.wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 
 /* ══ HEADER ══ */
 .header {
-  background: var(--text);
-  padding: 1.25rem 2rem;
   display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; z-index: 100;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
 }
-.brand { font-family: var(--serif); font-size: 20px; color: #f7f5f0; font-weight: 400; }
-.brand em { color: var(--accent2); }
-.header-sub { font-size: 11px; color: rgba(247,245,240,0.4); letter-spacing: .12em; text-transform: uppercase; }
+.brand { font-family: var(--serif); font-size: 18px; color: var(--text); font-weight: 400; }
+.brand span { color: var(--accent); font-style: italic; }
+.step-indicator { font-size: 12px; color: var(--muted); letter-spacing: .08em; }
 
-/* ══ LAYOUT ══ */
-.layout { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 60px); }
+/* ══ SCREENS ══ */
+.screen { display: none; }
+.screen.active { display: block; }
 
-/* ══ SIDEBAR ══ */
-.sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  overflow-y: auto;
-  max-height: calc(100vh - 60px);
-  position: sticky; top: 60px;
-}
-.sidebar-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.sidebar-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.sidebar-count { font-family: var(--mono); font-size: 11px; color: var(--hint); }
-
-.candidato-item {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: background .15s;
-  position: relative;
-}
-.candidato-item:hover { background: var(--surface2); }
-.candidato-item.active { background: var(--text); }
-.candidato-item.active .ci-nombre { color: #f7f5f0; }
-.candidato-item.active .ci-meta { color: rgba(247,245,240,0.5); }
-.candidato-item.active .ci-badge { background: rgba(255,255,255,0.1); color: rgba(247,245,240,0.7); }
-
-.ci-nombre { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-.ci-meta { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-.ci-footer { display: flex; align-items: center; gap: 6px; }
-.ci-badge {
-  font-size: 10px; font-weight: 700; letter-spacing: .06em;
-  padding: 2px 8px; border-radius: 20px;
-  background: var(--surface2); color: var(--muted);
-  text-transform: uppercase;
-}
-.ci-rec {
-  width: 8px; height: 8px; border-radius: 50%;
-  margin-left: auto;
-}
-.rec-verde { background: var(--green2); }
-.rec-amarillo { background: var(--amber2); }
-.rec-rojo { background: var(--red); }
-
-.sidebar-empty {
-  padding: 3rem 1.5rem; text-align: center;
-  color: var(--hint); font-size: 13px; line-height: 1.7;
-}
-
-/* ══ MAIN ══ */
-.main { padding: 2rem; overflow-y: auto; }
-
-/* ══ EMPTY STATE ══ */
-.empty-state {
-  display: flex; flex-direction: column;
+/* ══ BLOQUEADO ══ */
+#screen-bloqueado {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg); z-index: 9999;
   align-items: center; justify-content: center;
-  min-height: 60vh; text-align: center;
 }
-.empty-icon { font-size: 56px; margin-bottom: 1.5rem; opacity: .3; }
-.empty-title { font-family: var(--serif); font-size: 24px; font-weight: 400; color: var(--muted); margin-bottom: .5rem; }
-.empty-sub { font-size: 13px; color: var(--hint); }
+#screen-bloqueado.show { display: flex; }
 
-/* ══ INFORME ══ */
-.informe { max-width: 900px; }
-
-/* Cabecera candidato */
-.candidato-header {
-  background: var(--text);
-  border-radius: var(--radius);
-  padding: 2rem;
-  margin-bottom: 1.5rem;
-  display: grid; grid-template-columns: 1fr auto;
-  gap: 1rem; align-items: start;
-}
-.ch-nombre { font-family: var(--serif); font-size: 28px; font-weight: 400; color: #f7f5f0; margin-bottom: 4px; }
-.ch-cargo { font-size: 13px; color: rgba(247,245,240,0.5); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 1rem; }
-.ch-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
-.ch-meta-item { font-size: 12px; color: rgba(247,245,240,0.4); }
-.ch-meta-item strong { color: rgba(247,245,240,0.8); display: block; font-size: 13px; }
-
-.rec-badge {
-  padding: .75rem 1.25rem; border-radius: 8px;
-  text-align: center; min-width: 140px;
-}
-.rec-badge.verde { background: rgba(42,92,58,.3); border: 1px solid rgba(58,140,86,.3); }
-.rec-badge.amarillo { background: rgba(176,120,32,.3); border: 1px solid rgba(212,150,42,.3); }
-.rec-badge.rojo { background: rgba(139,26,26,.3); border: 1px solid rgba(196,67,42,.3); }
-.rec-emoji { font-size: 28px; margin-bottom: 4px; }
-.rec-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.rec-badge.verde .rec-label { color: #3a8c56; }
-.rec-badge.amarillo .rec-label { color: #d4962a; }
-.rec-badge.rojo .rec-label { color: var(--accent2); }
-
-/* Cards */
+/* ══ CARD ══ */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.5rem;
-  margin-bottom: 1.25rem;
-  box-shadow: var(--shadow);
-}
-.card-header {
-  display: flex; align-items: center; gap: .75rem;
-  margin-bottom: 1.25rem; padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-.card-icon { font-size: 18px; }
-.card-title { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-
-/* Análisis ejecutivo */
-.resumen-texto {
-  font-family: var(--serif); font-size: 16px; font-weight: 400;
-  line-height: 1.8; color: var(--text); font-style: italic;
-  padding: 1rem 1.25rem; background: var(--surface2);
-  border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0;
+  padding: 2rem;
   margin-bottom: 1.25rem;
 }
-
-.hallazgos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.hallazgo-item {
-  padding: 1rem; border-radius: 8px;
-  border: 1px solid var(--border);
-}
-.hallazgo-item.fortaleza { background: rgba(42,92,58,.05); border-color: rgba(58,140,86,.2); }
-.hallazgo-item.alerta { background: rgba(139,26,26,.05); border-color: rgba(196,67,42,.2); }
-.hallazgo-label {
-  font-size: 10px; font-weight: 700; letter-spacing: .1em;
-  text-transform: uppercase; margin-bottom: .5rem;
-}
-.hallazgo-item.fortaleza .hallazgo-label { color: var(--green2); }
-.hallazgo-item.alerta .hallazgo-label { color: var(--accent); }
-.hallazgo-comp { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
-.hallazgo-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-/* Competencias */
-.competencia-block {
-  border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden;
-  margin-bottom: 1rem;
-}
-.comp-header {
-  padding: 1rem 1.25rem;
-  display: flex; align-items: center; gap: 1rem;
-  cursor: pointer; transition: background .15s;
-  background: var(--surface2);
-}
-.comp-header:hover { background: var(--border); }
-.comp-grado {
-  width: 36px; height: 36px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 16px; font-weight: 500;
-  flex-shrink: 0;
-}
-.grado-A { background: rgba(42,92,58,.15); color: var(--green); border: 1px solid rgba(42,92,58,.3); }
-.grado-B { background: rgba(30,58,92,.1); color: var(--blue); border: 1px solid rgba(30,58,92,.25); }
-.grado-C { background: rgba(176,120,32,.1); color: var(--amber); border: 1px solid rgba(176,120,32,.25); }
-.grado-D { background: rgba(139,26,26,.1); color: var(--red); border: 1px solid rgba(139,26,26,.25); }
-
-.comp-info { flex: 1; }
-.comp-nombre { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-.comp-obs { font-size: 12px; color: var(--muted); }
-.comp-star { display: flex; gap: 6px; margin-left: auto; }
-.star-pip {
-  width: 28px; height: 28px; border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; letter-spacing: .04em;
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--muted);
-}
-.star-pip.active { background: var(--text); color: #f7f5f0; border-color: var(--text); }
-.comp-chevron { color: var(--hint); font-size: 12px; transition: transform .2s; }
-.comp-chevron.open { transform: rotate(180deg); }
-
-.comp-body { display: none; padding: 1.25rem; border-top: 1px solid var(--border); }
-.comp-body.open { display: block; }
-
-.star-detalle { display: grid; grid-template-columns: repeat(4,1fr); gap: .75rem; margin-bottom: 1rem; }
-.star-item { text-align: center; padding: .75rem .5rem; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
-.star-letra { font-family: var(--mono); font-size: 18px; font-weight: 500; margin-bottom: 2px; }
-.star-nombre { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 4px; }
-.star-pts { font-size: 11px; color: var(--hint); }
-.star-item.ok .star-letra { color: var(--green); }
-.star-item.parcial .star-letra { color: var(--amber); }
-.star-item.nok .star-letra { color: var(--red); }
-
-.transcripcion-box {
-  background: var(--surface2); border-radius: 8px;
-  padding: 1rem; margin-bottom: 1rem;
-  font-size: 13px; color: var(--muted); line-height: 1.7;
-  font-style: italic; border: 1px solid var(--border);
-}
-.transcripcion-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--hint); margin-bottom: .5rem; font-style: normal; }
-
-.video-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 600; color: var(--blue);
-  padding: 6px 14px; border: 1px solid rgba(30,58,92,.25);
-  border-radius: 6px; background: rgba(30,58,92,.05);
-  text-decoration: none; transition: all .15s;
-}
-.video-link:hover { background: rgba(30,58,92,.1); }
-
-/* Emocional */
-.emo-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 1rem; }
-.emo-item { text-align: center; padding: 1rem; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
-.emo-emoji { font-size: 28px; margin-bottom: 4px; }
-.emo-valor { font-family: var(--mono); font-size: 20px; font-weight: 500; margin-bottom: 2px; }
-.emo-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
-
-.alerta-emo {
+.card-title {
+  font-family: var(--serif);
+  font-size: 11px; font-weight: 400;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1rem;
   display: flex; align-items: center; gap: .75rem;
-  padding: .75rem 1rem; border-radius: 8px; margin-bottom: .5rem;
-  font-size: 13px;
 }
-.alerta-emo.warn { background: rgba(176,120,32,.08); border: 1px solid rgba(176,120,32,.2); color: var(--amber); }
-.alerta-emo.ok { background: rgba(42,92,58,.08); border: 1px solid rgba(42,92,58,.2); color: var(--green); }
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* Radar */
-.radar-wrap { max-width: 400px; margin: 0 auto; }
+/* ══ FORM ══ */
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: .05em; text-transform: uppercase; }
+.field input {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text);
+  font-family: var(--font); font-size: 14px;
+  outline: none; transition: border-color .15s;
+}
+.field input:focus { border-color: var(--accent); }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
-/* Brecha */
-.brecha-item { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
-.brecha-nombre { font-size: 13px; font-weight: 600; width: 180px; flex-shrink: 0; }
-.brecha-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: visible; position: relative; }
-.brecha-bar { height: 100%; border-radius: 4px; transition: width .5s; }
-.brecha-bar.A { background: var(--green2); }
-.brecha-bar.B { background: var(--blue2); }
-.brecha-bar.C { background: var(--amber2); }
-.brecha-bar.D { background: var(--red); }
-.brecha-min { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--text); border-radius: 2px; }
-.brecha-grado { font-family: var(--mono); font-size: 13px; font-weight: 500; width: 24px; text-align: center; }
-.brecha-req { font-size: 11px; color: var(--hint); width: 60px; }
-
-/* Tabs */
-.tabs { display: flex; gap: 2px; margin-bottom: 1.5rem; background: var(--surface2); padding: 4px; border-radius: 10px; border: 1px solid var(--border); }
-.tab { flex: 1; padding: 8px 12px; border-radius: 7px; border: none; background: transparent; font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all .15s; letter-spacing: .03em; }
-.tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-
-/* Loading */
-.loading { text-align: center; padding: 4rem 2rem; color: var(--hint); }
-.spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ══ BOTÓN PDF ══ */
-.btn-pdf {
+/* ══ BOTONES ══ */
+.btn {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 20px; border-radius: 8px;
-  background: var(--accent); color: #fff;
-  font-family: var(--font); font-size: 12px; font-weight: 700;
-  cursor: pointer; border: none; letter-spacing: .04em;
-  transition: all .15s; text-transform: uppercase;
+  padding: 12px 24px; border-radius: 8px;
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; transition: all .15s;
+  letter-spacing: .02em;
 }
-.btn-pdf:hover { background: var(--accent2); }
-.btn-pdf:disabled { opacity: .5; cursor: default; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+.btn-record { background: var(--accent); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-record.recording { background: #8b1a1a; animation: pulse-btn .8s ease-in-out infinite; }
+.btn-stop { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-next { background: var(--green); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-next:hover { background: var(--green2); }
+.btn-full { width: 100%; justify-content: center; margin-top: .5rem; }
 
-@media (max-width: 768px) {
-  .layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; max-height: 300px; }
-  .hallazgos-grid { grid-template-columns: 1fr; }
-  .emo-grid { grid-template-columns: repeat(2,1fr); }
-  .star-detalle { grid-template-columns: repeat(2,1fr); }
+@keyframes pulse-btn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .8; }
+}
+
+/* ══ BIENVENIDA ══ */
+.welcome-hero {
+  text-align: center; padding: 3rem 2rem;
+}
+.welcome-icon { font-size: 52px; margin-bottom: 1.5rem; }
+.welcome-title {
+  font-family: var(--serif); font-size: 32px; font-weight: 300;
+  margin-bottom: .75rem; line-height: 1.2;
+}
+.welcome-title span { color: var(--accent); font-style: italic; }
+.welcome-sub { font-size: 15px; color: var(--muted); max-width: 480px; margin: 0 auto 2rem; line-height: 1.7; }
+
+.info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+.info-item {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.25rem; text-align: center;
+}
+.info-num { font-family: var(--serif); font-size: 28px; color: var(--accent); font-weight: 400; }
+.info-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+
+.tip-box {
+  background: rgba(196,67,42,.08); border: 1px solid rgba(196,67,42,.2);
+  border-radius: 10px; padding: 1rem 1.25rem;
+  font-size: 13px; color: rgba(240,236,228,.7);
+  line-height: 1.65; text-align: left; margin-bottom: 1.5rem;
+}
+.tip-box strong { color: var(--accent2); }
+
+/* ══ PREGUNTA / VIDEO ══ */
+.pregunta-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.pregunta-badge {
+  background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+}
+.competencia-tag {
+  font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border2); border-radius: 20px;
+  padding: 4px 12px; letter-spacing: .05em;
+}
+
+.pregunta-texto {
+  font-family: var(--serif); font-size: 22px; font-weight: 300;
+  line-height: 1.5; color: var(--text);
+  margin-bottom: 2rem; font-style: italic;
+}
+
+/* ══ CUENTA REGRESIVA ══ */
+.countdown-wrap {
+  text-align: center; padding: 3rem 2rem;
+}
+.countdown-num {
+  font-family: var(--serif); font-size: 96px; font-weight: 300;
+  color: var(--accent); line-height: 1; margin-bottom: .5rem;
+  animation: count-pulse 1s ease-in-out infinite;
+}
+@keyframes count-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.countdown-lbl { font-size: 13px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+
+/* ══ VIDEO ══ */
+.video-wrap {
+  position: relative; border-radius: 12px; overflow: hidden;
+  background: #000; margin-bottom: 1.25rem;
+  aspect-ratio: 16/9;
+}
+video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.rec-dot {
+  position: absolute; top: 14px; right: 14px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); display: none;
+  animation: blink 1s ease-in-out infinite;
+}
+.rec-dot.show { display: block; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+.rec-label {
+  position: absolute; top: 12px; left: 14px;
+  background: rgba(139,26,26,.85); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  padding: 3px 10px; border-radius: 20px; display: none;
+}
+.rec-label.show { display: block; }
+
+.timer-video {
+  position: absolute; bottom: 14px; right: 14px;
+  font-family: 'DM Sans', monospace; font-size: 20px; font-weight: 600;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  display: none;
+}
+.timer-video.show { display: block; }
+
+/* ══ CONTROLES GRABACIÓN ══ */
+.controls { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+.control-hint { font-size: 12px; color: var(--hint); text-align: center; margin-top: .25rem; }
+
+/* ══ PREVIEW ══ */
+.preview-wrap {
+  background: #000; border-radius: 12px; overflow: hidden;
+  margin-bottom: 1rem; aspect-ratio: 16/9; display: none;
+}
+.preview-wrap video { width: 100%; height: 100%; object-fit: cover; }
+
+/* ══ PROGRESO ══ */
+.progress-bar-wrap { margin-bottom: 2rem; }
+.progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--hint); margin-bottom: 6px; }
+.progress-track { height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+
+/* ══ GRACIAS ══ */
+.gracias-wrap { text-align: center; padding: 4rem 2rem; }
+.gracias-icon { font-size: 56px; margin-bottom: 1.5rem; }
+.gracias-title { font-family: var(--serif); font-size: 30px; font-weight: 300; margin-bottom: .75rem; }
+.gracias-sub { font-size: 15px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
+
+/* ══ UPLOAD PROGRESS ══ */
+.upload-wrap { text-align: center; padding: 3rem 2rem; }
+.upload-spinner {
+  width: 48px; height: 48px; border: 3px solid var(--border2);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite; margin: 0 auto 1.5rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.upload-text { font-size: 15px; color: var(--muted); }
+.upload-progress { margin-top: 1rem; }
+.upload-bar-track { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-top: .5rem; }
+.upload-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+
+footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3rem; padding-bottom: 2rem; letter-spacing: .05em; }
+
+@media (max-width: 600px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .pregunta-texto { font-size: 18px; }
+  .countdown-num { font-size: 72px; }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <div class="brand">Grupo <em>Cygnus</em></div>
-    <div class="header-sub">Dashboard · Entrevistas por Competencias</div>
+<!-- PANTALLA BLOQUEADA -->
+<div id="screen-bloqueado">
+  <div style="max-width:480px;text-align:center;padding:2rem;">
+    <div style="font-size:56px;margin-bottom:1rem;">🔒</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:300;margin-bottom:.75rem;">Esta entrevista ya fue completada</h2>
+    <p style="font-size:14px;color:var(--muted);line-height:1.7;">Ya registraste tus respuestas para esta evaluación. No es posible volver a realizarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
   </div>
-  <div style="display:flex;align-items:center;gap:1rem;"><div style="font-size:11px;color:rgba(247,245,240,0.3);font-family:var(--mono);" id="header-fecha"></div><button class="btn-pdf" id="btn-pdf" onclick="descargarPDF()" style="display:none;">&#11015; Descargar PDF</button></div>
 </div>
 
-<div class="layout">
+<div class="header">
+  <div class="brand">Grupo <span>Cygnus</span></div>
+  <div class="step-indicator" id="step-indicator">Entrevista por Competencias</div>
+</div>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <span class="sidebar-title">Candidatos</span>
-      <span class="sidebar-count" id="sidebar-count">—</span>
+<!-- ══ PANTALLA 1: BIENVENIDA ══ -->
+<div class="screen active" id="screen-bienvenida">
+  <div class="wrap">
+    <div class="welcome-hero">
+      <div class="welcome-icon">🎙️</div>
+      <h1 class="welcome-title">Entrevista por <span>Competencias</span></h1>
+      <p class="welcome-sub">Responderás preguntas grabándote en video. Lee cada pregunta con atención — tendrás unos segundos para prepararte antes de grabar.</p>
     </div>
-    <div id="lista-candidatos">
-      <div class="sidebar-empty">
-        <div style="font-size:32px;margin-bottom:.75rem;">⏳</div>
-        Cargando candidatos...
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-num" id="num-preguntas">5</div>
+        <div class="info-lbl">Preguntas</div>
+      </div>
+      <div class="info-item">
+        <div class="info-num">3</div>
+        <div class="info-lbl">Min por pregunta</div>
+      </div>
+      <div class="info-item">
+        <div class="info-num">10</div>
+        <div class="info-lbl">Seg preparación</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      <strong>Antes de comenzar:</strong> Asegúrate de estar en un lugar tranquilo con buena iluminación. Tu cámara y micrófono deben estar habilitados. Responde con ejemplos concretos de tu experiencia — situación, acción y resultado.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tus datos</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>Nombre completo</label>
+          <input type="text" id="inp-nombre" placeholder="Apellido Nombre">
+        </div>
+        <div class="field">
+          <label>RUT</label>
+          <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="inp-email" placeholder="correo@ejemplo.com">
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="iniciarEntrevista()">
+      Comenzar entrevista →
+    </button>
+    <p style="text-align:center;font-size:12px;color:var(--hint);margin-top:.75rem;">Al iniciar se activará tu cámara y micrófono</p>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 2: CUENTA REGRESIVA ══ -->
+<div class="screen" id="screen-countdown">
+  <div class="wrap">
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="cd-badge">Pregunta 1 de 5</span>
+        <span class="competencia-tag" id="cd-competencia"></span>
+      </div>
+      <div class="pregunta-texto" id="cd-pregunta"></div>
+    </div>
+    <div class="countdown-wrap">
+      <div class="countdown-num" id="countdown-num">10</div>
+      <div class="countdown-lbl">segundos para prepararte</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 3: GRABACIÓN ══ -->
+<div class="screen" id="screen-grabacion">
+  <div class="wrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-labels">
+        <span id="prog-label">Pregunta 1 de 5</span>
+        <span id="prog-pct">20%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:20%"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="gr-badge">Pregunta 1</span>
+        <span class="competencia-tag" id="gr-competencia"></span>
+      </div>
+      <div class="pregunta-texto" id="gr-pregunta"></div>
+    </div>
+
+    <div class="video-wrap" style="position:relative;">
+      <video id="video-live" autoplay muted playsinline></video>
+            <div class="rec-dot" id="rec-dot"></div>
+      <div class="rec-label" id="rec-label">● REC</div>
+      <div class="timer-video" id="timer-video">3:00</div>
+    </div>
+
+    <!-- Panel emocional en tiempo real -->
+        <div style="text-align:center;">
+          <div id="emo-contacto" style="font-size:24px;margin-bottom:4px;">👁️</div>
+          <div style="font-size:10px;color:var(--muted);">Contacto visual</div>
+        </div>
+        <div style="text-align:center;">
+          <div id="emo-confianza" style="font-size:24px;margin-bottom:4px;">📊</div>
+          <div style="font-size:10px;color:var(--muted);">Confianza</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcripción en tiempo real -->
+    <div id="transcripcion-wrap" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;min-height:60px;">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;">Transcripción en tiempo real</div>
+      <div id="transcripcion-texto" style="font-size:13px;color:rgba(240,236,228,0.7);line-height:1.6;font-style:italic;"></div>
+    </div>
+
+    <div class="controls" id="controles-grabacion">
+      <button class="btn btn-record" id="btn-grabar" onclick="iniciarGrabacion()">
+        ● Iniciar grabación
+      </button>
+      <p class="control-hint">Cuando estés listo, presiona para grabar</p>
+    </div>
+
+    <div class="controls" id="controles-grabando" style="display:none;">
+      <button class="btn btn-stop" onclick="detenerGrabacion()">
+        ■ Detener grabación
+      </button>
+      <p class="control-hint" id="hint-grabando">Grabando... presiona para detener antes del tiempo</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 4: PREVIEW ══ -->
+<div class="screen" id="screen-preview">
+  <div class="wrap">
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="pv-badge">Pregunta 1</span>
+        <span class="competencia-tag" id="pv-competencia"></span>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Revisa tu respuesta. Si estás conforme, continúa. Si no, puedes volver a grabar.</p>
+    </div>
+
+    <div class="preview-wrap" id="preview-wrap" style="display:block;">
+      <video id="video-preview" controls playsinline></video>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-next btn-full" onclick="siguientePregunta()">
+        Continuar → <span id="btn-next-label"></span>
+      </button>
+      <button class="btn btn-ghost btn-full" onclick="repetirGrabacion()">
+        ↺ Grabar de nuevo
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 5: SUBIENDO ══ -->
+<div class="screen" id="screen-subiendo">
+  <div class="wrap">
+    <div class="upload-wrap">
+      <div class="upload-spinner"></div>
+      <div class="upload-text" id="upload-text">Guardando tu respuesta...</div>
+      <div class="upload-progress">
+        <div style="font-size:12px;color:var(--hint);" id="upload-pct">0%</div>
+        <div class="upload-bar-track">
+          <div class="upload-bar-fill" id="upload-bar" style="width:0%"></div>
+        </div>
       </div>
     </div>
   </div>
-
-  <!-- MAIN -->
-  <div class="main" id="main-content">
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">Selecciona un candidato</div>
-      <div class="empty-sub">Elige un candidato del panel izquierdo<br>para ver su informe completo.</div>
-    </div>
-  </div>
-
 </div>
 
+<!-- ══ PANTALLA 6: GRACIAS ══ -->
+<div class="screen" id="screen-gracias">
+  <div class="wrap">
+    <div class="gracias-wrap">
+      <div class="gracias-icon">✓</div>
+      <h2 class="gracias-title">Entrevista completada</h2>
+      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente. Puedes cerrar esta ventana.</p>
+    </div>
+  </div>
+</div>
+
+<footer>Entrevista por Competencias — Grupo Cygnus · Uso exclusivo de evaluadores certificados</footer>
+
 <script>
+// ══════════════════════════════════════
+// CONFIGURACIÓN
+// ══════════════════════════════════════
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
+const TIEMPO_GRABACION = 180;
+const TIEMPO_COUNTDOWN = 10;
 
-// Grado mínimo requerido por cargo (Martha Alles)
-const GRADO_REQUERIDO = {
-  'Vendedor': { orientacion_cliente: 'B', orientacion_resultados: 'B', iniciativa: 'B', persuasion: 'B', trabajo_presion: 'C' },
-  'Jefatura': { liderazgo: 'B', trabajo_equipo: 'B', planificacion: 'B', comunicacion: 'B', toma_decisiones: 'C' },
-  'Gerencia': { vision_negocio: 'A', liderazgo: 'A', pensamiento_estrategico: 'A', orientacion_resultados: 'B', gestion_cambio: 'B' },
-  'Administrativo': { orden_calidad: 'C', responsabilidad: 'C', trabajo_equipo: 'C', comunicacion: 'C', flexibilidad: 'C' },
-  'Operario': { responsabilidad: 'D', trabajo_equipo: 'D', seguridad: 'C', orden_calidad: 'D', trabajo_presion: 'D' },
-  'Otro': { comunicacion: 'C', trabajo_equipo: 'C', iniciativa: 'C', responsabilidad: 'C', orientacion_resultados: 'C' }
-};
+// ══════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════
+let token = '';
+let cargo = '';
+let competencias = [];
+let preguntaActual = 0;
+let stream = null;
+let mediaRecorder = null;
+let chunks = [];
+let blobActual = null;
+let videosGuardados = [];
+let transcripciones = [];
+let recognition = null;
+let textoActual = '';
+let intervaloFacial = null;
+let faceApiCargado = false;
+let timerGrabacion = null;
+let timerCountdown = null;
+let segundosRestantes = TIEMPO_GRABACION;
+let candidato = { nombre: '', rut: '', email: '' };
 
-const GRADO_VAL = { A: 4, B: 3, C: 2, D: 1 };
-const GRADO_COLOR = { A: 'verde', B: 'azul', C: 'amarillo', D: 'rojo' };
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('load', async function() {
+  const params = new URLSearchParams(window.location.search);
+  token = params.get('token') || '';
+  cargo = decodeURIComponent(params.get('cargo') || 'Otro');
 
-let entrevistas = [];
-let candidatoActual = null;
-let radarChart = null;
+  if (token) {
+    try {
+      const r = await fetch(APPS_URL + '?action=validarToken&token=' + token);
+      const d = await r.json();
+      if (!d.valido) {
+        document.getElementById('screen-bloqueado').classList.add('show');
+        return;
+      }
+      if (d.nombre) document.getElementById('inp-nombre').value = d.nombre;
+    } catch(e) {}
+  }
 
-document.getElementById('header-fecha').textContent = new Date().toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  await cargarCompetencias();
+});
 
-// ══ CARGAR DATOS ══
-async function cargarDatos() {
+}
+
+async function cargarCompetencias() {
   try {
-    const r = await fetch(APPS_URL + '?action=getEntrevistas');
+    const r = await fetch(APPS_URL + '?action=getCompetencias&cargo=' + encodeURIComponent(cargo));
     const d = await r.json();
-    entrevistas = d.entrevistas || [];
-    renderSidebar();
+    competencias = d.competencias || [];
+    document.getElementById('num-preguntas').textContent = competencias.length;
   } catch(e) {
-    document.getElementById('lista-candidatos').innerHTML = '<div class="sidebar-empty">Error cargando datos.<br>Verifica la conexión.</div>';
+    competencias = [
+      { id: 'comunicacion', nombre: 'Comunicación', pregunta: 'Cuéntame una situación en la que tuviste que comunicar una información difícil o compleja. ¿Cómo lo hiciste y cuál fue el resultado?' },
+      { id: 'trabajo_equipo', nombre: 'Trabajo en equipo', pregunta: 'Cuéntame una experiencia en la que trabajaste en equipo para lograr un objetivo difícil. ¿Cuál fue tu rol?' },
+      { id: 'iniciativa', nombre: 'Iniciativa', pregunta: 'Cuéntame una situación en la que identificaste un problema o mejora sin que nadie te lo pidiera. ¿Qué hiciste?' },
+      { id: 'orientacion_resultados', nombre: 'Orientación a resultados', pregunta: 'Descríbeme una ocasión en que te propusiste una meta ambiciosa. ¿Qué hiciste para lograrla?' },
+      { id: 'responsabilidad', nombre: 'Responsabilidad', pregunta: 'Cuéntame una situación en que cometiste un error o algo salió mal. ¿Cómo lo manejaste y qué aprendiste?' }
+    ];
+    document.getElementById('num-preguntas').textContent = competencias.length;
   }
 }
 
-// ══ SIDEBAR ══
-function renderSidebar() {
-  const lista = document.getElementById('lista-candidatos');
-  document.getElementById('sidebar-count').textContent = entrevistas.length + ' candidato' + (entrevistas.length !== 1 ? 's' : '');
+// ══════════════════════════════════════
+// INICIAR ENTREVISTA
+// ══════════════════════════════════════
+async function iniciarEntrevista() {
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  const rut = document.getElementById('inp-rut').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
 
-  if (entrevistas.length === 0) {
-    lista.innerHTML = '<div class="sidebar-empty">Sin entrevistas registradas aún.</div>';
+  if (!nombre || !rut) {
+    alert('Por favor ingresa tu nombre y RUT.');
     return;
   }
 
-  lista.innerHTML = entrevistas.map(function(e, i) {
-    const rec = calcularRecomendacion(e);
-    const recClass = rec.clase;
-    return '<div class="candidato-item" onclick="verCandidato(' + i + ')" id="ci-' + i + '">'
-      + '<div class="ci-nombre">' + (e.nombre || 'Sin nombre') + '</div>'
-      + '<div class="ci-meta">' + (e.cargo || '—') + ' · ' + (e.fecha || '—') + '</div>'
-      + '<div class="ci-footer">'
-      + '<span class="ci-badge">' + (e.estado || 'Completada') + '</span>'
-      + '<span class="ci-rec rec-' + recClass + '"></span>'
-      + '</div></div>';
-  }).join('');
-}
+  candidato = { nombre, rut, email };
 
-// ══ VER CANDIDATO ══
-function verCandidato(idx) {
-  document.querySelectorAll('.candidato-item').forEach(function(el) { el.classList.remove('active'); });
-  document.getElementById('ci-' + idx).classList.add('active');
-  candidatoActual = entrevistas[idx];
-  renderInforme(candidatoActual);
-  document.getElementById("btn-pdf").style.display = "flex";
-}
-
-// ══ CALCULAR RECOMENDACIÓN ══
-function calcularRecomendacion(ent) {
-  const analisis = ent.analisis_star || [];
-  if (analisis.length === 0) return { clase: 'amarillo', texto: 'Sin datos', emoji: '🟡' };
-
-  const reqs = GRADO_REQUERIDO[ent.cargo] || GRADO_REQUERIDO['Otro'];
-  let cumple = 0, parcial = 0, noCumple = 0;
-
-  analisis.forEach(function(a) {
-    const grado = a.analisis ? a.analisis.grado : 'D';
-    const req = reqs[a.competencia_id] || 'C';
-    const diff = GRADO_VAL[grado] - GRADO_VAL[req];
-    if (diff >= 0) cumple++;
-    else if (diff === -1) parcial++;
-    else noCumple++;
-  });
-
-  if (noCumple === 0 && parcial <= 1) return { clase: 'verde', texto: 'Recomendado', emoji: '🟢' };
-  if (noCumple <= 1) return { clase: 'amarillo', texto: 'Con reservas', emoji: '🟡' };
-  return { clase: 'rojo', texto: 'No recomendado', emoji: '🔴' };
-}
-
-// ══ RENDER INFORME ══
-function renderInforme(ent) {
-  if (radarChart) { radarChart.destroy(); radarChart = null; }
-  const rec = calcularRecomendacion(ent);
-  const analisis = ent.analisis_star || [];
-  const emociones = ent.emociones || [];
-  const transcripciones = ent.transcripciones || [];
-  const videos = ent.videos || [];
-
-  // Calcular datos generales emocionales
-  const emoResumen = calcularEmoResumen(emociones);
-
-  // Generar resumen ejecutivo
-  const resumenTexto = generarResumenEjecutivo(ent, analisis, emoResumen, rec);
-  const fortalezas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'A' || a.analisis.grado === 'B'); });
-  const alertas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'C' || a.analisis.grado === 'D'); });
-
-  const html = '<div class="informe">'
-
-    // Cabecera
-    + '<div class="candidato-header">'
-    + '<div>'
-    + '<div class="ch-nombre">' + (ent.nombre || 'Sin nombre') + '</div>'
-    + '<div class="ch-cargo">' + (ent.cargo || '—') + '</div>'
-    + '<div class="ch-meta">'
-    + '<div class="ch-meta-item"><strong>' + (ent.rut || '—') + '</strong>RUT</div>'
-    + '<div class="ch-meta-item"><strong>' + (ent.email || '—') + '</strong>Email</div>'
-    + '<div class="ch-meta-item"><strong>' + (ent.fecha || '—') + '</strong>Fecha</div>'
-    + '<div class="ch-meta-item"><strong>' + analisis.length + ' de 5</strong>Competencias</div>'
-    + '</div>'
-    + '</div>'
-    + '<div class="rec-badge ' + rec.clase + '">'
-    + '<div class="rec-emoji">' + rec.emoji + '</div>'
-    + '<div class="rec-label">' + rec.texto + '</div>'
-    + '</div>'
-    + '</div>'
-
-    // Sin tabs — todo visible
-
-    // ─── TAB EJECUTIVO ───
-    + '<div id="tab-ejecutivo">'
-    + '<div class="card">'
-    + '<div class="card-header"><span class="card-icon">📋</span><span class="card-title">Resumen ejecutivo</span></div>'
-    + '<div class="resumen-texto">' + resumenTexto + '</div>'
-    + '<div class="hallazgos-grid">'
-    + (fortalezas.length > 0
-      ? fortalezas.slice(0,2).map(function(f) {
-          return '<div class="hallazgo-item fortaleza">'
-            + '<div class="hallazgo-label">✓ Fortaleza</div>'
-            + '<div class="hallazgo-comp">' + f.competencia + ' — Grado ' + f.analisis.grado + '</div>'
-            + '<div class="hallazgo-desc">' + f.analisis.observacion + '</div>'
-            + '</div>';
-        }).join('')
-      : '<div class="hallazgo-item fortaleza"><div class="hallazgo-label">✓ Fortalezas</div><div class="hallazgo-desc">Sin fortalezas destacadas.</div></div>')
-    + (alertas.length > 0
-      ? alertas.slice(0,2).map(function(a) {
-          return '<div class="hallazgo-item alerta">'
-            + '<div class="hallazgo-label">⚠ Área de desarrollo</div>'
-            + '<div class="hallazgo-comp">' + a.competencia + ' — Grado ' + a.analisis.grado + '</div>'
-            + '<div class="hallazgo-desc">' + a.analisis.observacion + '</div>'
-            + '</div>';
-        }).join('')
-      : '<div class="hallazgo-item alerta"><div class="hallazgo-label">⚠ Alertas</div><div class="hallazgo-desc">Sin áreas críticas detectadas.</div></div>')
-    + '</div>'
-    + '</div>'
-    + '</div>'
-
-    // ─── TAB COMPETENCIAS ───
-    + '<div id="tab-competencias">'
-    + '<div class="card">'
-    + '<div class="card-header"><span class="card-icon">🎯</span><span class="card-title">Análisis por competencia</span></div>'
-    + analisis.map(function(a, idx) {
-        const grado = a.analisis ? a.analisis.grado : 'D';
-        const trans = transcripciones.find(function(t) { return t.competencia_id === a.competencia_id; });
-        const video = videos.find(function(v) { return v.competencia_id === a.competencia_id; });
-        const an = a.analisis || { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin datos.' };
-        return '<div class="competencia-block">'
-          + '<div class="comp-header" onclick="toggleComp(' + idx + ')">'
-          + '<div class="comp-grado grado-' + grado + '">' + grado + '</div>'
-          + '<div class="comp-info">'
-          + '<div class="comp-nombre">' + a.competencia + '</div>'
-          + '<div class="comp-obs">' + an.observacion + '</div>'
-          + '</div>'
-          + '<div class="comp-star">'
-          + ['S','T','A','R'].map(function(l, li) {
-              const val = [an.s, an.t, an.a, an.r][li];
-              return '<div class="star-pip ' + (val > 0 ? 'active' : '') + '">' + l + '</div>';
-            }).join('')
-          + '</div>'
-          + '<span class="comp-chevron" id="chev-' + idx + '">▼</span>'
-          + '</div>'
-          + '<div class="comp-body open" id="cb-' + idx + '"><div style="margin-bottom:.75rem;"></div>'
-          + '<div class="star-detalle">'
-          + [
-              { l:'S', n:'Situación', v: an.s, max:1 },
-              { l:'T', n:'Tarea', v: an.t, max:1 },
-              { l:'A', n:'Acción', v: an.a, max:2 },
-              { l:'R', n:'Resultado', v: an.r, max:2 }
-            ].map(function(item) {
-              const cls = item.v >= item.max ? 'ok' : item.v > 0 ? 'parcial' : 'nok';
-              return '<div class="star-item ' + cls + '">'
-                + '<div class="star-letra">' + item.l + '</div>'
-                + '<div class="star-nombre">' + item.n + '</div>'
-                + '<div class="star-pts">' + item.v + '/' + item.max + ' pts</div>'
-                + '</div>';
-            }).join('')
-          + '</div>'
-          + (trans && trans.texto
-            ? '<div class="transcripcion-box"><div class="transcripcion-label">Transcripción</div>' + trans.texto + '</div>'
-            : '<div class="transcripcion-box"><div class="transcripcion-label">Transcripción</div>Sin transcripción disponible.</div>')
-          + (video && video.url
-            ? '<a href="' + video.url + '" target="_blank" class="video-link">▶ Ver video en Drive</a>'
-            : '')
-          + '</div>'
-          + '</div>';
-      }).join('')
-    + '</div>'
-    + '</div>'
-
-    // ─── TAB EMOCIONAL ───
-    + '<div id="tab-emocional">'
-    + '<div class="card">'
-    + '<div class="card-header"><span class="card-icon">😊</span><span class="card-title">Perfil emocional durante la entrevista</span></div>'
-    + '<div style="background:rgba(176,120,32,0.08);border:1px solid rgba(176,120,32,0.2);border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;font-size:12px;color:#b07820;line-height:1.6;">⚠ <strong>Nota metodológica:</strong> El análisis emocional es referencial y depende de las condiciones de grabación (iluminación, distancia a la cámara, navegador). Se recomienda complementar siempre con la revisión directa del video.</div>'
-    + '<div class="emo-grid">'
-    + '<div class="emo-item"><div class="emo-emoji">' + (emoResumen.emoji || '😐') + '</div><div class="emo-valor">' + (emoResumen.disposicion || '—') + '</div><div class="emo-label">Disposición general</div></div>'
-    + '<div class="emo-item"><div class="emo-emoji">😊</div><div class="emo-valor">' + (emoResumen.pct_positivo || 0) + '%</div><div class="emo-label">Expresión positiva</div></div>'
-    + '<div class="emo-item"><div class="emo-emoji">😟</div><div class="emo-valor">' + (emoResumen.pct_negativo || 0) + '%</div><div class="emo-label">Tensión / Ansiedad</div></div>'
-    + '<div class="emo-item"><div class="emo-emoji">👁️</div><div class="emo-valor">' + (emoResumen.pct_contacto || 0) + '%</div><div class="emo-label">Contacto visual</div></div>'
-    + '</div>'
-    + (emoResumen.alerta_tension ? '<div class="alerta-emo warn">⚠ Se detectó tensión elevada durante la entrevista. Puede indicar ansiedad situacional o dificultad con algunas preguntas.</div>' : '<div class="alerta-emo ok">✓ Nivel emocional dentro de rangos normales.</div>')
-    + (emoResumen.alerta_contacto ? '<div class="alerta-emo warn">⚠ Contacto visual bajo. El candidato tendió a desviar la mirada durante las respuestas.</div>' : '')
-    + (emociones.length === 0 ? '<div style="text-align:center;padding:2rem;color:var(--hint);font-size:13px;">Análisis emocional no disponible para esta entrevista.</div>' : '')
-    + '</div>'
-    + '</div>'
-
-    // ─── TAB BRECHA ───
-    + '<div id="tab-brecha">'
-    + '<div class="card">'
-    + '<div class="card-header"><span class="card-icon">📊</span><span class="card-title">Brecha vs perfil requerido</span></div>'
-    + '<div style="margin-bottom:1.5rem;">'
-    + '<canvas id="radar-chart" style="max-height:300px;"></canvas>'
-    + '</div>'
-    + '<div style="margin-bottom:.5rem;display:flex;gap:2rem;font-size:11px;color:var(--muted);">'
-    + '<span>Barra = Grado obtenido &nbsp;|&nbsp; Línea = Mínimo requerido</span>'
-    + '<span style="margin-left:auto;">A=4 · B=3 · C=2 · D=1</span>'
-    + '</div>'
-    + analisis.map(function(a) {
-        const grado = a.analisis ? a.analisis.grado : 'D';
-        const reqs = GRADO_REQUERIDO[ent.cargo] || GRADO_REQUERIDO['Otro'];
-        const req = reqs[a.competencia_id] || 'C';
-        const pct = (GRADO_VAL[grado] / 4) * 100;
-        const pctReq = (GRADO_VAL[req] / 4) * 100;
-        return '<div class="brecha-item">'
-          + '<div class="brecha-nombre">' + a.competencia + '</div>'
-          + '<div class="brecha-bar-wrap">'
-          + '<div class="brecha-bar ' + grado + '" style="width:' + pct + '%"></div>'
-          + '<div class="brecha-min" style="left:' + pctReq + '%"></div>'
-          + '</div>'
-          + '<div class="brecha-grado grado-' + grado + '" style="font-family:var(--mono);font-size:13px;color:' + (grado==='A'?'var(--green)':grado==='B'?'var(--blue)':grado==='C'?'var(--amber)':'var(--red)') + '">' + grado + '</div>'
-          + '<div class="brecha-req">Req: ' + req + '</div>'
-          + '</div>';
-      }).join('')
-    + '</div>'
-    + '</div>'
-
-    + '</div>'; // fin informe
-
-  document.getElementById('main-content').innerHTML = html;
-
-  // Radar chart
-  setTimeout(function() {
-    const ctx = document.getElementById('radar-chart');
-    if (!ctx || analisis.length === 0) return;
-    const labels = analisis.map(function(a) { return a.competencia; });
-    const obtenido = analisis.map(function(a) { return GRADO_VAL[a.analisis ? a.analisis.grado : 'D']; });
-    const reqs = GRADO_REQUERIDO[ent.cargo] || GRADO_REQUERIDO['Otro'];
-    const requerido = analisis.map(function(a) { return GRADO_VAL[reqs[a.competencia_id] || 'C']; });
-
-    radarChart = new Chart(ctx, {
-      type: 'radar',
-      data: {
-        labels: labels,
-        datasets: [
-          { label: 'Obtenido', data: obtenido, backgroundColor: 'rgba(196,67,42,0.15)', borderColor: 'rgba(196,67,42,0.8)', borderWidth: 2, pointBackgroundColor: '#c4432a' },
-          { label: 'Requerido', data: requerido, backgroundColor: 'rgba(30,58,92,0.08)', borderColor: 'rgba(30,58,92,0.5)', borderWidth: 2, borderDash: [5,5], pointBackgroundColor: '#1e3a5c' }
-        ]
-      },
-      options: {
-        scales: { r: { min: 0, max: 4, ticks: { stepSize: 1, callback: function(v) { return ['','D','C','B','A'][v]; } }, grid: { color: 'rgba(0,0,0,0.06)' } } },
-        plugins: { legend: { position: 'bottom', labels: { font: { family: 'Syne', size: 11 } } } }
-      }
-    });
-  }, 100);
-}
-
-// ══ HELPERS ══
-function switchTab(tab, btn) {}
-
-function toggleComp(idx) {
-  const body = document.getElementById('cb-' + idx);
-  const chev = document.getElementById('chev-' + idx);
-  if (body) body.classList.toggle('open');
-  if (chev) chev.classList.toggle('open');
-}
-
-function calcularEmoResumen(emociones) {
-  if (!emociones || emociones.length === 0) return {};
-  const total = emociones.length;
-  const pctPos = Math.round(emociones.reduce(function(s,e) { return s + (e.pct_positivo||0); }, 0) / total);
-  const pctNeg = Math.round(emociones.reduce(function(s,e) { return s + (e.pct_negativo||0); }, 0) / total);
-  const pctCont = Math.round(emociones.reduce(function(s,e) { return s + (e.pct_contacto_visual||0); }, 0) / total);
-
-  let disposicion, emoji;
-  if (pctPos >= 40) { disposicion = 'Positiva'; emoji = '😊'; }
-  else if (pctNeg >= 40) { disposicion = 'Tensa'; emoji = '😟'; }
-  else { disposicion = 'Neutral'; emoji = '😐'; }
-
-  return {
-    disposicion, emoji,
-    pct_positivo: pctPos,
-    pct_negativo: pctNeg,
-    pct_contacto: pctCont,
-    alerta_tension: pctNeg >= 50,
-    alerta_contacto: pctCont < 30
-  };
-}
-
-function generarResumenEjecutivo(ent, analisis, emoResumen, rec) {
-  if (analisis.length === 0) return 'No hay datos suficientes para generar un resumen ejecutivo.';
-
-  const fortalezas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'A' || a.analisis.grado === 'B'); });
-  const alertas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'D'); });
-  const medio = analisis.filter(function(a) { return a.analisis && a.analisis.grado === 'C'; });
-
-  let texto = ent.nombre + ' se presentó a la entrevista por competencias para el cargo de ' + ent.cargo + '. ';
-
-  if (fortalezas.length > 0) {
-    texto += 'Demostró fortalezas destacadas en ' + fortalezas.map(function(f) { return f.competencia + ' (Grado ' + f.analisis.grado + ')'; }).join(', ') + '. ';
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    mostrarPantalla('screen-countdown');
+    mostrarPreguntaCountdown(0);
+  } catch(err) {
+    alert('No se pudo acceder a tu cámara o micrófono. Por favor permite el acceso e intenta de nuevo.');
   }
-  if (medio.length > 0) {
-    texto += 'Presenta un desempeño básico en ' + medio.map(function(m) { return m.competencia; }).join(' y ') + ', con oportunidades de desarrollo. ';
-  }
-  if (alertas.length > 0) {
-    texto += 'Se identificaron brechas importantes en ' + alertas.map(function(a) { return a.competencia; }).join(' y ') + ', donde las respuestas no evidenciaron los componentes STAR esperados. ';
-  }
+}
 
-  if (emoResumen.disposicion) {
-    texto += 'A nivel emocional mostró una disposición ' + emoResumen.disposicion.toLowerCase() + ' durante la entrevista';
-    if (emoResumen.pct_contacto !== undefined) {
-      texto += ', con un ' + emoResumen.pct_contacto + '% de contacto visual. ';
-    } else {
-      texto += '. ';
+// ══════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════
+function mostrarPreguntaCountdown(idx) {
+  const comp = competencias[idx];
+  document.getElementById('cd-badge').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
+  document.getElementById('cd-competencia').textContent = comp.nombre;
+  document.getElementById('cd-pregunta').textContent = comp.pregunta;
+  document.getElementById('step-indicator').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
+
+  let segs = TIEMPO_COUNTDOWN;
+  document.getElementById('countdown-num').textContent = segs;
+  clearInterval(timerCountdown);
+  timerCountdown = setInterval(function() {
+    segs--;
+    document.getElementById('countdown-num').textContent = segs;
+    if (segs <= 0) {
+      clearInterval(timerCountdown);
+      mostrarGrabacion(idx);
     }
-  }
-
-  if (rec.clase === 'verde') texto += 'En términos generales, el perfil evaluado es compatible con los requerimientos del cargo.';
-  else if (rec.clase === 'amarillo') texto += 'El perfil presenta condiciones parciales para el cargo, recomendándose una segunda instancia de evaluación.';
-  else texto += 'El perfil evaluado presenta brechas significativas respecto al perfil requerido para el cargo.';
-
-  return texto;
+  }, 1000);
 }
 
-// ══ DESCARGAR PDF ══
-function descargarPDF() {
-  const btn = document.getElementById('btn-pdf');
-  btn.disabled = true;
-  btn.innerHTML = '&#9203; Generando...';
-  const elemento = document.getElementById('main-content');
-  const nombre = candidatoActual ? (candidatoActual.nombre || 'informe').replace(/\s+/g,'_') : 'informe';
-  const fecha = new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
-  const opciones = {
-    margin: [10, 10, 10, 10],
-    filename: 'Informe_' + nombre + '_' + fecha + '.pdf',
-    image: { type: 'jpeg', quality: 0.92 },
-    html2canvas: { scale: 1.5, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+// ══════════════════════════════════════
+// GRABACIÓN
+// ══════════════════════════════════════
+function mostrarGrabacion(idx) {
+  const comp = competencias[idx];
+  const pct = Math.round(((idx) / competencias.length) * 100);
+
+  document.getElementById('gr-badge').textContent = 'Pregunta ' + (idx+1);
+  document.getElementById('gr-competencia').textContent = comp.nombre;
+  document.getElementById('gr-pregunta').textContent = comp.pregunta;
+  document.getElementById('prog-label').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+
+  const videoLive = document.getElementById('video-live');
+  videoLive.srcObject = stream;
+
+  document.getElementById('controles-grabacion').style.display = 'flex';
+  document.getElementById('controles-grabando').style.display = 'none';
+  document.getElementById('rec-dot').classList.remove('show');
+  document.getElementById('rec-label').classList.remove('show');
+  document.getElementById('timer-video').classList.remove('show');
+
+  mostrarPantalla('screen-grabacion');
+}
+
+function iniciarGrabacion() {
+  chunks = [];
+  textoActual = '';
+  document.getElementById('transcripcion-texto').textContent = '';
+
+  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  mediaRecorder.ondataavailable = function(e) {
+    if (e.data.size > 0) chunks.push(e.data);
   };
-  html2pdf().set(opciones).from(elemento).save().then(function() {
-    btn.disabled = false;
-    btn.innerHTML = '&#11015; Descargar PDF';
+  mediaRecorder.onstop = function() {
+    blobActual = new Blob(chunks, { type: getSupportedMimeType() });
+    detenerTranscripcion();
+    mostrarPreview();
+  };
+  mediaRecorder.start(1000);
+
+  iniciarTranscripcion();
+
+  document.getElementById('transcripcion-wrap').style.display = 'block';
+  document.getElementById('controles-grabacion').style.display = 'none';
+  document.getElementById('controles-grabando').style.display = 'flex';
+  document.getElementById('rec-dot').classList.add('show');
+  document.getElementById('rec-label').classList.add('show');
+  document.getElementById('timer-video').classList.add('show');
+
+  segundosRestantes = TIEMPO_GRABACION;
+  actualizarTimerVideo();
+
+  timerGrabacion = setInterval(function() {
+    segundosRestantes--;
+    actualizarTimerVideo();
+    if (segundosRestantes <= 0) {
+      clearInterval(timerGrabacion);
+      detenerGrabacion();
+    }
+  }, 1000);
+}
+
+function detenerGrabacion() {
+  clearInterval(timerGrabacion);
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  document.getElementById('rec-dot').classList.remove('show');
+  document.getElementById('rec-label').classList.remove('show');
+  document.getElementById('timer-video').classList.remove('show');
+}
+
+function actualizarTimerVideo() {
+  const m = Math.floor(segundosRestantes / 60);
+  const s = segundosRestantes % 60;
+  document.getElementById('timer-video').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById('timer-video').style.color = segundosRestantes <= 30 ? '#e8593c' : '#fff';
+}
+
+function mostrarPreview() {
+  const videoPreview = document.getElementById('video-preview');
+  videoPreview.src = URL.createObjectURL(blobActual);
+  const isLast = preguntaActual === competencias.length - 1;
+  document.getElementById('btn-next-label').textContent = isLast ? '(finalizar entrevista)' : '(siguiente pregunta)';
+  document.getElementById('pv-badge').textContent = 'Pregunta ' + (preguntaActual+1);
+  document.getElementById('pv-competencia').textContent = competencias[preguntaActual].nombre;
+  mostrarPantalla('screen-preview');
+}
+
+function repetirGrabacion() {
+  mostrarGrabacion(preguntaActual);
+}
+
+// ══════════════════════════════════════
+// SIGUIENTE PREGUNTA / FINALIZAR
+// ══════════════════════════════════════
+async function siguientePregunta() {
+  mostrarPantalla('screen-subiendo');
+  document.getElementById('upload-text').textContent = 'Guardando pregunta ' + (preguntaActual+1) + '...';
+
+  const urlVideo = await subirVideo(blobActual, preguntaActual + 1);
+
+  videosGuardados.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    competencia_id: competencias[preguntaActual].id,
+    url: urlVideo,
+    transcripcion: textoActual.trim()
+  });
+
+  transcripciones.push({
+    pregunta: preguntaActual + 1,
+    competencia_id: competencias[preguntaActual].id,
+    competencia: competencias[preguntaActual].nombre,
+    texto: textoActual.trim(),
+    analisis: analizarSTAR(textoActual.trim(), competencias[preguntaActual])
+  });
+
+  preguntaActual++;
+
+  if (preguntaActual < competencias.length) {
+    mostrarPantalla('screen-countdown');
+    mostrarPreguntaCountdown(preguntaActual);
+  } else {
+    await finalizarEntrevista();
+  }
+}
+
+// ══════════════════════════════════════
+// SUBIR VIDEO A DRIVE
+// ══════════════════════════════════════
+async function subirVideo(blob, numeroPregunta) {
+  try {
+    let progreso = 0;
+    const intervalo = setInterval(function() {
+      progreso = Math.min(progreso + Math.random() * 15, 90);
+      document.getElementById('upload-bar').style.width = progreso + '%';
+      document.getElementById('upload-pct').textContent = Math.round(progreso) + '%';
+    }, 300);
+
+    const base64 = await blobToBase64(blob);
+    const payload = {
+      action: 'guardarRespuesta',
+      nombre: candidato.nombre,
+      token: token,
+      numeroPregunta: numeroPregunta,
+      competencia: competencias[numeroPregunta - 1]?.id || '',
+      videoBase64: base64.split(',')[1]
+    };
+
+    const resp = await fetch(APPS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    clearInterval(intervalo);
+    document.getElementById('upload-bar').style.width = '100%';
+    document.getElementById('upload-pct').textContent = '100%';
+
+    const data = await resp.json();
+    return data.url || '';
+  } catch(err) {
+    console.error('Error subiendo video:', err);
+    return '';
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onloadend = function() { resolve(reader.result); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
   });
 }
 
-// ══ INIT ══
-cargarDatos();
+// ══════════════════════════════════════
+// FINALIZAR ENTREVISTA
+// ══════════════════════════════════════
+async function finalizarEntrevista() {
+  document.getElementById('upload-text').textContent = 'Finalizando entrevista...';
+
+  if (stream) {
+    stream.getTracks().forEach(function(t) { t.stop(); });
+  }
+
+  const payload = {
+    action: 'finalizarEntrevista',
+    nombre: candidato.nombre,
+    rut: candidato.rut,
+    email: candidato.email,
+    cargo: cargo,
+    competencias: competencias.map(function(c) { return c.nombre; }),
+    videos: videosGuardados,
+    transcripciones: transcripciones,
+    respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url, transcripcion: v.transcripcion }; }),
+    token: token
+  };
+
+  try {
+    await fetch(APPS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+
+  mostrarPantalla('screen-gracias');
+}
+
+// ══════════════════════════════════════
+// WEB SPEECH API — TRANSCRIPCIÓN
+// ══════════════════════════════════════
+function iniciarTranscripcion() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-CL';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        textoActual += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('transcripcion-texto').textContent = textoActual + interim;
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
+  };
+
+  recognition.onend = function() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  try { recognition.start(); } catch(e) {}
+}
+
+function detenerTranscripcion() {
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+  }
+  document.getElementById('transcripcion-wrap').style.display = 'none';
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS STAR AUTOMÁTICO
+// ══════════════════════════════════════
+function analizarSTAR(texto, competencia) {
+  if (!texto || texto.length < 15) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin respuesta registrada.' };
+  }
+  const t = texto.toLowerCase();
+
+  // ── S: SITUACIÓN — contexto, cuándo, dónde ocurrió ──
+  const palabrasS = [
+    'cuando','en ese momento','en esa época','trabajaba','estaba','el contexto',
+    'la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa',
+    'en el área','en el equipo','tuve que','me pasó','en ese entonces','en aquel momento',
+    'en ese trabajo','en esa empresa','en ese proyecto','en ese cargo','en esa oportunidad',
+    'hace','años','meses','semanas','el año','el mes','un día','una vez','cierta vez',
+    'me tocó','nos tocó','me enfrenté','enfrentamos','surgió','se presentó','hubo','había'
+  ];
+  const s = palabrasS.filter(p => t.includes(p)).length >= 2 ? 1 : palabrasS.some(p => t.includes(p)) ? 1 : 0;
+
+  // ── T: TAREA — rol, responsabilidad, qué debía hacer ──
+  const palabrasT = [
+    'mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea',
+    'debía','tenía que','me correspondía','mi función','me pidieron','me asignaron',
+    'era responsable','fui el encargado','me tocó','nos tocó a mí','yo debía',
+    'mi trabajo era','mi objetivo era','me encargaron','a mí me','yo tenía',
+    'me designaron','fui designado','como encargado','como líder','como parte de',
+    'mi misión','mi meta','mi deber','debí','tuve que','me propuse','quería lograr',
+    'era necesario que yo','yo era el','me asigné','tomé la responsabilidad'
+  ];
+  const tarea = palabrasT.filter(p => t.includes(p)).length >= 1 ? 1 : 0;
+
+  // ── A: ACCIÓN — verbos de acción en primera persona ──
+  const palabrasA = [
+    'hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté',
+    'llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté',
+    'negocié','hablé','expliqué','trabajé','ayudé','apoyé','lideré','diseñé',
+    'ejecuté','apliqué','busqué','establecí','definí','creé','construí','armé',
+    'generé','elaboré','preparé','envié','realicé','llevé','puse','fui','hablé',
+    'conversé','dialogué','escuché','identifiqué','detecté','encontré','analicé',
+    'evaluué','revisé','cambié','modifiqué','ajusté','adapté','mejoré','optimicé',
+    'empecé','comencé','inicié','terminé','completé','concluí','logré','conseguí',
+    'pude','convencí','motivé','capacité','enseñé','aprendí','solicité','pedí',
+    'pregunté','investigué','consulté','verifiqué','controlé','supervisé','seguí',
+    'me comuniqué','me acerqué','me reuní','me organicé','me comprometí','asumí'
+  ];
+  const accionesEncontradas = palabrasA.filter(p => t.includes(p)).length;
+  const a = accionesEncontradas >= 4 ? 2 : accionesEncontradas >= 1 ? 1 : 0;
+
+  // ── R: RESULTADO — qué pasó, impacto, logro ──
+  const palabrasR = [
+    'resultado','logramos','conseguimos','pudimos','mejoró','aumentó','redujo',
+    'bajó','subió','se solucionó','se resolvió','finalmente','al final','gracias a',
+    'como resultado','el impacto','se cumplió','se alcanzó','exitoso','aprendí',
+    'aprendimos','%','porciento','en menos tiempo','salió bien','salió mejor',
+    'quedó','quedamos','terminamos','concluimos','completamos','entregamos',
+    'superamos','superé','cumplimos','cumplí','alcanzamos','alcancé','funcionó',
+    'tuvo éxito','fue exitoso','fue positivo','fue bueno','fue muy bien',
+    'se logró','lograron','se pudo','se mejoró','se resolvió','cliente satisfecho',
+    'quedó conforme','quedó contento','quedó feliz','valió la pena','fue un éxito',
+    'impacto','beneficio','ganancia','ahorro','eficiencia','mejora','avance',
+    'el equipo','el proyecto','la empresa','todos','el jefe','mi jefe','mi superior',
+    'reconocieron','felicitaron','agradecieron','valoraron','apreciaron','en conclusión',
+    'en resumen','de esa experiencia','lo que aprendí','me enseñó','me quedó claro'
+  ];
+  const resultadoEncontrado = palabrasR.filter(p => t.includes(p)).length;
+  const r = resultadoEncontrado >= 3 ? 2 : resultadoEncontrado >= 1 ? 1 : 0;
+
+  const total = s + tarea + a + r;
+
+  // Bonus por longitud — respuesta larga probablemente tiene más contenido
+  const palabras = texto.trim().split(/\s+/).length;
+  const bonusLongitud = palabras >= 80 ? 1 : 0;
+  const totalConBonus = Math.min(total + bonusLongitud, 6);
+
+  let grado, observacion;
+  if (totalConBonus >= 5) { grado = 'A'; observacion = 'Respuesta completa. Se identifican claramente la situación, el rol, acciones concretas y resultados. Alto nivel de competencia.'; }
+  else if (totalConBonus >= 3) { grado = 'B'; observacion = 'Respuesta sólida. Describe la situación y acciones tomadas. El resultado podría ser más específico o medible.'; }
+  else if (totalConBonus === 2) { grado = 'C'; observacion = 'Respuesta básica. Falta especificar mejor el rol propio o el resultado concreto obtenido.'; }
+  else { grado = 'D'; observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR (situación, tarea, acción, resultado).'; }
+
+  // Penalizar respuestas muy cortas
+  if (palabras < 20 && grado !== 'D') {
+    grado = grado === 'A' ? 'B' : grado === 'B' ? 'C' : 'D';
+    observacion += ' Nota: la respuesta fue muy breve.';
+  }
+
+  return { s, t: tarea, a, r, total: totalConBonus, grado, observacion };
+}
+
+// ══════════════════════════════════════
+// UTILIDADES
+// ══════════════════════════════════════
+function mostrarPantalla(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function getSupportedMimeType() {
+  const tipos = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  for (const t of tipos) {
+    if (MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return 'video/webm';
+}
+
+// Protecciones anti-trampa
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && ['c','a','u','s','p'].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+});
 </script>
 </body>
 </html>
