@@ -596,19 +596,19 @@ function irA(pag) {
 // CARGAR DATOS
 async function cargarDatos() {
   try {
-    var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now());
+    var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
+      method: "GET",
+      redirect: "follow"
+    });
     var data = await resp.json();
     todosLosDatos = data.results || [];
     actualizarStats();
     renderRecientes();
     filtrar();
   } catch(e) {
-    console.warn("Error cargando datos:", e);
-    // Usar datos de ejemplo si falla
-    todosLosDatos = [];
-    actualizarStats();
-    renderRecientes();
-    filtrar();
+    console.warn("Error cargando datos:", e.message);
+    document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error: "+e.message+"</td></tr>";
+    document.getElementById("tabla-recientes").innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--accent);'>Error al cargar</td></tr>";
   }
 }
 
