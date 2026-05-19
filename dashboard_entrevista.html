@@ -6,6 +6,7 @@
 <title>Dashboard Entrevistas — Grupo Cygnus</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 :root {
   --bg: #f7f5f0;
@@ -295,6 +296,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ══ BOTÓN PDF ══ */
+.btn-pdf {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; border-radius: 8px;
+  background: var(--accent); color: #fff;
+  font-family: var(--font); font-size: 12px; font-weight: 700;
+  cursor: pointer; border: none; letter-spacing: .04em;
+  transition: all .15s; text-transform: uppercase;
+}
+.btn-pdf:hover { background: var(--accent2); }
+.btn-pdf:disabled { opacity: .5; cursor: default; }
+
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
   .sidebar { position: static; max-height: 300px; }
@@ -311,7 +324,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
     <div class="brand">Grupo <em>Cygnus</em></div>
     <div class="header-sub">Dashboard · Entrevistas por Competencias</div>
   </div>
-  <div style="font-size:11px;color:rgba(247,245,240,0.3);font-family:var(--mono);" id="header-fecha"></div>
+  <div style="display:flex;align-items:center;gap:1rem;"><div style="font-size:11px;color:rgba(247,245,240,0.3);font-family:var(--mono);" id="header-fecha"></div><button class="btn-pdf" id="btn-pdf" onclick="descargarPDF()" style="display:none;">&#11015; Descargar PDF</button></div>
 </div>
 
 <div class="layout">
@@ -404,6 +417,7 @@ function verCandidato(idx) {
   document.getElementById('ci-' + idx).classList.add('active');
   candidatoActual = entrevistas[idx];
   renderInforme(candidatoActual);
+  document.getElementById("btn-pdf").style.display = "flex";
 }
 
 // ══ CALCULAR RECOMENDACIÓN ══
@@ -465,13 +479,7 @@ function renderInforme(ent) {
     + '</div>'
     + '</div>'
 
-    // Tabs
-    + '<div class="tabs">'
-    + '<button class="tab active" onclick="switchTab(\'ejecutivo\', this)">📋 Análisis ejecutivo</button>'
-    + '<button class="tab" onclick="switchTab(\'competencias\', this)">🎯 Competencias</button>'
-    + '<button class="tab" onclick="switchTab(\'emocional\', this)">😊 Perfil emocional</button>'
-    + '<button class="tab" onclick="switchTab(\'brecha\', this)">📊 Brecha vs cargo</button>'
-    + '</div>'
+    // Sin tabs — todo visible
 
     // ─── TAB EJECUTIVO ───
     + '<div id="tab-ejecutivo">'
@@ -502,7 +510,7 @@ function renderInforme(ent) {
     + '</div>'
 
     // ─── TAB COMPETENCIAS ───
-    + '<div id="tab-competencias" style="display:none;">'
+    + '<div id="tab-competencias">'
     + '<div class="card">'
     + '<div class="card-header"><span class="card-icon">🎯</span><span class="card-title">Análisis por competencia</span></div>'
     + analisis.map(function(a, idx) {
@@ -525,7 +533,7 @@ function renderInforme(ent) {
           + '</div>'
           + '<span class="comp-chevron" id="chev-' + idx + '">▼</span>'
           + '</div>'
-          + '<div class="comp-body" id="cb-' + idx + '">'
+          + '<div class="comp-body open" id="cb-' + idx + '"><div style="margin-bottom:.75rem;"></div>'
           + '<div class="star-detalle">'
           + [
               { l:'S', n:'Situación', v: an.s, max:1 },
@@ -554,7 +562,7 @@ function renderInforme(ent) {
     + '</div>'
 
     // ─── TAB EMOCIONAL ───
-    + '<div id="tab-emocional" style="display:none;">'
+    + '<div id="tab-emocional">'
     + '<div class="card">'
     + '<div class="card-header"><span class="card-icon">😊</span><span class="card-title">Perfil emocional durante la entrevista</span></div>'
     + '<div class="emo-grid">'
@@ -570,7 +578,7 @@ function renderInforme(ent) {
     + '</div>'
 
     // ─── TAB BRECHA ───
-    + '<div id="tab-brecha" style="display:none;">'
+    + '<div id="tab-brecha">'
     + '<div class="card">'
     + '<div class="card-header"><span class="card-icon">📊</span><span class="card-title">Brecha vs perfil requerido</span></div>'
     + '<div style="margin-bottom:1.5rem;">'
@@ -630,21 +638,7 @@ function renderInforme(ent) {
 }
 
 // ══ HELPERS ══
-function switchTab(tab, btn) {
-  ['ejecutivo','competencias','emocional','brecha'].forEach(function(t) {
-    const el = document.getElementById('tab-' + t);
-    if (el) el.style.display = t === tab ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-
-  if (tab === 'brecha' && candidatoActual) {
-    // Re-render radar si es necesario
-    setTimeout(function() {
-      if (!radarChart) renderInforme(candidatoActual);
-    }, 50);
-  }
-}
+function switchTab(tab, btn) {}
 
 function toggleComp(idx) {
   const body = document.getElementById('cb-' + idx);
@@ -708,6 +702,27 @@ function generarResumenEjecutivo(ent, analisis, emoResumen, rec) {
   else texto += 'El perfil evaluado presenta brechas significativas respecto al perfil requerido para el cargo.';
 
   return texto;
+}
+
+// ══ DESCARGAR PDF ══
+function descargarPDF() {
+  const btn = document.getElementById('btn-pdf');
+  btn.disabled = true;
+  btn.innerHTML = '&#9203; Generando...';
+  const elemento = document.getElementById('main-content');
+  const nombre = candidatoActual ? (candidatoActual.nombre || 'informe').replace(/\s+/g,'_') : 'informe';
+  const fecha = new Date().toLocaleDateString('es-CL').replace(/\//g,'-');
+  const opciones = {
+    margin: [10, 10, 10, 10],
+    filename: 'Informe_' + nombre + '_' + fecha + '.pdf',
+    image: { type: 'jpeg', quality: 0.92 },
+    html2canvas: { scale: 1.5, useCORS: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opciones).from(elemento).save().then(function() {
+    btn.disabled = false;
+    btn.innerHTML = '&#11015; Descargar PDF';
+  });
 }
 
 // ══ INIT ══
