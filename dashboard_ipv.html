@@ -488,6 +488,8 @@ function volverLista(){
       renderLista();
       document.getElementById("loading").style.display="none";
       document.getElementById("contenido").style.display="block";
+      document.getElementById("sec-lista").style.display="block";
+      autoSeleccionarCandidato();
       return;
     } catch(e) {}
   }
