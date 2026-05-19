@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<base target="_top">
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:#f2ede6;color:#1c1c1c;font-size:13px;padding:.75rem;}
+
+/* HEADER */
+.header{border-bottom:2px solid #1c1c1c;padding-bottom:.5rem;margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center;}
+.titulo{font-family:'Crimson Pro',serif;font-size:18px;font-weight:600;color:#1c1c1c;}
+.btn{padding:6px 14px;background:#1e2d3d;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;}
+.btn:hover{background:#162330;}
+.btn-gris{background:#6b6860;}
+.btn-verde{background:#2e7d52;}
+
+/* LOADING */
+.loading{text-align:center;padding:2rem;color:#888070;font-size:13px;}
+.empty{color:#a09d96;font-size:12px;text-align:center;padding:1rem;}
+
+/* TABLA CANDIDATOS */
+.section{background:#fff;border:1px solid #ddd5c4;border-radius:8px;padding:.875rem;margin-bottom:.6rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.sec-tit{font-size:10px;font-weight:600;color:#888070;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.6rem;border-bottom:1px solid #ece8e0;padding-bottom:.35rem;}
+.tabla-cands{width:100%;border-collapse:collapse;}
+.tabla-cands th{padding:7px 10px;background:#f7f4ef;border-bottom:1px solid #ddd5c4;text-align:left;color:#888070;text-transform:uppercase;font-size:10px;letter-spacing:.05em;font-weight:500;}
+.tabla-cands td{padding:9px 10px;border-bottom:1px solid #f0ece4;font-size:12px;vertical-align:middle;}
+.tabla-cands tr:last-child td{border-bottom:none;}
+.tabla-cands tr{cursor:pointer;transition:background .12s;}
+.tabla-cands tr:hover td{background:#faf7f2;}
+.tabla-cands tr.act td{background:#f0ece4;}
+.semaforo{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.s-verde{background:#2e7d52;} .s-amarillo{background:#d4830a;} .s-rojo{background:#c0392b;}
+
+/* HERO candidato */
+.hero-candidato{background:#1e2d3d;color:#fff;border-radius:8px;padding:20px 22px;margin-bottom:.6rem;}
+.candidato-nombre{font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;margin-bottom:4px;}
+.candidato-meta{font-size:11px;color:rgba(255,255,255,0.5);}
+
+/* SEMAFORO */
+.semaforo-wrap{display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:6px;margin-bottom:.6rem;}
+.semaforo-grande{width:38px;height:38px;border-radius:50%;flex-shrink:0;}
+.semaforo-titulo{font-weight:600;font-size:14px;}
+.sw-verde{background:#e8f5ee;} .sw-amarillo{background:#fdf5e0;} .sw-rojo{background:#f5e8e8;}
+
+/* DGV */
+.dgv-banner{display:flex;align-items:center;gap:.75rem;background:#1e2d3d;color:#fff;border-radius:8px;padding:16px 20px;margin-bottom:.6rem;}
+.dgv-circle{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.dgv-pt{font-family:'Crimson Pro',serif;font-size:24px;font-weight:600;line-height:1;}
+.dgv-lbl{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.4);text-transform:uppercase;}
+.dgv-info h4{font-family:'Crimson Pro',serif;font-size:15px;font-weight:600;margin-bottom:3px;}
+.dgv-info p{font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5;}
+.dgv-nivel{margin-left:auto;padding:4px 12px;border-radius:10px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;flex-shrink:0;}
+.nvl-alto{background:rgba(46,125,82,0.4);color:#72d4a0;}
+.nvl-promedio{background:rgba(212,131,10,0.4);color:#f5c842;}
+.nvl-bajo{background:rgba(192,57,43,0.4);color:#ff8a7a;}
+
+/* DIMENSIONES */
+.dim-header{font-size:11px;font-weight:600;color:#1e2d3d;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;padding:.4rem .7rem;background:#e8f0f8;border-radius:4px;display:flex;justify-content:space-between;border-left:3px solid #1e2d3d;}
+
+/* ESCALAS */
+.escalas-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.6rem;}
+.esc-card{border-radius:6px;padding:.6rem .75rem;border-top:3px solid #ddd5c4;background:#fff;border:1px solid #ddd5c4;box-shadow:0 1px 2px rgba(0,0,0,0.04);}
+.esc-alto{border-top-color:#2e7d52;background:#f7fbf8;}
+.esc-promedio{border-top-color:#d4830a;background:#fdf9f2;}
+.esc-bajo{border-top-color:#c0392b;background:#fdf5f5;}
+.esc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px;}
+.esc-nombre{font-size:10px;font-weight:600;text-transform:uppercase;color:#888070;letter-spacing:.03em;}
+.esc-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;text-transform:uppercase;}
+.b-alto{background:#d0f0e0;color:#2e7d52;}
+.b-promedio{background:#fdecc0;color:#a06010;}
+.b-bajo{background:#f8d0d0;color:#c0392b;}
+.esc-puntos{display:flex;gap:3px;margin:5px 0;}
+.esc-punto{width:10px;height:10px;border-radius:50%;background:#ece8e0;}
+.esc-punto.on-alto{background:#2e7d52;}
+.esc-punto.on-promedio{background:#d4830a;}
+.esc-punto.on-bajo{background:#c0392b;}
+.esc-texto{font-size:10px;color:#888070;line-height:1.5;border-top:1px solid #f0ece4;padding-top:5px;margin-top:3px;}
+
+/* FORTALEZAS Y ALERTAS */
+.cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem;}
+.card-fort{background:#e8f5ee;border-radius:6px;padding:.6rem .75rem;font-size:12px;color:#2e7d52;line-height:1.5;}
+.card-fort strong{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.2rem;}
+.areas-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;}
+.card-alerta{background:#fff;border:1px solid #ddd5c4;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;padding:.6rem .75rem;font-size:12px;color:#1c1c1c;line-height:1.5;}
+.card-alerta-titulo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#d4830a;margin-bottom:3px;}
+.card-alerta-desc{font-size:11px;color:#888070;line-height:1.45;}
+.sin-alertas{background:#e8f5ee;border-radius:6px;padding:.6rem .75rem;font-size:12px;color:#2e7d52;}
+
+/* SINTESIS */
+.sintesis-card{background:#1e2d3d;color:#fff;border-radius:8px;padding:18px 20px;margin-bottom:.6rem;}
+.sintesis-card .sec-tit{color:rgba(255,255,255,0.45);border-bottom-color:rgba(255,255,255,0.12);}
+.narr-item{display:flex;gap:10px;margin-bottom:10px;}
+.narr-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.narr-text{font-size:12px;color:rgba(255,255,255,0.75);line-height:1.65;}
+.narr-text strong{color:#fff;}
+.interp{font-size:12px;color:rgba(255,255,255,0.75);line-height:1.8;}
+.nota-pie{font-size:10px;color:rgba(255,255,255,0.3);font-style:italic;margin-top:.5rem;padding-top:.4rem;border-top:1px solid rgba(255,255,255,0.1);}
+
+/* RESUMEN */
+.resumen-box{background:#fff;border:1px solid #ddd5c4;border-radius:8px;padding:.875rem;margin-bottom:.6rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+.resumen-box .sec-tit{color:#888070;}
+.resumen-box p{font-family:'Crimson Pro',serif;font-size:15px;color:#3a3530;line-height:1.9;font-style:italic;}
+
+/* BOTONES */
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.5rem;}
+
+@media print{
+  .btn-row,.btn,.header,#sec-lista{display:none!important;}
+  body{background:#fff;padding:0;}
+  .section,.resumen-box{border:1px solid #ccc;page-break-inside:avoid;}
+  .dgv-banner,.sintesis-card,.hero-candidato{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+}
+
+.integ-wrap{display:inline-flex;align-items:center;gap:10px;padding:.55rem 1.1rem;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:.75rem;letter-spacing:.02em;}
+.integridad-ok{background:#e8f5ee;color:#1a5c3a;border:1.5px solid #a8d5b8;}
+.integridad-alerta{background:#fdf5e0;color:#7a5c10;border:1.5px solid #e6c84a;}
+.integridad-riesgo{background:#f5e8e8;color:#8b2020;border:1.5px solid #d4a0a0;}
+.integ-icon{font-size:16px;}
+.integ-body{display:flex;flex-direction:column;}
+.integ-titulo{font-size:12px;font-weight:700;line-height:1.3;}
+.integ-desc{font-size:11px;font-weight:400;opacity:0.8;margin-top:2px;}
+</style>
+</head>
+<body>
+<script>
+// Interceptar datos desde plataforma via localStorage
+(function() {
+  try {
+    var stored = localStorage.getItem("dash_datos_IPV");
+    if (stored) {
+      var datos = JSON.parse(stored);
+      // Sobrescribir el placeholder con los datos reales
+      window._DATOS_PLATAFORMA_IPV = datos;
+    }
+  } catch(e) {}
+})();
+</script>
+
+<div class="header">
+  <div class="titulo">Informe IPV — Inventario de Personalidad para Vendedores</div>
+  <button class="btn" onclick="actualizar()">&#8635; Actualizar</button>
+</div>
+<div id="loading" class="loading">Cargando datos...</div>
+<div id="contenido" style="display:none;">
+
+  <div class="section" id="sec-lista">
+    <div class="sec-tit">Candidatos evaluados</div>
+    <table class="tabla-cands">
+      <thead><tr>
+        <th>Estado</th><th>Nombre</th><th>RUT</th><th>Fecha</th><th>Cargo</th><th>DGV</th><th>Perfil</th><th>Integridad</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div id="perfil" style="display:none;">
+    <div class="hero-candidato">
+      <div class="candidato-nombre" id="p-nombre"></div>
+      <div class="candidato-meta" id="p-meta"></div>
+    </div>
+    <div id="p-semaforo"></div>
+    <div id="p-dgv"></div>
+    <div id="p-integridad"></div>
+    <div class="section">
+      <div id="p-dims"></div>
+    </div>
+    <div class="section" id="sec-forts" style="display:none;">
+      <div class="sec-tit">Fortalezas identificadas</div>
+      <div class="cards-grid" id="p-forts"></div>
+    </div>
+    <div class="section">
+      <div class="sec-tit">Areas de atencion</div>
+      <div id="p-alertas"></div>
+    </div>
+    <div class="sintesis-card">
+      <div class="sec-tit">Sintesis interpretativa</div>
+      <div class="interp" id="p-interp"></div>
+      <div class="nota-pie">Este informe es de caracter orientativo. La decision final de seleccion debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
+    </div>
+    <div class="resumen-box">
+    <div class="sec-tit">Resumen ejecutivo</div>
+    <p id="p-resumen-texto"></p>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-gris" onclick="volverLista()">&#8592; Volver</button>
+      <button class="btn btn-verde" onclick="window.print()">&#128438; Imprimir PDF</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var candidatos=[];
+
+var NOMBRES_ESC={I:'Comprension',II:'Adaptabilidad',III:'Control de si mismo',
+  IV:'Tolerancia a la frustracion',V:'Combatividad',VI:'Dominio',
+  VII:'Seguridad',VIII:'Actividad',IX:'Sociabilidad'};
+
+var INTERP_ESC={
+  I:{alto:'Alta empatia y escucha activa. Se situa facilmente en el lugar del cliente, generando confianza.',
+     promedio:'Capacidad empatica dentro de lo esperado. Comprende al cliente en situaciones habituales.',
+     bajo:'Menor tendencia a ponerse en el lugar del otro. Puede mostrar dificultades en situaciones que requieren alta sintonia emocional.'},
+  II:{alto:'Alta flexibilidad conductual. Ajusta su estilo segun el tipo de cliente y contexto.',
+      promedio:'Flexibilidad adecuada. Se adapta sin dificultad.',
+      bajo:'Menor facilidad para cambiar de enfoque ante situaciones inesperadas.'},
+  III:{alto:'Disciplinado, perseverante y organizado. Maneja bien sus emociones bajo presion.',
+       promedio:'Autocontrol adecuado para situaciones cotidianas.',
+       bajo:'Puede tener dificultades en la gestion emocional ante presion sostenida.'},
+  IV:{alto:'Alta capacidad para sobreponerse a rechazos y fracasos sin personalizarlos.',
+      promedio:'Tolerancia a la frustracion dentro del rango esperado.',
+      bajo:'Mayor sensibilidad al fracaso y rechazo. Puede desmotivarse ante resultados negativos reiterados.'},
+  V:{alto:'Competitivo y orientado al logro. Disfruta el desafio comercial.',
+     promedio:'Puede sostener posiciones y negociar sin dificultad.',
+     bajo:'Menor orientacion al conflicto. Puede ceder rapidamente en negociaciones.'},
+  VI:{alto:'Alta capacidad de influencia y ascendencia natural. Persuade con conviccion.',
+      promedio:'Capacidad de influencia dentro de lo esperado.',
+      bajo:'Menor tendencia al dominio interpersonal. Puede mostrarse deferente cuando se requiere firmeza.'},
+  VII:{alto:'Alta confianza en si mismo. Enfrenta situaciones nuevas o de riesgo sin inhibicion.',
+       promedio:'Se desenvuelve bien sin inseguridad marcada.',
+       bajo:'Menor confianza personal. Puede dudar en situaciones de riesgo.'},
+  VIII:{alto:'Persona dinamica y energica. Busca accion constante.',
+        promedio:'Mantiene un ritmo de trabajo estable.',
+        bajo:'Menor orientacion a la actividad dinamica.'},
+  IX:{alto:'Extravertida, con facilidad para crear vinculos. Base esencial para roles comerciales.',
+      promedio:'Establece contactos sin dificultad.',
+      bajo:'Menor orientacion al contacto social. Puede preferir trabajar de forma mas independiente.'}
+};
+
+var INTERP_DGV={
+  alto:'Vocacion comercial clara: combina habilidad relacional con impetu persuasivo y autocontrol.',
+  promedio:'Capacidades comerciales dentro del rango esperado. Con motivacion adecuada puede desempenarse bien.',
+  bajo:'Baja orientacion a la venta. Conviene explorar otras areas o trabajar el desarrollo de competencias comerciales.'
+};
+
+function nvl(pt){ return pt<=3?'bajo':pt<=7?'promedio':'alto'; }
+function nvlLabel(pt){ return pt<=3?'Bajo':pt<=7?'Promedio':'Alto'; }
+
+function getSemaforo(dgvN,areas){
+  var nAreas=areas.filter(function(a){return a.trim();}).length;
+  if(dgvN==='Alto'&&nAreas===0) return {clase:'s-verde',swClase:'sw-verde',color:'#1a5c3a',titulo:'Perfil comercial solido',texto:'Muestra clara disposicion para la venta con fortalezas en las dimensiones clave.'};
+  if(dgvN==='Bajo'||nAreas>=3) return {clase:'s-rojo',swClase:'sw-rojo',color:'#8b2020',titulo:'Perfil con areas de atencion',texto:'Se recomienda profundizar en entrevista antes de tomar una decision de seleccion.'};
+  return {clase:'s-amarillo',swClase:'sw-amarillo',color:'#7a5c10',titulo:'Perfil dentro del rango esperado',texto:'El candidato muestra capacidades comerciales con algunas areas a desarrollar.'};
+}
+
+function parseEsc(str){
+  if(!str) return [5,5,5,5,5,5,5,5,5];
+  return String(str).split(',').map(function(v){return parseInt(v.trim())||5;});
+}
+
+function generarResumen(nombre,dgvN,perfilRA,escPT,fortalezas,areas){
+  var KEYS=['I','II','III','IV','V','VI','VII','VIII','IX'];
+  var nombreCorto=nombre.split(' ')[0];
+  var txt='';
+  if(dgvN==='Alto') txt+=nombreCorto+' presenta una solida disposicion hacia la actividad comercial, con caracteristicas de personalidad claramente alineadas al perfil de vendedor. ';
+  else if(dgvN==='Bajo') txt+=nombreCorto+' muestra una orientacion comercial limitada, lo que sugiere que roles de venta directa pueden no ser su area de mayor fortaleza. ';
+  else txt+=nombreCorto+' presenta caracteristicas de personalidad compatibles con roles comerciales, con un perfil equilibrado que puede desarrollarse con la motivacion y el contexto adecuados. ';
+  if(perfilRA==='Receptivo') txt+='Su perfil es predominantemente receptivo, con mayor afinidad hacia la fidelizacion de clientes y la venta en mercados ya establecidos. ';
+  else if(perfilRA==='Agresivo') txt+='Su perfil es predominantemente activo, con mayor orientacion hacia la apertura de nuevos mercados y la prospeccion de clientes. ';
+  else txt+='Su perfil muestra un equilibrio entre la venta receptiva y la venta activa, adaptandose tanto a la mantencion de cartera como a la captacion de nuevos clientes. ';
+  var altas=KEYS.filter(function(e,i){return escPT[i]>=7;}).map(function(e){return NOMBRES_ESC[e].toLowerCase();});
+  var bajas=KEYS.filter(function(e,i){return escPT[i]<=3;}).map(function(e){return NOMBRES_ESC[e].toLowerCase();});
+  if(altas.length>0){
+    var ult=altas.slice(-1)[0];var rest=altas.slice(0,-1);
+    txt+='Entre sus principales recursos se destaca'+(altas.length>1?'n':'')+' la '+(rest.length?rest.join(', la ')+' y la ':'')+ult+', dimensiones que representan ventajas concretas en su desempeno comercial. ';
+  }
+  if(bajas.length>0){
+    var ult2=bajas.slice(-1)[0];var rest2=bajas.slice(0,-1);
+    txt+='Como area'+(bajas.length>1?'s':'')+' de desarrollo se identifica'+(bajas.length>1?'n':'')+' la '+(rest2.length?rest2.join(', la ')+' y la ':'')+ult2+', aspecto que conviene explorar en la entrevista. ';
+  }
+  if(dgvN==='Alto'&&bajas.length===0) txt+='En terminos generales, el perfil es consistente con los requerimientos de un cargo comercial y se recomienda continuar el proceso de seleccion.';
+  else if(dgvN==='Bajo'||bajas.length>=3) txt+='Se recomienda complementar esta evaluacion con una entrevista en profundidad antes de tomar una decision.';
+  else txt+='En terminos generales, el perfil es compatible con funciones comerciales y se sugiere profundizar en las areas senaladas durante la entrevista.';
+  return txt;
+}
+
+function generarPuntos(pt, niv){
+  // 10 puntos, los primeros pt encendidos
+  var puntos='';
+  for(var i=1;i<=10;i++){
+    var on = i<=pt ? ' on-'+niv.toLowerCase() : '';
+    puntos+='<span class="esc-punto'+on+'"></span>';
+  }
+  return puntos;
+}
+
+function limpiarFecha(f){
+  if(!f) return "-";
+  var s=String(f);
+  if(s.indexOf("T")>-1){
+    var p=s.split("T")[0].split("-");
+    if(p.length===3) return p[2]+"/"+p[1]+"/"+p[0];
+  }
+  return s;
+}
+
+function getFocoTxt(foco){
+  if(foco===0) return '<span style="color:#1a5c3a;">&#10003; Sin alertas</span>';
+  if(foco<=3) return '<span style="color:#7a5c10;">&#9888; Leve ('+foco+')</span>';
+  return '<span style="color:#8b2020;font-weight:bold;">&#9888; Alerta ('+foco+')</span>';
+}
+
+function getIntegridadHtml(foco){
+  if(foco===0) return "<div class='integ-wrap integridad-ok'><span class='integ-icon'>&#10003;</span><div class='integ-body'><div class='integ-titulo'>Sin alertas de integridad</div><div class='integ-desc'>El candidato no cambio de ventana. Resultado confiable.</div></div></div>";
+  if(foco<=3) return "<div class='integ-wrap integridad-alerta'><span class='integ-icon'>&#9888;</span><div class='integ-body'><div class='integ-titulo'>Alerta leve &mdash; "+foco+" cambio(s) detectado(s)</div><div class='integ-desc'>Puede ser accidental. Considere este antecedente.</div></div></div>";
+  return "<div class='integ-wrap integridad-riesgo'><span class='integ-icon'>&#9888;</span><div class='integ-body'><div class='integ-titulo'>Alerta de integridad &mdash; "+foco+" cambios</div><div class='integ-desc'>Riesgo de consulta externa. Evaluar validez del resultado.</div></div></div>";
+}
+
+function actualizar(){
+  document.getElementById('loading').style.display='block';
+  document.getElementById('contenido').style.display='none';
+  document.getElementById('perfil').style.display='none';
+  document.getElementById('sec-lista').style.display='block';
+  google.script.run
+    .withSuccessHandler(function(json){
+      candidatos=JSON.parse(json);
+      renderLista();
+      document.getElementById('loading').style.display='none';
+      document.getElementById('contenido').style.display='block';
+    })
+    .withFailureHandler(function(e){
+      document.getElementById('loading').textContent='Error: '+e.message;
+    })
+    .getDatosIPV();
+}
+
+function renderLista(){
+  var tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  if(!candidatos.length){
+    tbody.innerHTML='<tr><td colspan="8" class="empty">Sin candidatos aun</td></tr>';
+    return;
+  }
+  candidatos.forEach(function(c,i){
+    var dgvN=c[7]||nvlLabel(parseInt(c[6])||5);
+    var areas=(c[10]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a&&a!=='Sin areas criticas';});
+    var sem=getSemaforo(dgvN,areas);
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td><span class="semaforo '+sem.clase+'"></span></td>'+
+      '<td><strong>'+(c[1]||'-')+'</strong></td>'+
+      '<td style="color:#6b6860;">'+(c[2]||'-')+'</td>'+
+      '<td style="color:#6b6860;font-size:10px;">'+(c[0]||'-')+'</td>'+
+      '<td>'+(c[5]||'-')+'</td>'+
+      '<td style="font-weight:bold;">PT '+(c[6]||'-')+' — '+dgvN+'</td>'+
+      '<td style="font-size:11px;color:#1a3a5c;font-weight:bold;">'+(c[8]||'-')+'</td>'+
+      '<td>'+getFocoTxt(parseInt(c[15])||0)+'</td>';
+    (function(idx,row){row.onclick=function(){mostrarPerfil(idx,row);};})(i,tr);
+    tbody.appendChild(tr);
+  });
+}
+
+function mostrarPerfil(idx,tr){
+  document.querySelectorAll('.tabla-cands tr').forEach(function(r){r.classList.remove('act');});
+  tr.classList.add('act');
+  var c=candidatos[idx];
+  document.getElementById('sec-lista').style.display='none';
+  document.getElementById('perfil').style.display='block';
+
+  document.getElementById('p-nombre').textContent=c[1]||'-';
+  document.getElementById('p-meta').textContent=
+    'RUT: '+(c[2]||'-')+
+    (c[3]?' | Edad: '+c[3]:'')+
+    (c[4]?' | Sexo: '+c[4]:'')+
+    (c[5]?' | Cargo: '+c[5]:'')+
+    ' | Fecha: '+limpiarFecha(c[0]);
+
+  var dgvPT=parseInt(c[6])||5;
+  var dgvN=c[7]||nvlLabel(dgvPT);
+  var perfilRA=c[8]||'Equilibrado';
+  var fortalezas=(c[9]||'').split(',').map(function(f){return f.trim();}).filter(function(f){return f&&f!=='Sin fortalezas destacadas';});
+  var areas=(c[10]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a&&a!=='Sin areas criticas';});
+  var interp=c[11]||'';
+  var escPT=parseEsc(c[12]);
+  var ptR=parseInt(c[13])||0;
+  var ptA=parseInt(c[14])||0;
+
+  // Semaforo
+  var sem=getSemaforo(dgvN,areas);
+  document.getElementById('p-integridad').innerHTML=getIntegridadHtml(parseInt(c[15])||0);
+  document.getElementById('p-semaforo').innerHTML=
+    '<div class="semaforo-wrap '+sem.swClase+'">'+
+    '<div class="semaforo-grande '+sem.clase+'"></div>'+
+    '<div class="semaforo-texto"><div class="semaforo-titulo" style="color:'+sem.color+'">'+sem.titulo+'</div>'+
+    '<div style="color:#6b6860;font-size:11px;margin-top:2px;">'+sem.texto+'</div></div></div>';
+
+  // DGV
+  document.getElementById('p-dgv').innerHTML=
+    '<div class="dgv-banner">'+
+    '<div class="dgv-circle"><div class="dgv-pt">'+dgvPT+'</div><div class="dgv-lbl">PT</div></div>'+
+    '<div class="dgv-info"><h4>DGV — Disposicion General para la Venta</h4>'+
+    '<p>'+INTERP_DGV[nvl(dgvPT)]+'</p></div>'+
+    '<div class="dgv-nivel nvl-'+nvl(dgvPT)+'">'+dgvN+'</div></div>';
+
+  // Dims
+  var dimsHtml='';
+  dimsHtml+='<div class="dim-header"><span>R — Receptividad | Escalas I a IV</span><span>PT '+ptR+' — '+nvlLabel(ptR)+'</span></div>';
+  dimsHtml+='<div class="escalas-grid">';
+  ['I','II','III','IV'].forEach(function(e,i){
+    var pt=escPT[i]||5,niv=nvlLabel(pt),pct=Math.round(pt/10*100);
+    dimsHtml+='<div class="esc-card esc-'+niv.toLowerCase()+'">'+
+      '<div class="esc-head"><div class="esc-nombre">'+e+' — '+NOMBRES_ESC[e]+'</div>'+
+      '<div class="esc-badge b-'+niv.toLowerCase()+'">'+niv+'</div></div>'+
+      '<div class="esc-puntos">'+generarPuntos(pt,niv)+'</div>'+
+      '<div class="esc-texto">'+INTERP_ESC[e][nvl(pt)]+'</div></div>';
+  });
+  dimsHtml+='</div>';
+
+  dimsHtml+='<div class="dim-header" style="margin-top:.5rem;"><span>A — Agresividad Comercial | Escalas V a VIII</span><span>PT '+ptA+' — '+nvlLabel(ptA)+'</span></div>';
+  dimsHtml+='<div class="escalas-grid">';
+  ['V','VI','VII','VIII'].forEach(function(e,i){
+    var pt=escPT[i+4]||5,niv=nvlLabel(pt),pct=Math.round(pt/10*100);
+    dimsHtml+='<div class="esc-card esc-'+niv.toLowerCase()+'">'+
+      '<div class="esc-head"><div class="esc-nombre">'+e+' — '+NOMBRES_ESC[e]+'</div>'+
+      '<div class="esc-badge b-'+niv.toLowerCase()+'">'+niv+'</div></div>'+
+      '<div class="esc-puntos">'+generarPuntos(pt,niv)+'</div>'+
+      '<div class="esc-texto">'+INTERP_ESC[e][nvl(pt)]+'</div></div>';
+  });
+  dimsHtml+='</div>';
+
+  var ptIX=escPT[8]||5,nivIX=nvlLabel(ptIX),pctIX=Math.round(ptIX/10*100);
+  dimsHtml+='<div class="dim-header" style="margin-top:.5rem;"><span>Escala IX — Sociabilidad</span><span>PT '+ptIX+' — '+nivIX+'</span></div>';
+  dimsHtml+='<div class="escalas-grid"><div class="esc-card esc-'+nivIX.toLowerCase()+'">'+
+    '<div class="esc-head"><div class="esc-nombre">IX — Sociabilidad</div>'+
+    '<div class="esc-badge b-'+nivIX.toLowerCase()+'">'+nivIX+'</div></div>'+
+    '<div class="esc-puntos">'+generarPuntos(ptIX,nivIX)+'</div>'+
+    '<div class="esc-texto">'+INTERP_ESC.IX[nvl(ptIX)]+'</div></div></div>';
+
+  document.getElementById('p-dims').innerHTML=dimsHtml;
+
+  // Fortalezas
+  var secForts=document.getElementById('sec-forts');
+  if(fortalezas.length>0){
+    document.getElementById('p-forts').innerHTML=fortalezas.slice(0,6).map(function(f){
+      return '<div class="card-fort"><strong>✓ Fortaleza</strong>'+f+'</div>';
+    }).join('');
+    secForts.style.display='block';
+  } else { secForts.style.display='none'; }
+
+  // Alertas
+  var DESC_AREAS={
+    'Comprension':'Puede mostrar dificultades para ponerse en el lugar del cliente o captar sus necesidades implicitas.',
+    'Adaptabilidad':'Menor flexibilidad ante diferentes tipos de clientes o situaciones comerciales inesperadas.',
+    'Control de si mismo':'Puede experimentar dificultades para mantener la calma bajo presion o ante resultados negativos sostenidos.',
+    'Tolerancia a la frustracion':'Mayor sensibilidad al rechazo. Puede desmotivarse ante ciclos de venta largos o con muchas negativas.',
+    'Combatividad':'Tendencia a ceder rapidamente en negociaciones. Puede tener dificultades para sostener posiciones.',
+    'Dominio':'Menor ascendencia sobre el cliente. Puede costarle conducir la conversacion comercial con firmeza.',
+    'Seguridad':'Puede dudar antes de tomar iniciativa o proponer soluciones en situaciones nuevas o de riesgo.',
+    'Actividad':'Menor orientacion a la accion dinamica. Puede preferir ambientes tranquilos sobre roles de alta actividad.',
+    'Sociabilidad':'Menor facilidad para crear vinculos nuevos. Puede preferir trabajar de forma independiente.'
+  };
+  var pAlertas=document.getElementById('p-alertas');
+  if(areas.length>0){
+    pAlertas.innerHTML='<div class="areas-grid">'+areas.map(function(a){
+      var desc=DESC_AREAS[a]||'Aspecto a explorar en entrevista para evaluar su impacto en el rol comercial.';
+      return '<div class="card-alerta">'+
+        '<div class="card-alerta-titulo">⚠ '+a+'</div>'+
+        '<div class="card-alerta-desc">'+desc+'</div>'+
+      '</div>';
+    }).join('')+'</div>';
+  } else {
+    pAlertas.innerHTML='<div class="sin-alertas">✓ No se identifican areas de atencion relevantes en este perfil.</div>';
+  }
+
+  // Sintesis
+  var lineas=interp.split('|').map(function(l){return l.trim();}).filter(function(l){return l;});
+  document.getElementById('p-interp').textContent=lineas.slice(0,4).join(' — ')||interp;
+
+  // Resumen ejecutivo
+  document.getElementById('p-resumen-texto').textContent=
+    generarResumen(c[1]||'El candidato',dgvN,perfilRA,escPT,fortalezas,areas);
+}
+
+function volverLista(){
+  document.getElementById('perfil').style.display='none';
+  document.getElementById('sec-lista').style.display='block';
+}
+
+(async function() {
+  // 1. Leer desde localStorage (viene de la plataforma)
+  var stored = localStorage.getItem("dash_datos_IPV");
+  if (stored) {
+    try {
+      candidatos = JSON.parse(stored);
+      renderLista();
+      document.getElementById("loading").style.display="none";
+      document.getElementById("contenido").style.display="block";
+      return;
+    } catch(e) {}
+  }
+  // 2. Cargar desde API directamente
+  try {
+    var resp = await fetch("https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec?action=getDatosIPV", {redirect:"follow"});
+    var data = await resp.json();
+    if(data && data.length) {
+      candidatos = data;
+      renderLista();
+      document.getElementById("loading").style.display="none";
+      document.getElementById("contenido").style.display="block";
+    } else {
+      document.getElementById("loading").innerHTML = "No hay evaluaciones registradas.";
+    }
+  } catch(e) {
+    document.getElementById("loading").innerHTML = "Error al cargar: " + e.message;
+  }
+})();
+if(DATOS_SERVIDOR && typeof DATOS_SERVIDOR !== "string"){
+  candidatos=DATOS_SERVIDOR;
+  renderLista();
+  document.getElementById('loading').style.display='none';
+  document.getElementById('contenido').style.display='block';
+} else {
+  actualizar();
+}
+
+// Auto-selección desde URL (plataforma web)
+window.addEventListener("load", function() {
+  var params = new URLSearchParams(window.location.search);
+  var rutParam = params.get("rut");
+  var nombreParam = params.get("nombre");
+  if (rutParam || nombreParam) {
+    // Buscar candidato que coincida
+    var rows = document.querySelectorAll("#lista-body tr, #tabla-body tr");
+    for (var i = 0; i < rows.length; i++) {
+      var rut = rows[i].getAttribute("data-rut") || "";
+      var nom = rows[i].getAttribute("data-nombre") || "";
+      if ((rutParam && rut.includes(decodeURIComponent(rutParam))) ||
+          (nombreParam && nom.toLowerCase().includes(decodeURIComponent(nombreParam).toLowerCase()))) {
+        rows[i].click();
+        rows[i].scrollIntoView({behavior:"smooth", block:"center"});
+        break;
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
