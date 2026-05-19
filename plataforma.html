@@ -439,7 +439,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div class="card-body" style="padding:0;">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Candidato</th><th>Test</th><th>Fecha</th><th>Resultado</th><th>Informe</th></tr></thead>
+              <thead><tr><th>Candidato</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
               <tbody id="tabla-recientes"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Cargando...</td></tr></tbody>
             </table>
           </div>
@@ -469,7 +469,7 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Resultado</th><th>Informe</th></tr></thead>
+            <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
             <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
           </table>
         </div>
@@ -652,9 +652,9 @@ function renderTablaComun(datos, tbodyId, cols) {
       ? "<button class='btn btn-ghost btn-sm' onclick=\"window.open('"+dashUrl+"','_blank')\">Ver informe</button>"
       : "<span style='color:var(--muted);font-size:11px;'>—</span>";
     if(cols===5) {
-      html += "<tr><td class='td-nombre'>"+( d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+(d.nivel?"<span class='badge "+nivCls+"'>"+(d.nivel)+"</span>":"<span style='color:var(--muted);font-size:11px;'>Ver informe</span>")+"</td><td>"+btnVer+"</td></tr>";
+      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     } else {
-      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+(d.nivel?"<span class='badge "+nivCls+"'>"+(d.nivel)+"</span>":"<span style='color:var(--muted);font-size:11px;'>Ver informe</span>")+"</td><td>"+btnVer+"</td></tr>";
+      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     }
   });
   tbody.innerHTML = html;
@@ -683,7 +683,7 @@ async function cargarHistorial() {
     var envios = data.envios || [];
     document.getElementById("st-enviados").textContent = envios.length;
     if (!envios.length) {
-      document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+      document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
       return;
     }
     var html = "";
