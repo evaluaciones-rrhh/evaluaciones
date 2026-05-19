@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrevista por Competencias — Grupo Cygnus</title>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -371,12 +372,20 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 
     <div class="video-wrap" style="position:relative;">
       <video id="video-live" autoplay muted playsinline></video>
-            <div class="rec-dot" id="rec-dot"></div>
+      <canvas id="canvas-facial" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;"></canvas>
+      <div class="rec-dot" id="rec-dot"></div>
       <div class="rec-label" id="rec-label">● REC</div>
       <div class="timer-video" id="timer-video">3:00</div>
     </div>
 
     <!-- Panel emocional en tiempo real -->
+    <div id="panel-emocional" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;">Análisis en tiempo real</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;">
+        <div style="text-align:center;">
+          <div id="emo-expresion" style="font-size:24px;margin-bottom:4px;">😐</div>
+          <div style="font-size:10px;color:var(--muted);">Expresión</div>
+        </div>
         <div style="text-align:center;">
           <div id="emo-contacto" style="font-size:24px;margin-bottom:4px;">👁️</div>
           <div style="font-size:10px;color:var(--muted);">Contacto visual</div>
@@ -429,9 +438,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <button class="btn btn-next btn-full" onclick="siguientePregunta()">
         Continuar → <span id="btn-next-label"></span>
       </button>
-      <button class="btn btn-ghost btn-full" onclick="repetirGrabacion()">
-        ↺ Grabar de nuevo
-      </button>
+
     </div>
   </div>
 </div>
@@ -486,10 +493,12 @@ let chunks = [];
 let blobActual = null;
 let videosGuardados = [];
 let transcripciones = [];
+let datosEmocionales = [];
 let recognition = null;
 let textoActual = '';
 let intervaloFacial = null;
 let faceApiCargado = false;
+let contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
 let timerGrabacion = null;
 let timerCountdown = null;
 let segundosRestantes = TIEMPO_GRABACION;
@@ -516,8 +525,21 @@ window.addEventListener('load', async function() {
   }
 
   await cargarCompetencias();
+  cargarModelosFacial();
 });
 
+async function cargarModelosFacial() {
+  try {
+    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
+    await Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
+    ]);
+    faceApiCargado = true;
+  } catch(e) {
+    faceApiCargado = false;
+  }
 }
 
 async function cargarCompetencias() {
@@ -629,7 +651,13 @@ function iniciarGrabacion() {
 
   iniciarTranscripcion();
 
-  document.getElementById('transcripcion-wrap').style.display = 'block';
+  contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
+  if (faceApiCargado) {
+    document.getElementById('panel-emocional').style.display = 'block';
+    iniciarAnalisisFacial();
+  }
+
+  // transcripcion oculta al candidato
   document.getElementById('controles-grabacion').style.display = 'none';
   document.getElementById('controles-grabando').style.display = 'flex';
   document.getElementById('rec-dot').classList.add('show');
@@ -676,9 +704,6 @@ function mostrarPreview() {
   mostrarPantalla('screen-preview');
 }
 
-function repetirGrabacion() {
-  mostrarGrabacion(preguntaActual);
-}
 
 // ══════════════════════════════════════
 // SIGUIENTE PREGUNTA / FINALIZAR
@@ -688,6 +713,14 @@ async function siguientePregunta() {
   document.getElementById('upload-text').textContent = 'Guardando pregunta ' + (preguntaActual+1) + '...';
 
   const urlVideo = await subirVideo(blobActual, preguntaActual + 1);
+
+  const resumenEmo = generarResumenEmocional();
+  if (resumenEmo) datosEmocionales.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    competencia_id: competencias[preguntaActual].id,
+    ...resumenEmo
+  });
 
   videosGuardados.push({
     pregunta: preguntaActual + 1,
@@ -783,6 +816,7 @@ async function finalizarEntrevista() {
     competencias: competencias.map(function(c) { return c.nombre; }),
     videos: videosGuardados,
     transcripciones: transcripciones,
+    emociones: datosEmocionales,
     respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url, transcripcion: v.transcripcion }; }),
     token: token
   };
@@ -797,6 +831,56 @@ async function finalizarEntrevista() {
   } catch(e) {}
 
   mostrarPantalla('screen-gracias');
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS FACIAL
+// ══════════════════════════════════════
+function iniciarAnalisisFacial() {
+  const video = document.getElementById('video-live');
+  clearInterval(intervaloFacial);
+  intervaloFacial = setInterval(async function() {
+    if (!faceApiCargado || !video || video.paused) return;
+    try {
+      const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.4})).withFaceLandmarks(true).withFaceExpressions();
+      if (!det) return;
+      const exp = det.expressions;
+      contadorFrames.totalFrames++;
+      const positivo = (exp.happy||0) + (exp.surprised||0)*0.3;
+      const negativo = (exp.sad||0) + (exp.angry||0) + (exp.fearful||0) + (exp.disgusted||0);
+      if (positivo > 0.3) { contadorFrames.positivo++; document.getElementById('emo-expresion').textContent='😊'; }
+      else if (negativo > 0.3) { contadorFrames.negativo++; document.getElementById('emo-expresion').textContent='😟'; }
+      else { contadorFrames.neutro++; document.getElementById('emo-expresion').textContent='😐'; }
+      const lm = det.landmarks;
+      const le = lm.getLeftEye(), re = lm.getRightEye();
+      if (le && re) {
+        const cx = video.videoWidth / 2;
+        const ex = (le[0].x + re[0].x) / 2;
+        if (Math.abs(ex - cx) / cx < 0.25) { contadorFrames.contacto++; document.getElementById('emo-contacto').textContent='👁️'; }
+        else { document.getElementById('emo-contacto').textContent='👀'; }
+      }
+      document.getElementById('emo-confianza').textContent = det.detection.score > 0.8 ? '💪' : det.detection.score > 0.5 ? '📊' : '🔍';
+    } catch(e) {}
+  }, 1500);
+}
+
+function detenerAnalisisFacial() {
+  clearInterval(intervaloFacial);
+  intervaloFacial = null;
+}
+
+function generarResumenEmocional() {
+  if (contadorFrames.totalFrames === 0) return null;
+  const total = contadorFrames.totalFrames;
+  const pp = Math.round((contadorFrames.positivo/total)*100);
+  const pn = Math.round((contadorFrames.negativo/total)*100);
+  const pu = Math.round((contadorFrames.neutro/total)*100);
+  const pc = Math.round((contadorFrames.contacto/total)*100);
+  let disposicion, emoji;
+  if (pp >= 40) { disposicion='Positiva'; emoji='😊'; }
+  else if (pn >= 40) { disposicion='Tensa / Ansiosa'; emoji='😟'; }
+  else { disposicion='Neutral / Serena'; emoji='😐'; }
+  return { disposicion, emoji, pct_positivo:pp, pct_negativo:pn, pct_neutro:pu, pct_contacto_visual:pc, alerta_tension:pn>=50, alerta_sin_contacto:pc<30, frames_analizados:total };
 }
 
 // ══════════════════════════════════════
@@ -841,6 +925,8 @@ function detenerTranscripcion() {
     recognition = null;
   }
   document.getElementById('transcripcion-wrap').style.display = 'none';
+  detenerAnalisisFacial();
+  document.getElementById('panel-emocional').style.display = 'none';
 }
 
 // ══════════════════════════════════════
