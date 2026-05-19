@@ -479,8 +479,8 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 // CONFIGURACIÓN
 // ══════════════════════════════════════
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
-const TIEMPO_GRABACION = 180; // 3 minutos en segundos
-const TIEMPO_COUNTDOWN = 10;  // segundos de preparación
+const TIEMPO_GRABACION = 180;
+const TIEMPO_COUNTDOWN = 10;
 
 // ══════════════════════════════════════
 // ESTADO
@@ -494,13 +494,13 @@ let mediaRecorder = null;
 let chunks = [];
 let blobActual = null;
 let videosGuardados = [];
-let transcripciones = [];   // guarda texto transcrito por pregunta
-let datosEmocionales = [];  // análisis emocional por pregunta
-let intervaloFacial = null; // intervalo de análisis facial
-let faceApiCargado = false; // si face-api.js está listo
+let transcripciones = [];
+let datosEmocionales = [];
+let recognition = null;
+let textoActual = '';
+let intervaloFacial = null;
+let faceApiCargado = false;
 let contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
-let recognition = null;     // Web Speech API
-let textoActual = '';       // texto acumulado de la pregunta actual
 let timerGrabacion = null;
 let timerCountdown = null;
 let segundosRestantes = TIEMPO_GRABACION;
@@ -522,17 +522,13 @@ window.addEventListener('load', async function() {
         document.getElementById('screen-bloqueado').classList.add('show');
         return;
       }
-      // Precargar nombre si viene en el token
       if (d.nombre) document.getElementById('inp-nombre').value = d.nombre;
     } catch(e) {}
   }
 
-  // Cargar competencias según cargo
   await cargarCompetencias();
-
-  // Cargar modelos de face-api.js en segundo plano
   cargarModelosFacial();
-}
+});
 
 async function cargarModelosFacial() {
   try {
@@ -543,12 +539,10 @@ async function cargarModelosFacial() {
       faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
     ]);
     faceApiCargado = true;
-    console.log('Face API cargada OK');
   } catch(e) {
-    console.log('Face API no disponible:', e.message);
     faceApiCargado = false;
   }
-});
+}
 
 async function cargarCompetencias() {
   try {
@@ -557,7 +551,6 @@ async function cargarCompetencias() {
     competencias = d.competencias || [];
     document.getElementById('num-preguntas').textContent = competencias.length;
   } catch(e) {
-    // Competencias por defecto si falla
     competencias = [
       { id: 'comunicacion', nombre: 'Comunicación', pregunta: 'Cuéntame una situación en la que tuviste que comunicar una información difícil o compleja. ¿Cómo lo hiciste y cuál fue el resultado?' },
       { id: 'trabajo_equipo', nombre: 'Trabajo en equipo', pregunta: 'Cuéntame una experiencia en la que trabajaste en equipo para lograr un objetivo difícil. ¿Cuál fue tu rol?' },
@@ -584,7 +577,6 @@ async function iniciarEntrevista() {
 
   candidato = { nombre, rut, email };
 
-  // Solicitar acceso a cámara
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     mostrarPantalla('screen-countdown');
@@ -606,7 +598,6 @@ function mostrarPreguntaCountdown(idx) {
 
   let segs = TIEMPO_COUNTDOWN;
   document.getElementById('countdown-num').textContent = segs;
-
   clearInterval(timerCountdown);
   timerCountdown = setInterval(function() {
     segs--;
@@ -632,7 +623,6 @@ function mostrarGrabacion(idx) {
   document.getElementById('prog-pct').textContent = pct + '%';
   document.getElementById('prog-fill').style.width = pct + '%';
 
-  // Mostrar video en vivo
   const videoLive = document.getElementById('video-live');
   videoLive.srcObject = stream;
 
@@ -655,24 +645,21 @@ function iniciarGrabacion() {
     if (e.data.size > 0) chunks.push(e.data);
   };
   mediaRecorder.onstop = function() {
-    const mimeType = getSupportedMimeType();
-    blobActual = new Blob(chunks, { type: mimeType });
+    blobActual = new Blob(chunks, { type: getSupportedMimeType() });
     detenerTranscripcion();
     mostrarPreview();
   };
   mediaRecorder.start(1000);
 
-  // Iniciar transcripción Web Speech API
   iniciarTranscripcion();
 
-  document.getElementById('transcripcion-wrap').style.display = 'block';
-
-  // Iniciar análisis facial si está disponible
   contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
   if (faceApiCargado) {
     document.getElementById('panel-emocional').style.display = 'block';
     iniciarAnalisisFacial();
   }
+
+  document.getElementById('transcripcion-wrap').style.display = 'block';
   document.getElementById('controles-grabacion').style.display = 'none';
   document.getElementById('controles-grabando').style.display = 'flex';
   document.getElementById('rec-dot').classList.add('show');
@@ -702,77 +689,20 @@ function detenerGrabacion() {
   document.getElementById('timer-video').classList.remove('show');
 }
 
-// ══════════════════════════════════════
-// WEB SPEECH API — TRANSCRIPCIÓN
-// ══════════════════════════════════════
-function iniciarTranscripcion() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-CL';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-
-  recognition.onresult = function(e) {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) {
-        textoActual += e.results[i][0].transcript + ' ';
-      } else {
-        interim += e.results[i][0].transcript;
-      }
-    }
-    document.getElementById('transcripcion-texto').textContent = textoActual + interim;
-  };
-
-  recognition.onerror = function(e) {
-    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
-  };
-
-  recognition.onend = function() {
-    // Reiniciar si aún se está grabando
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      try { recognition.start(); } catch(e) {}
-    }
-  };
-
-  try { recognition.start(); } catch(e) {}
-}
-
-function detenerTranscripcion() {
-  if (recognition) {
-    try { recognition.stop(); } catch(e) {}
-    recognition = null;
-  }
-  document.getElementById('transcripcion-wrap').style.display = 'none';
-  detenerAnalisisFacial();
-  document.getElementById('panel-emocional').style.display = 'none';
-}
-
 function actualizarTimerVideo() {
   const m = Math.floor(segundosRestantes / 60);
   const s = segundosRestantes % 60;
   document.getElementById('timer-video').textContent = m + ':' + (s < 10 ? '0' : '') + s;
-
-  // Cambiar color cuando queda poco tiempo
-  const timerEl = document.getElementById('timer-video');
-  if (segundosRestantes <= 30) {
-    timerEl.style.color = '#e8593c';
-  } else {
-    timerEl.style.color = '#fff';
-  }
+  document.getElementById('timer-video').style.color = segundosRestantes <= 30 ? '#e8593c' : '#fff';
 }
 
 function mostrarPreview() {
   const videoPreview = document.getElementById('video-preview');
   videoPreview.src = URL.createObjectURL(blobActual);
-
   const isLast = preguntaActual === competencias.length - 1;
   document.getElementById('btn-next-label').textContent = isLast ? '(finalizar entrevista)' : '(siguiente pregunta)';
-
   document.getElementById('pv-badge').textContent = 'Pregunta ' + (preguntaActual+1);
   document.getElementById('pv-competencia').textContent = competencias[preguntaActual].nombre;
-
   mostrarPantalla('screen-preview');
 }
 
@@ -787,20 +717,22 @@ async function siguientePregunta() {
   mostrarPantalla('screen-subiendo');
   document.getElementById('upload-text').textContent = 'Guardando pregunta ' + (preguntaActual+1) + '...';
 
-  // Subir video actual
   const urlVideo = await subirVideo(blobActual, preguntaActual + 1);
+
+  const resumenEmo = generarResumenEmocional();
+  if (resumenEmo) datosEmocionales.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    competencia_id: competencias[preguntaActual].id,
+    ...resumenEmo
+  });
+
   videosGuardados.push({
     pregunta: preguntaActual + 1,
     competencia: competencias[preguntaActual].nombre,
     competencia_id: competencias[preguntaActual].id,
     url: urlVideo,
     transcripcion: textoActual.trim()
-  });
-  const resumenEmo = generarResumenEmocional();
-  if (resumenEmo) datosEmocionales.push({
-    pregunta: preguntaActual + 1,
-    competencia: competencias[preguntaActual].nombre,
-    ...resumenEmo
   });
 
   transcripciones.push({
@@ -817,7 +749,6 @@ async function siguientePregunta() {
     mostrarPantalla('screen-countdown');
     mostrarPreguntaCountdown(preguntaActual);
   } else {
-    // Finalizar entrevista
     await finalizarEntrevista();
   }
 }
@@ -827,7 +758,6 @@ async function siguientePregunta() {
 // ══════════════════════════════════════
 async function subirVideo(blob, numeroPregunta) {
   try {
-    // Simular progreso visual
     let progreso = 0;
     const intervalo = setInterval(function() {
       progreso = Math.min(progreso + Math.random() * 15, 90);
@@ -835,16 +765,14 @@ async function subirVideo(blob, numeroPregunta) {
       document.getElementById('upload-pct').textContent = Math.round(progreso) + '%';
     }, 300);
 
-    // Convertir a base64
     const base64 = await blobToBase64(blob);
-
     const payload = {
       action: 'guardarRespuesta',
       nombre: candidato.nombre,
       token: token,
       numeroPregunta: numeroPregunta,
       competencia: competencias[numeroPregunta - 1]?.id || '',
-      videoBase64: base64.split(',')[1] // quitar el prefijo data:video/...
+      videoBase64: base64.split(',')[1]
     };
 
     const resp = await fetch(APPS_URL, {
@@ -859,7 +787,6 @@ async function subirVideo(blob, numeroPregunta) {
 
     const data = await resp.json();
     return data.url || '';
-
   } catch(err) {
     console.error('Error subiendo video:', err);
     return '';
@@ -881,7 +808,6 @@ function blobToBase64(blob) {
 async function finalizarEntrevista() {
   document.getElementById('upload-text').textContent = 'Finalizando entrevista...';
 
-  // Detener stream de cámara
   if (stream) {
     stream.getTracks().forEach(function(t) { t.stop(); });
   }
@@ -913,71 +839,34 @@ async function finalizarEntrevista() {
 }
 
 // ══════════════════════════════════════
-// ANÁLISIS FACIAL CON FACE-API.JS
+// ANÁLISIS FACIAL
 // ══════════════════════════════════════
 function iniciarAnalisisFacial() {
   const video = document.getElementById('video-live');
-  const canvas = document.getElementById('canvas-facial');
   clearInterval(intervaloFacial);
-
   intervaloFacial = setInterval(async function() {
     if (!faceApiCargado || !video || video.paused) return;
     try {
-      const detecciones = await faceapi
-        .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 }))
-        .withFaceLandmarks(true)
-        .withFaceExpressions();
-
-      if (!detecciones || detecciones.length === 0) return;
-
-      const det = detecciones[0];
+      const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.4})).withFaceLandmarks(true).withFaceExpressions();
+      if (!det) return;
       const exp = det.expressions;
       contadorFrames.totalFrames++;
-
-      // Clasificar expresión dominante
-      const positivo = (exp.happy || 0) + (exp.surprised || 0) * 0.3;
-      const negativo = (exp.sad || 0) + (exp.angry || 0) + (exp.fearful || 0) + (exp.disgusted || 0);
-      const neutro = exp.neutral || 0;
-
-      if (positivo > 0.3) {
-        contadorFrames.positivo++;
-        document.getElementById('emo-expresion').textContent = '😊';
-      } else if (negativo > 0.3) {
-        contadorFrames.negativo++;
-        document.getElementById('emo-expresion').textContent = '😟';
-      } else {
-        contadorFrames.neutro++;
-        document.getElementById('emo-expresion').textContent = '😐';
+      const positivo = (exp.happy||0) + (exp.surprised||0)*0.3;
+      const negativo = (exp.sad||0) + (exp.angry||0) + (exp.fearful||0) + (exp.disgusted||0);
+      if (positivo > 0.3) { contadorFrames.positivo++; document.getElementById('emo-expresion').textContent='😊'; }
+      else if (negativo > 0.3) { contadorFrames.negativo++; document.getElementById('emo-expresion').textContent='😟'; }
+      else { contadorFrames.neutro++; document.getElementById('emo-expresion').textContent='😐'; }
+      const lm = det.landmarks;
+      const le = lm.getLeftEye(), re = lm.getRightEye();
+      if (le && re) {
+        const cx = video.videoWidth / 2;
+        const ex = (le[0].x + re[0].x) / 2;
+        if (Math.abs(ex - cx) / cx < 0.25) { contadorFrames.contacto++; document.getElementById('emo-contacto').textContent='👁️'; }
+        else { document.getElementById('emo-contacto').textContent='👀'; }
       }
-
-      // Contacto visual — landmarks de ojos apuntando hacia cámara
-      const landmarks = det.landmarks;
-      const leftEye = landmarks.getLeftEye();
-      const rightEye = landmarks.getRightEye();
-      if (leftEye && rightEye) {
-        const centerX = video.videoWidth / 2;
-        const eyeCenterX = (leftEye[0].x + rightEye[0].x) / 2;
-        const desviacion = Math.abs(eyeCenterX - centerX) / centerX;
-        if (desviacion < 0.25) {
-          contadorFrames.contacto++;
-          document.getElementById('emo-contacto').textContent = '👁️';
-        } else {
-          document.getElementById('emo-contacto').textContent = '👀';
-        }
-      }
-
-      // Confianza general
-      const score = det.detection.score;
-      if (score > 0.8) {
-        document.getElementById('emo-confianza').textContent = '💪';
-      } else if (score > 0.5) {
-        document.getElementById('emo-confianza').textContent = '📊';
-      } else {
-        document.getElementById('emo-confianza').textContent = '🔍';
-      }
-
+      document.getElementById('emo-confianza').textContent = det.detection.score > 0.8 ? '💪' : det.detection.score > 0.5 ? '📊' : '🔍';
     } catch(e) {}
-  }, 1500); // analizar cada 1.5 segundos
+  }, 1500);
 }
 
 function detenerAnalisisFacial() {
@@ -988,26 +877,61 @@ function detenerAnalisisFacial() {
 function generarResumenEmocional() {
   if (contadorFrames.totalFrames === 0) return null;
   const total = contadorFrames.totalFrames;
-  const pctPositivo = Math.round((contadorFrames.positivo / total) * 100);
-  const pctNegativo = Math.round((contadorFrames.negativo / total) * 100);
-  const pctNeutro = Math.round((contadorFrames.neutro / total) * 100);
-  const pctContacto = Math.round((contadorFrames.contacto / total) * 100);
-
+  const pp = Math.round((contadorFrames.positivo/total)*100);
+  const pn = Math.round((contadorFrames.negativo/total)*100);
+  const pu = Math.round((contadorFrames.neutro/total)*100);
+  const pc = Math.round((contadorFrames.contacto/total)*100);
   let disposicion, emoji;
-  if (pctPositivo >= 40) { disposicion = 'Positiva'; emoji = '😊'; }
-  else if (pctNegativo >= 40) { disposicion = 'Tensa / Ansiosa'; emoji = '😟'; }
-  else { disposicion = 'Neutral / Serena'; emoji = '😐'; }
+  if (pp >= 40) { disposicion='Positiva'; emoji='😊'; }
+  else if (pn >= 40) { disposicion='Tensa / Ansiosa'; emoji='😟'; }
+  else { disposicion='Neutral / Serena'; emoji='😐'; }
+  return { disposicion, emoji, pct_positivo:pp, pct_negativo:pn, pct_neutro:pu, pct_contacto_visual:pc, alerta_tension:pn>=50, alerta_sin_contacto:pc<30, frames_analizados:total };
+}
 
-  return {
-    disposicion, emoji,
-    pct_positivo: pctPositivo,
-    pct_negativo: pctNegativo,
-    pct_neutro: pctNeutro,
-    pct_contacto_visual: pctContacto,
-    alerta_tension: pctNegativo >= 50,
-    alerta_sin_contacto: pctContacto < 30,
-    frames_analizados: total
+// ══════════════════════════════════════
+// WEB SPEECH API — TRANSCRIPCIÓN
+// ══════════════════════════════════════
+function iniciarTranscripcion() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-CL';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        textoActual += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('transcripcion-texto').textContent = textoActual + interim;
   };
+
+  recognition.onerror = function(e) {
+    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
+  };
+
+  recognition.onend = function() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  try { recognition.start(); } catch(e) {}
+}
+
+function detenerTranscripcion() {
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+  }
+  document.getElementById('transcripcion-wrap').style.display = 'none';
+  detenerAnalisisFacial();
+  document.getElementById('panel-emocional').style.display = 'none';
 }
 
 // ══════════════════════════════════════
@@ -1017,50 +941,27 @@ function analizarSTAR(texto, competencia) {
   if (!texto || texto.length < 20) {
     return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin respuesta registrada.' };
   }
-
   const t = texto.toLowerCase();
-
-  // ── SITUACIÓN (S): contexto, cuándo, dónde, escenario
   const palabrasS = ['cuando','en ese momento','en esa época','trabajaba en','estaba en','el contexto','la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa','en el área','en el equipo','había una vez','hubo un'];
   const s = palabrasS.some(p => t.includes(p)) ? 1 : 0;
-
-  // ── TAREA (T): rol, responsabilidad, mi función
   const palabrasT = ['mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea','debía','tenía que','me correspondía','mi función','fui designado','me pidieron','me asignaron','era responsable'];
   const tarea = palabrasT.some(p => t.includes(p)) ? 1 : 0;
-
-  // ── ACCIÓN (A): qué hice yo — verbos de acción en primera persona
   const palabrasA = ['hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté','llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté','negocié','hablé','expliqué','trabajé','ayudé','apoyé','lideré','diseñé','ejecuté','apliqué','busqué'];
   const accionesEncontradas = palabrasA.filter(p => t.includes(p)).length;
   const a = accionesEncontradas >= 3 ? 2 : accionesEncontradas >= 1 ? 1 : 0;
-
-  // ── RESULTADO (R): qué pasó, impacto, logro
-  const palabrasR = ['resultado','logramos','conseguimos','pudimos','mejoró','aumentó','redujo','bajó','subió','el cliente quedó','se solucionó','se resolvió','finalmente','al final','gracias a','como resultado','el impacto','se cumplió','se alcanzó','exitoso','aprendí','aprendimos','%','porciento','en menos tiempo','antes de','después'];
+  const palabrasR = ['resultado','logramos','conseguimos','pudimos','mejoró','aumentó','redujo','bajó','subió','el cliente quedó','se solucionó','se resolvió','finalmente','al final','gracias a','como resultado','el impacto','se cumplió','se alcanzó','exitoso','aprendí','aprendimos','%','porciento','en menos tiempo'];
   const resultadoEncontrado = palabrasR.filter(p => t.includes(p)).length;
   const r = resultadoEncontrado >= 2 ? 2 : resultadoEncontrado >= 1 ? 1 : 0;
-
   const total = s + tarea + a + r;
-
   let grado, observacion;
-  if (total >= 5) {
-    grado = 'A';
-    observacion = 'Respuesta completa con situación, rol, acciones concretas y resultado medible. Alto nivel de competencia.';
-  } else if (total >= 3) {
-    grado = 'B';
-    observacion = 'Respuesta sólida. Describe la situación y acciones. El resultado podría ser más específico.';
-  } else if (total === 2) {
-    grado = 'C';
-    observacion = 'Respuesta básica. Falta especificar mejor el rol o el resultado concreto.';
-  } else {
-    grado = 'D';
-    observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR.';
-  }
-
-  // Longitud mínima — respuesta muy corta baja grado
+  if (total >= 5) { grado = 'A'; observacion = 'Respuesta completa con situación, rol, acciones concretas y resultado medible. Alto nivel de competencia.'; }
+  else if (total >= 3) { grado = 'B'; observacion = 'Respuesta sólida. Describe la situación y acciones. El resultado podría ser más específico.'; }
+  else if (total === 2) { grado = 'C'; observacion = 'Respuesta básica. Falta especificar mejor el rol o el resultado concreto.'; }
+  else { grado = 'D'; observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR.'; }
   if (texto.split(' ').length < 30 && grado !== 'D') {
     grado = grado === 'A' ? 'B' : grado === 'B' ? 'C' : 'D';
     observacion += ' Nota: la respuesta fue muy breve.';
   }
-
   return { s, t: tarea, a, r, total, grado, observacion };
 }
 
