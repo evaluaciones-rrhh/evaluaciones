@@ -337,6 +337,8 @@ function renderLista(){
     var areas=(c[10]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a&&a!=='Sin areas criticas';});
     var sem=getSemaforo(dgvN,areas);
     var tr=document.createElement('tr');
+    tr.setAttribute('data-rut', String(c[2]||''));
+    tr.setAttribute('data-nombre', String(c[1]||'').toLowerCase());
     tr.innerHTML=
       '<td><span class="semaforo '+sem.clase+'"></span></td>'+
       '<td><strong>'+(c[1]||'-')+'</strong></td>'+
