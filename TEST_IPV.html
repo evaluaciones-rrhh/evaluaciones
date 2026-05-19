@@ -972,6 +972,7 @@ function calcular(){
 }
 
 // ════ MOSTRAR RESULTADOS ════
+window.scrollTo(0,0);
 // ── VALIDACION TOKEN ──
 const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
@@ -981,7 +982,7 @@ const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || ''
     const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL);
     const d = await r.json();
     if (!d.valido) {
-      document.querySelectorAll('#screen-inicio,#screen-prueba').forEach(el => el.style.display='none');
+      document.querySelectorAll('#view-portada,#view-test,#view-res').forEach(el => el.style.display='none');
       const bloq = document.getElementById('screen-bloqueado');
       bloq.style.display = 'flex';
     }
