@@ -972,6 +972,21 @@ function calcular(){
 }
 
 // ════ MOSTRAR RESULTADOS ════
+// ── VALIDACION TOKEN ──
+const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
+const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
+(async function validarAcceso() {
+  if (!TOKEN_URL) return;
+  try {
+    const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL);
+    const d = await r.json();
+    if (!d.valido) {
+      document.querySelectorAll('#screen-inicio,#screen-prueba').forEach(el => el.style.display='none');
+      const bloq = document.getElementById('screen-bloqueado');
+      bloq.style.display = 'flex';
+    }
+  } catch(e) {}
+})();
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
 
 function mostrar(PD,PT){
@@ -1032,6 +1047,7 @@ function enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp){
     pt_a: PT.A,
     cambios_foco: cambiosFoco
   };
+  payload.token = TOKEN_URL;
   fetch(APPS_SCRIPT_URL,{
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'application/json'},
@@ -1098,5 +1114,12 @@ function radar(PT){
   LBL.forEach((l,i)=>{ const p=pt(i,R*1.18); ctx.fillText(l,p.x,p.y+4); });
 }
 </script>
+<div id="screen-bloqueado" style="display:none;position:fixed;inset:0;background:#f5f4f0;z-index:9999;align-items:center;justify-content:center;flex-direction:column;font-family:'IBM Plex Sans',sans-serif;">
+  <div style="max-width:480px;text-align:center;padding:2rem;">
+    <div style="font-size:56px;margin-bottom:1rem;">&#128274;</div>
+    <h2 style="font-size:22px;font-weight:300;margin-bottom:.75rem;color:#1a1917;">Este test ya fue completado</h2>
+    <p style="font-size:14px;color:#6b6860;line-height:1.7;">Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
+  </div>
+</div>
 </body>
 </html>
