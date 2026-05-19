@@ -546,10 +546,10 @@ const TESTS_LINKS = {
   IPV: BASE+"TEST_IPV.html",
   WONDERLIC: BASE+"TEST_WONDERLIC.html"
 };
-const DASH_LINKS = {
-  "16PF": APPS_URL+"?dashboard=16PF",
-  IPV: APPS_URL+"?dashboard=IPV",
-  WONDERLIC: APPS_URL+"?dashboard=WONDERLIC"
+const DASH_HTML = {
+  "16PF":    BASE+"dashboard.html",
+  IPV:       BASE+"dashboard_ipv.html",
+  WONDERLIC: BASE+"dashboard_wonderlic.html"
 };
 const USUARIOS = { admin:"cygnus2024", rrhh:"postula2024", evaluador:"eval2024", tarina:"cygnus2024" };
 
@@ -649,7 +649,7 @@ function renderTablaComun(datos, tbodyId, cols) {
     var nivCls = niv.includes("alto")||niv.includes("sup")?"badge-alto":niv.includes("bajo")||niv.includes("inf")?"badge-bajo":"badge-promedio";
     var dashUrl = DASH_LINKS[d.test];
     var btnVer = dashUrl
-      ? "<button class='btn btn-ghost btn-sm' onclick=\"window.open('"+dashUrl+"','_blank')\">Ver informe</button>"
+      ? "<button class='btn btn-ghost btn-sm' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver informe</button>"
       : "<span style='color:var(--muted);font-size:11px;'>—</span>";
     if(cols===5) {
       html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
@@ -699,6 +699,14 @@ async function cargarHistorial() {
 }
 
 // ENVIAR
+function abrirDash(test, rut, nombre) {
+  var dashUrl = DASH_HTML[test];
+  if (!dashUrl) { alert("Este test no tiene dashboard disponible aun."); return; }
+  // Pasar rut y nombre por query string para que el dashboard filtre automáticamente
+  var url = dashUrl + "?rut=" + encodeURIComponent(rut) + "&nombre=" + encodeURIComponent(nombre);
+  window.open(url, "_blank");
+}
+
 function actualizarPreview() {
   var test = document.getElementById("env-test").value;
   var prev = document.getElementById("link-preview");
