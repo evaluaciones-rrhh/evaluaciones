@@ -253,6 +253,80 @@ video {
 .upload-bar-track { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-top: .5rem; }
 .upload-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
 
+/* ══ ENTREVISTADOR VIRTUAL ══ */
+.entrevistador-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2rem 1rem 1rem; text-align: center;
+}
+.avatar-wrap {
+  position: relative; margin-bottom: 1.5rem;
+}
+.avatar-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #1a3a5c, #c4432a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto;
+  box-shadow: 0 0 0 0 rgba(196,67,42,0.4);
+  animation: avatar-pulse 2s ease-in-out infinite;
+}
+.avatar-circle.hablando {
+  animation: avatar-pulse-fast 0.6s ease-in-out infinite;
+  box-shadow: 0 0 0 8px rgba(196,67,42,0.2);
+}
+@keyframes avatar-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,67,42,0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(196,67,42,0.0); }
+}
+@keyframes avatar-pulse-fast {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(196,67,42,0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 0 12px rgba(196,67,42,0.0); transform: scale(1.04); }
+}
+.avatar-ondas {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px; height: 80px;
+}
+.onda {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(196,67,42,0.3);
+  animation: onda-expand 2s ease-out infinite;
+  opacity: 0;
+}
+.onda:nth-child(2) { animation-delay: 0.6s; }
+.onda:nth-child(3) { animation-delay: 1.2s; }
+@keyframes onda-expand {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.entrevistador-nombre {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: .5rem;
+}
+.burbuja-texto {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 0 12px 12px 12px;
+  padding: 1rem 1.25rem; max-width: 480px;
+  font-size: 15px; line-height: 1.7; color: var(--text);
+  text-align: left; margin-bottom: 1.5rem;
+  min-height: 60px;
+}
+.cursor-texto {
+  display: inline-block; width: 2px; height: 16px;
+  background: var(--accent); margin-left: 2px;
+  vertical-align: middle;
+  animation: cursor-blink 0.7s ease-in-out infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.btn-saltar {
+  font-size: 11px; color: var(--hint); background: none;
+  border: none; cursor: pointer; text-decoration: underline;
+  font-family: var(--font); padding: 0;
+}
+.btn-saltar:hover { color: var(--muted); }
+
 footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3rem; padding-bottom: 2rem; letter-spacing: .05em; }
 
 @media (max-width: 600px) {
@@ -329,6 +403,27 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       Comenzar entrevista →
     </button>
     <p style="text-align:center;font-size:12px;color:var(--hint);margin-top:.75rem;">Al iniciar se activará tu cámara y micrófono</p>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 1B: ENTREVISTADOR VIRTUAL ══ -->
+<div class="screen" id="screen-entrevistador">
+  <div class="wrap">
+    <div class="entrevistador-wrap">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatar-circle">🎙️</div>
+        <div class="avatar-ondas" id="avatar-ondas">
+          <div class="onda"></div>
+          <div class="onda"></div>
+          <div class="onda"></div>
+        </div>
+      </div>
+      <div class="entrevistador-nombre">Asistente de Evaluación · Grupo Cygnus</div>
+      <div class="burbuja-texto" id="burbuja-texto">
+        <span id="texto-animado"></span><span class="cursor-texto" id="cursor-texto"></span>
+      </div>
+      <button class="btn-saltar" onclick="saltarEntrevistador()">Saltar introducción →</button>
+    </div>
   </div>
 </div>
 
@@ -587,7 +682,102 @@ async function iniciarEntrevista() {
 // ══════════════════════════════════════
 // COUNTDOWN
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// ENTREVISTADOR VIRTUAL
+// ══════════════════════════════════════
+let synth = window.speechSynthesis;
+let vozActual = null;
+let timeoutEntrevistador = null;
+let indiceEntrevistador = 0;
+
 function mostrarPreguntaCountdown(idx) {
+  indiceEntrevistador = idx;
+  const comp = competencias[idx];
+  const esIntro = idx === 0;
+
+  // Texto del entrevistador
+  let textoCompleto = '';
+  if (esIntro) {
+    textoCompleto = 'Hola, bienvenido o bienvenida a tu entrevista por competencias. A continuación te presentaré preguntas sobre las cuales deberás responder. Recuerda ser específico y basarte en experiencias reales de tu vida laboral.
+
+Pregunta ' + (idx+1) + ' de ' + competencias.length + ': ' + comp.pregunta;
+  } else {
+    textoCompleto = 'Pregunta ' + (idx+1) + ' de ' + competencias.length + ': ' + comp.pregunta;
+  }
+
+  // Mostrar pantalla entrevistador
+  document.getElementById('texto-animado').textContent = '';
+  document.getElementById('cursor-texto').style.display = 'inline-block';
+  mostrarPantalla('screen-entrevistador');
+
+  // Animar texto letra por letra
+  let charIdx = 0;
+  const velocidad = 28; // ms por caracter
+  clearInterval(timeoutEntrevistador);
+
+  function escribirLetra() {
+    if (charIdx < textoCompleto.length) {
+      document.getElementById('texto-animado').textContent += textoCompleto[charIdx];
+      charIdx++;
+      timeoutEntrevistador = setTimeout(escribirLetra, velocidad);
+    } else {
+      // Texto completo — ocultar cursor y esperar para ir al countdown
+      document.getElementById('cursor-texto').style.display = 'none';
+      setTimeout(function() {
+        iniciarCountdown(idx);
+      }, 1200);
+    }
+  }
+  escribirLetra();
+
+  // Voz sintética
+  hablarTexto(textoCompleto, function() {
+    // Al terminar de hablar, detener animación y ir directo al countdown
+    clearTimeout(timeoutEntrevistador);
+    document.getElementById('texto-animado').textContent = textoCompleto;
+    document.getElementById('cursor-texto').style.display = 'none';
+    setTimeout(function() { iniciarCountdown(idx); }, 800);
+  });
+}
+
+function hablarTexto(texto, onEnd) {
+  if (!synth) { if(onEnd) onEnd(); return; }
+  synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(texto);
+  utterance.lang = 'es-CL';
+  utterance.rate = 0.95;
+  utterance.pitch = 1.0;
+  utterance.volume = 1;
+
+  // Buscar voz en español
+  const voces = synth.getVoices();
+  const vozEs = voces.find(function(v) { return v.lang.startsWith('es'); });
+  if (vozEs) utterance.voice = vozEs;
+
+  utterance.onstart = function() {
+    document.getElementById('avatar-circle').classList.add('hablando');
+  };
+  utterance.onend = function() {
+    document.getElementById('avatar-circle').classList.remove('hablando');
+    if (onEnd) onEnd();
+  };
+  utterance.onerror = function() {
+    document.getElementById('avatar-circle').classList.remove('hablando');
+    if (onEnd) onEnd();
+  };
+
+  vozActual = utterance;
+  synth.speak(utterance);
+}
+
+function saltarEntrevistador() {
+  synth && synth.cancel();
+  clearTimeout(timeoutEntrevistador);
+  document.getElementById('avatar-circle').classList.remove('hablando');
+  iniciarCountdown(indiceEntrevistador);
+}
+
+function iniciarCountdown(idx) {
   const comp = competencias[idx];
   document.getElementById('cd-badge').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
   document.getElementById('cd-competencia').textContent = comp.nombre;
@@ -596,6 +786,7 @@ function mostrarPreguntaCountdown(idx) {
 
   let segs = TIEMPO_COUNTDOWN;
   document.getElementById('countdown-num').textContent = segs;
+  mostrarPantalla('screen-countdown');
   clearInterval(timerCountdown);
   timerCountdown = setInterval(function() {
     segs--;
