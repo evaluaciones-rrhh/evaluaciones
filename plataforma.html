@@ -695,8 +695,14 @@ function renderPendientes(envios, completados) {
 
   var html = "";
   pendientes.slice(0,5).forEach(function(e) {
-    var fechaEnvio = e.fecha ? new Date(e.fecha.split("/").reverse().join("-")) : hoy;
-    var dias = Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
+    var dias = 0;
+    try {
+      if (e.fecha) {
+        var partes = e.fecha.split("/");
+        var fechaEnvio = partes.length === 3 ? new Date(partes[2]+"-"+partes[1]+"-"+partes[0]) : new Date(e.fecha);
+        dias = isNaN(fechaEnvio) ? 0 : Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
+      }
+    } catch(ex) { dias = 0; }
     var urgente = dias >= 3;
     html += "<div class='pendiente-item'>" +
       "<div style='flex:1'>" +
