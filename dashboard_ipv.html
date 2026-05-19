@@ -519,8 +519,7 @@ function autoSeleccionarCandidato() {
   var rutParam = localStorage.getItem("dash_filtro_rut") || "";
   var nombreParam = localStorage.getItem("dash_filtro_nombre") || "";
   if (!rutParam && !nombreParam) return;
-  setTimeout(function() {
-    var rows = document.querySelectorAll("#tbody tr");
+  var rows = document.querySelectorAll("#tbody tr");
     for (var i = 0; i < rows.length; i++) {
       var rut = rows[i].getAttribute("data-rut") || "";
       var nom = rows[i].getAttribute("data-nombre") || "";
@@ -532,7 +531,6 @@ function autoSeleccionarCandidato() {
         break;
       }
     }
-  }, 300);
 }
 window.addEventListener("load", autoSeleccionarCandidato);
 </script>
