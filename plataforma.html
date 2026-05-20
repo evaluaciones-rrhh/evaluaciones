@@ -393,6 +393,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('historial')">
         <span class="nav-icon">📋</span> Historial
       </div>
+      <div class="nav-item" onclick="irA('tests')">
+        <span class="nav-icon">🧠</span> Tests disponibles
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
@@ -596,6 +599,148 @@ tbody tr:hover td { background: #fdf9f6; }
       </div>
     </div>
 
+    <!-- TESTS DISPONIBLES -->
+    <div class="page" id="page-tests">
+      <div style="max-width:860px;">
+
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">🧠 Tests Psicolaborales disponibles</div></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:0;">Cada evaluación mide dimensiones específicas del candidato. Se recomienda combinar tests cognitivos con tests de personalidad para obtener un perfil más completo.</p>
+        </div>
+
+        <!-- IC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test IC — Instrucciones Complejas</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 7 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad de comprensión y ejecución de instrucciones complejas</strong> bajo presión de tiempo. Mide atención al detalle, velocidad de procesamiento y seguimiento de reglas múltiples simultáneas.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Atención</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Velocidad de procesamiento</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Comprensión lectora</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos administrativos, analistas, operadores, cualquier rol que requiera seguir procedimientos precisos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CEAL -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#e8f4ee;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧭</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test CEAL — Estilos de Liderazgo</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e8f4ee;color:var(--high);">Liderazgo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 15-20 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Identifica el <strong>estilo de liderazgo predominante</strong> del evaluado: Directivo, Persuasivo, Participativo o Delegativo. Basado en el modelo situacional de Hersey y Blanchard.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Estilo de liderazgo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a tareas</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a personas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: jefaturas, supervisores, gerentes y cualquier cargo con responsabilidad de equipos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16PF -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#f0e8f8;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧩</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test 16PF — Personalidad</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#f0e8f8;color:#6a1e9a;">Personalidad</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 35-45 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa <strong>16 factores primarios de personalidad</strong> agrupados en 5 dimensiones globales. Es uno de los instrumentos más usados y validados a nivel mundial para selección de personal. Desarrollado por Raymond Cattell.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Extraversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Ansiedad</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Dureza</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Independencia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Auto-control</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: todos los cargos. Especialmente útil en procesos de selección gerencial y profesional.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IPV -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--mid-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💼</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test IPV — Personalidad para Vendedores</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--mid-bg);color:var(--mid);">Ventas</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 20-30 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Mide las <strong>características de personalidad asociadas al perfil vendedor</strong>. Evalúa Dinamismo, Dominancia, Extroversión, Tolerancia, Autocontrol, entre otras dimensiones clave para el desempeño comercial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dinamismo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dominancia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Extroversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Autocontrol</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: ejecutivos de ventas, representantes comerciales, KAM, promotores y cargos de atención al cliente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WONDERLIC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🎯</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test Wonderlic — Habilidad Cognitiva</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 12 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad cognitiva general</strong> — habilidad para aprender, adaptarse y resolver problemas. Incluye razonamiento verbal, numérico y abstracto. Es uno de los test cognitivos más utilizados en selección de personal a nivel mundial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento verbal</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento numérico</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Resolución de problemas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos técnicos, profesionales, gerenciales y cualquier rol que requiera alta capacidad de aprendizaje.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ENTREVISTA -->
+        <div class="card" style="margin-bottom:1.25rem;border:1px solid var(--naranja);background:var(--naranja-light);">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--naranja);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🎙️</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Entrevista por Competencias</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--naranja);color:#fff;">Nuevo ✦ IA</span>
+                <span style="font-size:11px;color:var(--ink-soft);">⏱ 20-25 minutos</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Entrevista estructurada por video con <strong>metodología STAR</strong> (Situación, Tarea, Acción, Resultado) basada en el diccionario de competencias de Martha Alles. El candidato responde grabándose y el sistema analiza automáticamente con Inteligencia Artificial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Metodología STAR</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Análisis con IA</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Martha Alles</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Video</span>
+              </div>
+              <p style="font-size:12px;color:var(--ink-soft);margin-top:.75rem;">📌 Recomendado para: todos los cargos. Complementa los tests psicométricos con evidencia conductual concreta.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- HISTORIAL -->
     <div class="page" id="page-historial">
       <div class="card">
@@ -661,12 +806,12 @@ document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Candidatos evaluados", enviar:"Enviar evaluación", historial:"Historial de envíos" };
+var titulos = { panel:"Panel principal", candidatos:"Candidatos evaluados", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  document.querySelectorAll(".nav-item")[["panel","candidatos","enviar","historial"].indexOf(pag)].classList.add("activo");
+  document.querySelectorAll(".nav-item")[["panel","candidatos","enviar","historial","tests"].indexOf(pag)].classList.add("activo");
   document.getElementById("topbar-title").textContent = titulos[pag];
   paginaActual = pag;
 }
