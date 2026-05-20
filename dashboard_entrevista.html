@@ -454,7 +454,7 @@ function renderInforme(ent) {
   // Calcular datos generales emocionales
 
   // Generar resumen ejecutivo
-  const resumenTexto = generarResumenEjecutivo(ent, analisis);
+  const resumenTexto = generarResumenEjecutivo(ent, analisis, rec);
   const fortalezas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'A' || a.analisis.grado === 'B'); });
   const alertas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'C' || a.analisis.grado === 'D'); });
 
@@ -629,20 +629,7 @@ function toggleComp(idx) {
   if (chev) chev.classList.toggle('open');
 }
 
-  else if (pctNeg >= 40) { disposicion = 'Tensa'; emoji = '😟'; }
-  else { disposicion = 'Neutral'; emoji = '😐'; }
-
-  return {
-    disposicion, emoji,
-    pct_positivo: pctPos,
-    pct_negativo: pctNeg,
-    pct_contacto: pctCont,
-    alerta_tension: pctNeg >= 50,
-    alerta_contacto: pctCont < 30
-  };
-}
-
-function generarResumenEjecutivo(ent, analisis) {
+function generarResumenEjecutivo(ent, analisis, rec) {
   if (analisis.length === 0) return 'No hay datos suficientes para generar un resumen ejecutivo.';
 
   const fortalezas = analisis.filter(function(a) { return a.analisis && (a.analisis.grado === 'A' || a.analisis.grado === 'B'); });
@@ -659,7 +646,6 @@ function generarResumenEjecutivo(ent, analisis) {
   }
   if (alertas.length > 0) {
     texto += 'Se identificaron brechas importantes en ' + alertas.map(function(a) { return a.competencia; }).join(' y ') + ', donde las respuestas no evidenciaron los componentes STAR esperados. ';
-  }
   }
 
   if (rec.clase === 'verde') texto += 'En términos generales, el perfil evaluado es compatible con los requerimientos del cargo.';
