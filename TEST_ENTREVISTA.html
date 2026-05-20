@@ -1082,79 +1082,75 @@ function detenerTranscripcion() {
 // ANÁLISIS STAR AUTOMÁTICO
 // ══════════════════════════════════════
 function analizarSTAR(texto, competencia) {
-  if (!texto || texto.length < 15) {
-    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin respuesta registrada.' };
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 50) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa y detallada.' };
   }
   const t = texto.toLowerCase();
 
-  // ── S: SITUACIÓN — contexto, cuándo, dónde ocurrió ──
+  // ── S: SITUACIÓN — requiere al menos 2 palabras clave ──
   const palabrasS = [
-    'cuando','en ese momento','en esa época','trabajaba','estaba','el contexto',
+    'cuando','en ese momento','en esa época','trabajaba','el contexto',
     'la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa',
-    'en el área','en el equipo','tuve que','me pasó','en ese entonces','en aquel momento',
+    'en el área','en el equipo','me pasó','en ese entonces','en aquel momento',
     'en ese trabajo','en esa empresa','en ese proyecto','en ese cargo','en esa oportunidad',
-    'hace','años','meses','semanas','el año','el mes','un día','una vez','cierta vez',
-    'me tocó','nos tocó','me enfrenté','enfrentamos','surgió','se presentó','hubo','había'
+    'hace años','hace meses','el año pasado','un día','una vez','cierta vez',
+    'me enfrenté','enfrentamos','surgió','se presentó'
   ];
-  const s = palabrasS.filter(p => t.includes(p)).length >= 2 ? 1 : palabrasS.some(p => t.includes(p)) ? 1 : 0;
+  const matchesS = palabrasS.filter(function(p) { return t.includes(p); }).length;
+  const s = matchesS >= 2 ? 1 : 0;
 
-  // ── T: TAREA — rol, responsabilidad, qué debía hacer ──
+  // ── T: TAREA — requiere al menos 2 palabras clave ──
   const palabrasT = [
     'mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea',
-    'debía','tenía que','me correspondía','mi función','me pidieron','me asignaron',
-    'era responsable','fui el encargado','me tocó','nos tocó a mí','yo debía',
-    'mi trabajo era','mi objetivo era','me encargaron','a mí me','yo tenía',
-    'me designaron','fui designado','como encargado','como líder','como parte de',
-    'mi misión','mi meta','mi deber','debí','tuve que','me propuse','quería lograr',
-    'era necesario que yo','yo era el','me asigné','tomé la responsabilidad'
+    'me correspondía','mi función','me pidieron','me asignaron',
+    'era responsable','fui el encargado','yo debía',
+    'mi trabajo era','mi objetivo era','me encargaron',
+    'me designaron','fui designado','como encargado','como líder',
+    'tomé la responsabilidad','me propuse','quería lograr'
   ];
-  const tarea = palabrasT.filter(p => t.includes(p)).length >= 1 ? 1 : 0;
+  const matchesT = palabrasT.filter(function(p) { return t.includes(p); }).length;
+  const tarea = matchesT >= 2 ? 1 : 0;
 
-  // ── A: ACCIÓN — verbos de acción en primera persona ──
+  // ── A: ACCIÓN — requiere al menos 5 verbos de acción ──
   const palabrasA = [
     'hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté',
     'llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté',
-    'negocié','hablé','expliqué','trabajé','ayudé','apoyé','lideré','diseñé',
-    'ejecuté','apliqué','busqué','establecí','definí','creé','construí','armé',
-    'generé','elaboré','preparé','envié','realicé','llevé','puse','fui','hablé',
-    'conversé','dialogué','escuché','identifiqué','detecté','encontré','analicé',
-    'evaluué','revisé','cambié','modifiqué','ajusté','adapté','mejoré','optimicé',
+    'negocié','expliqué','trabajé','ayudé','apoyé','lideré','diseñé',
+    'ejecuté','apliqué','busqué','establecí','definí','creé','construí',
+    'generé','elaboré','preparé','realicé','llevé','conversé',
+    'escuché','identifiqué','detecté','encontré','analicé',
+    'revisé','cambié','modifiqué','ajusté','adapté','mejoré',
     'empecé','comencé','inicié','terminé','completé','concluí','logré','conseguí',
-    'pude','convencí','motivé','capacité','enseñé','aprendí','solicité','pedí',
-    'pregunté','investigué','consulté','verifiqué','controlé','supervisé','seguí',
-    'me comuniqué','me acerqué','me reuní','me organicé','me comprometí','asumí'
+    'convencí','motivé','capacité','solicité','pedí',
+    'investigué','consulté','verifiqué','controlé','supervisé','asumí'
   ];
-  const accionesEncontradas = palabrasA.filter(p => t.includes(p)).length;
-  const a = accionesEncontradas >= 4 ? 2 : accionesEncontradas >= 1 ? 1 : 0;
+  const accionesEncontradas = palabrasA.filter(function(p) { return t.includes(p); }).length;
+  const a = accionesEncontradas >= 5 ? 2 : accionesEncontradas >= 3 ? 1 : 0;
 
-  // ── R: RESULTADO — qué pasó, impacto, logro ──
+  // ── R: RESULTADO — requiere al menos 3 palabras clave ──
   const palabrasR = [
-    'resultado','logramos','conseguimos','pudimos','mejoró','aumentó','redujo',
-    'bajó','subió','se solucionó','se resolvió','finalmente','al final','gracias a',
-    'como resultado','el impacto','se cumplió','se alcanzó','exitoso','aprendí',
-    'aprendimos','%','porciento','en menos tiempo','salió bien','salió mejor',
-    'quedó','quedamos','terminamos','concluimos','completamos','entregamos',
+    'resultado','logramos','conseguimos','mejoró','aumentó','redujo',
+    'bajó','subió','se solucionó','se resolvió','finalmente','al final',
+    'como resultado','el impacto','se cumplió','se alcanzó',
+    'aprendimos','porciento','salió bien','salió mejor',
+    'terminamos','concluimos','completamos','entregamos',
     'superamos','superé','cumplimos','cumplí','alcanzamos','alcancé','funcionó',
-    'tuvo éxito','fue exitoso','fue positivo','fue bueno','fue muy bien',
-    'se logró','lograron','se pudo','se mejoró','se resolvió','cliente satisfecho',
-    'quedó conforme','quedó contento','quedó feliz','valió la pena','fue un éxito',
-    'impacto','beneficio','ganancia','ahorro','eficiencia','mejora','avance',
-    'el equipo','el proyecto','la empresa','todos','el jefe','mi jefe','mi superior',
-    'reconocieron','felicitaron','agradecieron','valoraron','apreciaron','en conclusión',
-    'en resumen','de esa experiencia','lo que aprendí','me enseñó','me quedó claro'
+    'tuvo éxito','fue exitoso','fue positivo',
+    'se logró','cliente satisfecho','quedó conforme','quedó contento',
+    'valió la pena','fue un éxito','impacto positivo','beneficio',
+    'reconocieron','felicitaron','agradecieron',
+    'de esa experiencia','lo que aprendí','me enseñó'
   ];
-  const resultadoEncontrado = palabrasR.filter(p => t.includes(p)).length;
-  const r = resultadoEncontrado >= 3 ? 2 : resultadoEncontrado >= 1 ? 1 : 0;
+  const resultadoEncontrado = palabrasR.filter(function(p) { return t.includes(p); }).length;
+  const r = resultadoEncontrado >= 3 ? 2 : resultadoEncontrado >= 2 ? 1 : 0;
 
   const total = s + tarea + a + r;
-
-  // Bonus por longitud — respuesta larga probablemente tiene más contenido
-  const palabras = texto.trim().split(/\s+/).length;
-  const bonusLongitud = palabras >= 80 ? 1 : 0;
+  const bonusLongitud = palabras >= 100 ? 1 : 0;
   const totalConBonus = Math.min(total + bonusLongitud, 6);
 
   let grado, observacion;
-  if (totalConBonus >= 5) { grado = 'A'; observacion = 'Respuesta completa. Se identifican claramente la situación, el rol, acciones concretas y resultados. Alto nivel de competencia.'; }
+  if (totalConBonus >= 5) { grado = 'A'; observacion = 'Respuesta completa. Se identifican claramente la situación, el rol, acciones concretas y resultados medibles. Alto nivel de competencia.'; }
   else if (totalConBonus >= 3) { grado = 'B'; observacion = 'Respuesta sólida. Describe la situación y acciones tomadas. El resultado podría ser más específico o medible.'; }
   else if (totalConBonus === 2) { grado = 'C'; observacion = 'Respuesta básica. Falta especificar mejor el rol propio o el resultado concreto obtenido.'; }
   else { grado = 'D'; observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR (situación, tarea, acción, resultado).'; }
