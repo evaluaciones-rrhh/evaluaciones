@@ -1235,7 +1235,7 @@ function actualizarPreview() {
 
   if (test && TESTS_LINKS[test]) {
     document.getElementById("link-url").textContent = TESTS_LINKS[test];
-    prev.style.display = "block";
+    prev.style.display = "none"; // oculto
   } else {
     prev.style.display = "none";
   }
@@ -1312,7 +1312,7 @@ function actualizarPreviewEntrevista() {
     document.getElementById('ent-nivel-competencias').textContent = NIVELES_INFO[nivel] || '';
     infoEl.style.display = 'block';
     document.getElementById('ent-link-url').textContent = BASE + 'TEST_ENTREVISTA.html?cargo=' + encodeURIComponent(nivel);
-    linkEl.style.display = 'block';
+    linkEl.style.display = 'none'; // oculto
   } else {
     infoEl.style.display = 'none';
     linkEl.style.display = 'none';
