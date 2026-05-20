@@ -577,6 +577,10 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 // CONFIGURACIÓN
 // ══════════════════════════════════════
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
+// ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
+const GROQ_API_KEY = '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';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'mixtral-8x7b-32768'; // modelo estable para análisis JSON
 const TIEMPO_GRABACION = 180;
 const TIEMPO_COUNTDOWN = 10;
 
@@ -880,12 +884,16 @@ async function siguientePregunta() {
     transcripcion: textoActual.trim()
   });
 
+  // Análisis con Groq IA (si hay key) o palabras clave como respaldo
+  document.getElementById('upload-text').textContent = 'Analizando respuesta con IA...';
+  const analisisResultado = await analizarConIA(textoActual.trim(), competencias[preguntaActual]);
+
   transcripciones.push({
     pregunta: preguntaActual + 1,
     competencia_id: competencias[preguntaActual].id,
     competencia: competencias[preguntaActual].nombre,
     texto: textoActual.trim(),
-    analisis: analizarSTAR(textoActual.trim(), competencias[preguntaActual])
+    analisis: analisisResultado
   });
 
   preguntaActual++;
@@ -919,8 +927,9 @@ async function subirVideo(blob, numeroPregunta) {
       videoBase64: base64.split(',')[1]
     };
 
-    const resp = await fetch(APPS_URL, {
+    await fetch(APPS_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
@@ -929,8 +938,9 @@ async function subirVideo(blob, numeroPregunta) {
     document.getElementById('upload-bar').style.width = '100%';
     document.getElementById('upload-pct').textContent = '100%';
 
-    const data = await resp.json();
-    return data.url || '';
+    // Con no-cors no podemos leer la respuesta — retornamos URL vacía
+    // El video se guarda igualmente en Drive
+    return '';
   } catch(err) {
     console.error('Error subiendo video:', err);
     return '';
@@ -1081,38 +1091,134 @@ function detenerTranscripcion() {
 // ══════════════════════════════════════
 // ANÁLISIS STAR AUTOMÁTICO
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// ANÁLISIS CON GROQ IA
+// ══════════════════════════════════════
+async function analizarConIA(texto, competencia) {
+  // Si no hay texto suficiente, retornar D directo
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 30) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa.', alertas:['Respuesta muy breve'], metodo:'palabras_clave' };
+  }
+
+  // Si hay API key de Groq, usar IA
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const prompt = `Eres un experto en evaluación psicolaboral usando metodología STAR (Situación, Tarea, Acción, Resultado) y el diccionario de competencias de Martha Alles.
+
+Analiza la siguiente respuesta de un candidato a la competencia "${competencia.nombre}".
+
+PREGUNTA FORMULADA: "${competencia.pregunta}"
+
+RESPUESTA DEL CANDIDATO: "${texto}"
+
+Evalúa la respuesta según metodología STAR y devuelve ÚNICAMENTE un JSON con este formato exacto, sin texto adicional:
+{
+  "s": 0 o 1 (¿describió claramente una SITUACIÓN o contexto concreto?),
+  "t": 0 o 1 (¿explicó cuál era su TAREA o responsabilidad específica?),
+  "a": 0, 1 o 2 (¿detalló ACCIONES propias concretas? 0=ninguna, 1=algunas, 2=detalladas),
+  "r": 0, 1 o 2 (¿mencionó RESULTADOS concretos y medibles? 0=ninguno, 1=vagos, 2=específicos),
+  "total": suma de s+t+a+r,
+  "grado": "A" si total>=5, "B" si total>=3, "C" si total=2, "D" si total<=1,
+  "observacion": "Una observación específica de 1-2 oraciones sobre la calidad de la respuesta",
+  "alertas": ["lista de alertas si hay respuesta genérica, sin ejemplos concretos, sin resultado claro, etc"],
+  "especificidad": 0, 1, 2 o 3 (¿mencionó números, fechas o datos concretos?)
+}`;
+
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: GROQ_MODEL,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.1,
+          max_tokens: 500
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        // Extraer JSON de la respuesta
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const resultado = JSON.parse(jsonMatch[0]);
+          resultado.metodo = 'groq_ia';
+          return resultado;
+        }
+      }
+    } catch(e) {
+      console.log('Groq error:', e.message, '— usando análisis de palabras clave como respaldo');
+    }
+  }
+
+  // Fallback: análisis por palabras clave
+  const resultado = analizarSTAR(texto, competencia);
+  resultado.metodo = 'palabras_clave';
+  return resultado;
+}
+
 function analizarSTAR(texto, competencia) {
   const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
   if (!texto || palabras < 50) {
-    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa y detallada.' };
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa y detallada.', alertas:[] };
   }
   const t = texto.toLowerCase();
 
-  // ── S: SITUACIÓN — requiere al menos 2 palabras clave ──
+  // ── DETECCIÓN DE NEGACIONES ──
+  // Si una palabra clave aparece precedida de negación, no cuenta
+  function noNegada(palabra) {
+    const negaciones = ['no ','nunca ','jamás ','sin ','tampoco ','ni '];
+    const idx = t.indexOf(palabra);
+    if (idx === -1) return false;
+    const contexto = t.substring(Math.max(0, idx - 15), idx);
+    return !negaciones.some(function(n) { return contexto.includes(n); });
+  }
+
+  // ── DETECCIÓN DE FRASES GENÉRICAS (penalizar) ──
+  const frasesGenericas = [
+    'siempre trato de','en general yo','normalmente hago','siempre intento',
+    'por lo general','suelo hacer','acostumbro a','tiendo a','me gusta',
+    'creo que es importante','considero que','pienso que','en mi opinión',
+    'lo que haría es','haría lo siguiente','intentaría','trataría de'
+  ];
+  const genericasEncontradas = frasesGenericas.filter(function(f) { return t.includes(f); }).length;
+
+  // ── DETECCIÓN DE ESPECIFICIDAD (bonus) ──
+  // Números, fechas, porcentajes, nombres de empresas
+  const tieneNumeros = /\d+/.test(texto);
+  const tienePorcentaje = /\d+\s*%/.test(texto) || t.includes('porciento') || t.includes('por ciento');
+  const tieneFechas = /\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|\d{4}|lunes|martes|miércoles|jueves|viernes)\b/.test(t);
+  const especificidad = (tieneNumeros ? 1 : 0) + (tienePorcentaje ? 1 : 0) + (tieneFechas ? 1 : 0);
+
+  // ── S: SITUACIÓN — contexto temporal y espacial ──
   const palabrasS = [
     'cuando','en ese momento','en esa época','trabajaba','el contexto',
     'la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa',
     'en el área','en el equipo','me pasó','en ese entonces','en aquel momento',
     'en ese trabajo','en esa empresa','en ese proyecto','en ese cargo','en esa oportunidad',
     'hace años','hace meses','el año pasado','un día','una vez','cierta vez',
-    'me enfrenté','enfrentamos','surgió','se presentó'
+    'me enfrenté','surgió','se presentó','en ese periodo','en esa etapa'
   ];
-  const matchesS = palabrasS.filter(function(p) { return t.includes(p); }).length;
+  const matchesS = palabrasS.filter(function(p) { return noNegada(p); }).length;
   const s = matchesS >= 2 ? 1 : 0;
 
-  // ── T: TAREA — requiere al menos 2 palabras clave ──
+  // ── T: TAREA — rol y responsabilidad específica ──
   const palabrasT = [
     'mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea',
     'me correspondía','mi función','me pidieron','me asignaron',
     'era responsable','fui el encargado','yo debía',
     'mi trabajo era','mi objetivo era','me encargaron',
     'me designaron','fui designado','como encargado','como líder',
-    'tomé la responsabilidad','me propuse','quería lograr'
+    'tomé la responsabilidad','me propuse','quería lograr','debía lograr'
   ];
-  const matchesT = palabrasT.filter(function(p) { return t.includes(p); }).length;
+  const matchesT = palabrasT.filter(function(p) { return noNegada(p); }).length;
   const tarea = matchesT >= 2 ? 1 : 0;
 
-  // ── A: ACCIÓN — requiere al menos 5 verbos de acción ──
+  // ── A: ACCIÓN — verbos concretos en primera persona ──
   const palabrasA = [
     'hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté',
     'llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté',
@@ -1125,15 +1231,15 @@ function analizarSTAR(texto, competencia) {
     'convencí','motivé','capacité','solicité','pedí',
     'investigué','consulté','verifiqué','controlé','supervisé','asumí'
   ];
-  const accionesEncontradas = palabrasA.filter(function(p) { return t.includes(p); }).length;
+  const accionesEncontradas = palabrasA.filter(function(p) { return noNegada(p); }).length;
   const a = accionesEncontradas >= 5 ? 2 : accionesEncontradas >= 3 ? 1 : 0;
 
-  // ── R: RESULTADO — requiere al menos 3 palabras clave ──
+  // ── R: RESULTADO — impacto concreto y medible ──
   const palabrasR = [
     'resultado','logramos','conseguimos','mejoró','aumentó','redujo',
     'bajó','subió','se solucionó','se resolvió','finalmente','al final',
     'como resultado','el impacto','se cumplió','se alcanzó',
-    'aprendimos','porciento','salió bien','salió mejor',
+    'aprendimos','salió bien','salió mejor',
     'terminamos','concluimos','completamos','entregamos',
     'superamos','superé','cumplimos','cumplí','alcanzamos','alcancé','funcionó',
     'tuvo éxito','fue exitoso','fue positivo',
@@ -1142,26 +1248,50 @@ function analizarSTAR(texto, competencia) {
     'reconocieron','felicitaron','agradecieron',
     'de esa experiencia','lo que aprendí','me enseñó'
   ];
-  const resultadoEncontrado = palabrasR.filter(function(p) { return t.includes(p); }).length;
+  const resultadoEncontrado = palabrasR.filter(function(p) { return noNegada(p); }).length;
   const r = resultadoEncontrado >= 3 ? 2 : resultadoEncontrado >= 2 ? 1 : 0;
 
-  const total = s + tarea + a + r;
-  const bonusLongitud = palabras >= 100 ? 1 : 0;
-  const totalConBonus = Math.min(total + bonusLongitud, 6);
+  // ── CALCULAR TOTAL ──
+  let total = s + tarea + a + r;
 
+  // Penalizar frases genéricas
+  if (genericasEncontradas >= 3) total = Math.max(0, total - 1);
+  if (genericasEncontradas >= 5) total = Math.max(0, total - 1);
+
+  // Bonus por especificidad (números, fechas, porcentajes)
+  const bonusEspecificidad = especificidad >= 2 ? 1 : 0;
+
+  // Bonus por longitud solo con 120+ palabras
+  const bonusLongitud = palabras >= 120 ? 1 : 0;
+
+  const totalFinal = Math.min(total + bonusEspecificidad + bonusLongitud, 6);
+
+  // ── ALERTAS ──
+  const alertas = [];
+  if (genericasEncontradas >= 3) alertas.push('Respuesta con lenguaje genérico — no describe una situación específica.');
+  if (!tieneNumeros && !tieneFechas) alertas.push('Sin datos concretos — falta especificidad en fechas, cifras o nombres.');
+  if (accionesEncontradas < 3) alertas.push('Pocas acciones propias descritas.');
+  if (resultadoEncontrado < 2) alertas.push('El resultado no queda claro o es muy vago.');
+
+  // ── GRADO FINAL ──
   let grado, observacion;
-  if (totalConBonus >= 5) { grado = 'A'; observacion = 'Respuesta completa. Se identifican claramente la situación, el rol, acciones concretas y resultados medibles. Alto nivel de competencia.'; }
-  else if (totalConBonus >= 3) { grado = 'B'; observacion = 'Respuesta sólida. Describe la situación y acciones tomadas. El resultado podría ser más específico o medible.'; }
-  else if (totalConBonus === 2) { grado = 'C'; observacion = 'Respuesta básica. Falta especificar mejor el rol propio o el resultado concreto obtenido.'; }
-  else { grado = 'D'; observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR (situación, tarea, acción, resultado).'; }
-
-  // Penalizar respuestas muy cortas
-  if (palabras < 20 && grado !== 'D') {
-    grado = grado === 'A' ? 'B' : grado === 'B' ? 'C' : 'D';
-    observacion += ' Nota: la respuesta fue muy breve.';
+  if (totalFinal >= 5) {
+    grado = 'A';
+    observacion = 'Respuesta completa y específica. Se identifican claramente situación, rol, acciones concretas y resultados medibles.';
+  } else if (totalFinal >= 3) {
+    grado = 'B';
+    observacion = 'Respuesta sólida. Describe la situación y acciones tomadas. El resultado podría ser más específico o medible.';
+  } else if (totalFinal === 2) {
+    grado = 'C';
+    observacion = 'Respuesta básica. Falta especificar mejor el rol propio o el resultado concreto obtenido.';
+  } else {
+    grado = 'D';
+    observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR (situación, tarea, acción, resultado).';
   }
 
-  return { s, t: tarea, a, r, total: totalConBonus, grado, observacion };
+  if (alertas.length > 0) observacion += ' Alertas: ' + alertas.join(' | ');
+
+  return { s, t: tarea, a, r, total: totalFinal, grado, observacion, alertas, especificidad, genericasEncontradas };
 }
 
 // ══════════════════════════════════════
