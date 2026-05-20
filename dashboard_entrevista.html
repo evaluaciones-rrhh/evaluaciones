@@ -521,7 +521,7 @@ function renderInforme(ent) {
           + '<div class="comp-header" onclick="toggleComp(' + idx + ')">'
           + '<div class="comp-grado grado-' + grado + '">' + grado + '</div>'
           + '<div class="comp-info">'
-          + '<div class="comp-nombre">' + a.competencia + '</div>'
+          + '<div class="comp-nombre">' + a.competencia + (an.metodo === 'groq_ia' ? ' <span style="font-size:9px;background:rgba(42,92,58,.15);color:var(--green);border:1px solid rgba(42,92,58,.3);padding:2px 6px;border-radius:10px;font-weight:700;letter-spacing:.06em;vertical-align:middle;">✦ IA</span>' : ' <span style="font-size:9px;background:var(--surface2);color:var(--hint);border:1px solid var(--border);padding:2px 6px;border-radius:10px;font-weight:700;letter-spacing:.06em;vertical-align:middle;">AUTO</span>') + '</div>'
           + '<div class="comp-obs">' + an.observacion + '</div>'
           + '</div>'
           + '<div class="comp-star">'
@@ -533,6 +533,7 @@ function renderInforme(ent) {
           + '<span class="comp-chevron" id="chev-' + idx + '">▼</span>'
           + '</div>'
           + '<div class="comp-body open" id="cb-' + idx + '"><div style="margin-bottom:.75rem;"></div>'
+          + (an.alertas && an.alertas.length > 0 ? '<div style="margin-bottom:1rem;">' + an.alertas.map(function(al) { return '<div style="font-size:11px;color:var(--amber);background:rgba(176,120,32,0.08);border:1px solid rgba(176,120,32,0.2);border-radius:6px;padding:5px 10px;margin-bottom:4px;">⚠ ' + al + '</div>'; }).join('') + '</div>' : '')
           + '<div class="star-detalle">'
           + [
               { l:'S', n:'Situación', v: an.s, max:1 },
