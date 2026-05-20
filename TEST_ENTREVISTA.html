@@ -412,7 +412,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
     <div class="entrevistador-wrap">
       <div class="avatar-wrap">
         <div class="avatar-circle" id="avatar-circle">🎙️</div>
-        <div class="avatar-ondas" id="avatar-ondas">
+        <div class="avatar-ondas">
           <div class="onda"></div>
           <div class="onda"></div>
           <div class="onda"></div>
@@ -422,13 +422,18 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <div class="burbuja-texto" id="burbuja-texto">
         <span id="texto-animado"></span><span class="cursor-texto" id="cursor-texto"></span>
       </div>
-      <button class="btn-saltar" onclick="saltarEntrevistador()">Saltar introducción →</button>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;margin-top:.5rem;">
+        <button class="btn btn-primary" id="btn-listo" onclick="continuarDesdeEntrevistador()" style="display:none;min-width:200px;justify-content:center;">
+          Estoy listo/a →
+        </button>
+        <button class="btn-saltar" onclick="continuarDesdeEntrevistador()">Saltar →</button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- ══ PANTALLA 2: CUENTA REGRESIVA ══ -->
-<div class="screen" id="screen-countdown">
+<div class="screen" id="screen-countdown" style="display:none!important;">
   <div class="wrap">
     <div class="card">
       <div class="pregunta-header">
@@ -685,115 +690,71 @@ async function iniciarEntrevista() {
 // ══════════════════════════════════════
 // ENTREVISTADOR VIRTUAL
 // ══════════════════════════════════════
-let synth = window.speechSynthesis;
-let vozActual = null;
-let timeoutEntrevistador = null;
 let indiceEntrevistador = 0;
+let timeoutEscritura = null;
+let escrituraCompleta = false;
+
+const FRASES_TRANSICION = [
+  // Después de pregunta 1
+  'Bien hecho. Llevas 1 de 5 preguntas. Para la siguiente, recuerda describir una situacion concreta — cuando ocurrio y cual era el contexto.',
+  // Después de pregunta 2
+  'Muy bien. Llevas 2 de 5 preguntas. Esta vez pon enfasis en cual era tu rol especifico y que acciones tomaste tu personalmente.',
+  // Después de pregunta 3
+  'Excelente, vas a la mitad. Llevas 3 de 5 preguntas. Recuerda mencionar el resultado concreto que obtuviste — datos, cifras o impacto si los tienes.',
+  // Después de pregunta 4
+  'Casi terminamos. Llevas 4 de 5 preguntas. Para esta ultima, tomatelo con calma y responde con detalle — lo estas haciendo muy bien.'
+];
+
+const TEXTO_BIENVENIDA = 'Hola, bienvenido o bienvenida a tu entrevista por competencias. A continuacion te presentare 5 preguntas sobre situaciones laborales. Recuerda responder con ejemplos reales y concretos de tu experiencia. Cuando estes listo o lista, presiona el boton para comenzar.';
 
 function mostrarPreguntaCountdown(idx) {
   indiceEntrevistador = idx;
-  const comp = competencias[idx];
-  const esIntro = idx === 0;
+  escrituraCompleta = false;
 
-  // Texto del entrevistador
-  let textoCompleto = '';
-  if (esIntro) {
-    textoCompleto = 'Hola, bienvenido o bienvenida a tu entrevista por competencias. A continuacion te presentare preguntas sobre las cuales deberas responder. Recuerda ser especifico y basarte en experiencias reales de tu vida laboral. Pregunta ' + (idx+1) + ' de ' + competencias.length + ': ' + comp.pregunta;
-  } else {
-    textoCompleto = 'Pregunta ' + (idx+1) + ' de ' + competencias.length + ': ' + comp.pregunta;
-  }
+  // Ocultar botón listo inicialmente
+  const btnListo = document.getElementById('btn-listo');
+  if (btnListo) btnListo.style.display = 'none';
 
-  // Mostrar pantalla entrevistador
+  // Texto según si es intro o transición
+  const texto = idx === 0 ? TEXTO_BIENVENIDA : FRASES_TRANSICION[idx - 1] || FRASES_TRANSICION[FRASES_TRANSICION.length - 1];
+
+  // Limpiar texto animado
   document.getElementById('texto-animado').textContent = '';
   document.getElementById('cursor-texto').style.display = 'inline-block';
+  document.getElementById('avatar-circle').classList.add('hablando');
+
   mostrarPantalla('screen-entrevistador');
 
   // Animar texto letra por letra
   let charIdx = 0;
-  const velocidad = 28; // ms por caracter
-  clearInterval(timeoutEntrevistador);
+  clearTimeout(timeoutEscritura);
 
   function escribirLetra() {
-    if (charIdx < textoCompleto.length) {
-      document.getElementById('texto-animado').textContent += textoCompleto[charIdx];
+    if (charIdx < texto.length) {
+      document.getElementById('texto-animado').textContent += texto[charIdx];
       charIdx++;
-      timeoutEntrevistador = setTimeout(escribirLetra, velocidad);
+      timeoutEscritura = setTimeout(escribirLetra, 25);
     } else {
-      // Texto completo — ocultar cursor y esperar para ir al countdown
+      // Terminó de escribir
       document.getElementById('cursor-texto').style.display = 'none';
-      setTimeout(function() {
-        iniciarCountdown(idx);
-      }, 1200);
+      document.getElementById('avatar-circle').classList.remove('hablando');
+      escrituraCompleta = true;
+      // Mostrar botón listo
+      if (btnListo) btnListo.style.display = 'flex';
     }
   }
   escribirLetra();
-
-  // Voz sintética
-  hablarTexto(textoCompleto, function() {
-    // Al terminar de hablar, detener animación y ir directo al countdown
-    clearTimeout(timeoutEntrevistador);
-    document.getElementById('texto-animado').textContent = textoCompleto;
-    document.getElementById('cursor-texto').style.display = 'none';
-    setTimeout(function() { iniciarCountdown(idx); }, 800);
-  });
 }
 
-function hablarTexto(texto, onEnd) {
-  if (!synth) { if(onEnd) onEnd(); return; }
-  synth.cancel();
-  const utterance = new SpeechSynthesisUtterance(texto);
-  utterance.lang = 'es-CL';
-  utterance.rate = 0.95;
-  utterance.pitch = 1.0;
-  utterance.volume = 1;
-
-  // Buscar voz en español
-  const voces = synth.getVoices();
-  const vozEs = voces.find(function(v) { return v.lang.startsWith('es'); });
-  if (vozEs) utterance.voice = vozEs;
-
-  utterance.onstart = function() {
-    document.getElementById('avatar-circle').classList.add('hablando');
-  };
-  utterance.onend = function() {
-    document.getElementById('avatar-circle').classList.remove('hablando');
-    if (onEnd) onEnd();
-  };
-  utterance.onerror = function() {
-    document.getElementById('avatar-circle').classList.remove('hablando');
-    if (onEnd) onEnd();
-  };
-
-  vozActual = utterance;
-  synth.speak(utterance);
-}
-
-function saltarEntrevistador() {
-  synth && synth.cancel();
-  clearTimeout(timeoutEntrevistador);
+function continuarDesdeEntrevistador() {
+  clearTimeout(timeoutEscritura);
+  document.getElementById('cursor-texto').style.display = 'none';
   document.getElementById('avatar-circle').classList.remove('hablando');
-  iniciarCountdown(indiceEntrevistador);
+  iniciarGrabacionDirecta(indiceEntrevistador);
 }
 
-function iniciarCountdown(idx) {
-  const comp = competencias[idx];
-  document.getElementById('cd-badge').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
-  document.getElementById('cd-competencia').textContent = comp.nombre;
-  document.getElementById('cd-pregunta').textContent = comp.pregunta;
-  document.getElementById('step-indicator').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
-
-  let segs = TIEMPO_COUNTDOWN;
-  document.getElementById('countdown-num').textContent = segs;
-  mostrarPantalla('screen-countdown');
-  clearInterval(timerCountdown);
-  timerCountdown = setInterval(function() {
-    segs--;
-    document.getElementById('countdown-num').textContent = segs;
-    if (segs <= 0) {
-      clearInterval(timerCountdown);
-      mostrarGrabacion(idx);
-    }
-  }, 1000);
+function iniciarGrabacionDirecta(idx) {
+  mostrarGrabacion(idx);
 }
 
 // ══════════════════════════════════════
@@ -930,7 +891,6 @@ async function siguientePregunta() {
   preguntaActual++;
 
   if (preguntaActual < competencias.length) {
-    mostrarPantalla('screen-countdown');
     mostrarPreguntaCountdown(preguntaActual);
   } else {
     await finalizarEntrevista();
