@@ -467,6 +467,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
+      <div class="nav-item" onclick="irA('enviar-entrevista')">
+        <span class="nav-icon">🎤</span> Enviar entrevista
+      </div>
       <div class="nav-item" onclick="irA('historial')">
         <span class="nav-icon">📋</span> Historial
       </div>
@@ -695,25 +698,11 @@ tbody tr:hover td { background: #fdf9f6; }
                 <option value="16PF">16PF — Personalidad</option>
                 <option value="IPV">IPV — Personalidad Vendedores</option>
                 <option value="WONDERLIC">Wonderlic — Habilidad Cognitiva</option>
-                <option value="ENTREVISTA">🎙️ Entrevista por Competencias</option>
               </select>
             </div>
 
           </div>
-          <!-- Selector de cargo para entrevista -->
-          <div id="env-cargo-wrap" style="display:none;margin-top:14px;">
-            <div class="form-group">
-              <label>CARGO A EVALUAR</label>
-              <select id="env-cargo">
-                <option value="Vendedor">Vendedor</option>
-                <option value="Jefatura">Jefatura</option>
-                <option value="Gerencia">Gerencia</option>
-                <option value="Administrativo">Administrativo</option>
-                <option value="Operario">Operario</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </div>
-          </div>
+
 
           <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
             🔗 Link a enviar: <span id="link-url" style="color:var(--naranja);font-weight:500;"></span>
@@ -723,6 +712,56 @@ tbody tr:hover td { background: #fdf9f6; }
           </div>
           <div class="alert alert-ok" id="env-ok"></div>
           <div class="alert alert-err" id="env-err"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR ENTREVISTA -->
+    <div class="page" id="page-enviar-entrevista">
+      <div style="max-width:600px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">🎤 Enviar Entrevista por Competencias</div></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:1.25rem;">
+              Selecciona el nivel de cargo del candidato. El sistema enviará automáticamente las preguntas correspondientes según el marco de competencias definido.
+            </p>
+            <div class="form-grid" style="margin-bottom:1rem;">
+              <div class="form-group">
+                <label>NOMBRE DEL CANDIDATO</label>
+                <input type="text" id="ent-nombre" placeholder="Apellido Nombre">
+              </div>
+              <div class="form-group">
+                <label>EMAIL</label>
+                <input type="email" id="ent-email" placeholder="candidato@email.com">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label>NIVEL DE CARGO</label>
+              <select id="ent-nivel" onchange="actualizarPreviewEntrevista()">
+                <option value="">Seleccionar nivel...</option>
+                <option value="Operativo">Operativo — 4 competencias</option>
+                <option value="Administrativo">Administrativo — 5 competencias</option>
+                <option value="Comercial">Comercial — 5 competencias</option>
+                <option value="Profesional">Profesional / Especialista — 5 competencias</option>
+                <option value="Jefatura">Jefatura — 5 competencias</option>
+                <option value="Gerencia">Gerencia — 5 competencias</option>
+              </select>
+            </div>
+
+            <!-- Info del nivel seleccionado -->
+            <div id="ent-nivel-info" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:1rem;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;">Competencias a evaluar</div>
+              <div id="ent-nivel-competencias" style="font-size:13px;color:var(--ink);line-height:1.7;"></div>
+            </div>
+
+            <div id="ent-link-preview" style="margin-bottom:1rem;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
+              🔗 Link: <span id="ent-link-url" style="color:var(--naranja);font-weight:500;"></span>
+            </div>
+
+            <button class="btn btn-primary" onclick="enviarEntrevistaDesdePlataforma()" id="btn-ent">🎤 Enviar entrevista</button>
+            <div class="alert alert-ok" id="ent-ok"></div>
+            <div class="alert alert-err" id="ent-err"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -849,31 +888,6 @@ tbody tr:hover td { background: #fdf9f6; }
           </div>
         </div>
 
-        <!-- ENTREVISTA -->
-        <div class="card" style="margin-bottom:1.25rem;border:1px solid var(--naranja);background:var(--naranja-light);">
-          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
-            <div style="width:48px;height:48px;border-radius:10px;background:var(--naranja);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🎙️</div>
-            <div style="flex:1;">
-              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
-                <h3 style="font-size:16px;font-weight:600;">Entrevista por Competencias</h3>
-                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--naranja);color:#fff;">Nuevo ✦ IA</span>
-                <span style="font-size:11px;color:var(--ink-soft);">⏱ 20-25 minutos</span>
-              </div>
-              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Entrevista estructurada por video con <strong>metodología STAR</strong> (Situación, Tarea, Acción, Resultado) basada en el diccionario de competencias de Martha Alles. El candidato responde grabándose y el sistema analiza automáticamente con Inteligencia Artificial.</p>
-              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Metodología STAR</span>
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Análisis con IA</span>
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Martha Alles</span>
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.15);color:var(--naranja);">Video</span>
-              </div>
-              <p style="font-size:12px;color:var(--ink-soft);margin-top:.75rem;">📌 Recomendado para: todos los cargos. Complementa los tests psicométricos con evidencia conductual concreta.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
     <!-- HISTORIAL -->
     <div class="page" id="page-historial">
       <div class="card">
@@ -942,12 +956,12 @@ document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", "enviar-entrevista":"Enviar entrevista", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
+  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
   document.getElementById("topbar-title").textContent = titulos[pag];
   paginaActual = pag;
 }
@@ -1182,16 +1196,8 @@ function actualizarPreview() {
   var prev = document.getElementById("link-preview");
   var cargoWrap = document.getElementById("env-cargo-wrap");
 
-  // Mostrar/ocultar selector de cargo
-  cargoWrap.style.display = test === "ENTREVISTA" ? "block" : "none";
-
   if (test && TESTS_LINKS[test]) {
-    var url = TESTS_LINKS[test];
-    if (test === "ENTREVISTA") {
-      var cargo = document.getElementById("env-cargo").value;
-      url += "?cargo=" + encodeURIComponent(cargo);
-    }
-    document.getElementById("link-url").textContent = url;
+    document.getElementById("link-url").textContent = TESTS_LINKS[test];
     prev.style.display = "block";
   } else {
     prev.style.display = "none";
@@ -1250,6 +1256,66 @@ async function enviarEvaluacion() {
   }
   btn.disabled=false;
   btn.innerHTML="📧 Enviar invitación";
+}
+
+var NIVELES_INFO = {
+  "Operativo": "Responsabilidad · Orientación a la seguridad · Trabajo en equipo · Orden y calidad del trabajo",
+  "Administrativo": "Comunicación · Responsabilidad · Orden y calidad · Trabajo en equipo · Flexibilidad",
+  "Comercial": "Orientación al cliente · Orientación a resultados · Persuasión · Iniciativa · Trabajo bajo presión",
+  "Profesional": "Orientación a resultados · Iniciativa · Comunicación · Responsabilidad · Planificación",
+  "Jefatura": "Liderazgo · Trabajo en equipo · Planificación · Comunicación · Toma de decisiones",
+  "Gerencia": "Visión de negocio · Liderazgo estratégico · Pensamiento estratégico · Orientación a resultados · Gestión del cambio",
+};
+
+function actualizarPreviewEntrevista() {
+  var nivel = document.getElementById('ent-nivel').value;
+  var infoEl = document.getElementById('ent-nivel-info');
+  var linkEl = document.getElementById('ent-link-preview');
+  if (nivel) {
+    document.getElementById('ent-nivel-competencias').textContent = NIVELES_INFO[nivel] || '';
+    infoEl.style.display = 'block';
+    document.getElementById('ent-link-url').textContent = BASE + 'TEST_ENTREVISTA.html?cargo=' + encodeURIComponent(nivel);
+    linkEl.style.display = 'block';
+  } else {
+    infoEl.style.display = 'none';
+    linkEl.style.display = 'none';
+  }
+}
+
+async function enviarEntrevistaDesdePlataforma() {
+  var nombre = document.getElementById('ent-nombre').value.trim();
+  var email = document.getElementById('ent-email').value.trim();
+  var nivel = document.getElementById('ent-nivel').value;
+  var okEl = document.getElementById('ent-ok');
+  var errEl = document.getElementById('ent-err');
+  okEl.style.display = 'none'; errEl.style.display = 'none';
+
+  if (!nombre || !email || !nivel) {
+    errEl.textContent = 'Por favor completa nombre, email y nivel de cargo.';
+    errEl.style.display = 'block'; return;
+  }
+  var btn = document.getElementById('btn-ent');
+  btn.disabled = true;
+  btn.innerHTML = "<span class='spinner'></span> Enviando...";
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'enviarEntrevista', nombre: nombre, email: email, cargo: nivel, competencias: [] })
+    });
+    okEl.textContent = '✓ Entrevista enviada a ' + email + ' — Nivel: ' + nivel;
+    okEl.style.display = 'block';
+    document.getElementById('ent-nombre').value = '';
+    document.getElementById('ent-email').value = '';
+    document.getElementById('ent-nivel').value = '';
+    document.getElementById('ent-nivel-info').style.display = 'none';
+    document.getElementById('ent-link-preview').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🎤 Enviar entrevista';
 }
 
 // ══ REPORTE ENTREVISTAS ══
@@ -1327,7 +1393,7 @@ function verInformeEntrevista(ent) {
 
     <!-- MARCO DE COMPETENCIAS -->
     <div class="page" id="page-competencias">
-      <div style="max-width:860px;">
+      <div style="max-width:860px;margin:0 auto;">
         <div class="card" style="margin-bottom:1.25rem;">
           <div class="card-header"><div class="card-title">📐 Marco de Competencias por Nivel de Cargo</div></div>
           <p style="font-size:13px;color:var(--muted);line-height:1.7;padding:16px 20px;margin:0;">Basado en el diccionario de competencias de Martha Alles. Cada nivel tiene un set específico de competencias conductuales medidas mediante metodología STAR en la entrevista por competencias.</p>
