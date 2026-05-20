@@ -577,7 +577,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 // ══════════════════════════════════════
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
 // ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
-const GROQ_API_KEY = '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';
+let GROQ_API_KEY = ''; // se carga desde Apps Script al iniciar
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama3-8b-8192'; // modelo gratuito y rápido
 const TIEMPO_GRABACION = 180;
@@ -627,8 +627,22 @@ window.addEventListener('load', async function() {
     } catch(e) {}
   }
 
+  await cargarGroqKey();
   await cargarCompetencias();
 });
+
+async function cargarGroqKey() {
+  try {
+    const r = await fetch(APPS_URL + '?action=getGroqKey');
+    const d = await r.json();
+    if (d.key) {
+      GROQ_API_KEY = d.key;
+      console.log('Groq key cargada OK:', GROQ_API_KEY.substring(0,10) + '...');
+    }
+  } catch(e) {
+    console.log('No se pudo cargar Groq key:', e.message);
+  }
+}
 
 async function cargarCompetencias() {
   try {
