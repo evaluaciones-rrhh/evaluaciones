@@ -48,10 +48,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .header-sub { font-size: 11px; color: rgba(247,245,240,0.4); letter-spacing: .12em; text-transform: uppercase; }
 
 /* ══ LAYOUT ══ */
-.layout { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 60px); }
+.layout { display: block; min-height: calc(100vh - 60px); }
 
 /* ══ SIDEBAR ══ */
-.sidebar {
+.sidebar { display: none !important; 
   background: var(--surface);
   border-right: 1px solid var(--border);
   overflow-y: auto;
@@ -102,7 +102,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 }
 
 /* ══ MAIN ══ */
-.main { padding: 2rem; overflow-y: auto; }
+.main { padding: 2rem; overflow-y: auto; max-width: 960px; margin: 0 auto; }
 
 /* ══ EMPTY STATE ══ */
 .empty-state {
@@ -315,7 +315,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 
 @media (max-width: 768px) {
   .layout { grid-template-columns: 1fr; }
-  .sidebar { position: static; max-height: 300px; }
+  .sidebar { display: none !important;  position: static; max-height: 300px; }
   .hallazgos-grid { grid-template-columns: 1fr; }
   .emo-grid { grid-template-columns: repeat(2,1fr); }
   .star-detalle { grid-template-columns: repeat(2,1fr); }
@@ -749,6 +749,13 @@ function descargarPDF() {
 
 // ══ INIT ══
 cargarDatos();
+
+// Si no hay candidato en localStorage después de cargar, mostrar mensaje
+setTimeout(function() {
+  if (!candidatoActual) {
+    document.getElementById('main-content').innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sin candidato seleccionado</div><div class="empty-sub">Accede a este informe desde la sección<br>Reporte Entrevistas de la plataforma.</div></div>';
+  }
+}, 3000);
 </script>
 </body>
 </html>
