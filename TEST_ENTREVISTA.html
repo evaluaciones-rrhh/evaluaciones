@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Entrevista por Competencias — Grupo Cygnus</title>
-<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -580,7 +579,7 @@ const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7
 // ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
 const GROQ_API_KEY = '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';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'mixtral-8x7b-32768'; // modelo estable para análisis JSON
+const GROQ_MODEL = 'llama3-8b-8192'; // modelo gratuito y rápido
 const TIEMPO_GRABACION = 180;
 const TIEMPO_COUNTDOWN = 10;
 
@@ -629,22 +628,7 @@ window.addEventListener('load', async function() {
   }
 
   await cargarCompetencias();
-  cargarModelosFacial();
 });
-
-async function cargarModelosFacial() {
-  try {
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights';
-    await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-      faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-      faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL)
-    ]);
-    faceApiCargado = true;
-  } catch(e) {
-    faceApiCargado = false;
-  }
-}
 
 async function cargarCompetencias() {
   try {
@@ -927,9 +911,8 @@ async function subirVideo(blob, numeroPregunta) {
       videoBase64: base64.split(',')[1]
     };
 
-    await fetch(APPS_URL, {
+    const resp = await fetch(APPS_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
@@ -938,9 +921,8 @@ async function subirVideo(blob, numeroPregunta) {
     document.getElementById('upload-bar').style.width = '100%';
     document.getElementById('upload-pct').textContent = '100%';
 
-    // Con no-cors no podemos leer la respuesta — retornamos URL vacía
-    // El video se guarda igualmente en Drive
-    return '';
+    const data = await resp.json();
+    return data.url || '';
   } catch(err) {
     console.error('Error subiendo video:', err);
     return '';
@@ -1151,7 +1133,7 @@ Evalúa la respuesta según metodología STAR y devuelve ÚNICAMENTE un JSON con
         }
       }
     } catch(e) {
-      console.log('Groq error:', e.message, '— usando análisis de palabras clave como respaldo');
+      console.log('Groq no disponible, usando análisis de palabras clave:', e.message);
     }
   }
 
