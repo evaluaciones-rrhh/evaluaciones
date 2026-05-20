@@ -367,7 +367,14 @@ const GRADO_REQUERIDO = {
   'Otro': { comunicacion: 'C', trabajo_equipo: 'C', iniciativa: 'C', responsabilidad: 'C', orientacion_resultados: 'C' }
 };
 
+// Puntajes STAR: A=Destacado(5-6pts) B=Satisfactorio(3-4pts) C=Basico(2pts) D=Insuficiente(0-1pts)
 const GRADO_VAL = { A: 4, B: 3, C: 2, D: 1 };
+const NIVEL_STAR = {
+  A: { label: 'Destacado', pts: '5-6 pts' },
+  B: { label: 'Satisfactorio', pts: '3-4 pts' },
+  C: { label: 'Básico', pts: '2 pts' },
+  D: { label: 'Insuficiente', pts: '0-1 pts' }
+};
 const GRADO_COLOR = { A: 'verde', B: 'azul', C: 'amarillo', D: 'rojo' };
 
 let entrevistas = [];
@@ -425,20 +432,40 @@ function calcularRecomendacion(ent) {
   const analisis = ent.analisis_star || [];
   if (analisis.length === 0) return { clase: 'amarillo', texto: 'Sin datos', emoji: '🟡' };
 
-  const reqs = GRADO_REQUERIDO[ent.cargo] || GRADO_REQUERIDO['Otro'];
-  let cumple = 0, parcial = 0, noCumple = 0;
+  let cntA = 0; // Destacado
+  let cntB = 0; // Satisfactorio
+  let cntC = 0; // Básico
+  let cntD = 0; // Insuficiente
 
   analisis.forEach(function(a) {
     const grado = a.analisis ? a.analisis.grado : 'D';
-    const req = reqs[a.competencia_id] || 'C';
-    const diff = GRADO_VAL[grado] - GRADO_VAL[req];
-    if (diff >= 0) cumple++;
-    else if (diff === -1) parcial++;
-    else noCumple++;
+    if (grado === 'A') cntA++;
+    else if (grado === 'B') cntB++;
+    else if (grado === 'C') cntC++;
+    else cntD++;
   });
 
-  if (noCumple === 0 && parcial <= 1) return { clase: 'verde', texto: 'Recomendado', emoji: '🟢' };
-  if (noCumple <= 1) return { clase: 'amarillo', texto: 'Con reservas', emoji: '🟡' };
+  const total = analisis.length;
+  const satisfactorios = cntA + cntB; // A + B
+
+  // 🔴 No recomendado — condiciones inmediatas
+  if (cntD >= 3) return { clase: 'rojo', texto: 'No recomendado', emoji: '🔴' };
+  if (cntD === total) return { clase: 'rojo', texto: 'No recomendado', emoji: '🔴' };
+  if (satisfactorios === 0 && cntD >= 2) return { clase: 'rojo', texto: 'No recomendado', emoji: '🔴' };
+
+  // 🟢 Recomendado: mayoría A/B sin D
+  if (satisfactorios >= Math.ceil(total * 0.8) && cntD === 0) {
+    return { clase: 'verde', texto: 'Recomendado', emoji: '🟢' };
+  }
+  // 🟢 Recomendado: 60%+ en A/B con máximo 1 D
+  if (satisfactorios >= Math.ceil(total * 0.6) && cntD <= 1) {
+    return { clase: 'verde', texto: 'Recomendado', emoji: '🟢' };
+  }
+  // 🟡 Con reservas: algo de A/B pero con brechas, máximo 2 D
+  if (satisfactorios >= 1 && cntD <= 2) {
+    return { clase: 'amarillo', texto: 'Con reservas', emoji: '🟡' };
+  }
+  // 🔴 No recomendado: todo lo demás
   return { clase: 'rojo', texto: 'No recomendado', emoji: '🔴' };
 }
 
@@ -519,7 +546,7 @@ function renderInforme(ent) {
         const an = a.analisis || { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Sin datos.' };
         return '<div class="competencia-block">'
           + '<div class="comp-header" onclick="toggleComp(' + idx + ')">'
-          + '<div class="comp-grado grado-' + grado + '">' + grado + '</div>'
+          + '<div class="comp-grado grado-' + grado + '" title="' + (NIVEL_STAR[grado] ? NIVEL_STAR[grado].label : grado) + '">' + grado + '</div>'
           + '<div class="comp-info">'
           + '<div class="comp-nombre">' + a.competencia + (an.metodo === 'groq_ia' ? ' <span style="font-size:9px;background:rgba(42,92,58,.15);color:var(--green);border:1px solid rgba(42,92,58,.3);padding:2px 6px;border-radius:10px;font-weight:700;letter-spacing:.06em;vertical-align:middle;">✦ IA</span>' : ' <span style="font-size:9px;background:var(--surface2);color:var(--hint);border:1px solid var(--border);padding:2px 6px;border-radius:10px;font-weight:700;letter-spacing:.06em;vertical-align:middle;">AUTO</span>') + '</div>'
           + '<div class="comp-obs">' + an.observacion + '</div>'
