@@ -238,9 +238,18 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .star-item.parcial .star-letra { color: var(--amber); }
 .star-item.nok .star-letra { color: var(--red); }
 
-
-
-
+.transcripcion-box {
+  background: var(--surface2); border-radius: 8px;
+  padding: 1rem 1.25rem; margin-bottom: 1rem;
+  font-size: 13px; color: var(--text); line-height: 1.8;
+  border: 1px solid var(--border); border-left: 3px solid var(--border2);
+}
+.transcripcion-label { 
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; 
+  text-transform: uppercase; color: var(--muted); 
+  margin-bottom: .5rem; display: flex; align-items: center; gap: 6px;
+}
+.trans-vacia { color: var(--hint); font-style: italic; font-size: 12px; }
 
 .video-link {
   display: inline-flex; align-items: center; gap: 6px;
@@ -381,6 +390,26 @@ document.getElementById('header-fecha').textContent = new Date().toLocaleDateStr
 
 // ══ CARGAR DATOS ══
 async function cargarDatos() {
+  // Si viene desde plataforma con candidato preseleccionado
+  const entLocal = localStorage.getItem('dash_entrevista');
+  if (entLocal) {
+    try {
+      const ent = JSON.parse(entLocal);
+      localStorage.removeItem('dash_entrevista');
+      // Cargar todos igualmente pero autoseleccionar este
+      const r = await fetch(APPS_URL + '?action=getEntrevistas');
+      const d = await r.json();
+      entrevistas = d.entrevistas || [];
+      renderSidebar();
+      // Buscar y autoseleccionar el candidato
+      const idx = entrevistas.findIndex(function(e) {
+        return e.token === ent.token || (e.nombre === ent.nombre && e.fecha === ent.fecha);
+      });
+      if (idx >= 0) verCandidato(idx);
+      return;
+    } catch(e) {}
+  }
+  // Carga normal
   try {
     const r = await fetch(APPS_URL + '?action=getEntrevistas');
     const d = await r.json();
@@ -572,6 +601,27 @@ function renderInforme(ent) {
                 + '</div>';
             }).join('')
           + '</div>'
+          + (function() {
+            // Buscar transcripción por competencia_id o por índice
+            let textoTrans = '';
+            if (trans && trans.texto) {
+              textoTrans = trans.texto;
+            } else {
+              // Intentar por posición
+              const transPorIdx = transcripciones[idx];
+              if (transPorIdx && transPorIdx.texto) textoTrans = transPorIdx.texto;
+            }
+            if (textoTrans) {
+              return '<div class="transcripcion-box">'
+                + '<div class="transcripcion-label">📝 Respuesta transcrita</div>'
+                + '<div style="line-height:1.8;">' + textoTrans + '</div>'
+                + '</div>';
+            }
+            return '<div class="transcripcion-box">'
+              + '<div class="transcripcion-label">📝 Respuesta transcrita</div>'
+              + '<div class="trans-vacia">Sin transcripción disponible — el candidato puede haber hablado en voz baja o el micrófono no estaba activo.</div>'
+              + '</div>';
+          })()
           + (video && video.url
             ? '<a href="' + video.url + '" target="_blank" class="video-link">▶ Ver video en Drive</a>'
             : '')
