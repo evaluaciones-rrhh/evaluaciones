@@ -579,7 +579,7 @@ const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7
 // ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
 const GROQ_API_KEY = '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';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.1-8b-instant'; // modelo estable Groq
+const GROQ_MODEL = 'llama3-8b-8192'; // modelo gratuito y rápido
 const TIEMPO_GRABACION = 180;
 const TIEMPO_COUNTDOWN = 10;
 
@@ -894,6 +894,7 @@ async function siguientePregunta() {
 // ══════════════════════════════════════
 async function subirVideo(blob, numeroPregunta) {
   try {
+    // Animar progreso visual
     let progreso = 0;
     const intervalo = setInterval(function() {
       progreso = Math.min(progreso + Math.random() * 15, 90);
@@ -911,9 +912,11 @@ async function subirVideo(blob, numeroPregunta) {
       videoBase64: base64.split(',')[1]
     };
 
-    const resp = await fetch(APPS_URL, {
+    // Usar no-cors — el video se guarda en Drive aunque no podamos leer la respuesta
+    await fetch(APPS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
 
@@ -921,9 +924,12 @@ async function subirVideo(blob, numeroPregunta) {
     document.getElementById('upload-bar').style.width = '100%';
     document.getElementById('upload-pct').textContent = '100%';
 
-    return '';
+    return ''; // Con no-cors no podemos leer la URL — el video queda en Drive
   } catch(err) {
     console.error('Error subiendo video:', err);
+    // Continuar aunque falle — no bloquear la entrevista
+    document.getElementById('upload-bar').style.width = '100%';
+    document.getElementById('upload-pct').textContent = '100%';
     return '';
   }
 }
@@ -1085,7 +1091,26 @@ async function analizarConIA(texto, competencia) {
   // Si hay API key de Groq, usar IA
   if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
     try {
-      const prompt = 'Eres experto en evaluacion psicolaboral con metodologia STAR (Situacion, Tarea, Accion, Resultado) y competencias de Martha Alles. Analiza esta respuesta a la competencia "' + competencia.nombre + '". Pregunta: "' + competencia.pregunta + '". Respuesta: "' + texto.substring(0, 800) + '". Responde SOLO con JSON valido sin texto adicional: {"s":0,"t":0,"a":0,"r":0,"total":0,"grado":"D","observacion":"texto","alertas":[],"especificidad":0} donde s/t=0 o 1, a/r=0,1 o 2, total=suma, grado=A si total>=5/B si>=3/C si=2/D si<=1.';
+      const prompt = `Eres un experto en evaluación psicolaboral usando metodología STAR (Situación, Tarea, Acción, Resultado) y el diccionario de competencias de Martha Alles.
+
+Analiza la siguiente respuesta de un candidato a la competencia "${competencia.nombre}".
+
+PREGUNTA FORMULADA: "${competencia.pregunta}"
+
+RESPUESTA DEL CANDIDATO: "${texto}"
+
+Evalúa la respuesta según metodología STAR y devuelve ÚNICAMENTE un JSON con este formato exacto, sin texto adicional:
+{
+  "s": 0 o 1 (¿describió claramente una SITUACIÓN o contexto concreto?),
+  "t": 0 o 1 (¿explicó cuál era su TAREA o responsabilidad específica?),
+  "a": 0, 1 o 2 (¿detalló ACCIONES propias concretas? 0=ninguna, 1=algunas, 2=detalladas),
+  "r": 0, 1 o 2 (¿mencionó RESULTADOS concretos y medibles? 0=ninguno, 1=vagos, 2=específicos),
+  "total": suma de s+t+a+r,
+  "grado": "A" si total>=5, "B" si total>=3, "C" si total=2, "D" si total<=1,
+  "observacion": "Una observación específica de 1-2 oraciones sobre la calidad de la respuesta",
+  "alertas": ["lista de alertas si hay respuesta genérica, sin ejemplos concretos, sin resultado claro, etc"],
+  "especificidad": 0, 1, 2 o 3 (¿mencionó números, fechas o datos concretos?)
+}`;
 
       const response = await fetch(GROQ_URL, {
         method: 'POST',
