@@ -385,7 +385,10 @@ tbody tr:hover td { background: #fdf9f6; }
         <span class="nav-icon">📊</span> Panel
       </div>
       <div class="nav-item" onclick="irA('candidatos')">
-        <span class="nav-icon">👥</span> Candidatos
+        <span class="nav-icon">📁</span> Reporte Tests
+      </div>
+      <div class="nav-item" onclick="irA('entrevistas')">
+        <span class="nav-icon">🎙️</span> Reporte Entrevistas
       </div>
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
@@ -535,7 +538,7 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="page" id="page-candidatos">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Todos los evaluados</div>
+          <div class="card-title">Reporte Tests Psicolaborales</div>
           <span id="count-label" style="font-size:12px;color:var(--muted);"></span>
         </div>
         <div class="card-body" style="padding-bottom:0;">
@@ -555,6 +558,38 @@ tbody tr:hover td { background: #fdf9f6; }
           <table>
             <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
             <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTE ENTREVISTAS -->
+    <div class="page" id="page-entrevistas">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reporte Entrevistas por Competencias</div>
+          <button class="btn btn-ghost btn-sm" onclick="cargarEntrevistas()">↻ Actualizar</button>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="filtros-row">
+            <input class="filtro-input" type="text" id="filtro-entrevista" placeholder="Buscar nombre o RUT..." oninput="filtrarEntrevistas()" style="max-width:300px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>RUT</th>
+                <th>Cargo</th>
+                <th>Fecha</th>
+                <th>Resultado</th>
+                <th>Informe</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-entrevistas">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -583,10 +618,26 @@ tbody tr:hover td { background: #fdf9f6; }
                 <option value="16PF">16PF — Personalidad</option>
                 <option value="IPV">IPV — Personalidad Vendedores</option>
                 <option value="WONDERLIC">Wonderlic — Habilidad Cognitiva</option>
+                <option value="ENTREVISTA">🎙️ Entrevista por Competencias</option>
               </select>
             </div>
 
           </div>
+          <!-- Selector de cargo para entrevista -->
+          <div id="env-cargo-wrap" style="display:none;margin-top:14px;">
+            <div class="form-group">
+              <label>CARGO A EVALUAR</label>
+              <select id="env-cargo">
+                <option value="Vendedor">Vendedor</option>
+                <option value="Jefatura">Jefatura</option>
+                <option value="Gerencia">Gerencia</option>
+                <option value="Administrativo">Administrativo</option>
+                <option value="Operario">Operario</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+
           <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
             🔗 Link a enviar: <span id="link-url" style="color:var(--naranja);font-weight:500;"></span>
           </div>
@@ -772,8 +823,10 @@ const TESTS_LINKS = {
   CEAL: BASE+"TEST_CEAL.html",
   "16PF": BASE+"TEST_16PF.html",
   IPV: BASE+"TEST_IPV.html",
-  WONDERLIC: BASE+"TEST_WONDERLIC.html"
+  WONDERLIC: BASE+"TEST_WONDERLIC.html",
+  ENTREVISTA: BASE+"TEST_ENTREVISTA.html"
 };
+const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
 const DASH_HTML = {
   "16PF":    BASE+"dashboard.html",
   IPV:       BASE+"dashboard_ipv.html",
@@ -798,6 +851,7 @@ function login() {
     document.getElementById("login-error").style.display = "none";
     cargarDatos();
     cargarHistorial();
+    cargarEntrevistas();
   } else {
     document.getElementById("login-error").style.display = "block";
   }
@@ -811,12 +865,12 @@ document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Candidatos evaluados", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  document.querySelectorAll(".nav-item")[["panel","candidatos","enviar","historial","tests"].indexOf(pag)].classList.add("activo");
+  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","historial","tests"].indexOf(pag)].classList.add("activo");
   document.getElementById("topbar-title").textContent = titulos[pag];
   paginaActual = pag;
 }
@@ -1049,8 +1103,18 @@ async function abrirDash(test, rut, nombre) {
 function actualizarPreview() {
   var test = document.getElementById("env-test").value;
   var prev = document.getElementById("link-preview");
+  var cargoWrap = document.getElementById("env-cargo-wrap");
+
+  // Mostrar/ocultar selector de cargo
+  cargoWrap.style.display = test === "ENTREVISTA" ? "block" : "none";
+
   if (test && TESTS_LINKS[test]) {
-    document.getElementById("link-url").textContent = TESTS_LINKS[test];
+    var url = TESTS_LINKS[test];
+    if (test === "ENTREVISTA") {
+      var cargo = document.getElementById("env-cargo").value;
+      url += "?cargo=" + encodeURIComponent(cargo);
+    }
+    document.getElementById("link-url").textContent = url;
     prev.style.display = "block";
   } else {
     prev.style.display = "none";
@@ -1061,7 +1125,8 @@ async function enviarEvaluacion() {
   var nombre = document.getElementById("env-nombre").value.trim();
   var email = document.getElementById("env-email").value.trim();
   var test = document.getElementById("env-test").value;
-    var okEl = document.getElementById("env-ok");
+  var cargo = document.getElementById("env-cargo") ? document.getElementById("env-cargo").value : "";
+  var okEl = document.getElementById("env-ok");
   var errEl = document.getElementById("env-err");
   okEl.style.display="none"; errEl.style.display="none";
 
@@ -1069,21 +1134,38 @@ async function enviarEvaluacion() {
     errEl.textContent="Por favor completa nombre, email y test.";
     errEl.style.display="block"; return;
   }
+  if (test === "ENTREVISTA" && !cargo) {
+    errEl.textContent="Por favor selecciona el cargo a evaluar.";
+    errEl.style.display="block"; return;
+  }
+
   var btn = document.getElementById("btn-env");
   btn.disabled=true;
   btn.innerHTML="<span class='spinner'></span> Enviando...";
+
   try {
-    await fetch(APPS_URL, {
-      method:"POST", mode:"no-cors",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({action:"enviarEvaluacion",nombre,email,test,cargo:"",link:TESTS_LINKS[test]})
-    });
+    // Entrevista usa su propio Apps Script
+    if (test === "ENTREVISTA") {
+      await fetch(APPS_URL_ENTREVISTA, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEntrevista", nombre, email, cargo, competencias:[], link:TESTS_LINKS[test]})
+      });
+    } else {
+      await fetch(APPS_URL, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEvaluacion", nombre, email, test, cargo:"", link:TESTS_LINKS[test]})
+      });
+    }
+
     okEl.textContent="✓ Invitación enviada a "+email;
     okEl.style.display="block";
     document.getElementById("env-nombre").value="";
     document.getElementById("env-email").value="";
     document.getElementById("env-test").value="";
     document.getElementById("link-preview").style.display="none";
+    document.getElementById("env-cargo-wrap").style.display="none";
     setTimeout(cargarHistorial, 2000);
   } catch(e) {
     errEl.textContent="Error: "+e.message;
@@ -1092,6 +1174,78 @@ async function enviarEvaluacion() {
   btn.disabled=false;
   btn.innerHTML="📧 Enviar invitación";
 }
+
+// ══ REPORTE ENTREVISTAS ══
+var datosEntrevistas = [];
+
+async function cargarEntrevistas() {
+  try {
+    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas");
+    var d = await r.json();
+    datosEntrevistas = (d.entrevistas || []).slice().reverse();
+    renderTablaEntrevistas(datosEntrevistas);
+  } catch(e) {
+    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
+  }
+}
+
+function filtrarEntrevistas() {
+  var q = document.getElementById("filtro-entrevista").value.toLowerCase();
+  var filtrado = datosEntrevistas.filter(function(e) {
+    return (e.nombre||"").toLowerCase().includes(q) || (e.rut||"").toLowerCase().includes(q);
+  });
+  renderTablaEntrevistas(filtrado);
+}
+
+function renderTablaEntrevistas(lista) {
+  var tbody = document.getElementById("tabla-entrevistas");
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
+    return;
+  }
+
+  var GRADO_VAL = { A:4, B:3, C:2, D:1 };
+
+  tbody.innerHTML = lista.map(function(ent) {
+    // Calcular recomendación
+    var analisis = ent.analisis_star || [];
+    var cntA=0, cntB=0, cntC=0, cntD=0;
+    analisis.forEach(function(a) {
+      var g = a.analisis ? a.analisis.grado : 'D';
+      if (g==='A') cntA++; else if (g==='B') cntB++; else if (g==='C') cntC++; else cntD++;
+    });
+    var total = analisis.length;
+    var satisf = cntA + cntB;
+    var rec, recColor, recEmoji;
+
+    if (cntD >= 3 || cntD === total || (satisf === 0 && cntD >= 2)) {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    } else if (satisf >= Math.ceil(total * 0.6) && cntD <= 1) {
+      rec = 'Recomendado'; recColor = 'var(--high)'; recEmoji = '🟢';
+    } else if (satisf >= 1 && cntD <= 2) {
+      rec = 'Con reservas'; recColor = 'var(--mid)'; recEmoji = '🟡';
+    } else {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    }
+
+    if (analisis.length === 0) { rec = 'Sin datos'; recColor = 'var(--muted)'; recEmoji = '⚪'; }
+
+    return '<tr>'
+      + '<td><strong>' + (ent.nombre||'—') + '</strong></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.rut||'—') + '</td>'
+      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.1);color:var(--naranja);">' + (ent.cargo||'—') + '</span></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.fecha||'—') + '</td>'
+      + '<td><span style="font-size:12px;font-weight:600;color:' + recColor + ';">' + recEmoji + ' ' + rec + '</span></td>'
+      + '<td><button class="btn btn-ghost btn-sm" onclick="verInformeEntrevista(' + JSON.stringify(ent).replace(/"/g,"&quot;") + ')">Ver informe</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function verInformeEntrevista(ent) {
+  localStorage.setItem('dash_entrevista', JSON.stringify(ent));
+  window.open(BASE + 'dashboard_entrevista.html', '_blank');
+}
+
 </script>
 </body>
 </html>
