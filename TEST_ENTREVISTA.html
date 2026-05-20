@@ -577,7 +577,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 // ══════════════════════════════════════
 const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
 // ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
-let GROQ_API_KEY = ''; // se carga desde Apps Script al iniciar
+const GROQ_API_KEY = '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';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama3-8b-8192'; // modelo gratuito y rápido
 const TIEMPO_GRABACION = 180;
@@ -627,22 +627,8 @@ window.addEventListener('load', async function() {
     } catch(e) {}
   }
 
-  await cargarGroqKey();
   await cargarCompetencias();
 });
-
-async function cargarGroqKey() {
-  try {
-    const r = await fetch(APPS_URL + '?action=getGroqKey');
-    const d = await r.json();
-    if (d.key) {
-      GROQ_API_KEY = d.key;
-      console.log('Groq key cargada OK:', GROQ_API_KEY.substring(0,10) + '...');
-    }
-  } catch(e) {
-    console.log('No se pudo cargar Groq key:', e.message);
-  }
-}
 
 async function cargarCompetencias() {
   try {
@@ -1105,26 +1091,16 @@ async function analizarConIA(texto, competencia) {
   // Si hay API key de Groq, usar IA
   if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
     try {
-      const prompt = `Eres un experto en evaluación psicolaboral usando metodología STAR (Situación, Tarea, Acción, Resultado) y el diccionario de competencias de Martha Alles.
-
-Analiza la siguiente respuesta de un candidato a la competencia "${competencia.nombre}".
-
-PREGUNTA FORMULADA: "${competencia.pregunta}"
-
-RESPUESTA DEL CANDIDATO: "${texto}"
-
-Evalúa la respuesta según metodología STAR y devuelve ÚNICAMENTE un JSON con este formato exacto, sin texto adicional:
-{
-  "s": 0 o 1 (¿describió claramente una SITUACIÓN o contexto concreto?),
-  "t": 0 o 1 (¿explicó cuál era su TAREA o responsabilidad específica?),
-  "a": 0, 1 o 2 (¿detalló ACCIONES propias concretas? 0=ninguna, 1=algunas, 2=detalladas),
-  "r": 0, 1 o 2 (¿mencionó RESULTADOS concretos y medibles? 0=ninguno, 1=vagos, 2=específicos),
-  "total": suma de s+t+a+r,
-  "grado": "A" si total>=5, "B" si total>=3, "C" si total=2, "D" si total<=1,
-  "observacion": "Una observación específica de 1-2 oraciones sobre la calidad de la respuesta",
-  "alertas": ["lista de alertas si hay respuesta genérica, sin ejemplos concretos, sin resultado claro, etc"],
-  "especificidad": 0, 1, 2 o 3 (¿mencionó números, fechas o datos concretos?)
-}`;
+      const textoLimitado = texto.substring(0, 600).replace(/"/g, "'");
+      const preguntaLimitada = competencia.pregunta.substring(0, 200).replace(/"/g, "'");
+      const prompt = 'Eres experto en evaluacion psicolaboral STAR y competencias Martha Alles. ' +
+        'Competencia: ' + competencia.nombre + '. ' +
+        'Pregunta: ' + preguntaLimitada + ' ' +
+        'Respuesta candidato: ' + textoLimitado + ' ' +
+        'Responde SOLO con JSON valido sin texto extra: ' +
+        '{"s":0,"t":0,"a":0,"r":0,"total":0,"grado":"D","observacion":"texto breve","alertas":[],"especificidad":0} ' +
+        'Donde s y t son 0 o 1, a y r son 0 1 o 2, total es la suma, ' +
+        'grado es A si total mayor o igual 5, B si mayor o igual 3, C si igual 2, D si menor o igual 1.';
 
       const response = await fetch(GROQ_URL, {
         method: 'POST',
