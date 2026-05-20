@@ -238,13 +238,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); font
 .star-item.parcial .star-letra { color: var(--amber); }
 .star-item.nok .star-letra { color: var(--red); }
 
-.transcripcion-box {
-  background: var(--surface2); border-radius: 8px;
-  padding: 1rem; margin-bottom: 1rem;
-  font-size: 13px; color: var(--muted); line-height: 1.7;
-  font-style: italic; border: 1px solid var(--border);
-}
-.transcripcion-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--hint); margin-bottom: .5rem; font-style: normal; }
+
+
+
 
 .video-link {
   display: inline-flex; align-items: center; gap: 6px;
@@ -576,9 +572,6 @@ function renderInforme(ent) {
                 + '</div>';
             }).join('')
           + '</div>'
-          + (trans && trans.texto
-            ? '<div class="transcripcion-box"><div class="transcripcion-label">Transcripción</div>' + trans.texto + '</div>'
-            : '<div class="transcripcion-box"><div class="transcripcion-label">Transcripción</div>Sin transcripción disponible.</div>')
           + (video && video.url
             ? '<a href="' + video.url + '" target="_blank" class="video-link">▶ Ver video en Drive</a>'
             : '')
