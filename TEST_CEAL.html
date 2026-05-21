@@ -181,21 +181,17 @@ document.addEventListener("dragstart", function(e) { e.preventDefault(); });
 // ── VALIDACION TOKEN ──
 const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
-(async function validarAcceso() {
+// Validar token con localStorage — sin depender del Apps Script
+function validarAcceso() {
   if (!TOKEN_URL) return;
-  try {
-    const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL, {redirect:'follow', credentials:'omit'});
-    const d = await r.json();
-    if (!d.valido) {
-      document.querySelectorAll('#screen-inicio,#screen-prueba').forEach(el => el.style.display='none');
-      const bloq = document.getElementById('screen-bloqueado');
-      bloq.style.display = 'flex';
-    }
-  } catch(e) {
-    // Si hay error de conexión, permitir acceso (no bloquear por error de red)
-    console.warn("validarToken error:", e);
+  var key = 'test_completado_' + TOKEN_URL;
+  if (localStorage.getItem(key) === 'completado') {
+    document.querySelectorAll('#screen-inicio,#screen-prueba').forEach(function(el){ el.style.display='none'; });
+    var bloq = document.getElementById('screen-bloqueado');
+    if (bloq) bloq.style.display = 'flex';
   }
-})();
+}
+validarAcceso();
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 
 // Puntajes por pregunta y alternativa: [A, B, C, D]
@@ -447,6 +443,11 @@ function enviar(){
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify(payload)
   }).catch(()=>{});
+
+  // Marcar como completado en localStorage para este token
+  if (TOKEN_URL) {
+    localStorage.setItem('test_completado_' + TOKEN_URL, 'completado');
+  }
 
   document.getElementById('screen-prueba').classList.add('hidden');
   document.getElementById('screen-gracias').classList.remove('hidden');
