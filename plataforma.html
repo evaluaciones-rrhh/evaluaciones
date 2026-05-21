@@ -959,7 +959,8 @@ async function login() {
     var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
       method: "GET", redirect: "follow", credentials: "omit"
     });
-    var data = await resp.json();
+    var txt = await resp.text();
+    var data = JSON.parse(txt);
     if (data.ok === true) {
       usuarioActual = u2;
       document.getElementById("login-screen").style.display = "none";
@@ -1088,9 +1089,10 @@ async function cargarDatos() {
   try {
     var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
       method: "GET",
-      redirect: "follow"
+      redirect: "follow",
+      credentials: "omit"
     });
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     todosLosDatos = data.results || [];
     actualizarStats();
     renderRecientes();
@@ -1223,7 +1225,7 @@ async function abrirDash(test, rut, nombre) {
     localStorage.removeItem("dash_datos_" + test);
     // Cargar datos
     var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow", credentials:"omit"});
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     // Guardar en localStorage
     localStorage.setItem("dash_datos_" + test, JSON.stringify(data));
     localStorage.setItem("dash_filtro_rut", rut || "");
@@ -2426,7 +2428,8 @@ async function login() {
     var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
       method: "GET", redirect: "follow", credentials: "omit"
     });
-    var data = await resp.json();
+    var txt = await resp.text();
+    var data = JSON.parse(txt);
     if (data.ok === true) {
       usuarioActual = u2;
       document.getElementById("login-screen").style.display = "none";
@@ -2555,9 +2558,10 @@ async function cargarDatos() {
   try {
     var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
       method: "GET",
-      redirect: "follow"
+      redirect: "follow",
+      credentials: "omit"
     });
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     todosLosDatos = data.results || [];
     actualizarStats();
     renderRecientes();
@@ -2690,7 +2694,7 @@ async function abrirDash(test, rut, nombre) {
     localStorage.removeItem("dash_datos_" + test);
     // Cargar datos
     var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow", credentials:"omit"});
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     // Guardar en localStorage
     localStorage.setItem("dash_datos_" + test, JSON.stringify(data));
     localStorage.setItem("dash_filtro_rut", rut || "");
