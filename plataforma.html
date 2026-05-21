@@ -1172,12 +1172,10 @@ function filtrar() {
 // CARGAR HISTORIAL
 function procesarEnvios(data) {
   var envios = data.envios || [];
-  console.log("procesarEnvios llamado con", envios.length, "envios");
   document.getElementById("st-enviados").textContent = envios.length;
-  try { renderPendientes(envios, todosLosDatos); } catch(e) { console.warn("renderPendientes error:", e); }
-  try { renderTasa(todosLosDatos, envios); } catch(e) { console.warn("renderTasa error:", e); }
+  try { renderPendientes(envios, todosLosDatos); } catch(e) {}
+  try { renderTasa(todosLosDatos, envios); } catch(e) {}
   var tbl = document.getElementById("tabla-historial");
-  console.log("tabla-historial element:", tbl);
   if (!tbl) return;
   if (!envios.length) {
     tbl.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
@@ -1205,11 +1203,22 @@ function cargarHistorial() {
     redirect: "follow",
     credentials: "omit"
   })
-  .then(function(r) { return r.json(); })
-  .then(function(data) { procesarEnvios(data); })
+  .then(function(r) {
+    console.log("fetch status:", r.status, "url:", r.url);
+    return r.text();
+  })
+  .then(function(txt) {
+    console.log("fetch response:", txt.substring(0, 300));
+    try {
+      var data = JSON.parse(txt);
+      procesarEnvios(data);
+    } catch(e) {
+      console.error("JSON parse error:", e, txt.substring(0, 100));
+    }
+  })
   .catch(function(err) {
+    console.error("fetch error:", err);
     document.getElementById("st-enviados").textContent = "—";
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
   });
 }
 
