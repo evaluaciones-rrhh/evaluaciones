@@ -1103,35 +1103,65 @@ function renderTasa(completados, enviados) {
 }
 async function cargarDatos() {
   try {
-    var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
-      method: "GET",
-      redirect: "follow"
-    });
-    var data = JSON.parse(await resp.text());
+    var rawText = "";
+    try {
+      var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
+        method: "GET",
+        redirect: "follow",
+        credentials: "omit"
+      });
+      rawText = await resp.text();
+    } catch(fetchErr) {
+      console.error("Fetch getAllResults falló:", fetchErr.message);
+      document.getElementById("st-enviados").textContent = "Error";
+      return;
+    }
+
+    var data;
+    try {
+      data = JSON.parse(rawText);
+    } catch(parseErr) {
+      console.error("JSON.parse falló. Respuesta recibida:", rawText.slice(0, 300));
+      document.getElementById("st-enviados").textContent = "?";
+      // Intentar extraer solo la parte JSON si viene con prefijo HTML
+      var jsonStart = rawText.indexOf("{");
+      if (jsonStart > -1) {
+        try { data = JSON.parse(rawText.slice(jsonStart)); } catch(e2) { data = {}; }
+      } else {
+        data = {};
+      }
+    }
+
+    // ── Resultados de tests completados ──
     todosLosDatos = data.results || [];
     actualizarStats();
     renderRecientes();
     filtrar();
     renderRanking(todosLosDatos);
-    renderHistorial();
-    // Procesar envíos incluidos en getAllResults
-    if (data.envios && data.envios.length) {
+
+    // ── Envíos (hoja Envios, incluida en getAllResults) ──
+    if (data.envios && Array.isArray(data.envios)) {
       todosEnvios = data.envios;
-      var stEl = document.getElementById("st-enviados");
-      if (stEl) stEl.textContent = todosEnvios.length;
-      try { renderPendientes(todosEnvios, todosLosDatos); } catch(x){}
-      try { renderTasa(todosLosDatos, todosEnvios); } catch(x){}
-      renderHistorial();
     } else {
       todosEnvios = [];
-      var enviados = parseInt(document.getElementById("st-enviados").textContent) || 0;
-      renderTasa(todosLosDatos, {length: enviados});
-      renderHistorial();
+      console.warn("getAllResults no devolvió envios. Keys recibidos:", Object.keys(data));
     }
+
+    // Actualizar stat card
+    document.getElementById("st-enviados").textContent = todosEnvios.length || 0;
+
+    // Widgets que dependen de envíos
+    try { renderPendientes(todosEnvios, todosLosDatos); } catch(x){ console.warn("renderPendientes:", x.message); }
+    try { renderTasa(todosLosDatos, todosEnvios); }      catch(x){ console.warn("renderTasa:", x.message); }
+
+    // Historial se pinta DESPUÉS de que todosEnvios ya tiene datos
+    renderHistorial();
+
   } catch(e) {
-    console.warn("Error cargando datos:", e.message);
-    document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error: "+e.message+"</td></tr>";
-    document.getElementById("tabla-recientes").innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--accent);'>Error al cargar</td></tr>";
+    console.error("cargarDatos error general:", e.message);
+    document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--low);'>Error cargando datos: "+e.message+"</td></tr>";
+    document.getElementById("tabla-recientes").innerHTML  = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--low);'>Error al cargar</td></tr>";
+    document.getElementById("st-enviados").textContent = "!";
   }
 }
 
