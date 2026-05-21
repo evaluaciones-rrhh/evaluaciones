@@ -400,6 +400,48 @@ tbody tr:hover td { background: #fdf9f6; }
 .tasa-desc { font-size:13px; color:var(--muted); line-height:1.5; }
 .tasa-bar-wrap { height:8px; background:var(--border); border-radius:4px; margin-top:8px; }
 .tasa-bar { height:100%; border-radius:4px; background:var(--naranja); transition:width 0.5s; }
+
+/* ══════════ MODAL INFORME IC ══════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(26,20,16,0.5); align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.activo { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 12px; width: 100%; max-width: 680px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.modal-header-title { font-family: "Sora",sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); }
+.modal-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--muted); padding: 4px 8px; border-radius: 6px; }
+.modal-close:hover { background: var(--bg); color: var(--ink); }
+.modal-body { padding: 24px; }
+.ic-categoria-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-bottom: 20px;
+}
+.ic-cat-adecuado { background: var(--high-bg); color: var(--high); }
+.ic-cat-regular   { background: var(--mid-bg);  color: var(--mid);  }
+.ic-cat-inferior  { background: var(--low-bg);  color: var(--low);  }
+.ic-stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+.ic-stat { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+.ic-stat-num { font-family: "Sora",sans-serif; font-size: 24px; font-weight: 700; color: var(--ink); }
+.ic-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ic-resumen {
+  background: var(--bg); border-radius: 8px; padding: 16px 18px;
+  border-left: 4px solid var(--naranja); margin-bottom: 20px;
+}
+.ic-resumen-title { font-size: 11px; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.ic-resumen-text { font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
+.ic-barra-wrap { margin-bottom: 16px; }
+.ic-barra-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.ic-barra-bg { height: 8px; background: var(--border); border-radius: 4px; }
+.ic-barra-fill { height: 100%; border-radius: 4px; background: var(--naranja); transition: width 0.6s ease; }
 </style>
 </head>
 <body>
@@ -585,11 +627,11 @@ tbody tr:hover td { background: #fdf9f6; }
             <div class="card-title">Acceso rápido a tests</div>
           </div>
           <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
-            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IC_V1_final.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IC — Test de Instrucciones Complejas <span>→</span></a>
-            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_CEAL.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">CEAL — Test de Estilos de Liderazgo <span>→</span></a>
-            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_16PF.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">16PF — Evaluación de Personalidad <span>→</span></a>
-            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IPV — Perfil de Personalidad Comercial <span>→</span></a>
-            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Wonderlic — Test de Habilidad Cognitiva General <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IC_V1_final.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IC — Instrucciones Complejas <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_CEAL.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">CEAL — Estilos de Liderazgo <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_16PF.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">16PF — Personalidad <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IPV — Personalidad Vendedores <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Wonderlic — Habilidad Cognitiva <span>→</span></a>
           </div>
         </div>
       </div>
@@ -984,7 +1026,8 @@ const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW
 const DASH_HTML = {
   "16PF":    BASE+"dashboard.html",
   IPV:       BASE+"dashboard_ipv.html",
-  WONDERLIC: BASE+"dashboard_wonderlic.html"
+  WONDERLIC: BASE+"dashboard_wonderlic.html",
+  IC:        "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -1354,11 +1397,26 @@ function _pintarTablaHistorial(envios) {
 // ENVIAR
 async function abrirDash(test, rut, nombre) {
   var dashUrl = DASH_HTML[test];
-  if (!dashUrl) { alert("Este test no tiene dashboard disponible aun."); return; }
-  
+  if (!dashUrl) { alert("Este test no tiene dashboard disponible aún."); return; }
+
+  // IC tiene modal inline — buscar en todosLosDatos
+  if (test === "IC") {
+    var rutDec = decodeURIComponent(rut || "");
+    var nomDec = decodeURIComponent(nombre || "");
+    var d = todosLosDatos.find(function(x){
+      return x.test === "IC" && (
+        (rutDec && (x.rut||"").toLowerCase() === rutDec.toLowerCase()) ||
+        (nomDec && (x.nombre||"").toLowerCase() === nomDec.toLowerCase())
+      );
+    });
+    if (!d) { alert("No se encontraron datos del candidato."); return; }
+    abrirInformeIC(d);
+    return;
+  }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
-    IPV: "getDatosIPV", 
+    IPV: "getDatosIPV",
     WONDERLIC: "getDatosWONDERLIC"
   };
   
@@ -1580,6 +1638,129 @@ function verInformeEntrevista(ent) {
   window.open(BASE + 'dashboard_entrevista.html', '_blank');
 }
 
+
+// ══════════ INFORME IC ══════════
+var IC_RESUMENES = {
+  "Completo sin errores": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "El candidato demuestra una capacidad sobresaliente para comprender, interpretar y ejecutar instrucciones complejas de manera correcta y eficiente. Completa la totalidad de las tareas dentro del tiempo establecido sin cometer errores, lo que refleja un alto nivel de atención al detalle, concentración sostenida y velocidad de procesamiento. Este perfil es altamente favorable para cargos que requieran seguir procedimientos precisos bajo presión de tiempo."
+  },
+  "Completo con errores mínimos": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "El candidato completa la totalidad de las tareas dentro del tiempo asignado, cometiendo solo un número mínimo de errores que no afectan de manera significativa la calidad final del trabajo. Demuestra esfuerzo y concentración, con capacidad para mantener un rendimiento adecuado bajo condiciones de presión. Este perfil es favorable para la mayoría de los cargos administrativos y operativos."
+  },
+  "Completo con errores corregidos": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "El candidato logra completar las instrucciones y, si bien comete errores durante el proceso, tiene la capacidad de detectarlos y corregirlos de manera autónoma. Esto refleja una buena capacidad de autocorrección y orientación a la calidad. Es un perfil adecuado, especialmente en contextos donde existe posibilidad de revisión del trabajo realizado."
+  },
+  "Completo con gran cantidad de errores": {
+    cls: "ic-cat-regular", emoji: "⚠️",
+    texto: "El candidato muestra rapidez en la ejecución, completando todas las instrucciones dentro del tiempo asignado. Sin embargo, comete un número importante de errores que impactan la calidad final del trabajo. Este patrón puede indicar una tendencia a priorizar la velocidad sobre la precisión, así como posibles dificultades de atención y concentración bajo presión. Se recomienda considerar este resultado junto con otras variables del proceso de selección."
+  },
+  "Incompleto sin errores": {
+    cls: "ic-cat-regular", emoji: "⚠️",
+    texto: "El candidato no logra completar la totalidad de las instrucciones en el tiempo asignado, aunque las respuestas entregadas son correctas. Este perfil indica que prioriza la calidad sobre la cantidad, trabajando con cuidado y precisión, pero con un ritmo de procesamiento más lento. Es adecuado para cargos que no requieran alta velocidad, pero sí exactitud en los resultados."
+  },
+  "Incompleto con gran cantidad de errores": {
+    cls: "ic-cat-inferior", emoji: "🔴",
+    texto: "El candidato presenta dificultades significativas para seguir instrucciones complejas, evidenciando una escasa capacidad de comprensión e interpretación. No logra completar las tareas en el tiempo asignado y comete un número elevado de errores, lo que sugiere limitaciones en la atención, concentración y capacidad de trabajar de manera organizada bajo presión. Este resultado constituye un factor de riesgo relevante y debe ser evaluado en conjunto con los demás antecedentes del postulante."
+  }
+};
+
+function abrirInformeIC(d) {
+  var cat = d.nivel || d.categoria || "";
+  var info = IC_RESUMENES[cat] || { cls: "ic-cat-regular", emoji: "📋", texto: "No se encontró interpretación para la categoría: " + cat };
+
+  document.getElementById("ic-modal-sub").textContent = (d.nombre || "—") + (d.rut ? "  ·  " + d.rut : "");
+
+  var badge = document.getElementById("ic-categoria-badge");
+  badge.className = "ic-categoria-badge " + info.cls;
+  badge.textContent = info.emoji + "  " + cat;
+
+  document.getElementById("ic-pb").textContent        = d.pb !== undefined ? d.pb : (d.correctas || "—");
+  document.getElementById("ic-percentil").textContent  = d.percentil || "—";
+  document.getElementById("ic-errores").textContent    = d.errores   || "0";
+  document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
+
+  var pct = parseInt(d.percentil) || 0;
+  document.getElementById("ic-percentil-pct").textContent = "Percentil " + pct;
+  document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 99) + "%";
+
+  var barColor = info.cls === "ic-cat-adecuado" ? "var(--high)" : info.cls === "ic-cat-inferior" ? "var(--low)" : "var(--mid)";
+  document.getElementById("ic-barra-percentil").style.background = barColor;
+
+  document.getElementById("ic-resumen-texto").textContent = info.texto;
+  document.getElementById("ic-fecha").textContent = d.fecha || "—";
+
+  document.getElementById("modal-ic").classList.add("activo");
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarModalIC() {
+  document.getElementById("modal-ic").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
 </script>
+
+
+<!-- ══════════ MODAL INFORME IC ══════════ -->
+<div class="modal-overlay" id="modal-ic" onclick="if(event.target===this)cerrarModalIC()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">⚡ Informe — Test de Instrucciones Complejas</div>
+        <div class="modal-header-sub" id="ic-modal-sub">Candidato</div>
+      </div>
+      <button class="modal-close" onclick="cerrarModalIC()">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Categoría -->
+      <div id="ic-categoria-badge" class="ic-categoria-badge">—</div>
+
+      <!-- Stats -->
+      <div class="ic-stats-grid">
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-pb">—</div>
+          <div class="ic-stat-lbl">Puntaje bruto</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-percentil">—</div>
+          <div class="ic-stat-lbl">Percentil</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-errores" style="color:var(--low);">—</div>
+          <div class="ic-stat-lbl">Errores</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-omisiones" style="color:var(--mid);">—</div>
+          <div class="ic-stat-lbl">Omisiones</div>
+        </div>
+      </div>
+
+      <!-- Barra percentil -->
+      <div class="ic-barra-wrap">
+        <div class="ic-barra-label">
+          <span>Percentil</span>
+          <span id="ic-percentil-pct">—</span>
+        </div>
+        <div class="ic-barra-bg">
+          <div class="ic-barra-fill" id="ic-barra-percentil" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Resumen ejecutivo -->
+      <div class="ic-resumen">
+        <div class="ic-resumen-title">📋 Resumen ejecutivo</div>
+        <div class="ic-resumen-text" id="ic-resumen-texto">—</div>
+      </div>
+
+      <!-- Fecha -->
+      <div style="font-size:11px;color:var(--muted);text-align:right;">
+        Evaluación realizada el <span id="ic-fecha">—</span>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
