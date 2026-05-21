@@ -442,6 +442,14 @@ tbody tr:hover td { background: #fdf9f6; }
 .ic-barra-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .ic-barra-bg { height: 8px; background: var(--border); border-radius: 4px; }
 .ic-barra-fill { height: 100%; border-radius: 4px; background: var(--naranja); transition: width 0.6s ease; }
+
+@media print {
+  body > *:not(#modal-ic) { display: none !important; }
+  .modal-overlay { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+  .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
+  .modal-close, .btn-primary { display: none !important; }
+  .modal-header { position: static !important; }
+}
 </style>
 </head>
 <body>
@@ -1399,18 +1407,35 @@ async function abrirDash(test, rut, nombre) {
   var dashUrl = DASH_HTML[test];
   if (!dashUrl) { alert("Este test no tiene dashboard disponible aún."); return; }
 
-  // IC tiene modal inline — buscar en todosLosDatos
+  // IC — cargar datos completos desde getDatosIC
   if (test === "IC") {
     var rutDec = decodeURIComponent(rut || "");
     var nomDec = decodeURIComponent(nombre || "");
-    var d = todosLosDatos.find(function(x){
-      return x.test === "IC" && (
-        (rutDec && (x.rut||"").toLowerCase() === rutDec.toLowerCase()) ||
-        (nomDec && (x.nombre||"").toLowerCase() === nomDec.toLowerCase())
-      );
-    });
-    if (!d) { alert("No se encontraron datos del candidato."); return; }
-    abrirInformeIC(d);
+    try {
+      var dataIC = await fetchJSON(APPS_URL + "?action=getDatosIC&t=" + Date.now());
+      var filas  = Array.isArray(dataIC) ? dataIC : [];
+      // Buscar la fila del candidato
+      // Estructura: [fecha,nombre,rut,correctas,errores,omisiones,pb,percentil,categoria]
+      var fila = filas.find(function(r){
+        return (rutDec && String(r[2]||"").toLowerCase() === rutDec.toLowerCase()) ||
+               (nomDec && String(r[1]||"").toLowerCase() === nomDec.toLowerCase());
+      });
+      if (!fila) { alert("No se encontraron datos del candidato."); return; }
+      var d = {
+        fecha:     fila[0] || "",
+        nombre:    fila[1] || "",
+        rut:       fila[2] || "",
+        correctas: fila[3] || 0,
+        errores:   fila[4] || 0,
+        omisiones: fila[5] || 0,
+        pb:        fila[6] || 0,
+        percentil: fila[7] || 0,
+        nivel:     fila[8] || ""
+      };
+      abrirInformeIC(d);
+    } catch(e) {
+      alert("Error cargando datos IC: " + e.message);
+    }
     return;
   }
 
@@ -1696,6 +1721,10 @@ function abrirInformeIC(d) {
   document.body.style.overflow = "hidden";
 }
 
+function imprimirInformeIC() {
+  window.print();
+}
+
 function cerrarModalIC() {
   document.getElementById("modal-ic").classList.remove("activo");
   document.body.style.overflow = "";
@@ -1712,7 +1741,12 @@ function cerrarModalIC() {
         <div class="modal-header-title">⚡ Informe — Test de Instrucciones Complejas</div>
         <div class="modal-header-sub" id="ic-modal-sub">Candidato</div>
       </div>
-      <button class="modal-close" onclick="cerrarModalIC()">✕</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirInformeIC()" style="gap:6px;">
+          ⬇ Descargar PDF
+        </button>
+        <button class="modal-close" onclick="cerrarModalIC()">✕</button>
+      </div>
     </div>
     <div class="modal-body">
       <!-- Categoría -->
