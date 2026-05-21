@@ -212,7 +212,7 @@ document.addEventListener("dragstart", function(e) { e.preventDefault(); });
 // ── VALIDACION TOKEN ──
 const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
-(function validarAcceso() {
+function validarAcceso() {
   if (!TOKEN_URL) return;
   var key = 'test_completado_' + TOKEN_URL;
   if (localStorage.getItem(key) === 'completado') {
