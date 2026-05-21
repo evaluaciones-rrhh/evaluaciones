@@ -957,7 +957,7 @@ async function login() {
 
   try {
     var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
-      method: "GET", redirect: "follow"
+      method: "GET", redirect: "follow", credentials: "omit"
     });
     var data = await resp.json();
     if (data.ok === true) {
@@ -1172,7 +1172,7 @@ function filtrar() {
 // CARGAR HISTORIAL
 async function cargarHistorial() {
   try {
-    var resp = await fetch(APPS_URL+"?action=getEnvios&t="+Date.now(), {redirect:"follow"});
+    var resp = await fetch(APPS_URL+"?action=getEnvios&t="+Date.now(), {redirect:"follow", credentials:"omit"});
     var data = await resp.json();
     var envios = data.envios || [];
     document.getElementById("st-enviados").textContent = envios.length;
@@ -1212,7 +1212,7 @@ async function abrirDash(test, rut, nombre) {
     // Primero limpiar localStorage anterior
     localStorage.removeItem("dash_datos_" + test);
     // Cargar datos
-    var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow"});
+    var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow", credentials:"omit"});
     var data = await resp.json();
     // Guardar en localStorage
     localStorage.setItem("dash_datos_" + test, JSON.stringify(data));
