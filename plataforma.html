@@ -908,12 +908,20 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="page" id="page-historial">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Historial de invitaciones enviadas</div>
+          <div class="card-title">Historial de envíos</div>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Fecha</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-historial"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Test</th>
+                <th>Fecha envío</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-historial">
+              <tr><td colspan="3" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -1102,7 +1110,7 @@ async function cargarDatos() {
   } catch(e) {
     console.warn("Error cargando datos:", e.message);
     document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error: "+e.message+"</td></tr>";
-    document.getElementById("tabla-recientes").innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--accent);'>Error al cargar</td></tr>";
+    document.getElementById("tabla-recientes").innerHTML = "<tr><td colspan='3' style='text-align:center;padding:24px;color:var(--accent);'>Error al cargar</td></tr>";
   }
 }
 
@@ -1170,54 +1178,41 @@ function filtrar() {
 }
 
 // CARGAR HISTORIAL
-function procesarEnvios(data) {
-  var envios = data.envios || [];
-  document.getElementById("st-enviados").textContent = envios.length;
-  renderPendientes(envios, todosLosDatos);
-  renderTasa(todosLosDatos, envios);
-  if (!envios.length) {
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
-    return;
-  }
-  var html = "";
-  envios.slice().reverse().forEach(function(e){
-    var testCls = "badge-"+(e.test||"").toLowerCase().replace("pf","pf");
-    var estCls = (e.estado||"")=="Enviado"?"badge-enviado":"badge-pendiente";
-    html += "<tr><td class='td-nombre'>"+(e.nombre||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.email||"—")+"</td><td><span class='badge "+testCls+"'>"+(e.test||"—")+"</span></td><td style='font-size:12px;color:var(--muted);'>"+(e.cargo||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.fecha||"—")+"</td><td><span class='badge "+estCls+"'>"+(e.estado||"—")+"</span></td></tr>";
-  });
-  document.getElementById("tabla-historial").innerHTML = html;
-}
-
 function cargarHistorial() {
   fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {credentials:"omit", redirect:"follow"})
   .then(function(r){ return r.text(); })
   .then(function(txt){
     var data = JSON.parse(txt);
     var envios = (data && data.envios) ? data.envios : [];
+
+    // Actualizar contador panel
     var stEl = document.getElementById("st-enviados");
     if (stEl) stEl.textContent = envios.length;
     try { renderPendientes(envios, todosLosDatos); } catch(x){}
     try { renderTasa(todosLosDatos, envios); } catch(x){}
+
+    // Renderizar tabla
     var tbl = document.getElementById("tabla-historial");
     if (!tbl) return;
     if (!envios.length) {
-      tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+      tbl.innerHTML = "<tr><td colspan='3' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
       return;
     }
     var html = "";
     envios.slice().reverse().forEach(function(env){
-      var estCls = env.estado === "Enviado" ? "badge-enviado" : "badge-pendiente";
-      html += "<tr><td class='td-nombre'>"+(env.nombre||"—")+"</td>"
-        +"<td style='font-size:12px;color:var(--muted);'>"+(env.email||"—")+"</td>"
-        +"<td style='font-size:12px;'>"+(env.test||"—")+"</td>"
-        +"<td style='font-size:12px;color:var(--muted);'>"+(env.fecha||"—")+"</td>"
-        +"<td><span class='badge "+estCls+"'>"+(env.estado||"—")+"</span></td></tr>";
+      html += "<tr>"
+        + "<td class='td-nombre'>" + (env.nombre || "—") + "</td>"
+        + "<td style='font-size:12px;'>" + (env.test || "—") + "</td>"
+        + "<td style='font-size:12px;color:var(--muted);'>" + (env.fecha || "—") + "</td>"
+        + "</tr>";
     });
     tbl.innerHTML = html;
   })
-  .catch(function(){
+  .catch(function(err){
     var stEl = document.getElementById("st-enviados");
     if (stEl) stEl.textContent = "—";
+    var tbl = document.getElementById("tabla-historial");
+    if (tbl) tbl.innerHTML = "<tr><td colspan='3' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
   });
 }
 
