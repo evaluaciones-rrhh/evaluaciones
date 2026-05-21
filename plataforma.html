@@ -1666,29 +1666,33 @@ function verInformeEntrevista(ent) {
 
 // ══════════ INFORME IC ══════════
 var IC_RESUMENES = {
-  "Completo sin errores": {
+  "Muy alto": {
     cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "El candidato demuestra una capacidad sobresaliente para comprender, interpretar y ejecutar instrucciones complejas de manera correcta y eficiente. Completa la totalidad de las tareas dentro del tiempo establecido sin cometer errores, lo que refleja un alto nivel de atención al detalle, concentración sostenida y velocidad de procesamiento. Este perfil es altamente favorable para cargos que requieran seguir procedimientos precisos bajo presión de tiempo."
+    texto: "Excelente capacidad de concentración, precisión y control atencional. Presenta bajo nivel de error y alta consistencia en tareas que requieren foco y seguimiento detallado."
   },
-  "Completo con errores mínimos": {
+  "Alto": {
     cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "El candidato completa la totalidad de las tareas dentro del tiempo asignado, cometiendo solo un número mínimo de errores que no afectan de manera significativa la calidad final del trabajo. Demuestra esfuerzo y concentración, con capacidad para mantener un rendimiento adecuado bajo condiciones de presión. Este perfil es favorable para la mayoría de los cargos administrativos y operativos."
+    texto: "Buen nivel de atención y precisión en la ejecución de tareas. Mantiene adecuada concentración y control operativo."
   },
-  "Completo con errores corregidos": {
+  "Medio alto": {
     cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "El candidato logra completar las instrucciones y, si bien comete errores durante el proceso, tiene la capacidad de detectarlos y corregirlos de manera autónoma. Esto refleja una buena capacidad de autocorrección y orientación a la calidad. Es un perfil adecuado, especialmente en contextos donde existe posibilidad de revisión del trabajo realizado."
+    texto: "Presenta adecuada capacidad atencional y nivel de precisión funcional para tareas operativas y administrativas habituales."
   },
-  "Completo con gran cantidad de errores": {
+  "Medio": {
     cls: "ic-cat-regular", emoji: "⚠️",
-    texto: "El candidato muestra rapidez en la ejecución, completando todas las instrucciones dentro del tiempo asignado. Sin embargo, comete un número importante de errores que impactan la calidad final del trabajo. Este patrón puede indicar una tendencia a priorizar la velocidad sobre la precisión, así como posibles dificultades de atención y concentración bajo presión. Se recomienda considerar este resultado junto con otras variables del proceso de selección."
+    texto: "Rendimiento atencional promedio. Puede desempeñarse adecuadamente en tareas estructuradas, aunque podría presentar fluctuaciones bajo presión o alta demanda."
   },
-  "Incompleto sin errores": {
+  "Medio bajo": {
     cls: "ic-cat-regular", emoji: "⚠️",
-    texto: "El candidato no logra completar la totalidad de las instrucciones en el tiempo asignado, aunque las respuestas entregadas son correctas. Este perfil indica que prioriza la calidad sobre la cantidad, trabajando con cuidado y precisión, pero con un ritmo de procesamiento más lento. Es adecuado para cargos que no requieran alta velocidad, pero sí exactitud en los resultados."
+    texto: "Se observan dificultades moderadas en precisión y control atencional, pudiendo aumentar la probabilidad de errores en tareas repetitivas o de alto detalle."
   },
-  "Incompleto con gran cantidad de errores": {
+  "Bajo": {
     cls: "ic-cat-inferior", emoji: "🔴",
-    texto: "El candidato presenta dificultades significativas para seguir instrucciones complejas, evidenciando una escasa capacidad de comprensión e interpretación. No logra completar las tareas en el tiempo asignado y comete un número elevado de errores, lo que sugiere limitaciones en la atención, concentración y capacidad de trabajar de manera organizada bajo presión. Este resultado constituye un factor de riesgo relevante y debe ser evaluado en conjunto con los demás antecedentes del postulante."
+    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
+  },
+  "Deficiente": {
+    cls: "ic-cat-inferior", emoji: "🔴",
+    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
   }
 };
 
