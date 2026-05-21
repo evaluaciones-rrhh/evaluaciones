@@ -988,7 +988,8 @@ async function login() {
       document.getElementById("user-name").textContent = u2;
       document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
-      setTimeout(function() { cargarDatos(); cargarEntrevistas(); }, 0);
+      cargarDatos();
+      cargarEntrevistas();
     } else {
       document.getElementById("login-error").style.display = "block";
     }
@@ -1105,6 +1106,14 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
 async function cargarDatos() {
+  // Indicar que está cargando
+  document.getElementById("st-total").textContent    = "…";
+  document.getElementById("st-hoy").textContent      = "…";
+  document.getElementById("st-semana").textContent   = "…";
+  document.getElementById("st-enviados").textContent = "…";
+  var tblR = document.getElementById("tabla-recientes");
+  if (tblR) tblR.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:28px;color:var(--muted);'>Cargando datos...</td></tr>";
+
   try {
     var resp = await fetch(APPS_URL + "?action=getAllResults&t=" + Date.now(), {
       method: "GET", redirect: "follow"
@@ -1132,6 +1141,8 @@ async function cargarDatos() {
     try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
     try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
     renderHistorial();
+
+
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
