@@ -358,15 +358,16 @@ function calcularYEnviar(porTiempo){
   let pbClamped = Math.min(pb, 30);
   let percentil = BAREMOS[pbClamped][1];
 
-  function getCategoria(pc) {
-    if(pc >= 80) return 'Muy Superior';
-    if(pc >= 60) return 'Superior al Promedio';
-    if(pc >= 40) return 'Promedio';
-    if(pc >= 30) return 'Bajo el Promedio';
-    if(pc >= 20) return 'Bajo';
-    return 'Deficiente';
+  function getCategoria(errores) {
+    // Corrección según tabla de baremos IC (se cuentan las malas)
+    if(errores <= 1)  return 'Muy alto';
+    if(errores <= 4)  return 'Alto';
+    if(errores <= 7)  return 'Medio alto';
+    if(errores <= 12) return 'Medio';
+    if(errores <= 17) return 'Medio bajo';
+    return 'Bajo';
   }
-  let categoria = getCategoria(percentil);
+  let categoria = getCategoria(incorrectas);
 
   let fecha = new Date().toLocaleString('es-CL');
   let nombre = document.getElementById('nombre').value.trim();
