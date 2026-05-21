@@ -513,7 +513,7 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Panel principal</div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="actualizarTodo()">↻ Actualizar</button>
+        <button class="btn btn-ghost btn-sm" onclick="cargarDatos()">↻ Actualizar</button>
       </div>
     </div>
 
@@ -983,11 +983,9 @@ async function login() {
       document.getElementById("user-name").textContent = u2;
       document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
-      // Cargar datos en background sin bloquear la UI
-      setTimeout(function() {
-        cargarDatos();
-        cargarEntrevistas();
-      }, 0);
+      cargarDatos();
+      cargarHistorial();
+      cargarEntrevistas();
     } else {
       document.getElementById("login-error").style.display = "block";
     }
@@ -1103,48 +1101,18 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-completados").textContent = totalCompletados;
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
-function actualizarTodo() {
-  cargarDatos();
-  cargarEntrevistas();
-}
-
 async function cargarDatos() {
-  // Mostrar estado cargando inmediatamente
-  ["st-total","st-hoy","st-semana","st-enviados"].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && el.textContent === "—") el.innerHTML = "<span style='font-size:18px;color:var(--muted);'>…</span>";
-  });
-  var tblR = document.getElementById("tabla-recientes");
-  if (tblR) tblR.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--muted);'><span class='spinner' style='border-color:rgba(0,0,0,0.15);border-top-color:var(--naranja);'></span></td></tr>";
-
   try {
-    var rawText = "";
-    try {
-      var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
-        method: "GET",
-        redirect: "follow",
-        credentials: "omit"
-      });
-      rawText = await resp.text();
-    } catch(fetchErr) {
-      console.error("Fetch getAllResults falló:", fetchErr.message);
-      document.getElementById("st-enviados").textContent = "Error";
-      return;
-    }
+    var resp = await fetch(APPS_URL + "?action=getAllResults&t=" + Date.now(), {
+      method: "GET", redirect: "follow"
+    });
+    var texto = await resp.text();
 
-    var data;
-    try {
-      data = JSON.parse(rawText);
-    } catch(parseErr) {
-      console.error("JSON.parse falló. Respuesta recibida:", rawText.slice(0, 300));
-      document.getElementById("st-enviados").textContent = "?";
-      // Intentar extraer solo la parte JSON si viene con prefijo HTML
-      var jsonStart = rawText.indexOf("{");
-      if (jsonStart > -1) {
-        try { data = JSON.parse(rawText.slice(jsonStart)); } catch(e2) { data = {}; }
-      } else {
-        data = {};
-      }
+    // Apps Script a veces devuelve HTML de redirección — extraer JSON del texto
+    var data = {};
+    var jsonStart = texto.indexOf("{");
+    if (jsonStart > -1) {
+      try { data = JSON.parse(texto.slice(jsonStart)); } catch(e) { data = {}; }
     }
 
     // ── Resultados de tests completados ──
@@ -1155,28 +1123,22 @@ async function cargarDatos() {
     renderRanking(todosLosDatos);
 
     // ── Envíos (hoja Envios, incluida en getAllResults) ──
-    if (data.envios && Array.isArray(data.envios)) {
-      todosEnvios = data.envios;
-    } else {
-      todosEnvios = [];
-      console.warn("getAllResults no devolvió envios. Keys recibidos:", Object.keys(data));
-    }
+    todosEnvios = Array.isArray(data.envios) ? data.envios : [];
+    document.getElementById("st-enviados").textContent = todosEnvios.length;
 
-    // Actualizar stat card
-    document.getElementById("st-enviados").textContent = todosEnvios.length || 0;
-
-    // Widgets que dependen de envíos
-    try { renderPendientes(todosEnvios, todosLosDatos); } catch(x){ console.warn("renderPendientes:", x.message); }
-    try { renderTasa(todosLosDatos, todosEnvios); }      catch(x){ console.warn("renderTasa:", x.message); }
-
-    // Historial se pinta DESPUÉS de que todosEnvios ya tiene datos
+    try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+    try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
     renderHistorial();
 
   } catch(e) {
-    console.error("cargarDatos error general:", e.message);
-    document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--low);'>Error cargando datos: "+e.message+"</td></tr>";
-    document.getElementById("tabla-recientes").innerHTML  = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--low);'>Error al cargar</td></tr>";
+    console.error("cargarDatos:", e.message);
+    document.getElementById("st-total").textContent    = "!";
     document.getElementById("st-enviados").textContent = "!";
+    var errRow = "<tr><td colspan='5' style='text-align:center;padding:28px;color:var(--low);'>Error al cargar datos</td></tr>";
+    var tbl = document.getElementById("tabla-candidatos");
+    if (tbl) tbl.innerHTML = errRow;
+    var tbl2 = document.getElementById("tabla-recientes");
+    if (tbl2) tbl2.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--low);'>Error al cargar</td></tr>";
   }
 }
 
