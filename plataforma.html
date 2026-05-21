@@ -1090,15 +1090,32 @@ async function cargarDatos() {
       method: "GET",
       redirect: "follow"
     });
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     todosLosDatos = data.results || [];
     actualizarStats();
     renderRecientes();
     filtrar();
     renderRanking(todosLosDatos);
-    // Tasa con datos disponibles
-    var enviados = parseInt(document.getElementById("st-enviados").textContent) || 0;
-    renderTasa(todosLosDatos, {length: enviados});
+    // Procesar envíos incluidos en getAllResults
+    if (data.envios && data.envios.length) {
+      var stEl = document.getElementById("st-enviados");
+      if (stEl) stEl.textContent = data.envios.length;
+      try { renderPendientes(data.envios, todosLosDatos); } catch(x){}
+      try { renderTasa(todosLosDatos, data.envios); } catch(x){}
+      var tbl = document.getElementById("tabla-historial");
+      if (tbl) {
+        var hHtml = "";
+        data.envios.slice().reverse().forEach(function(env){
+          hHtml += "<tr><td class='td-nombre'>"+(env.nombre||"—")+"</td>"
+            +"<td style='font-size:12px;'>"+(env.test||"—")+"</td>"
+            +"<td style='font-size:12px;color:var(--muted);'>"+(env.fecha||"—")+"</td></tr>";
+        });
+        tbl.innerHTML = hHtml;
+      }
+    } else {
+      var enviados = parseInt(document.getElementById("st-enviados").textContent) || 0;
+      renderTasa(todosLosDatos, {length: enviados});
+    }
   } catch(e) {
     console.warn("Error cargando datos:", e.message);
     document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error: "+e.message+"</td></tr>";
@@ -1189,36 +1206,7 @@ function procesarEnvios(data) {
 }
 
 function cargarHistorial() {
-  fetch(APPS_URL + "?action=getHistorial&t=" + Date.now(), {credentials:"omit", redirect:"follow"})
-  .then(function(r){ return r.text(); })
-  .then(function(txt){
-    var data = JSON.parse(txt);
-    var envios = (data && data.envios) ? data.envios : [];
-    var stEl = document.getElementById("st-enviados");
-    if (stEl) stEl.textContent = envios.length;
-    try { renderPendientes(envios, todosLosDatos); } catch(x){}
-    try { renderTasa(todosLosDatos, envios); } catch(x){}
-    var tbl = document.getElementById("tabla-historial");
-    if (!tbl) return;
-    if (!envios.length) {
-      tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
-      return;
-    }
-    var html = "";
-    envios.slice().reverse().forEach(function(env){
-      var estCls = env.estado === "Enviado" ? "badge-enviado" : "badge-pendiente";
-      html += "<tr><td class='td-nombre'>"+(env.nombre||"—")+"</td>"
-        +"<td style='font-size:12px;color:var(--muted);'>"+(env.email||"—")+"</td>"
-        +"<td style='font-size:12px;'>"+(env.test||"—")+"</td>"
-        +"<td style='font-size:12px;color:var(--muted);'>"+(env.fecha||"—")+"</td>"
-        +"<td><span class='badge "+estCls+"'>"+(env.estado||"—")+"</span></td></tr>";
-    });
-    tbl.innerHTML = html;
-  })
-  .catch(function(){
-    var stEl = document.getElementById("st-enviados");
-    if (stEl) stEl.textContent = "—";
-  });
+  // Historial cargado junto con getAllResults en cargarDatos()
 }
 
 // ENVIAR
