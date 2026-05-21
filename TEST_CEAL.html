@@ -179,7 +179,7 @@ window.addEventListener("blur", function() { cambiosFoco++; });
 document.addEventListener("dragstart", function(e) { e.preventDefault(); });
 
 // ── VALIDACION TOKEN ──
-const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
+const APPS_URL_TOKEN = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
 (async function validarAcceso() {
   if (!TOKEN_URL) return;
@@ -193,7 +193,7 @@ const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || ''
     }
   } catch(e) {}
 })();
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQvhmZtwJIGYFach3iJ_jpUiRtIQIJv_LTYD9mNficOQC8AeuIOHWM-i9vp4V2dyhhyw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 
 // Puntajes por pregunta y alternativa: [A, B, C, D]
 const PUNTAJES = [
