@@ -910,7 +910,8 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="page" id="page-historial">
       <div class="card">
         <div class="card-header">
-          <div style="display:flex;align-items:center;gap:10px;margin-left:auto;">
+          <div class="card-title">📋 Historial de envíos</div>
+          <div style="display:flex;align-items:center;gap:10px;">
             <input class="filtro-input" id="filtro-historial" placeholder="Buscar por nombre o email..." oninput="filtrarHistorial()" style="max-width:260px;">
           </div>
         </div>
@@ -1101,43 +1102,57 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
 async function cargarDatos() {
+  // ── Mostrar caché inmediatamente si existe ──
+  try {
+    var cache = localStorage.getItem("cygnus_cache");
+    if (cache) {
+      var cached = JSON.parse(cache);
+      todosLosDatos = cached.results || [];
+      todosEnvios   = cached.envios  || [];
+      actualizarStats();
+      renderRecientes();
+      filtrar();
+      renderRanking(todosLosDatos);
+      document.getElementById("st-enviados").textContent = todosEnvios.length;
+      try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+      try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
+      renderHistorial();
+    }
+  } catch(x) {}
+
+  // ── Luego cargar datos frescos del servidor ──
   try {
     var resp = await fetch(APPS_URL + "?action=getAllResults&t=" + Date.now(), {
       method: "GET", redirect: "follow"
     });
     var texto = await resp.text();
-
-    // Apps Script a veces devuelve HTML de redirección — extraer JSON del texto
     var data = {};
     var jsonStart = texto.indexOf("{");
     if (jsonStart > -1) {
       try { data = JSON.parse(texto.slice(jsonStart)); } catch(e) { data = {}; }
     }
 
-    // ── Resultados de tests completados ──
     todosLosDatos = data.results || [];
+    todosEnvios   = Array.isArray(data.envios) ? data.envios : [];
+
+    // Guardar en caché para la próxima vez
+    try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
+
     actualizarStats();
     renderRecientes();
     filtrar();
     renderRanking(todosLosDatos);
-
-    // ── Envíos (hoja Envios, incluida en getAllResults) ──
-    todosEnvios = Array.isArray(data.envios) ? data.envios : [];
     document.getElementById("st-enviados").textContent = todosEnvios.length;
-
     try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
     try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
     renderHistorial();
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
-    document.getElementById("st-total").textContent    = "!";
-    document.getElementById("st-enviados").textContent = "!";
-    var errRow = "<tr><td colspan='5' style='text-align:center;padding:28px;color:var(--low);'>Error al cargar datos</td></tr>";
-    var tbl = document.getElementById("tabla-candidatos");
-    if (tbl) tbl.innerHTML = errRow;
-    var tbl2 = document.getElementById("tabla-recientes");
-    if (tbl2) tbl2.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--low);'>Error al cargar</td></tr>";
+    if (!todosLosDatos.length) {
+      document.getElementById("st-total").textContent    = "!";
+      document.getElementById("st-enviados").textContent = "!";
+    }
   }
 }
 
