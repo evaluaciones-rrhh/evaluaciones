@@ -191,7 +191,7 @@ function validarAcceso() {
     if (bloq) bloq.style.display = 'flex';
   }
 }
-validarAcceso();
+document.addEventListener("DOMContentLoaded", validarAcceso);
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 
 // Puntajes por pregunta y alternativa: [A, B, C, D]
