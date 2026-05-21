@@ -1101,81 +1101,80 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-completados").textContent = totalCompletados;
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
-async function fetchJSON(url) {
-  var resp = await fetch(url, { method: "GET", redirect: "follow" });
-  var texto = await resp.text();
-  var j = texto.indexOf("{");
-  if (j > -1) { try { return JSON.parse(texto.slice(j)); } catch(e) {} }
-  return {};
-}
-
 async function cargarDatos() {
-  // ── 1. Caché instantáneo ──
   try {
-    var cache = localStorage.getItem("cygnus_cache");
-    if (cache) {
-      var cached = JSON.parse(cache);
-      todosLosDatos = cached.results || [];
-      todosEnvios   = cached.envios  || [];
-      pintarTodo();
+    var resp = await fetch(APPS_URL + "?action=getAllResults&t=" + Date.now(), {
+      method: "GET", redirect: "follow"
+    });
+    var texto = await resp.text();
+
+    // Apps Script a veces devuelve HTML de redirección — extraer JSON del texto
+    var data = {};
+    var jsonStart = texto.indexOf("{");
+    if (jsonStart > -1) {
+      try { data = JSON.parse(texto.slice(jsonStart)); } catch(e) { data = {}; }
     }
-  } catch(x) {}
 
-  // ── 2. getHistorial primero (solo 1 hoja, llega en ~1s) ──
-  // Lanzar getAllResults en paralelo sin esperar
-  var promiseAll = fetchJSON(APPS_URL + "?action=getAllResults&t=" + Date.now());
+    // ── Resultados de tests completados ──
+    todosLosDatos = data.results || [];
+    actualizarStats();
+    renderRecientes();
+    filtrar();
+    renderRanking(todosLosDatos);
 
-  try {
-    var dataH = await fetchJSON(APPS_URL + "?action=getHistorial&t=" + Date.now());
-    if (Array.isArray(dataH.envios) && dataH.envios.length) {
-      todosEnvios = dataH.envios;
-      document.getElementById("st-enviados").textContent = todosEnvios.length;
-      try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
-      try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
-      renderHistorial();
-    }
-  } catch(x) {}
+    // ── Envíos (hoja Envios, incluida en getAllResults) ──
+    todosEnvios = Array.isArray(data.envios) ? data.envios : [];
+    document.getElementById("st-enviados").textContent = todosEnvios.length;
 
-  // ── 3. Esperar getAllResults (tarda más, trae los tests) ──
-  try {
-    var dataR = await promiseAll;
-    todosLosDatos = dataR.results || [];
-    var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
-    if (enviosR.length > todosEnvios.length) todosEnvios = enviosR;
-
-    // Guardar caché completo
-    try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
-
-    pintarTodo();
+    try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+    try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
+    renderHistorial();
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
-    if (!todosLosDatos.length) {
-      document.getElementById("st-total").textContent    = "!";
-      document.getElementById("st-enviados").textContent = "!";
-    }
+    document.getElementById("st-total").textContent    = "!";
+    document.getElementById("st-enviados").textContent = "!";
+    var errRow = "<tr><td colspan='5' style='text-align:center;padding:28px;color:var(--low);'>Error al cargar datos</td></tr>";
+    var tbl = document.getElementById("tabla-candidatos");
+    if (tbl) tbl.innerHTML = errRow;
+    var tbl2 = document.getElementById("tabla-recientes");
+    if (tbl2) tbl2.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--low);'>Error al cargar</td></tr>";
   }
 }
 
-function pintarTodo() {
-  actualizarStats();
-  renderRecientes();
-  filtrar();
-  renderRanking(todosLosDatos);
-  document.getElementById("st-enviados").textContent = todosEnvios.length;
-  try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
-  try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
-  renderHistorial();
+function parseFechaCL(str) {
+  // Acepta "21-05-2026", "21/05/2026", ISO y Date nativa
+  if (!str) return null;
+  var s = String(str).trim();
+  // formato dd-mm-yyyy o dd/mm/yyyy
+  var m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+  // ISO o cualquier otro
+  var d = new Date(s);
+  return isNaN(d) ? null : d;
 }
 
-
 function actualizarStats() {
-  var hoy = new Date().toLocaleDateString("es-CL");
-  var semana = new Date(); semana.setDate(semana.getDate()-7);
+  var ahora  = new Date();
+  var hoy    = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  var semana = new Date(hoy); semana.setDate(semana.getDate()-7);
+
+  // Total evaluados = tests completados
   document.getElementById("st-total").textContent = todosLosDatos.length;
-  document.getElementById("st-hoy").textContent = todosLosDatos.filter(function(d){ return (d.fecha||"")===hoy; }).length;
-  document.getElementById("st-semana").textContent = todosLosDatos.filter(function(d){
-    var f=new Date(d.fecha_iso||d.fecha); return !isNaN(f) && f>=semana;
+
+  // Hoy y Esta semana = envíos realizados (más relevante que completados)
+  var fuenteHoy    = todosEnvios.length ? todosEnvios : todosLosDatos;
+  var campoFecha   = todosEnvios.length ? "fecha" : "fecha";
+
+  document.getElementById("st-hoy").textContent = fuenteHoy.filter(function(d){
+    var f = parseFechaCL(d.fecha);
+    if (!f) return false;
+    return f >= hoy && f < new Date(hoy.getTime() + 86400000);
+  }).length;
+
+  document.getElementById("st-semana").textContent = fuenteHoy.filter(function(d){
+    var f = parseFechaCL(d.fecha);
+    return f && f >= semana;
   }).length;
 
   // Gráfico barras
