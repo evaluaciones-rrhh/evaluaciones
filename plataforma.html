@@ -1007,6 +1007,7 @@ function irA(pag) {
   document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
   document.getElementById("topbar-title").textContent = titulos[pag];
   paginaActual = pag;
+  if (pag === "historial") renderHistorial();
 }
 
 // CARGAR DATOS
