@@ -1199,22 +1199,16 @@ function procesarEnvios(data) {
 }
 
 function cargarHistorial() {
-  var cbName = "cb_historial_" + Date.now();
-  window[cbName] = function(data) {
-    delete window[cbName];
-    var s = document.getElementById("jsonp-historial");
-    if (s) s.remove();
-    procesarEnvios(data);
-  };
-  var script = document.createElement("script");
-  script.id = "jsonp-historial";
-  script.src = APPS_URL + "?action=getEnvios&callback=" + cbName + "&t=" + Date.now();
-  script.onerror = function() {
-    delete window[cbName];
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
+    redirect: "follow",
+    credentials: "omit"
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) { procesarEnvios(data); })
+  .catch(function(err) {
     document.getElementById("st-enviados").textContent = "—";
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--low);'>Error al cargar historial. Intenta recargar la página.</td></tr>";
-  };
-  document.head.appendChild(script);
+    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+  });
 }
 
 // ENVIAR
