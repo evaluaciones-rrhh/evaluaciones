@@ -973,9 +973,14 @@ async function login() {
 
   try {
     var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
-      method: "GET", redirect: "follow", credentials: "omit"
+      method: "GET", redirect: "follow"
     });
-    var data = JSON.parse(await resp.text());
+    var texto = await resp.text();
+    // Extraer JSON aunque venga con prefijo HTML (redirección GSuite)
+    var data = {};
+    var j = texto.indexOf("{");
+    if (j > -1) { try { data = JSON.parse(texto.slice(j)); } catch(e) {} }
+
     if (data.ok === true) {
       usuarioActual = u2;
       document.getElementById("login-screen").style.display = "none";
@@ -983,14 +988,12 @@ async function login() {
       document.getElementById("user-name").textContent = u2;
       document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
-      cargarDatos();
-      cargarHistorial();
-      cargarEntrevistas();
+      setTimeout(function() { cargarDatos(); cargarEntrevistas(); }, 0);
     } else {
       document.getElementById("login-error").style.display = "block";
     }
   } catch(err) {
-    document.getElementById("login-error").textContent = "Error de conexión. Intenta nuevamente.";
+    document.getElementById("login-error").textContent = "Error de conexión: " + err.message;
     document.getElementById("login-error").style.display = "block";
   } finally {
     btn.textContent = "Ingresar →";
