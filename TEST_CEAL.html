@@ -191,7 +191,10 @@ const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || ''
       const bloq = document.getElementById('screen-bloqueado');
       bloq.style.display = 'flex';
     }
-  } catch(e) {}
+  } catch(e) {
+    // Si hay error de conexión, permitir acceso (no bloquear por error de red)
+    console.warn("validarToken error:", e);
+  }
 })();
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 
