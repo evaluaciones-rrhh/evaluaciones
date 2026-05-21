@@ -184,7 +184,7 @@ const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || ''
 (async function validarAcceso() {
   if (!TOKEN_URL) return;
   try {
-    const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL);
+    const r = await fetch(APPS_URL_TOKEN + '?action=validarToken&token=' + TOKEN_URL, {redirect:'follow', credentials:'omit'});
     const d = await r.json();
     if (!d.valido) {
       document.querySelectorAll('#screen-inicio,#screen-prueba').forEach(el => el.style.display='none');
