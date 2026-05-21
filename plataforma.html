@@ -513,7 +513,7 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Panel principal</div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="cargarDatos()">↻ Actualizar</button>
+        <button class="btn btn-ghost btn-sm" onclick="actualizarTodo()">↻ Actualizar</button>
       </div>
     </div>
 
@@ -938,7 +938,7 @@ tbody tr:hover td { background: #fdf9f6; }
 </div>
 
 <script>
-const APPS_URL = "https://script.google.com/macros/s/AKfycbx2YAyhAOswTezb8XEq6thtdwbIX3W9t0XYls0T753gMxmPsac-XwGQbyFpjeJjZ7Ut7g/exec";
+const APPS_URL = "https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec";
 const BASE = "https://evaluaciones-rrhh.github.io/evaluaciones/";
 const TESTS_LINKS = {
   IC: BASE+"TEST_IC_V1_final.html",
@@ -983,9 +983,11 @@ async function login() {
       document.getElementById("user-name").textContent = u2;
       document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
-      cargarDatos();
-      cargarHistorial();
-      cargarEntrevistas();
+      // Cargar datos en background sin bloquear la UI
+      setTimeout(function() {
+        cargarDatos();
+        cargarEntrevistas();
+      }, 0);
     } else {
       document.getElementById("login-error").style.display = "block";
     }
@@ -1101,7 +1103,20 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-completados").textContent = totalCompletados;
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
+function actualizarTodo() {
+  cargarDatos();
+  cargarEntrevistas();
+}
+
 async function cargarDatos() {
+  // Mostrar estado cargando inmediatamente
+  ["st-total","st-hoy","st-semana","st-enviados"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.textContent === "—") el.innerHTML = "<span style='font-size:18px;color:var(--muted);'>…</span>";
+  });
+  var tblR = document.getElementById("tabla-recientes");
+  if (tblR) tblR.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--muted);'><span class='spinner' style='border-color:rgba(0,0,0,0.15);border-top-color:var(--naranja);'></span></td></tr>";
+
   try {
     var rawText = "";
     try {
