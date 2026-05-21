@@ -350,12 +350,13 @@ tbody tr:hover td { background: #fdf9f6; }
 .empty-state-text { font-size: 14px; }
 
 /* GRAFICO MINI */
-.test-bars { display: flex; gap: 10px; align-items: flex-end; height: 120px; padding: 0 4px; }
-.test-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
-.test-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--naranja); opacity: 0.75; min-height: 0px; transition: height 0.5s ease, opacity 0.2s; }
-.test-bar:hover { opacity: 1; }
-.test-bar-num { font-size: 11px; font-weight: 700; color: var(--ink); line-height: 1; }
-.test-bar-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.grafico-barras { display: flex; gap: 12px; align-items: flex-end; height: 100px; padding: 0 4px; }
+.grafico-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.grafico-num { font-size: 12px; font-weight: 700; color: var(--ink); }
+.grafico-barra-wrap { width: 100%; display: flex; align-items: flex-end; height: 72px; }
+.grafico-barra { width: 100%; border-radius: 4px 4px 0 0; background: var(--naranja); opacity: 0.8; transition: opacity 0.2s, height 0.5s ease; }
+.grafico-barra:hover { opacity: 1; cursor: default; }
+.grafico-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
 
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
@@ -549,12 +550,32 @@ tbody tr:hover td { background: #fdf9f6; }
             <div class="card-title">Evaluaciones por test</div>
           </div>
           <div class="card-body">
-            <div class="test-bars" id="grafico-tests">
-              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ic">0</div><div class="test-bar" style="height:0%" id="bar-ic"></div><div class="test-bar-lbl">IC</div></div>
-              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ceal">0</div><div class="test-bar" style="height:0%" id="bar-ceal"></div><div class="test-bar-lbl">CEAL</div></div>
-              <div class="test-bar-wrap"><div class="test-bar-num" id="num-16pf">0</div><div class="test-bar" style="height:0%" id="bar-16pf"></div><div class="test-bar-lbl">16PF</div></div>
-              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ipv">0</div><div class="test-bar" style="height:0%" id="bar-ipv"></div><div class="test-bar-lbl">IPV</div></div>
-              <div class="test-bar-wrap"><div class="test-bar-num" id="num-wonderlic">0</div><div class="test-bar" style="height:0%" id="bar-wonderlic"></div><div class="test-bar-lbl">WON</div></div>
+            <div class="grafico-barras" id="grafico-tests">
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ic">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ic" style="height:0px;"></div></div>
+                <div class="grafico-lbl">IC</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ceal">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ceal" style="height:0px;"></div></div>
+                <div class="grafico-lbl">CEAL</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-16pf">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-16pf" style="height:0px;"></div></div>
+                <div class="grafico-lbl">16PF</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ipv">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ipv" style="height:0px;"></div></div>
+                <div class="grafico-lbl">IPV</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-wonderlic">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-wonderlic" style="height:0px;"></div></div>
+                <div class="grafico-lbl">WON</div>
+              </div>
             </div>
             <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
           </div>
@@ -1224,10 +1245,9 @@ function actualizarStats() {
     var key = t.toLowerCase();
     var bar = document.getElementById("bar-"+key);
     var num = document.getElementById("num-"+key);
-    var pct = maxC > 0 ? Math.round((conteos[t]/maxC)*100) : 0;
-    // Mínimo 8% para que la barra sea visible cuando hay datos, 0 si no hay
-    if (bar) bar.style.height = (conteos[t] > 0 ? Math.max(pct, 8) : 0) + "%";
-    if (num) num.textContent = conteos[t];
+    var px  = maxC > 0 ? Math.round((conteos[t]/maxC)*72) : 0;
+    if (bar) bar.style.height = (conteos[t] > 0 ? Math.max(px, 8) : 0) + "px";
+    if (num) { num.textContent = conteos[t]; num.style.visibility = conteos[t] > 0 ? "visible" : "hidden"; }
   });
   var ctEl = document.getElementById("conteos-tests");
   if(ctEl) ctEl.innerHTML = tests.map(function(t){
