@@ -1189,22 +1189,35 @@ function procesarEnvios(data) {
 }
 
 function cargarHistorial() {
-  var cbName = "cb_historial_" + Date.now();
-  window[cbName] = function(data) {
-    delete window[cbName];
-    var s = document.getElementById("jsonp-historial");
-    if (s) s.remove();
-    procesarEnvios(data);
-  };
-  var script = document.createElement("script");
-  script.id = "jsonp-historial";
-  script.src = APPS_URL + "?action=getEnvios&callback=" + cbName + "&t=" + Date.now();
-  script.onerror = function() {
-    delete window[cbName];
-    document.getElementById("st-enviados").textContent = "—";
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--low);'>Error al cargar historial. Intenta recargar la página.</td></tr>";
-  };
-  document.head.appendChild(script);
+  // Usar fetch con credentials omit para evitar bloqueo GSuite
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
+    method: "GET",
+    credentials: "omit",
+    redirect: "follow",
+    mode: "cors"
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) { procesarEnvios(data); })
+  .catch(function() {
+    // Si falla por GSuite, intentar sin credentials
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", APPS_URL + "?action=getEnvios&t=" + Date.now(), true);
+    xhr.withCredentials = false;
+    xhr.onload = function() {
+      try {
+        var data = JSON.parse(xhr.responseText);
+        procesarEnvios(data);
+      } catch(e) {
+        document.getElementById("st-enviados").textContent = "—";
+        document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+      }
+    };
+    xhr.onerror = function() {
+      document.getElementById("st-enviados").textContent = "—";
+      document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+    };
+    xhr.send();
+  });
 }
 
 // ENVIAR
