@@ -350,10 +350,11 @@ tbody tr:hover td { background: #fdf9f6; }
 .empty-state-text { font-size: 14px; }
 
 /* GRAFICO MINI */
-.test-bars { display: flex; gap: 8px; align-items: flex-end; height: 60px; }
-.test-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-.test-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--naranja); opacity: 0.7; min-height: 4px; transition: opacity 0.2s; }
+.test-bars { display: flex; gap: 10px; align-items: flex-end; height: 120px; padding: 0 4px; }
+.test-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+.test-bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--naranja); opacity: 0.75; min-height: 0px; transition: height 0.5s ease, opacity 0.2s; }
 .test-bar:hover { opacity: 1; }
+.test-bar-num { font-size: 11px; font-weight: 700; color: var(--ink); line-height: 1; }
 .test-bar-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
 
 @media (max-width: 768px) {
@@ -549,11 +550,11 @@ tbody tr:hover td { background: #fdf9f6; }
           </div>
           <div class="card-body">
             <div class="test-bars" id="grafico-tests">
-              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ic"></div><div class="test-bar-lbl">IC</div></div>
-              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ceal"></div><div class="test-bar-lbl">CEAL</div></div>
-              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-16pf"></div><div class="test-bar-lbl">16PF</div></div>
-              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ipv"></div><div class="test-bar-lbl">IPV</div></div>
-              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-wonderlic"></div><div class="test-bar-lbl">WON</div></div>
+              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ic">0</div><div class="test-bar" style="height:0%" id="bar-ic"></div><div class="test-bar-lbl">IC</div></div>
+              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ceal">0</div><div class="test-bar" style="height:0%" id="bar-ceal"></div><div class="test-bar-lbl">CEAL</div></div>
+              <div class="test-bar-wrap"><div class="test-bar-num" id="num-16pf">0</div><div class="test-bar" style="height:0%" id="bar-16pf"></div><div class="test-bar-lbl">16PF</div></div>
+              <div class="test-bar-wrap"><div class="test-bar-num" id="num-ipv">0</div><div class="test-bar" style="height:0%" id="bar-ipv"></div><div class="test-bar-lbl">IPV</div></div>
+              <div class="test-bar-wrap"><div class="test-bar-num" id="num-wonderlic">0</div><div class="test-bar" style="height:0%" id="bar-wonderlic"></div><div class="test-bar-lbl">WON</div></div>
             </div>
             <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
           </div>
@@ -1217,11 +1218,16 @@ function actualizarStats() {
   // Gráfico barras
   var tests = ["IC","CEAL","16PF","IPV","WONDERLIC"];
   var conteos = {};
-  tests.forEach(function(t){ conteos[t]=todosLosDatos.filter(function(d){ return d.test===t; }).length; });
+  tests.forEach(function(t){ conteos[t] = todosLosDatos.filter(function(d){ return d.test===t; }).length; });
   var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
   tests.forEach(function(t){
-    var bar = document.getElementById("bar-"+t.toLowerCase().replace("pf","pf"));
-    if(bar) bar.style.height = Math.round((conteos[t]/maxC)*100)+"%";
+    var key = t.toLowerCase();
+    var bar = document.getElementById("bar-"+key);
+    var num = document.getElementById("num-"+key);
+    var pct = maxC > 0 ? Math.round((conteos[t]/maxC)*100) : 0;
+    // Mínimo 8% para que la barra sea visible cuando hay datos, 0 si no hay
+    if (bar) bar.style.height = (conteos[t] > 0 ? Math.max(pct, 8) : 0) + "%";
+    if (num) num.textContent = conteos[t];
   });
   var ctEl = document.getElementById("conteos-tests");
   if(ctEl) ctEl.innerHTML = tests.map(function(t){
