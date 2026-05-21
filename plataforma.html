@@ -1199,39 +1199,20 @@ function procesarEnvios(data) {
 }
 
 function cargarHistorial() {
-  // Usar iframe para evitar bloqueo CORS/GSuite
-  var existingIframe = document.getElementById("iframe-historial");
-  if (existingIframe) existingIframe.remove();
-  
-  var iframe = document.createElement("iframe");
-  iframe.id = "iframe-historial";
-  iframe.style.display = "none";
-  
-  var cbName = "cb_hist_" + Date.now();
-  
-  // Timeout por si el iframe no responde
-  var timeout = setTimeout(function() {
-    delete window[cbName];
-    if (iframe.parentNode) iframe.remove();
-    // Intentar fetch directo como fallback
-    fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {credentials:"omit", redirect:"follow"})
-      .then(function(r){ return r.json(); })
-      .then(function(d){ procesarEnvios(d); })
-      .catch(function(){
-        document.getElementById("st-enviados").textContent = "—";
-        document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
-      });
-  }, 3000);
-  
-  window[cbName] = function(data) {
-    clearTimeout(timeout);
-    delete window[cbName];
-    if (iframe.parentNode) iframe.remove();
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
+    credentials: "omit",
+    redirect: "follow"
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    console.log("getEnvios data:", data);
     procesarEnvios(data);
-  };
-  
-  iframe.src = "data:text/html,<script>fetch('" + APPS_URL + "?action=getEnvios&t=" + Date.now() + "',{credentials:'omit',redirect:'follow'}).then(function(r){return r.json();}).then(function(d){parent['" + cbName + "'](d);}).catch(function(){parent['" + cbName + "']({envios:[]});});<\/script>";
-  document.body.appendChild(iframe);
+  })
+  .catch(function(err) {
+    console.error("cargarHistorial error:", err);
+    document.getElementById("st-enviados").textContent = "—";
+    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+  });
 }
 
 // ENVIAR
