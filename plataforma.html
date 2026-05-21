@@ -1101,18 +1101,34 @@ function renderTasa(completados, enviados) {
   document.getElementById("tasa-completados").textContent = totalCompletados;
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
 }
+async function fetchJSON(url) {
+  var resp = await fetch(url, { method: "GET", redirect: "follow" });
+  var texto = await resp.text();
+  var j = texto.indexOf("{");
+  if (j > -1) { try { return JSON.parse(texto.slice(j)); } catch(e) {} }
+  return {};
+}
+
 async function cargarDatos() {
-  // ── Mostrar caché inmediatamente si existe ──
+  // ── 1. Caché instantáneo ──
   try {
     var cache = localStorage.getItem("cygnus_cache");
     if (cache) {
       var cached = JSON.parse(cache);
       todosLosDatos = cached.results || [];
       todosEnvios   = cached.envios  || [];
-      actualizarStats();
-      renderRecientes();
-      filtrar();
-      renderRanking(todosLosDatos);
+      pintarTodo();
+    }
+  } catch(x) {}
+
+  // ── 2. getHistorial primero (solo 1 hoja, llega en ~1s) ──
+  // Lanzar getAllResults en paralelo sin esperar
+  var promiseAll = fetchJSON(APPS_URL + "?action=getAllResults&t=" + Date.now());
+
+  try {
+    var dataH = await fetchJSON(APPS_URL + "?action=getHistorial&t=" + Date.now());
+    if (Array.isArray(dataH.envios) && dataH.envios.length) {
+      todosEnvios = dataH.envios;
       document.getElementById("st-enviados").textContent = todosEnvios.length;
       try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
       try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
@@ -1120,32 +1136,17 @@ async function cargarDatos() {
     }
   } catch(x) {}
 
-  // ── Luego cargar datos frescos del servidor ──
+  // ── 3. Esperar getAllResults (tarda más, trae los tests) ──
   try {
-    var resp = await fetch(APPS_URL + "?action=getAllResults&t=" + Date.now(), {
-      method: "GET", redirect: "follow"
-    });
-    var texto = await resp.text();
-    var data = {};
-    var jsonStart = texto.indexOf("{");
-    if (jsonStart > -1) {
-      try { data = JSON.parse(texto.slice(jsonStart)); } catch(e) { data = {}; }
-    }
+    var dataR = await promiseAll;
+    todosLosDatos = dataR.results || [];
+    var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
+    if (enviosR.length > todosEnvios.length) todosEnvios = enviosR;
 
-    todosLosDatos = data.results || [];
-    todosEnvios   = Array.isArray(data.envios) ? data.envios : [];
-
-    // Guardar en caché para la próxima vez
+    // Guardar caché completo
     try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
 
-    actualizarStats();
-    renderRecientes();
-    filtrar();
-    renderRanking(todosLosDatos);
-    document.getElementById("st-enviados").textContent = todosEnvios.length;
-    try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
-    try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
-    renderHistorial();
+    pintarTodo();
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
@@ -1155,6 +1156,18 @@ async function cargarDatos() {
     }
   }
 }
+
+function pintarTodo() {
+  actualizarStats();
+  renderRecientes();
+  filtrar();
+  renderRanking(todosLosDatos);
+  document.getElementById("st-enviados").textContent = todosEnvios.length;
+  try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+  try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
+  renderHistorial();
+}
+
 
 function actualizarStats() {
   var hoy = new Date().toLocaleDateString("es-CL");
