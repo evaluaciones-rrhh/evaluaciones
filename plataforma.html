@@ -910,20 +910,24 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="page" id="page-historial">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Historial de evaluaciones completadas</div>
+          <div class="card-title">📋 Historial de envíos</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input class="filtro-input" id="filtro-historial" placeholder="Buscar por nombre o email..." oninput="filtrarHistorial()" style="max-width:260px;">
+          </div>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Nombre</th>
+                <th>Email</th>
                 <th>Test</th>
-                <th>Fecha</th>
-                <th>Resultado</th>
+                <th>Fecha envío</th>
+                <th>Estado</th>
               </tr>
             </thead>
             <tbody id="tabla-historial">
-              <tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -954,6 +958,7 @@ const DASH_HTML = {
 
 var usuarioActual = "";
 var todosLosDatos = [];
+var todosEnvios = [];
 
 // LOGIN SEGURO — valida contra Apps Script (contraseñas NO están en el HTML)
 async function login() {
@@ -1111,23 +1116,17 @@ async function cargarDatos() {
     renderHistorial();
     // Procesar envíos incluidos en getAllResults
     if (data.envios && data.envios.length) {
+      todosEnvios = data.envios;
       var stEl = document.getElementById("st-enviados");
-      if (stEl) stEl.textContent = data.envios.length;
-      try { renderPendientes(data.envios, todosLosDatos); } catch(x){}
-      try { renderTasa(todosLosDatos, data.envios); } catch(x){}
-      var tbl = document.getElementById("tabla-historial");
-      if (tbl) {
-        var hHtml = "";
-        data.envios.slice().reverse().forEach(function(env){
-          hHtml += "<tr><td class='td-nombre'>"+(env.nombre||"—")+"</td>"
-            +"<td style='font-size:12px;'>"+(env.test||"—")+"</td>"
-            +"<td style='font-size:12px;color:var(--muted);'>"+(env.fecha||"—")+"</td></tr>";
-        });
-        tbl.innerHTML = hHtml;
-      }
+      if (stEl) stEl.textContent = todosEnvios.length;
+      try { renderPendientes(todosEnvios, todosLosDatos); } catch(x){}
+      try { renderTasa(todosLosDatos, todosEnvios); } catch(x){}
+      renderHistorial();
     } else {
+      todosEnvios = [];
       var enviados = parseInt(document.getElementById("st-enviados").textContent) || 0;
       renderTasa(todosLosDatos, {length: enviados});
+      renderHistorial();
     }
   } catch(e) {
     console.warn("Error cargando datos:", e.message);
@@ -1199,59 +1198,64 @@ function filtrar() {
   renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
 }
 
-// CARGAR HISTORIAL
+// HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
+var TEST_NOMBRES_HTML = {
+  IC: "Test de Instrucciones Complejas",
+  CEAL: "Test de Estilos de Liderazgo",
+  "16PF": "Evaluación de Personalidad",
+  IPV: "Perfil de Personalidad Comercial",
+  WONDERLIC: "Test de Habilidad Cognitiva General"
+};
+
 function procesarEnvios(data) {
-  var envios = data.envios || [];
-  document.getElementById("st-enviados").textContent = envios.length;
-  renderPendientes(envios, todosLosDatos);
-  renderTasa(todosLosDatos, envios);
-  if (!envios.length) {
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
-    return;
-  }
-  var html = "";
-  envios.slice().reverse().forEach(function(e){
-    var testCls = "badge-"+(e.test||"").toLowerCase().replace("pf","pf");
-    var estCls = (e.estado||"")=="Enviado"?"badge-enviado":"badge-pendiente";
-    html += "<tr><td class='td-nombre'>"+(e.nombre||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.email||"—")+"</td><td><span class='badge "+testCls+"'>"+(e.test||"—")+"</span></td><td style='font-size:12px;color:var(--muted);'>"+(e.cargo||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.fecha||"—")+"</td><td><span class='badge "+estCls+"'>"+(e.estado||"—")+"</span></td></tr>";
-  });
-  document.getElementById("tabla-historial").innerHTML = html;
+  todosEnvios = data.envios || [];
+  var stEl = document.getElementById("st-enviados");
+  if (stEl) stEl.textContent = todosEnvios.length;
+  renderPendientes(todosEnvios, todosLosDatos);
+  renderTasa(todosLosDatos, todosEnvios);
+  renderHistorial();
 }
 
 function cargarHistorial() {
   renderHistorial();
 }
 
+function filtrarHistorial() {
+  var q = (document.getElementById("filtro-historial").value || "").toLowerCase();
+  var filtrado = todosEnvios.filter(function(e) {
+    return (e.nombre || "").toLowerCase().includes(q)
+        || (e.email  || "").toLowerCase().includes(q)
+        || (e.test   || "").toLowerCase().includes(q);
+  });
+  _pintarTablaHistorial(filtrado);
+}
+
 function renderHistorial() {
+  _pintarTablaHistorial(todosEnvios);
+}
+
+function _pintarTablaHistorial(envios) {
   var tbl = document.getElementById("tabla-historial");
   if (!tbl) return;
-  if (!todosLosDatos || !todosLosDatos.length) {
-    tbl.innerHTML = "<tr><td colspan='4' style='text-align:center;padding:32px;color:var(--muted);'>No hay evaluaciones completadas</td></tr>";
+  if (!envios || !envios.length) {
+    tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
     return;
   }
-  var sorted = todosLosDatos.slice().sort(function(a,b){
-    return (b.fecha_iso||"").localeCompare(a.fecha_iso||"");
-  });
   var html = "";
-  sorted.forEach(function(r){
-    var testNombres = {
-      IC: "Test de Instrucciones Complejas",
-      CEAL: "Test de Estilos de Liderazgo",
-      "16PF": "Evaluación de Personalidad",
-      IPV: "Perfil de Personalidad Comercial",
-      WONDERLIC: "Test de Habilidad Cognitiva General"
-    };
-    var testNombre = testNombres[r.test] || r.test || "—";
+  envios.slice().reverse().forEach(function(e) {
+    var testCls = "badge-" + (e.test || "").toLowerCase().replace("16pf","16pf");
+    var testNombre = TEST_NOMBRES_HTML[e.test] || e.test || "—";
+    var estCls = (e.estado || "").toLowerCase() === "enviado" ? "badge-enviado" : "badge-pendiente";
     html += "<tr>"
-      + "<td class='td-nombre'>" + (r.nombre||"—") + "</td>"
-      + "<td style='font-size:12px;'>" + testNombre + "</td>"
-      + "<td style='font-size:12px;color:var(--muted);'>" + (r.fecha||"—") + "</td>"
-      + "<td style='font-size:12px;color:var(--muted);'>" + (r.nivel||"—") + "</td>"
+      + "<td class='td-nombre'>" + (e.nombre || "—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (e.email  || "—") + "</td>"
+      + "<td><span class='badge " + testCls + "'>" + testNombre + "</span></td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (e.fecha  || "—") + "</td>"
+      + "<td><span class='badge " + estCls + "'>" + (e.estado || "—") + "</span></td>"
       + "</tr>";
   });
   tbl.innerHTML = html;
 }
-
 // ENVIAR
 async function abrirDash(test, rut, nombre) {
   var dashUrl = DASH_HTML[test];
