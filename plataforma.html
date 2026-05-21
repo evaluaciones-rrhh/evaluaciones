@@ -1172,7 +1172,7 @@ function filtrar() {
 // CARGAR HISTORIAL
 async function cargarHistorial() {
   try {
-    var resp = await fetch(APPS_URL+"?action=getEnvios&t="+Date.now());
+    var resp = await fetch(APPS_URL+"?action=getEnvios&t="+Date.now(), {redirect:"follow"});
     var data = await resp.json();
     var envios = data.envios || [];
     document.getElementById("st-enviados").textContent = envios.length;
@@ -1189,10 +1189,11 @@ async function cargarHistorial() {
       html += "<tr><td class='td-nombre'>"+(e.nombre||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.email||"—")+"</td><td><span class='badge "+testCls+"'>"+(e.test||"—")+"</span></td><td style='font-size:12px;color:var(--muted);'>"+(e.cargo||"—")+"</td><td style='font-size:12px;color:var(--muted);'>"+(e.fecha||"—")+"</td><td><span class='badge "+estCls+"'>"+(e.estado||"—")+"</span></td></tr>";
     });
     document.getElementById("tabla-historial").innerHTML = html;
-  } catch(e) {
+  } catch(err) {
     document.getElementById("st-enviados").textContent = "—";
     var tbl = document.getElementById("tabla-historial");
-    if(tbl) tbl.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--low);'>Error al cargar historial: "+e.message+"</td></tr>";
+    if(tbl) tbl.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--low);'>Error al cargar historial: "+err.message+"</td></tr>";
+    console.error("cargarHistorial error:", err);
   }
 }
 
