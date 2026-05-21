@@ -912,8 +912,8 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Cargo</th><th>Fecha</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-historial"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-historial"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1170,55 +1170,1507 @@ function filtrar() {
 }
 
 // CARGAR HISTORIAL
-function procesarEnvios(data) {
-  var envios = data.envios || [];
-  document.getElementById("st-enviados").textContent = envios.length;
+function procefunction procesarEnvios(data) {
+  var envios = (data && data.envios) ? data.envios : [];
+  var stEl = document.getElementById("st-enviados");
+  if (stEl) stEl.textContent = envios.length;
   try { renderPendientes(envios, todosLosDatos); } catch(e) {}
   try { renderTasa(todosLosDatos, envios); } catch(e) {}
   var tbl = document.getElementById("tabla-historial");
   if (!tbl) return;
   if (!envios.length) {
-    tbl.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+    tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
     return;
   }
   var html = "";
-  envios.slice().reverse().forEach(function(e){
-    var testNombre = e.test || "—";
-    var estCls = (e.estado||"") === "Enviado" ? "badge-enviado" : "badge-pendiente";
-    var estadoTexto = e.estado || "—";
-    var fecha = e.fecha || "—";
+  envios.slice().reverse().forEach(function(env) {
+    var estCls = (env.estado||"") === "Enviado" ? "badge-enviado" : "badge-pendiente";
     html += "<tr>"
-      + "<td class='td-nombre'>" + (e.nombre||"—") + "</td>"
-      + "<td style='font-size:12px;color:var(--muted);'>" + (e.email||"—") + "</td>"
-      + "<td style='font-size:12px;'>" + testNombre + "</td>"
-      + "<td style='font-size:12px;color:var(--muted);'>" + fecha + "</td>"
-      + "<td><span class='badge " + estCls + "'>" + estadoTexto + "</span></td>"
+      + "<td class='td-nombre'>" + (env.nombre||"—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (env.email||"—") + "</td>"
+      + "<td style='font-size:12px;'>" + (env.test||"—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (env.fecha||"—") + "</td>"
+      + "<td><span class='badge " + estCls + "'>" + (env.estado||"—") + "</span></td>"
       + "</tr>";
   });
   tbl.innerHTML = html;
-}
-
-function cargarHistorial() {
+}garHistorial() {
   fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
     redirect: "follow",
     credentials: "omit"
   })
-  .then(function(r) {
-    console.log("fetch status:", r.status, "url:", r.url);
-    return r.text();
-  })
-  .then(function(txt) {
-    console.log("fetch response:", txt.substring(0, 300));
-    try {
-      var data = JSON.parse(txt);
-      procesarEnvios(data);
-    } catch(e) {
-      console.error("JSON parse error:", e, txt.substring(0, 100));
-    }
-  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) { procesarEnvios(data); })
   .catch(function(err) {
-    console.error("fetch error:", err);
     document.getElementById("st-enviados").textContent = "—";
+    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+  });
+}
+
+// ENVIAR
+async function abrirDash(test, rut, nombre) {
+  var dashUrl = DASH_HTML[test];
+  if (!dashUrl) { alert("Este test no tiene dashboard disponible aun."); return; }
+  
+  var endpointMap = {
+    "16PF": "getDatos16PF",
+    IPV: "getDatosIPV", 
+    WONDERLIC: "getDatosWONDERLIC"
+  };
+  
+  try {
+    // Primero limpiar localStorage anterior
+    localStorage.removeItem("dash_datos_" + test);
+    // Cargar datos
+    var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow", credentials:"omit"});
+    var data = await resp.json();
+    // Guardar en localStorage
+    localStorage.setItem("dash_datos_" + test, JSON.stringify(data));
+    localStorage.setItem("dash_filtro_rut", rut || "");
+    localStorage.setItem("dash_filtro_nombre", nombre || "");
+    // Verificar que se guardó
+    var check = localStorage.getItem("dash_datos_" + test);
+    if (!check) { alert("Error guardando datos. Intenta de nuevo."); return; }
+    // Abrir dashboard después de guardar
+    window.open(dashUrl + "?t=" + Date.now(), "_blank");
+  } catch(e) {
+    alert("Error cargando datos: " + e.message);
+  }
+}
+
+function actualizarPreview() {
+  var test = document.getElementById("env-test").value;
+  var prev = document.getElementById("link-preview");
+  var cargoWrap = document.getElementById("env-cargo-wrap");
+
+  if (test && TESTS_LINKS[test]) {
+    document.getElementById("link-url").textContent = TESTS_LINKS[test];
+    prev.style.display = "none"; // oculto
+  } else {
+    prev.style.display = "none";
+  }
+}
+
+async function enviarEvaluacion() {
+  var nombre = document.getElementById("env-nombre").value.trim();
+  var email = document.getElementById("env-email").value.trim();
+  var test = document.getElementById("env-test").value;
+  var cargo = document.getElementById("env-cargo") ? document.getElementById("env-cargo").value : "";
+  var okEl = document.getElementById("env-ok");
+  var errEl = document.getElementById("env-err");
+  okEl.style.display="none"; errEl.style.display="none";
+
+  if (!nombre||!email||!test) {
+    errEl.textContent="Por favor completa nombre, email y test.";
+    errEl.style.display="block"; return;
+  }
+  if (test === "ENTREVISTA" && !cargo) {
+    errEl.textContent="Por favor selecciona el cargo a evaluar.";
+    errEl.style.display="block"; return;
+  }
+
+  var btn = document.getElementById("btn-env");
+  btn.disabled=true;
+  btn.innerHTML="<span class='spinner'></span> Enviando...";
+
+  try {
+    // Entrevista usa su propio Apps Script
+    if (test === "ENTREVISTA") {
+      await fetch(APPS_URL_ENTREVISTA, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEntrevista", nombre, email, cargo, competencias:[], link:TESTS_LINKS[test]})
+      });
+    } else {
+      await fetch(APPS_URL, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEvaluacion", nombre, email, test, cargo:"", link:TESTS_LINKS[test]})
+      });
+    }
+
+    okEl.textContent="✓ Invitación enviada a "+email;
+    okEl.style.display="block";
+    document.getElementById("env-nombre").value="";
+    document.getElementById("env-email").value="";
+    document.getElementById("env-test").value="";
+    document.getElementById("link-preview").style.display="none";
+    // env-cargo-wrap removed
+    setTimeout(cargarHistorial, 2000);
+  } catch(e) {
+    errEl.textContent="Error: "+e.message;
+    errEl.style.display="block";
+  }
+  btn.disabled=false;
+  btn.innerHTML="📧 Enviar invitación";
+}
+
+var NIVELES_INFO = {
+  "Operativo": "Responsabilidad · Orientación a la seguridad · Trabajo en equipo · Orden y calidad del trabajo",
+  "Administrativo": "Comunicación · Responsabilidad · Orden y calidad · Trabajo en equipo · Flexibilidad",
+  "Comercial": "Orientación al cliente · Orientación a resultados · Persuasión · Iniciativa · Trabajo bajo presión",
+  "Profesional": "Orientación a resultados · Iniciativa · Comunicación · Responsabilidad · Planificación",
+  "Jefatura": "Liderazgo · Trabajo en equipo · Planificación · Comunicación · Toma de decisiones",
+  "Gerencia": "Visión de negocio · Liderazgo estratégico · Pensamiento estratégico · Orientación a resultados · Gestión del cambio",
+};
+
+function actualizarPreviewEntrevista() {
+  var nivel = document.getElementById('ent-nivel').value;
+  var infoEl = document.getElementById('ent-nivel-info');
+  var linkEl = document.getElementById('ent-link-preview');
+  if (nivel) {
+    document.getElementById('ent-nivel-competencias').textContent = NIVELES_INFO[nivel] || '';
+    infoEl.style.display = 'block';
+    document.getElementById('ent-link-url').textContent = BASE + 'TEST_ENTREVISTA.html?cargo=' + encodeURIComponent(nivel);
+    linkEl.style.display = 'none'; // oculto
+  } else {
+    infoEl.style.display = 'none';
+    linkEl.style.display = 'none';
+  }
+}
+
+async function enviarEntrevistaDesdePlataforma() {
+  var nombre = document.getElementById('ent-nombre').value.trim();
+  var email = document.getElementById('ent-email').value.trim();
+  var nivel = document.getElementById('ent-nivel').value;
+  var okEl = document.getElementById('ent-ok');
+  var errEl = document.getElementById('ent-err');
+  okEl.style.display = 'none'; errEl.style.display = 'none';
+
+  if (!nombre || !email || !nivel) {
+    errEl.textContent = 'Por favor completa nombre, email y nivel de cargo.';
+    errEl.style.display = 'block'; return;
+  }
+  var btn = document.getElementById('btn-ent');
+  btn.disabled = true;
+  btn.innerHTML = "<span class='spinner'></span> Enviando...";
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'enviarEntrevista', nombre: nombre, email: email, cargo: nivel, competencias: [] })
+    });
+    okEl.textContent = '✓ Entrevista enviada a ' + email + ' — Nivel: ' + nivel;
+    okEl.style.display = 'block';
+    document.getElementById('ent-nombre').value = '';
+    document.getElementById('ent-email').value = '';
+    document.getElementById('ent-nivel').value = '';
+    document.getElementById('ent-nivel-info').style.display = 'none';
+    document.getElementById('ent-link-preview').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🎤 Enviar entrevista';
+}
+
+// ══ REPORTE ENTREVISTAS ══
+var datosEntrevistas = [];
+
+async function cargarEntrevistas() {
+  try {
+    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas");
+    var d = await r.json();
+    datosEntrevistas = (d.entrevistas || []).slice().reverse();
+    renderTablaEntrevistas(datosEntrevistas);
+  } catch(e) {
+    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
+  }
+}
+
+function filtrarEntrevistas() {
+  var q = document.getElementById("filtro-entrevista").value.toLowerCase();
+  var filtrado = datosEntrevistas.filter(function(e) {
+    return (e.nombre||"").toLowerCase().includes(q) || (e.rut||"").toLowerCase().includes(q);
+  });
+  renderTablaEntrevistas(filtrado);
+}
+
+function renderTablaEntrevistas(lista) {
+  var tbody = document.getElementById("tabla-entrevistas");
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
+    return;
+  }
+
+  var GRADO_VAL = { A:4, B:3, C:2, D:1 };
+
+  tbody.innerHTML = lista.map(function(ent) {
+    // Calcular recomendación
+    var analisis = ent.analisis_star || [];
+    var cntA=0, cntB=0, cntC=0, cntD=0;
+    analisis.forEach(function(a) {
+      var g = a.analisis ? a.analisis.grado : 'D';
+      if (g==='A') cntA++; else if (g==='B') cntB++; else if (g==='C') cntC++; else cntD++;
+    });
+    var total = analisis.length;
+    var satisf = cntA + cntB;
+    var rec, recColor, recEmoji;
+
+    if (cntD >= 3 || cntD === total || (satisf === 0 && cntD >= 2)) {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    } else if (satisf >= Math.ceil(total * 0.6) && cntD <= 1) {
+      rec = 'Recomendado'; recColor = 'var(--high)'; recEmoji = '🟢';
+    } else if (satisf >= 1 && cntD <= 2) {
+      rec = 'Con reservas'; recColor = 'var(--mid)'; recEmoji = '🟡';
+    } else {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    }
+
+    if (analisis.length === 0) { rec = 'Sin datos'; recColor = 'var(--muted)'; recEmoji = '⚪'; }
+
+    return '<tr>'
+      + '<td><strong>' + (ent.nombre||'—') + '</strong></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.rut||'—') + '</td>'
+      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.1);color:var(--naranja);">' + (ent.cargo||'—') + '</span></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.fecha||'—') + '</td>'
+      + '<td><span style="font-size:12px;font-weight:600;color:' + recColor + ';">' + recEmoji + ' ' + rec + '</span></td>'
+      + '<td><button class="btn btn-ghost btn-sm" onclick="verInformeEntrevista(' + JSON.stringify(ent).replace(/"/g,"&quot;") + ')">Ver informe</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function verInformeEntrevista(ent) {
+  localStorage.setItem('dash_entrevista', JSON.stringify(ent));
+  window.open(BASE + 'dashboard_entrevista.html', '_blank');
+}
+
+</script>
+
+    <!-- MARCO DE COMPETENCIAS -->
+    <div class="page" id="page-competencias" style="margin:0 auto;">
+      <div style="max-width:860px;margin:0 auto;">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">📐 Marco de Competencias por Nivel de Cargo</div></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;padding:16px 20px;margin:0;">Basado en el diccionario de competencias de Martha Alles. Cada nivel tiene un set específico de competencias conductuales medidas mediante metodología STAR en la entrevista por competencias.</p>
+        </div>
+<div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f0fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔧</div><div><div style="font-size:16px;font-weight:700;color:#1a4a9a;margin-bottom:2px;">Operativo</div><div style="font-size:11px;color:#1a4a9a;opacity:0.6;">Operador, auxiliar, bodeguero, conductor</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a4a9a;">4 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de tareas, manejo de errores y aprendizaje.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a la seguridad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación y prevención de riesgos en el trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Coordinación y colaboración con pares en terreno.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión y prolijidad en la ejecución de tareas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#f0e8fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📄</div><div><div style="font-size:16px;font-weight:700;color:#5a1a9a;margin-bottom:2px;">Administrativo</div><div style="font-size:11px;color:#5a1a9a;opacity:0.6;">Secretaria, recepcionista, asistente, digitador</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#5a1a9a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo efectivo de información y relaciones interpersonales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento y manejo de errores con integridad.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión en tareas administrativas y documentación.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración interdepartamental y apoyo a otros.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Flexibilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Adaptación a cambios de prioridades y situaciones nuevas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fce8e8;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💼</div><div><div style="font-size:16px;font-weight:700;color:#8a1a1a;margin-bottom:2px;">Comercial</div><div style="font-size:11px;color:#8a1a1a;opacity:0.6;">Vendedor, ejecutivo comercial, promotor, KAM</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a1a1a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación al cliente</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Comprensión y satisfacción de necesidades del cliente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de metas y cuotas comerciales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Persuasión e influencia</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Capacidad de convencer y negociar efectivamente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Prospección autónoma e identificación de oportunidades.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo bajo presión</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de cuotas, rechazos y plazos ajustados.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f5ee;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔬</div><div><div style="font-size:16px;font-weight:700;color:#1a6a4a;margin-bottom:2px;">Profesional / Especialista</div><div style="font-size:11px;color:#1a6a4a;opacity:0.6;">Analista financiero, analista de selección, técnico especialista</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a6a4a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de objetivos técnicos y entregables.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación proactiva de mejoras y problemas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Presentación clara de análisis, reportes e informes.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de errores, autonomía y aprendizaje continuo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión eficiente de múltiples tareas y plazos.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fef3e2;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👥</div><div><div style="font-size:16px;font-weight:700;color:#8a4a00;margin-bottom:2px;">Mando Medio</div><div style="font-size:11px;color:#8a4a00;opacity:0.6;">Encargado, coordinador, supervisor, jefe de área</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a4a00;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción y motivación de equipos de trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración y articulación entre áreas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión operativa, plazos y recursos.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Transmisión efectiva de información en todos los niveles.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Toma de decisiones</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Resolución en situaciones complejas con información incompleta.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#1e2d3d;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏢</div><div><div style="font-size:16px;font-weight:700;color:#ffffff;margin-bottom:2px;">Gerencia</div><div style="font-size:11px;color:#ffffff;opacity:0.6;">Gerente, subgerente, director, VP</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#ffffff;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Visión de negocio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Lectura del entorno, oportunidades y amenazas estratégicas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción estratégica de equipos y organizaciones.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Pensamiento estratégico</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Planificación a largo plazo y decisiones complejas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">KPIs, metas organizacionales e impacto en el negocio.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Gestión del cambio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Liderazgo de transformaciones e innovación organizacional.</div></div></div></div></div>
+      </div>
+    </div>
+</body>
+</html>function cargarHistorial() {
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
+    credentials: "omit",
+    redirect: "follow"
+  })
+  .then(function(r) { return r.text(); })
+  .then(function(txt) {
+    var data = JSON.parse(txt);
+    procesarEnvios(data);
+  })
+  .catch(function() {
+    var stEl = document.getElementById("st-enviados");
+    if (stEl) stEl.textContent = "—";
+    var tbl = document.getElementById("tabla-historial");
+    if (tbl) tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
+  });
+}!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cygnus — Plataforma de Evaluaciones</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --naranja: #c4432a;
+  --naranja-dark: #a3371f;
+  --naranja-light: #f5ede9;
+  --ink: #1a1410;
+  --ink-soft: #4a3f35;
+  --muted: #9a8a7a;
+  --border: #e8ddd4;
+  --bg: #faf7f4;
+  --white: #ffffff;
+  --azul: #1e2d3d;
+  --azul-soft: #e8ecf0;
+  --high: #2a6e47;
+  --high-bg: #e8f4ee;
+  --mid: #c07a00;
+  --mid-bg: #fef3e0;
+  --low: #c0392b;
+  --low-bg: #fdecea;
+  --shadow-sm: 0 1px 3px rgba(26,20,16,0.06);
+  --shadow: 0 2px 8px rgba(26,20,16,0.10);
+  --shadow-lg: 0 8px 32px rgba(26,20,16,0.14);
+  --radius: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; font-size: 14px; }
+h1,h2,h3 { font-family: 'Sora', sans-serif; }
+
+/* ══════════ LOGIN ══════════ */
+#login-screen {
+  min-height: 100vh; display: flex;
+  background: #f5f2ee;
+  position: relative; overflow: hidden;
+}
+
+/* Franja superior naranja */
+#login-screen::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 5px; background: var(--naranja); z-index: 10;
+}
+
+.login-left {
+  flex: 1; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 60px 64px; position: relative; z-index: 1;
+  background: var(--azul);
+}
+
+/* Patrón geométrico fondo izquierdo */
+.login-left::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(196,67,42,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(196,67,42,0.08) 0%, transparent 40%);
+}
+
+.login-logo-area {
+  position: relative; z-index: 2;
+}
+
+.login-logo-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 8px 14px; margin-bottom: 48px;
+}
+.login-logo-dot {
+  width: 28px; height: 28px; background: var(--naranja); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px; color: #fff; letter-spacing: -0.5px;
+}
+.login-logo-text {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.5px;
+}
+
+.login-headline {
+  font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 700;
+  color: #fff; line-height: 1.1; margin-bottom: 20px; position: relative; z-index: 2;
+}
+.login-headline em { color: var(--naranja); font-style: italic; font-weight: 400; }
+.login-desc {
+  font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.8;
+  max-width: 380px; position: relative; z-index: 2;
+}
+
+.login-features {
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative; z-index: 2; margin-top: 48px;
+}
+.login-feature-item {
+  display: flex; align-items: center; gap: 12px;
+}
+.login-feature-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(196,67,42,0.15); border: 1px solid rgba(196,67,42,0.25);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  flex-shrink: 0;
+}
+.login-feature-text { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+.login-feature-text strong { color: rgba(255,255,255,0.9); display: block; font-size: 13px; }
+
+
+/* Logos bar */
+.login-logos-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 44px; gap: 16px;
+}
+.login-logo-img {
+  object-fit: contain; border-radius: 6px;
+}
+.login-logo-cygnus {
+  height: 52px; width: auto; max-width: 180px;
+  background: transparent; padding: 0; border-radius: 0;
+}
+.login-logo-postula {
+  height: 52px; width: auto; max-width: 80px;
+  border-radius: 8px; padding: 2px;
+}
+
+.login-footer-left {
+  margin-top: auto; padding-top: 48px; position: relative; z-index: 2;
+  font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px;
+}
+
+.login-right {
+  width: 440px; display: flex; align-items: center; justify-content: center;
+  padding: 48px 40px; position: relative; z-index: 1;
+  background: #f5f2ee;
+}
+.login-card {
+  width: 100%; max-width: 360px;
+}
+.login-card-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--naranja); margin-bottom: 12px;
+}
+.login-card-title {
+  font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700;
+  color: var(--ink); margin-bottom: 6px; line-height: 1.2;
+}
+.login-card-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft);
+  margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;
+}
+.field input {
+  width: 100%; border: 1.5px solid #ddd8d2; border-radius: 8px;
+  padding: 12px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--ink); outline: none; transition: all 0.15s;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.field input:focus { border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(196,67,42,0.08); }
+.btn-login {
+  width: 100%; padding: 14px; background: var(--naranja); color: #fff;
+  border: none; border-radius: 8px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  transition: all 0.15s; letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(196,67,42,0.3);
+}
+.btn-login:hover { background: var(--naranja-dark); box-shadow: 0 6px 18px rgba(196,67,42,0.35); transform: translateY(-1px); }
+.btn-login:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(196,67,42,0.25); }
+.login-error {
+  background: #fdecea; color: var(--low); font-size: 12px;
+  padding: 10px 14px; border-radius: 8px; margin-top: 12px;
+  text-align: center; display: none; border: 1px solid rgba(192,57,43,0.2);
+}
+.login-security {
+  display: flex; align-items: center; gap: 6px; margin-top: 20px;
+  justify-content: center; font-size: 11px; color: var(--muted);
+}
+
+/* ══════════ APP LAYOUT ══════════ */
+#app-screen { display: none; }
+
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+  background: var(--azul); display: flex; flex-direction: column;
+  z-index: 200; transition: transform 0.3s;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-brand-name {
+  font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700;
+  color: #fff; line-height: 1;
+}
+.sidebar-brand-sub {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-top: 4px;
+}
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-item.activo { background: var(--naranja); color: #fff; }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: 8px;
+}
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--naranja); display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; flex: 1; }
+.btn-logout-sidebar {
+  background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3);
+  font-size: 14px; padding: 4px; transition: color 0.15s;
+}
+.btn-logout-sidebar:hover { color: rgba(255,255,255,0.7); }
+
+.main-content { margin-left: 220px; min-height: 100vh; }
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 56px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; color: var(--ink); }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.page { padding: 24px 28px 60px; display: none; }
+.page.activo { display: block; }
+
+/* ══════════ STATS ══════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--naranja); opacity: 0;
+}
+.stat-card.accent::before { opacity: 1; }
+.stat-num {
+  font-family: 'Sora', sans-serif; font-size: 36px; font-weight: 700;
+  color: var(--ink); line-height: 1; margin-bottom: 4px;
+}
+.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-icon { position: absolute; right: 16px; top: 16px; font-size: 22px; opacity: 0.15; }
+
+/* ══════════ CARDS / SECTIONS ══════════ */
+.card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); margin-bottom: 18px;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; color: var(--ink); }
+.card-body { padding: 20px; }
+
+/* ══════════ TABLA ══════════ */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); padding: 10px 14px;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+  background: var(--bg);
+}
+tbody td {
+  padding: 12px 14px; border-bottom: 1px solid #f2ede8;
+  font-size: 13px; vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #fdf9f6; }
+.td-nombre { font-weight: 600; color: var(--ink); }
+.td-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* BADGES */
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 9px;
+  border-radius: 20px; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+}
+.badge-ic { background: #e8f0fa; color: #1a4a9a; }
+.badge-ceal { background: #f0e8fa; color: #5a1a9a; }
+.badge-16pf { background: #e8f5ee; color: #1a6a4a; }
+.badge-ipv { background: var(--mid-bg); color: var(--mid); }
+.badge-wonderlic { background: #fce8e8; color: #8a1a1a; }
+.badge-alto { background: var(--high-bg); color: var(--high); }
+.badge-promedio, .badge-medio { background: var(--mid-bg); color: var(--mid); }
+.badge-bajo { background: var(--low-bg); color: var(--low); }
+.badge-enviado { background: var(--high-bg); color: var(--high); }
+.badge-pendiente { background: var(--mid-bg); color: var(--mid); }
+
+/* BOTONES */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--naranja); color: #fff; }
+.btn-primary:hover { background: var(--naranja-dark); }
+.btn-secondary { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-ghost { background: none; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--ink); background: var(--bg); }
+.btn-sm { padding: 5px 12px; font-size: 11px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* FILTROS */
+.filtros-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filtro-select, .filtro-input {
+  border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--ink);
+  background: var(--white); outline: none;
+}
+.filtro-select:focus, .filtro-input:focus { border-color: var(--naranja); }
+.filtro-input { flex: 1; min-width: 180px; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0.3px; }
+.form-group input, .form-group select {
+  border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--ink);
+  background: var(--white); outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(196,67,42,0.07);
+}
+
+/* ALERT */
+.alert { padding: 10px 14px; border-radius: 7px; font-size: 13px; margin-top: 12px; display: none; }
+.alert-ok { background: var(--high-bg); color: var(--high); border: 1px solid rgba(42,110,71,0.2); }
+.alert-err { background: var(--low-bg); color: var(--low); border: 1px solid rgba(192,57,43,0.2); }
+
+/* SPINNER */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* EMPTY */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-state-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-text { font-size: 14px; }
+
+/* GRAFICO MINI */
+.test-bars { display: flex; gap: 8px; align-items: flex-end; height: 60px; }
+.test-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.test-bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--naranja); opacity: 0.7; min-height: 4px; transition: opacity 0.2s; }
+.test-bar:hover { opacity: 1; }
+.test-bar-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .main-content { margin-left: 0; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .login-left { display: none; }
+  .login-right { width: 100%; }
+}
+
+.ranking-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.ranking-item:last-child { border-bottom:none; }
+.ranking-num {
+  font-family: 'Sora', sans-serif; font-size:20px; font-weight:700;
+  color:var(--muted); min-width:28px;
+}
+.ranking-num.gold { color:#c9a227; }
+.ranking-num.silver { color:#8a9bb0; }
+.ranking-num.bronze { color:#c4732a; }
+.ranking-info { flex:1; }
+.ranking-nombre { font-size:13px; font-weight:600; color:var(--ink); }
+.ranking-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+.ranking-badge { font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; }
+
+.pendiente-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.pendiente-item:last-child { border-bottom:none; }
+.pendiente-dias {
+  background:var(--mid-bg); color:var(--mid); border-radius:6px;
+  padding:4px 8px; font-size:11px; font-weight:700; white-space:nowrap;
+}
+.pendiente-dias.urgente { background:var(--low-bg); color:var(--low); }
+
+.tasa-wrap { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.tasa-num { font-family:'Sora',sans-serif; font-size:48px; font-weight:700; color:var(--naranja); line-height:1; }
+.tasa-desc { font-size:13px; color:var(--muted); line-height:1.5; }
+.tasa-bar-wrap { height:8px; background:var(--border); border-radius:4px; margin-top:8px; }
+.tasa-bar { height:100%; border-radius:4px; background:var(--naranja); transition:width 0.5s; }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+
+  <!-- LADO IZQUIERDO — Branding Cygnus -->
+  <div class="login-left">
+    <div class="login-logo-area">
+      <!-- Barra de logos superior -->
+      <div class="login-logos-bar">
+        <img src="data:image/jpeg;base64,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" alt="Grupo Cygnus" class="login-logo-img login-logo-cygnus">
+        <img src="data:image/jpeg;base64,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" alt="PostulaAquí" class="login-logo-img login-logo-postula">
+      </div>
+      <h1 class="login-headline">Plataforma de<br><em>Evaluaciones</em><br>Psicolaborales</h1>
+      <p class="login-desc">Gestiona, envía y analiza evaluaciones psicolaborales de tus candidatos desde un solo lugar.</p>
+      <div class="login-features">
+        <div class="login-feature-item">
+          <div class="login-feature-icon">📋</div>
+          <div class="login-feature-text">
+            <strong>Tests psicolaborales online</strong>
+            Evaluación de Personalidad, Perfil Comercial, Habilidad Cognitiva y más
+          </div>
+        </div>
+        <div class="login-feature-item">
+          <div class="login-feature-icon">🎙️</div>
+          <div class="login-feature-text">
+            <strong>Entrevista por competencias</strong>
+            Metodología STAR con análisis conductual
+          </div>
+        </div>
+        <div class="login-feature-item">
+          <div class="login-feature-icon">📊</div>
+          <div class="login-feature-text">
+            <strong>Reportes e informes descargables</strong>
+            PDF con análisis ejecutivo integrado
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer-left">© 2026 Grupo Cygnus · PostulaAquí · Evaluaciones Psicolaborales</div>
+  </div>
+
+  <!-- LADO DERECHO — Formulario -->
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-card-eyebrow">Acceso restringido</div>
+      <div class="login-card-title">Bienvenido/a</div>
+      <div class="login-card-sub">Ingresa tus credenciales para acceder a la plataforma de evaluaciones.</div>
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" id="inp-user" placeholder="Ingresa tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="inp-pass" placeholder="••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn-login" onclick="login()">Ingresar →</button>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos. Verifica tus credenciales.</div>
+      <div class="login-security">🔒 Acceso seguro · Solo personal autorizado</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app-screen">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">PostulaAquí</div>
+      <div class="sidebar-brand-sub">Evaluaciones · Cygnus</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item activo" onclick="irA('panel')">
+        <span class="nav-icon">📊</span> Panel
+      </div>
+      <div class="nav-item" onclick="irA('candidatos')">
+        <span class="nav-icon">📁</span> Reporte Tests
+      </div>
+      <div class="nav-item" onclick="irA('entrevistas')">
+        <span class="nav-icon">🎙️</span> Reporte Entrevistas
+      </div>
+      <div class="nav-item" onclick="irA('enviar')">
+        <span class="nav-icon">📧</span> Enviar evaluación
+      </div>
+      <div class="nav-item" onclick="irA('enviar-entrevista')">
+        <span class="nav-icon">🎤</span> Enviar entrevista
+      </div>
+      <div class="nav-item" onclick="irA('historial')">
+        <span class="nav-icon">📋</span> Historial
+      </div>
+      <div class="nav-item" onclick="irA('tests')">
+        <span class="nav-icon">🧠</span> Tests disponibles
+      </div>
+      <div class="nav-item" onclick="irA('competencias')">
+        <span class="nav-icon">📐</span> Marco de competencias
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-name" id="user-name">admin</div>
+        <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Panel principal</div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="cargarDatos()">↻ Actualizar</button>
+      </div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="page activo" id="page-panel">
+      <div class="stats-grid">
+        <div class="stat-card accent">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num" id="st-total">—</div>
+          <div class="stat-lbl">Total evaluados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-num" id="st-hoy">—</div>
+          <div class="stat-lbl">Hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📆</div>
+          <div class="stat-num" id="st-semana">—</div>
+          <div class="stat-lbl">Esta semana</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📧</div>
+          <div class="stat-num" id="st-enviados">—</div>
+          <div class="stat-lbl">Invitaciones enviadas</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Evaluaciones por test</div>
+          </div>
+          <div class="card-body">
+            <div class="test-bars" id="grafico-tests">
+              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ic"></div><div class="test-bar-lbl">IC</div></div>
+              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ceal"></div><div class="test-bar-lbl">CEAL</div></div>
+              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-16pf"></div><div class="test-bar-lbl">16PF</div></div>
+              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-ipv"></div><div class="test-bar-lbl">IPV</div></div>
+              <div class="test-bar-wrap"><div class="test-bar" style="height:0%" id="bar-wonderlic"></div><div class="test-bar-lbl">WON</div></div>
+            </div>
+            <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Acceso rápido a tests</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IC_V1_final.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IC — Instrucciones Complejas <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_CEAL.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">CEAL — Estilos de Liderazgo <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_16PF.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">16PF — Personalidad <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IPV — Personalidad Vendedores <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Wonderlic — Habilidad Cognitiva <span>→</span></a>
+          </div>
+        </div>
+      </div>
+
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;">
+        
+        <!-- TESTS PENDIENTES -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Tests pendientes</div>
+            <span id="num-pendientes" style="font-size:12px;color:var(--muted);"></span>
+          </div>
+          <div class="card-body" id="lista-pendientes">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">Cargando...</div>
+          </div>
+        </div>
+
+        <!-- RANKING -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top candidatos</div>
+          </div>
+          <div class="card-body" id="lista-ranking">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">Cargando...</div>
+          </div>
+        </div>
+
+        <!-- TASA DE COMPLETITUD -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Tasa de completitud</div>
+          </div>
+          <div class="card-body">
+            <div class="tasa-wrap">
+              <div class="tasa-num" id="tasa-pct">—</div>
+              <div class="tasa-desc">de los candidatos invitados<br>completaron su evaluación</div>
+            </div>
+            <div class="tasa-bar-wrap">
+              <div class="tasa-bar" id="tasa-bar" style="width:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px;">
+              <span style="font-size:12px;color:var(--muted);">Completados: <strong id="tasa-completados" style="color:var(--ink);">—</strong></span>
+              <span style="font-size:12px;color:var(--muted);">Enviados: <strong id="tasa-enviados" style="color:var(--ink);">—</strong></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Últimas evaluaciones</div>
+          <button class="btn btn-ghost btn-sm" onclick="irA('candidatos')">Ver todas →</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Candidato</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
+              <tbody id="tabla-recientes"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANDIDATOS -->
+    <div class="page" id="page-candidatos">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reporte Tests Psicolaborales</div>
+          <span id="count-label" style="font-size:12px;color:var(--muted);"></span>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="filtros-row">
+            <select class="filtro-select" id="filtro-test" onchange="filtrar()">
+              <option value="">Todos los tests</option>
+              <option value="IC">IC</option>
+              <option value="CEAL">CEAL</option>
+              <option value="16PF">16PF</option>
+              <option value="IPV">IPV</option>
+              <option value="WONDERLIC">Wonderlic</option>
+            </select>
+            <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
+            <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTE ENTREVISTAS -->
+    <div class="page" id="page-entrevistas">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reporte Entrevistas por Competencias</div>
+          <button class="btn btn-ghost btn-sm" onclick="cargarEntrevistas()">↻ Actualizar</button>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="filtros-row">
+            <input class="filtro-input" type="text" id="filtro-entrevista" placeholder="Buscar nombre o RUT..." oninput="filtrarEntrevistas()" style="max-width:300px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>RUT</th>
+                <th>Cargo</th>
+                <th>Fecha</th>
+                <th>Resultado</th>
+                <th>Informe</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-entrevistas">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR -->
+    <div class="page" id="page-enviar">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Enviar evaluación a candidato</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>NOMBRE DEL CANDIDATO</label>
+              <input type="text" id="env-nombre" placeholder="Apellido Nombre">
+            </div>
+            <div class="form-group">
+              <label>EMAIL</label>
+              <input type="email" id="env-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group">
+              <label>TEST A ENVIAR</label>
+              <select id="env-test" onchange="actualizarPreview()">
+                <option value="">Seleccionar test...</option>
+                <option value="IC">Test de Instrucciones Complejas</option>
+                <option value="CEAL">Test de Estilos de Liderazgo</option>
+                <option value="16PF">Evaluación de Personalidad</option>
+                <option value="IPV">Perfil de Personalidad Comercial</option>
+                <option value="WONDERLIC">Test de Habilidad Cognitiva General</option>
+              </select>
+            </div>
+
+          </div>
+
+
+          <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
+            🔗 Link a enviar: <span id="link-url" style="color:var(--naranja);font-weight:500;"></span>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary" onclick="enviarEvaluacion()" id="btn-env">📧 Enviar invitación</button>
+          </div>
+          <div class="alert alert-ok" id="env-ok"></div>
+          <div class="alert alert-err" id="env-err"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR ENTREVISTA -->
+    <div class="page" id="page-enviar-entrevista">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Enviar entrevista a candidato</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>NOMBRE DEL CANDIDATO</label>
+              <input type="text" id="ent-nombre" placeholder="Apellido Nombre">
+            </div>
+            <div class="form-group">
+              <label>EMAIL</label>
+              <input type="email" id="ent-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group">
+              <label>NIVEL DE CARGO</label>
+              <select id="ent-nivel" onchange="actualizarPreviewEntrevista()">
+                <option value="">Seleccionar nivel...</option>
+                <option value="Operativo">Operativo — 4 competencias</option>
+                <option value="Administrativo">Administrativo — 5 competencias</option>
+                <option value="Comercial">Comercial — 5 competencias</option>
+                <option value="Profesional">Profesional / Especialista — 5 competencias</option>
+                <option value="Jefatura">Jefatura — 5 competencias</option>
+                <option value="Gerencia">Gerencia — 5 competencias</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Info del nivel seleccionado -->
+          <div id="ent-nivel-info" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:14px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;">Competencias a evaluar</div>
+            <div id="ent-nivel-competencias" style="font-size:13px;color:var(--ink);line-height:1.7;"></div>
+          </div>
+
+          <div id="ent-link-preview" style="display:none;">
+            <span id="ent-link-url"></span>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary" onclick="enviarEntrevistaDesdePlataforma()" id="btn-ent">📧 Enviar invitación</button>
+          </div>
+          <div class="alert alert-ok" id="ent-ok"></div>
+          <div class="alert alert-err" id="ent-err"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTS DISPONIBLES -->
+    <div class="page" id="page-tests">
+      <div style="max-width:860px;">
+
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">🧠 Tests Psicolaborales disponibles</div></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:0;">Cada evaluación mide dimensiones específicas del candidato. Se recomienda combinar tests cognitivos con tests de personalidad para obtener un perfil más completo.</p>
+        </div>
+
+        <!-- IC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Instrucciones Complejas</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 7 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitudes administrativas</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad de comprensión y ejecución de instrucciones complejas</strong> bajo presión de tiempo. Mide atención al detalle, velocidad de procesamiento y seguimiento de reglas múltiples simultáneas.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Atención</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Velocidad de procesamiento</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Comprensión lectora</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos administrativos, analistas, operadores, cualquier rol que requiera seguir procedimientos precisos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CEAL -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#e8f4ee;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧭</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Estilos de Liderazgo</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e8f4ee;color:var(--high);">Liderazgo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 15-20 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en modelo situacional Hersey y Blanchard</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Identifica el <strong>estilo de liderazgo predominante</strong> del evaluado: Directivo, Persuasivo, Participativo o Delegativo. Basado en el modelo situacional de Hersey y Blanchard.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Estilo de liderazgo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a tareas</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a personas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: jefaturas, supervisores, gerentes y cualquier cargo con responsabilidad de equipos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16PF -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#f0e8f8;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧩</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Evaluación de Personalidad</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#f0e8f8;color:#6a1e9a;">Personalidad</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 35-45 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en modelo de 16 factores de Cattell</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa <strong>16 factores primarios de personalidad</strong> agrupados en 5 dimensiones globales. Es uno de los instrumentos más usados y validados a nivel mundial para selección de personal. Basado en el modelo de 16 factores de Cattell.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Extraversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Ansiedad</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Dureza</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Independencia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Auto-control</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: todos los cargos. Especialmente útil en procesos de selección gerencial y profesional.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IPV -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--mid-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💼</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Perfil de Personalidad Comercial</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--mid-bg);color:var(--mid);">Ventas</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 20-30 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitudes para ventas</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Mide las <strong>características de personalidad asociadas al perfil vendedor</strong>. Evalúa Dinamismo, Dominancia, Extroversión, Tolerancia, Autocontrol, entre otras dimensiones clave para el desempeño comercial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dinamismo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dominancia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Extroversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Autocontrol</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: ejecutivos de ventas, representantes comerciales, KAM, promotores y cargos de atención al cliente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WONDERLIC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🎯</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Habilidad Cognitiva General</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 12 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitud mental</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad cognitiva general</strong> — habilidad para aprender, adaptarse y resolver problemas. Incluye razonamiento verbal, numérico y abstracto. Es uno de los test cognitivos más utilizados en selección de personal a nivel mundial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento verbal</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento numérico</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Resolución de problemas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos técnicos, profesionales, gerenciales y cualquier rol que requiera alta capacidad de aprendizaje.</p>
+            </div>
+          </div>
+        </div>
+
+    <!-- HISTORIAL -->
+    <div class="page" id="page-historial">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Historial de invitaciones enviadas</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-historial"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const APPS_URL = "https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec";
+const BASE = "https://evaluaciones-rrhh.github.io/evaluaciones/";
+const TESTS_LINKS = {
+  IC: BASE+"TEST_IC_V1_final.html",
+  CEAL: BASE+"TEST_CEAL.html",
+  "16PF": BASE+"TEST_16PF.html",
+  IPV: BASE+"TEST_IPV.html",
+  WONDERLIC: BASE+"TEST_WONDERLIC.html",
+  ENTREVISTA: BASE+"TEST_ENTREVISTA.html"
+};
+const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
+const DASH_HTML = {
+  "16PF":    BASE+"dashboard.html",
+  IPV:       BASE+"dashboard_ipv.html",
+  WONDERLIC: BASE+"dashboard_wonderlic.html"
+};
+// Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
+
+var usuarioActual = "";
+var todosLosDatos = [];
+
+// LOGIN SEGURO — valida contra Apps Script (contraseñas NO están en el HTML)
+async function login() {
+  var u = document.getElementById("inp-user").value.trim().toLowerCase();
+  var p = document.getElementById("inp-pass").value;
+  var u2 = u.replace(/@.*/,"");
+  if (!u2 || !p) return;
+
+  var btn = document.querySelector(".btn-login");
+  btn.textContent = "Verificando...";
+  btn.disabled = true;
+
+  try {
+    var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
+      method: "GET", redirect: "follow", credentials: "omit"
+    });
+    var data = await resp.json();
+    if (data.ok === true) {
+      usuarioActual = u2;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app-screen").style.display = "block";
+      document.getElementById("user-name").textContent = u2;
+      document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
+      document.getElementById("login-error").style.display = "none";
+      cargarDatos();
+      cargarHistorial();
+      cargarEntrevistas();
+    } else {
+      document.getElementById("login-error").style.display = "block";
+    }
+  } catch(err) {
+    document.getElementById("login-error").textContent = "Error de conexión. Intenta nuevamente.";
+    document.getElementById("login-error").style.display = "block";
+  } finally {
+    btn.textContent = "Ingresar →";
+    btn.disabled = false;
+  }
+}
+function logout() {
+  document.getElementById("app-screen").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("inp-pass").value = "";
+}
+document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
+
+// NAVEGACION
+var paginaActual = "panel";
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", "enviar-entrevista":"Enviar entrevista", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias" };
+function irA(pag) {
+  document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
+  document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
+  document.getElementById("page-"+pag).classList.add("activo");
+  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
+  document.getElementById("topbar-title").textContent = titulos[pag];
+  paginaActual = pag;
+}
+
+// CARGAR DATOS
+
+function renderPendientes(envios, completados) {
+  var hoy = new Date();
+  var pendientes = envios.filter(function(e) {
+    if (e.estado === "Enviado" || e.estado === "enviado") {
+      // Verificar si ya completó el test
+      var completo = completados.some(function(c) {
+        return c.nombre && e.nombre && c.nombre.toLowerCase() === e.nombre.toLowerCase() && c.test === e.test;
+      });
+      return !completo;
+    }
+    return false;
+  });
+
+  document.getElementById("num-pendientes").textContent = pendientes.length + " pendiente(s)";
+
+  if (!pendientes.length) {
+    document.getElementById("lista-pendientes").innerHTML = "<div style='color:var(--high);font-size:13px;text-align:center;padding:16px;'>✓ Sin pendientes</div>";
+    return;
+  }
+
+  var html = "";
+  pendientes.slice(0,5).forEach(function(e) {
+    var dias = 0;
+    try {
+      if (e.fecha) {
+        var partes = e.fecha.split("/");
+        var fechaEnvio = partes.length === 3 ? new Date(partes[2]+"-"+partes[1]+"-"+partes[0]) : new Date(e.fecha);
+        dias = isNaN(fechaEnvio) ? 0 : Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
+      }
+    } catch(ex) { dias = 0; }
+    var urgente = dias >= 3;
+    html += "<div class='pendiente-item'>" +
+      "<div style='flex:1'>" +
+        "<div style='font-size:13px;font-weight:600;color:var(--ink);'>" + (e.nombre||"—") + "</div>" +
+        "<div style='font-size:11px;color:var(--muted);margin-top:1px;'>" + (e.test||"") + " · " + (e.email||"") + "</div>" +
+      "</div>" +
+      "<div class='pendiente-dias" + (urgente?" urgente":"") + "'>" + (dias===0?"Hoy":dias===1?"1 día":dias+" días") + "</div>" +
+      "</div>";
+  });
+  document.getElementById("lista-pendientes").innerHTML = html;
+}
+
+function renderRanking(datos) {
+  if (!datos.length) {
+    document.getElementById("lista-ranking").innerHTML = "<div style='color:var(--muted);font-size:13px;text-align:center;padding:16px;'>Sin datos</div>";
+    return;
+  }
+
+  var niveles = { alto:3, superior:3, promedio:2, medio:2, bajo:1, inferior:1 };
+  var conPuntaje = datos.map(function(d) {
+    var niv = (d.nivel||"").toLowerCase();
+    var puntaje = 0;
+    Object.keys(niveles).forEach(function(k) { if(niv.includes(k)) puntaje = niveles[k]; });
+    return Object.assign({}, d, {puntaje:puntaje});
+  });
+  conPuntaje.sort(function(a,b){ return b.puntaje - a.puntaje; });
+
+  var html = "";
+  conPuntaje.slice(0,5).forEach(function(d, i) {
+    var numCls = i===0?"gold":i===1?"silver":i===2?"bronze":"";
+    var nivCls = d.puntaje===3?"badge-alto":d.puntaje===2?"badge-promedio":"badge-bajo";
+    html += "<div class='ranking-item'>" +
+      "<div class='ranking-num " + numCls + "'>#" + (i+1) + "</div>" +
+      "<div class='ranking-info'>" +
+        "<div class='ranking-nombre'>" + (d.nombre||"—") + "</div>" +
+        "<div class='ranking-sub'>" + (d.test||"") + " · " + (d.fecha||"") + "</div>" +
+      "</div>" +
+      (d.nivel ? "<span class='badge " + nivCls + "'>" + d.nivel + "</span>" : "") +
+      "</div>";
+  });
+  document.getElementById("lista-ranking").innerHTML = html;
+}
+
+function renderTasa(completados, enviados) {
+  var totalCompletados = Array.isArray(completados) ? completados.length : 0;
+  var totalEnviados = enviados && enviados.length ? enviados.length : 0;
+  var pct = totalEnviados > 0 ? Math.min(100, Math.round(totalCompletados / totalEnviados * 100)) : (totalCompletados > 0 ? 100 : 0);
+  document.getElementById("tasa-pct").textContent = pct + "%";
+  document.getElementById("tasa-bar").style.width = pct + "%";
+  document.getElementById("tasa-completados").textContent = totalCompletados;
+  document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
+}
+async function cargarDatos() {
+  try {
+    var resp = await fetch(APPS_URL+"?action=getAllResults&t="+Date.now(), {
+      method: "GET",
+      redirect: "follow"
+    });
+    var data = await resp.json();
+    todosLosDatos = data.results || [];
+    actualizarStats();
+    renderRecientes();
+    filtrar();
+    renderRanking(todosLosDatos);
+    // Tasa con datos disponibles
+    var enviados = parseInt(document.getElementById("st-enviados").textContent) || 0;
+    renderTasa(todosLosDatos, {length: enviados});
+  } catch(e) {
+    console.warn("Error cargando datos:", e.message);
+    document.getElementById("tabla-candidatos").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error: "+e.message+"</td></tr>";
+    document.getElementById("tabla-recientes").innerHTML = "<tr><td colspan='4' style='text-align:center;padding:24px;color:var(--accent);'>Error al cargar</td></tr>";
+  }
+}
+
+function actualizarStats() {
+  var hoy = new Date().toLocaleDateString("es-CL");
+  var semana = new Date(); semana.setDate(semana.getDate()-7);
+  document.getElementById("st-total").textContent = todosLosDatos.length;
+  document.getElementById("st-hoy").textContent = todosLosDatos.filter(function(d){ return (d.fecha||"")===hoy; }).length;
+  document.getElementById("st-semana").textContent = todosLosDatos.filter(function(d){
+    var f=new Date(d.fecha_iso||d.fecha); return !isNaN(f) && f>=semana;
+  }).length;
+
+  // Gráfico barras
+  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC"];
+  var conteos = {};
+  tests.forEach(function(t){ conteos[t]=todosLosDatos.filter(function(d){ return d.test===t; }).length; });
+  var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
+  tests.forEach(function(t){
+    var bar = document.getElementById("bar-"+t.toLowerCase().replace("pf","pf"));
+    if(bar) bar.style.height = Math.round((conteos[t]/maxC)*100)+"%";
+  });
+  var ctEl = document.getElementById("conteos-tests");
+  if(ctEl) ctEl.innerHTML = tests.map(function(t){
+    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> "+t+"</span>";
+  }).join(" &nbsp;·&nbsp; ");
+}
+
+function renderTablaComun(datos, tbodyId, cols) {
+  var tbody = document.getElementById(tbodyId);
+  if (!datos.length) {
+    tbody.innerHTML = "<tr><td colspan='"+cols+"' style='text-align:center;padding:32px;color:var(--muted);'>Sin evaluaciones registradas</td></tr>";
+    return;
+  }
+  var html = "";
+  datos.forEach(function(d) {
+    var testCls = "badge-"+(d.test||"").toLowerCase().replace("pf","pf").replace("wonderlic","wonderlic");
+    var niv = (d.nivel||"").toLowerCase();
+    var nivCls = niv.includes("alto")||niv.includes("sup")?"badge-alto":niv.includes("bajo")||niv.includes("inf")?"badge-bajo":"badge-promedio";
+    var dashUrl = DASH_HTML[d.test];
+    var btnVer = dashUrl
+      ? "<button class='btn btn-ghost btn-sm' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver informe</button>"
+      : "<span style='color:var(--muted);font-size:11px;'>—</span>";
+    if(cols===5) {
+      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+    } else {
+      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function renderRecientes() {
+  var recientes = todosLosDatos.slice().reverse().slice(0,8);
+  renderTablaComun(recientes, "tabla-recientes", 5);
+}
+
+function filtrar() {
+  var test = document.getElementById("filtro-test").value;
+  var nombre = (document.getElementById("filtro-nombre").value||"").toLowerCase();
+  var filtered = todosLosDatos.filter(function(d){
+    return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
+  });
+  document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
+  renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
+}
+
+// CARGAR HISTORIAL
+function procefunction procesarEnvios(data) {
+  var envios = (data && data.envios) ? data.envios : [];
+  var stEl = document.getElementById("st-enviados");
+  if (stEl) stEl.textContent = envios.length;
+  try { renderPendientes(envios, todosLosDatos); } catch(e) {}
+  try { renderTasa(todosLosDatos, envios); } catch(e) {}
+  var tbl = document.getElementById("tabla-historial");
+  if (!tbl) return;
+  if (!envios.length) {
+    tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+    return;
+  }
+  var html = "";
+  envios.slice().reverse().forEach(function(env) {
+    var estCls = (env.estado||"") === "Enviado" ? "badge-enviado" : "badge-pendiente";
+    html += "<tr>"
+      + "<td class='td-nombre'>" + (env.nombre||"—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (env.email||"—") + "</td>"
+      + "<td style='font-size:12px;'>" + (env.test||"—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (env.fecha||"—") + "</td>"
+      + "<td><span class='badge " + estCls + "'>" + (env.estado||"—") + "</span></td>"
+      + "</tr>";
+  });
+  tbl.innerHTML = html;
+}garHistorial() {
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {
+    redirect: "follow",
+    credentials: "omit"
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) { procesarEnvios(data); })
+  .catch(function(err) {
+    document.getElementById("st-enviados").textContent = "—";
+    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudo cargar el historial.</td></tr>";
   });
 }
 
