@@ -656,7 +656,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div class="table-wrap">
           <table>
             <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
-            <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+            <tbody id="tabla-candidatos"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -687,7 +687,7 @@ tbody tr:hover td { background: #fdf9f6; }
               </tr>
             </thead>
             <tbody id="tabla-entrevistas">
-              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -912,8 +912,8 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Cargo</th><th>Fecha</th><th>Estado</th></tr></thead>
-            <tbody id="tabla-historial"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+            <thead><tr><th>Candidato</th><th>Email</th><th>Test</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-historial"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -959,7 +959,7 @@ async function login() {
     var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
       method: "GET", redirect: "follow", credentials: "omit"
     });
-    var data = await resp.json();
+    var data = JSON.parse(await resp.text());
     if (data.ok === true) {
       usuarioActual = u2;
       document.getElementById("login-screen").style.display = "none";
@@ -1176,7 +1176,7 @@ function procesarEnvios(data) {
   renderPendientes(envios, todosLosDatos);
   renderTasa(todosLosDatos, envios);
   if (!envios.length) {
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
     return;
   }
   var html = "";
@@ -1189,22 +1189,36 @@ function procesarEnvios(data) {
 }
 
 function cargarHistorial() {
-  var cbName = "cb_historial_" + Date.now();
-  window[cbName] = function(data) {
-    delete window[cbName];
-    var s = document.getElementById("jsonp-historial");
-    if (s) s.remove();
-    procesarEnvios(data);
-  };
-  var script = document.createElement("script");
-  script.id = "jsonp-historial";
-  script.src = APPS_URL + "?action=getEnvios&callback=" + cbName + "&t=" + Date.now();
-  script.onerror = function() {
-    delete window[cbName];
-    document.getElementById("st-enviados").textContent = "—";
-    document.getElementById("tabla-historial").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--low);'>Error al cargar historial. Intenta recargar la página.</td></tr>";
-  };
-  document.head.appendChild(script);
+  fetch(APPS_URL + "?action=getEnvios&t=" + Date.now(), {credentials:"omit", redirect:"follow"})
+  .then(function(r){ return r.text(); })
+  .then(function(txt){
+    var data = JSON.parse(txt);
+    var envios = (data && data.envios) ? data.envios : [];
+    var stEl = document.getElementById("st-enviados");
+    if (stEl) stEl.textContent = envios.length;
+    try { renderPendientes(envios, todosLosDatos); } catch(x){}
+    try { renderTasa(todosLosDatos, envios); } catch(x){}
+    var tbl = document.getElementById("tabla-historial");
+    if (!tbl) return;
+    if (!envios.length) {
+      tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+      return;
+    }
+    var html = "";
+    envios.slice().reverse().forEach(function(env){
+      var estCls = env.estado === "Enviado" ? "badge-enviado" : "badge-pendiente";
+      html += "<tr><td class='td-nombre'>"+(env.nombre||"—")+"</td>"
+        +"<td style='font-size:12px;color:var(--muted);'>"+(env.email||"—")+"</td>"
+        +"<td style='font-size:12px;'>"+(env.test||"—")+"</td>"
+        +"<td style='font-size:12px;color:var(--muted);'>"+(env.fecha||"—")+"</td>"
+        +"<td><span class='badge "+estCls+"'>"+(env.estado||"—")+"</span></td></tr>";
+    });
+    tbl.innerHTML = html;
+  })
+  .catch(function(){
+    var stEl = document.getElementById("st-enviados");
+    if (stEl) stEl.textContent = "—";
+  });
 }
 
 // ENVIAR
@@ -1375,7 +1389,7 @@ async function cargarEntrevistas() {
     datosEntrevistas = (d.entrevistas || []).slice().reverse();
     renderTablaEntrevistas(datosEntrevistas);
   } catch(e) {
-    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
+    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
   }
 }
 
@@ -1390,7 +1404,7 @@ function filtrarEntrevistas() {
 function renderTablaEntrevistas(lista) {
   var tbody = document.getElementById("tabla-entrevistas");
   if (!lista || lista.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
     return;
   }
 
