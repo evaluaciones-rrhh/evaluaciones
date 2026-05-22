@@ -367,7 +367,7 @@ function calcularYEnviar(porTiempo){
     if(errores <= 17) return 'Medio bajo';
     return 'Bajo';
   }
-  let categoria = getCategoria(incorrectas);
+  let categoria = getCategoria(incorrectas); // solo malas marcadas, omisiones NO penalizan
 
   let fecha = new Date().toLocaleString('es-CL');
   let nombre = document.getElementById('nombre').value.trim();
