@@ -1727,7 +1727,8 @@ function abrirInformeIC(d) {
   document.getElementById("ic-errores").textContent    = d.errores   || "0";
   document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
 
-  var pct = parseInt(d.percentil) || 0;
+  // Percentil puede venir como "Pc 2" o número directo
+  var pct = parseInt(String(d.percentil || "0").replace(/[^0-9]/g, "")) || 0;
   document.getElementById("ic-percentil-pct").textContent = "Percentil " + pct;
   document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 99) + "%";
 
