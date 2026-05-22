@@ -1414,12 +1414,25 @@ async function abrirDash(test, rut, nombre) {
     try {
       var dataIC = await fetchJSON(APPS_URL + "?action=getDatosIC&t=" + Date.now());
       var filas  = Array.isArray(dataIC) ? dataIC : [];
+      console.log("getDatosIC filas:", filas.length, "rut:", rutDec, "nombre:", nomDec);
       // Buscar la fila del candidato
       // Estructura: [fecha,nombre,rut,correctas,errores,omisiones,pb,percentil,categoria]
+      // Normalizar RUT quitando puntos y espacios para comparar
+      function normRut(s){ return String(s||"").replace(/[\.\s]/g,"").toLowerCase(); }
+      function normNom(s){ return String(s||"").trim().toLowerCase(); }
+      var rutNorm = normRut(rutDec);
+      var nomNorm = normNom(nomDec);
       var fila = filas.find(function(r){
-        return (rutDec && String(r[2]||"").toLowerCase() === rutDec.toLowerCase()) ||
-               (nomDec && String(r[1]||"").toLowerCase() === nomDec.toLowerCase());
+        var rMatch = rutNorm && normRut(r[2]) === rutNorm;
+        var nMatch = nomNorm && normNom(r[1]) === nomNorm;
+        return rMatch || nMatch;
       });
+      if (!fila) {
+        // Si no encuentra exacto, buscar por nombre parcial
+        fila = filas.find(function(r){
+          return nomNorm && normNom(r[1]).includes(nomNorm.split(" ")[0]);
+        });
+      }
       if (!fila) { alert("No se encontraron datos del candidato."); return; }
       var d = {
         fecha:     fila[0] || "",
