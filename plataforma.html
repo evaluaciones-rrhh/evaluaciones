@@ -445,32 +445,15 @@ tbody tr:hover td { background: #fdf9f6; }
 
 @media print {
   body > * { display: none !important; }
-  #modal-ic.activo, #modal-ceal.activo { display: block !important; }
-  .modal-overlay { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+  #modal-ic.activo { display: block !important; }
+  #modal-ceal.activo { display: block !important; }
+  #modal-ic:not(.activo) { display: none !important; }
+  #modal-ceal:not(.activo) { display: none !important; }
+  .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
   .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
   .modal-close, .btn-primary { display: none !important; }
   .modal-header { position: static !important; }
 }
-
-/* ══════════ MODAL INFORME CEAL ══════════ */
-.ceal-estilo-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-bottom: 12px;
-}
-.ceal-est-integrado  { background: var(--high-bg); color: var(--high); }
-.ceal-est-relacionado{ background: var(--mid-bg);  color: var(--mid);  }
-.ceal-est-autoritario{ background: var(--mid-bg);  color: var(--mid);  }
-.ceal-est-separado   { background: var(--low-bg);  color: var(--low);  }
-.ceal-efect-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 20px;
-}
-.ceal-efect-alto  { background: var(--high-bg); color: var(--high); }
-.ceal-efect-medio { background: var(--mid-bg);  color: var(--mid);  }
-.ceal-efect-bajo  { background: var(--low-bg);  color: var(--low);  }
-.ceal-puntaje-wrap { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
-.ceal-puntaje-num { font-family:"Sora",sans-serif; font-size:36px; font-weight:800; color:var(--ink); }
-.ceal-puntaje-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -1056,8 +1039,7 @@ const DASH_HTML = {
   "16PF":    BASE+"dashboard.html",
   IPV:       BASE+"dashboard_ipv.html",
   WONDERLIC: BASE+"dashboard_wonderlic.html",
-  IC:        "inline",
-  CEAL:      "inline"
+  IC:        "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -1477,12 +1459,6 @@ async function abrirDash(test, rut, nombre) {
     return;
   }
 
-  // CEAL — modal inline
-  if (test === "CEAL") {
-    abrirInformeCEAL(test, rut, nombre);
-    return;
-  }
-
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -1779,116 +1755,6 @@ function cerrarModalIC() {
   document.body.style.overflow = "";
 }
 
-
-// ══════════ INFORME CEAL ══════════
-async function abrirInformeCEAL(test, rut, nombre) {
-  var rutDec = decodeURIComponent(rut || "");
-  var nomDec = decodeURIComponent(nombre || "");
-  try {
-    var dataCEAL = await fetchJSON(APPS_URL + "?action=getDatosCEAL&t=" + Date.now());
-    var filas = Array.isArray(dataCEAL) ? dataCEAL : [];
-    console.log("getDatosCEAL filas:", filas.length);
-
-    function normRut(s){ return String(s||"").replace(/[.\s]/g,"").toLowerCase(); }
-    function normNom(s){ return String(s||"").trim().toLowerCase(); }
-    var rutNorm = normRut(rutDec);
-    var nomNorm = normNom(nomDec);
-
-    var fila = filas.find(function(r){
-      return (rutNorm && normRut(r[2]) === rutNorm) ||
-             (nomNorm && normNom(r[1]) === nomNorm);
-    });
-    if (!fila) {
-      fila = filas.find(function(r){
-        return nomNorm && normNom(r[1]).includes(nomNorm.split(" ")[0]);
-      });
-    }
-    if (!fila) { alert("No se encontraron datos del candidato."); return; }
-
-    // [fecha, nombre, rut, estilo, descripcion, efectividad, puntaje]
-    var estilo      = String(fila[3] || "—");
-    var descripcion = String(fila[4] || "—");
-    var efectividad = String(fila[5] || "—");
-    var puntaje     = fila[6] !== undefined ? fila[6] : "—";
-    var fecha       = String(fila[0] || "—");
-    var nomCand     = String(fila[1] || nomDec);
-    var rutCand     = String(fila[2] || rutDec);
-
-    document.getElementById("ceal-modal-sub").textContent = nomCand + (rutCand ? "  ·  " + rutCand : "");
-
-    var estiloClsMap = { "Integrado":"ceal-est-integrado","Relacionado":"ceal-est-relacionado","Autoritario":"ceal-est-autoritario","Separado":"ceal-est-separado" };
-    var estiloEmojiMap = { "Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴" };
-    var badge = document.getElementById("ceal-estilo-badge");
-    badge.className = "ceal-estilo-badge " + (estiloClsMap[estilo] || "ceal-est-autoritario");
-    badge.textContent = (estiloEmojiMap[estilo] || "📋") + "  Estilo " + estilo;
-
-    var efectCls = efectividad.includes("muy efectivo") ? "ceal-efect-alto"
-                 : efectividad.includes("efectivo") && !efectividad.includes("poco") ? "ceal-efect-alto"
-                 : efectividad === "Normal" ? "ceal-efect-medio" : "ceal-efect-bajo";
-    var efBadge = document.getElementById("ceal-efect-badge");
-    efBadge.className = "ceal-efect-badge " + efectCls;
-    efBadge.textContent = "Efectividad: " + efectividad;
-
-    document.getElementById("ceal-puntaje").textContent = puntaje;
-
-    // Texto combinado estilo + efectividad
-    var CEAL_TEXTOS = {
-      "Integrado|Líder muy efectivo":
-        "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad muy alto. Combina de manera sobresaliente el enfoque en resultados y tareas con una genuina preocupación por las personas y el equipo. Fija estándares elevados, motiva activamente a sus colaboradores y toma decisiones de manera participativa. Su capacidad para adaptarse a distintos contextos y generar compromiso colectivo lo posiciona como un líder altamente efectivo, capaz de sostener resultados de excelencia sin sacrificar el clima organizacional.",
-      "Integrado|Líder efectivo":
-        "El candidato presenta un estilo de liderazgo Integrado con un buen nivel de efectividad. Equilibra adecuadamente el enfoque en tareas y resultados con el cuidado de las relaciones interpersonales. Promueve la participación, establece metas claras y genera un ambiente de trabajo colaborativo. Con un desarrollo sostenido de sus habilidades de liderazgo, tiene potencial para alcanzar niveles de desempeño aún más altos en roles de conducción.",
-      "Integrado|Normal":
-        "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad promedio. Si bien muestra capacidad para equilibrar el foco en tareas y relaciones, aún existen áreas de mejora en la consistencia de su liderazgo. Puede desempeñarse bien en contextos estructurados, aunque podría beneficiarse de mayor desarrollo en habilidades de conducción para maximizar su impacto en el equipo.",
-      "Integrado|Líder poco efectivo":
-        "El candidato presenta un estilo de liderazgo Integrado, sin embargo su nivel de efectividad actual es bajo. A pesar de contar con las bases conceptuales de un liderazgo equilibrado, no logra trasladar este estilo a resultados concretos. Se recomienda explorar las causas de esta brecha, ya que podrían estar asociadas a falta de experiencia, contexto organizacional adverso o necesidades de desarrollo específicas en habilidades de conducción.",
-
-      "Autoritario|Líder muy efectivo":
-        "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad muy alto. Se orienta fuertemente al cumplimiento de metas y resultados, ejerciendo una conducción directiva y estructurada. En contextos que requieren rapidez de respuesta, dirección clara y control de procesos, logra resultados sobresalientes. Se sugiere monitorear el impacto de este estilo en el clima y la motivación del equipo a largo plazo.",
-      "Autoritario|Líder efectivo":
-        "El candidato presenta un estilo de liderazgo Autoritario con un buen nivel de efectividad. Conduce con claridad, define roles y supervisa el cumplimiento de tareas de manera efectiva. Es especialmente útil en contextos de alta exigencia o con equipos que requieren dirección y estructura. Se recomienda desarrollar habilidades relacionales para complementar su perfil directivo y ampliar su impacto en diferentes tipos de equipos.",
-      "Autoritario|Normal":
-        "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad promedio. Si bien muestra una orientación clara hacia las tareas y el control, sus resultados de liderazgo son moderados. Podría estar generando resistencia en el equipo o no aprovechando plenamente el potencial de sus colaboradores. Se sugiere trabajar en el desarrollo de habilidades de comunicación y gestión de personas para mejorar su efectividad.",
-      "Autoritario|Líder poco efectivo":
-        "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad bajo. Su orientación al control y las tareas no está generando los resultados esperados, lo que podría estar asociado a dificultades en la gestión del equipo, clima organizacional deteriorado o resistencia de los colaboradores. Se recomienda una intervención de desarrollo en liderazgo que contemple el fortalecimiento de habilidades relacionales y de motivación.",
-
-      "Relacionado|Líder muy efectivo":
-        "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad muy alto. Prioriza el bienestar del equipo, la armonía grupal y las relaciones interpersonales, logrando un clima de alta confianza y colaboración. En equipos maduros y automotivados, este estilo genera resultados excelentes. Se sugiere complementar con mayor foco en la definición de metas y seguimiento de resultados para maximizar el rendimiento del equipo.",
-      "Relacionado|Líder efectivo":
-        "El candidato presenta un estilo de liderazgo Relacionado con un buen nivel de efectividad. Muestra empatía, escucha activa y una genuina preocupación por las personas, generando equipos cohesionados y comprometidos. Para potenciar aún más su efectividad, se recomienda desarrollar mayor asertividad en la gestión del desempeño y la toma de decisiones difíciles.",
-      "Relacionado|Normal":
-        "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad promedio. Si bien genera buenas relaciones interpersonales, puede presentar dificultades para establecer límites claros, exigir resultados o tomar decisiones que impliquen tensión en el equipo. Se sugiere trabajar en el equilibrio entre el cuidado de las personas y el cumplimiento de objetivos organizacionales.",
-      "Relacionado|Líder poco efectivo":
-        "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad bajo. La priorización de las relaciones por sobre los resultados no está generando el impacto esperado en el desempeño del equipo. Puede estar generando ambigüedad de roles o bajo rendimiento. Se recomienda desarrollar habilidades de conducción orientadas al logro y la gestión del desempeño.",
-
-      "Separado|Líder muy efectivo":
-        "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad sorprendentemente alto. Aunque mantiene distancia tanto en lo relacional como en lo operativo, logra resultados positivos, posiblemente a través de una gestión técnica sólida o en contextos que valoran la autonomía. Se sugiere explorar en qué tipo de entornos específicos este estilo genera mayor impacto y si es sostenible a largo plazo.",
-      "Separado|Líder efectivo":
-        "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad aceptable. Tiende a mantener una postura distante en lo relacional y operativo, lo que puede funcionar en contextos técnicos o con equipos muy autónomos. Para ampliar su efectividad, se recomienda desarrollar mayor presencia y conexión con el equipo.",
-      "Separado|Normal":
-        "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad promedio. Su distancia tanto en tareas como en relaciones puede generar falta de dirección y desconexión en el equipo. Se recomienda trabajar activamente en el desarrollo de habilidades de liderazgo, tanto en la orientación a resultados como en la gestión de personas.",
-      "Separado|Líder poco efectivo":
-        "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad bajo. Este perfil combina baja orientación a las tareas y baja orientación a las relaciones, lo que dificulta significativamente la conducción efectiva de equipos. Se recomienda una intervención de desarrollo integral en liderazgo antes de asumir roles de conducción de mayor responsabilidad."
-    };
-
-    var claveTexto = estilo + "|" + efectividad;
-    var textoFinal = CEAL_TEXTOS[claveTexto] || descripcion;
-    document.getElementById("ceal-descripcion").textContent = textoFinal;
-    document.getElementById("ceal-fecha").textContent = fecha;
-
-    document.getElementById("modal-ceal").classList.add("activo");
-    document.body.style.overflow = "hidden";
-  } catch(e) {
-    alert("Error cargando datos CEAL: " + e.message);
-  }
-}
-
-function cerrarModalCEAL() {
-  document.getElementById("modal-ceal").classList.remove("activo");
-  document.body.style.overflow = "";
-}
-
-function imprimirInformeCEAL() { window.print(); }
-
 </script>
 
 
@@ -1956,37 +1822,4 @@ function imprimirInformeCEAL() { window.print(); }
   </div>
 </div>
 
-
-<!-- ══════════ MODAL INFORME CEAL ══════════ -->
-<div class="modal-overlay" id="modal-ceal" onclick="if(event.target===this)cerrarModalCEAL()">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">🎯 Informe — Test de Estilos de Liderazgo</div>
-        <div class="modal-header-sub" id="ceal-modal-sub">Candidato</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirInformeCEAL()">⬇ Descargar PDF</button>
-        <button class="modal-close" onclick="cerrarModalCEAL()">✕</button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div id="ceal-estilo-badge" class="ceal-estilo-badge">—</div>
-      <div id="ceal-efect-badge" class="ceal-efect-badge">—</div>
-      <div class="ceal-puntaje-wrap">
-        <div>
-          <div class="ceal-puntaje-num" id="ceal-puntaje">—</div>
-          <div class="ceal-puntaje-lbl">Puntaje total</div>
-        </div>
-      </div>
-      <div class="ic-resumen">
-        <div class="ic-resumen-title">📋 Descripción del estilo</div>
-        <div class="ic-resumen-text" id="ceal-descripcion">—</div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:right;">
-        Evaluación realizada el <span id="ceal-fecha">—</span>
-      </div>
-    </div>
-  </div>
-</div>
 </body>
