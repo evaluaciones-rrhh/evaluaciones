@@ -2088,18 +2088,92 @@ var DISC_PERFILES = {
 };
 
 function renderDiscBars(containerId, scores, colorClass) {
+  // Barras horizontales simples como fallback
   var factores = ['D','I','S','C'];
-  var colores = {D:'disc-bar-d', I:'disc-bar-i', S:'disc-bar-s', C:'disc-bar-c'};
+  var colores = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
   var html = '';
   factores.forEach(function(f) {
     var pct = scores[f] || 0;
     html += '<div class="disc-bar-row">'
-      + '<span class="disc-bar-label" style="color:' + ({D:'#CC3333',I:'#E8A020',S:'#2E8B2E',C:'#2563a8'}[f]) + '">' + f + '</span>'
-      + '<div class="disc-bar-bg"><div class="disc-bar-fill ' + colores[f] + '" style="width:' + Math.min(pct,100) + '%"></div></div>'
+      + '<span class="disc-bar-label" style="color:' + colores[f] + ';font-weight:800;">' + f + '</span>'
+      + '<div class="disc-bar-bg"><div class="disc-bar-fill disc-bar-' + f.toLowerCase() + '" style="width:' + Math.min(pct,100) + '%;background:' + colores[f] + '"></div></div>'
       + '<span class="disc-bar-pct">' + pct + '%</span>'
       + '</div>';
   });
   document.getElementById(containerId).innerHTML = html;
+}
+
+function renderDiscGraficoSVG(adScore, natScore) {
+  // Gráfico estilo DISC clásico: puntos conectados verticalmente
+  var colores = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
+  var factores = ['D','I','S','C'];
+
+  function buildGrafico(scores, titulo) {
+    var W = 130, H = 220, padTop = 30, padBot = 30, padLR = 20;
+    var colW = (W - padLR*2) / 4;
+    var maxH = H - padTop - padBot;
+
+    // Zonas de fondo (franjas horizontales alternadas como el original)
+    var zonas = '';
+    var franjas = 5;
+    for (var z = 0; z < franjas; z++) {
+      var fy = padTop + (z/franjas)*maxH;
+      var fh = maxH/franjas;
+      if (z % 2 === 0) {
+        zonas += '<rect x="' + padLR + '" y="' + fy.toFixed(1) + '" width="' + (W-padLR*2) + '" height="' + fh.toFixed(1) + '" fill="#b2f0e8" rx="0"/>';
+      }
+    }
+
+    // Línea central
+    var midY = padTop + maxH/2;
+    var lineaH = '<line x1="' + padLR + '" y1="' + midY.toFixed(1) + '" x2="' + (W-padLR) + '" y2="' + midY.toFixed(1) + '" stroke="#fff" stroke-width="1.5"/>';
+
+    // Puntos y línea conectora
+    var puntos = [];
+    factores.forEach(function(f, idx) {
+      var pct = scores[f] || 0;
+      var cx = padLR + colW * idx + colW/2;
+      // 0% = abajo, 100% = arriba
+      var cy = padTop + maxH - (pct/100)*maxH;
+      puntos.push({x: cx, y: cy, f: f, pct: pct});
+    });
+
+    // Línea conectora
+    var linea = '';
+    for (var i = 0; i < puntos.length-1; i++) {
+      linea += '<line x1="' + puntos[i].x.toFixed(1) + '" y1="' + puntos[i].y.toFixed(1) + '" x2="' + puntos[i+1].x.toFixed(1) + '" y2="' + puntos[i+1].y.toFixed(1) + '" stroke="#333" stroke-width="1.5"/>';
+    }
+
+    // Puntos de color
+    var circles = puntos.map(function(p) {
+      return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="6" fill="' + colores[p.f] + '" stroke="#fff" stroke-width="1.5"/>';
+    }).join('');
+
+    // Labels arriba (letra factor)
+    var labelsTop = puntos.map(function(p) {
+      return '<text x="' + p.x.toFixed(1) + '" y="' + (padTop-8) + '" text-anchor="middle" font-size="11" font-weight="800" fill="' + colores[p.f] + '">' + p.f + '</text>';
+    }).join('');
+
+    // Valores abajo
+    var labelsBot = puntos.map(function(p) {
+      return '<text x="' + p.x.toFixed(1) + '" y="' + (H-8) + '" text-anchor="middle" font-size="10" fill="#555">' + p.pct + '</text>';
+    }).join('');
+
+    // Título
+    var tit = '<text x="' + (W/2) + '" y="14" text-anchor="middle" font-size="10" font-weight="600" fill="#333">' + titulo + '</text>';
+
+    return '<svg width="' + W + '" height="' + H + '" style="overflow:visible">'
+      + tit + zonas + lineaH + linea + circles + labelsTop + labelsBot
+      + '</svg>';
+  }
+
+  var svgAd  = buildGrafico(adScore,  'Perfil Adaptado');
+  var svgNat = buildGrafico(natScore, 'Perfil Natural');
+
+  return '<div style="display:flex;gap:24px;justify-content:center;align-items:flex-start;padding:16px 0;">'
+    + '<div style="text-align:center;">' + svgAd + '</div>'
+    + '<div style="text-align:center;">' + svgNat + '</div>'
+    + '</div>';
 }
 
 function renderDiscList(containerId, items) {
@@ -2149,9 +2223,8 @@ async function abrirInformeDISC(test, rut, nombre) {
     document.getElementById("disc-badge-adaptado").textContent = "▶ Adaptado: " + perfilAd;
     document.getElementById("disc-badge-natural").textContent  = "◎ Natural: "  + perfilNat;
 
-    // Gráficos
-    renderDiscBars("disc-bars-adaptado", adScore);
-    renderDiscBars("disc-bars-natural",  natScore);
+    // Gráfico SVG estilo DISC clásico
+    document.getElementById("disc-graficos-svg").innerHTML = renderDiscGraficoSVG(adScore, natScore);
 
     // GAP chips
     var gapColors = {D:'#CC3333',I:'#E8A020',S:'#2E8B2E',C:'#2563a8'};
@@ -2327,17 +2400,8 @@ function imprimirModalDISC() { window.print(); }
         <div class="disc-badge-perfil" id="disc-badge-natural" style="background:var(--azul-soft);color:var(--azul);">—</div>
       </div>
 
-      <!-- Gráficos perfiles -->
-      <div class="disc-header-perfil">
-        <div class="disc-perfil-card">
-          <div class="disc-perfil-title">▶ Perfil Adaptado (conducta observable)</div>
-          <div class="disc-bars" id="disc-bars-adaptado"></div>
-        </div>
-        <div class="disc-perfil-card">
-          <div class="disc-perfil-title">◎ Perfil Natural (tendencia subyacente)</div>
-          <div class="disc-bars" id="disc-bars-natural"></div>
-        </div>
-      </div>
+      <!-- Gráficos perfiles SVG -->
+      <div id="disc-graficos-svg" style="margin-bottom:20px;background:var(--bg);border-radius:10px;border:1.5px solid var(--border);padding:8px;"></div>
 
       <!-- GAP / Tensión adaptativa -->
       <div class="disc-seccion">
