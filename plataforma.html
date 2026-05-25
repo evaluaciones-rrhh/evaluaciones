@@ -1622,12 +1622,20 @@ async function enviarEvaluacion() {
 
   try {
     // Enviar cada test seleccionado
-    for (var i = 0; i < testsSeleccionados.length; i++) {
-      var test = testsSeleccionados[i];
+    if (testsSeleccionados.length === 1) {
+      // Un solo test → correo individual
+      var test = testsSeleccionados[0];
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:"", link:TESTS_LINKS[test]})
+      });
+    } else {
+      // Múltiples tests → un solo correo con todos los botones
+      await fetch(APPS_URL, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, tests:testsSeleccionados})
       });
     }
 
