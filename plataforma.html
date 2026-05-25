@@ -481,6 +481,31 @@ tbody tr:hover td { background: #fdf9f6; }
 .check-test-label:hover { border-color: var(--naranja); }
 .check-test-label input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; }
 .check-test-label:has(input:checked) { border-color: var(--naranja); background: #fdf3f1; color: var(--naranja); }
+
+/* ══ DROPDOWN MULTI-TEST ══ */
+.multi-select-wrap { position: relative; }
+.multi-select-btn {
+  width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: #fff; cursor: pointer;
+  font-size: 13px; color: var(--ink); text-align: left;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.multi-select-btn:hover { border-color: var(--naranja); }
+.multi-select-dropdown {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fff; border: 1.5px solid var(--border); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1); z-index: 100; overflow: hidden;
+}
+.multi-select-dropdown.open { display: block; }
+.multi-select-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer; font-size: 13px; color: var(--ink);
+  transition: background 0.1s; border-bottom: 1px solid var(--border);
+}
+.multi-select-option:last-child { border-bottom: none; }
+.multi-select-option:hover { background: var(--bg); }
+.multi-select-option input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; }
+.multi-select-option.checked { background: #fdf3f1; color: var(--naranja); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -812,17 +837,31 @@ tbody tr:hover td { background: #fdf9f6; }
               <input type="email" id="env-email" placeholder="candidato@email.com">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
-              <label>TESTS A ENVIAR <span style="color:var(--muted);font-weight:400;font-size:11px;">(selecciona uno o más)</span></label>
-              <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
-                <label class="check-test-label"><input type="checkbox" class="check-test" value="IC"> Test de Instrucciones Complejas</label>
-                <label class="check-test-label"><input type="checkbox" class="check-test" value="CEAL"> Test de Estilos de Liderazgo</label>
-                <label class="check-test-label"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</label>
-                <label class="check-test-label"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</label>
-                <label class="check-test-label"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</label>
+              <label>TESTS A ENVIAR</label>
+              <div class="multi-select-wrap" id="multi-wrap">
+                <button type="button" class="multi-select-btn" onclick="toggleMultiSelect()">
+                  <span id="multi-label">Seleccionar tests...</span>
+                  <span>▾</span>
+                </button>
+                <div class="multi-select-dropdown" id="multi-dropdown">
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="IC"> Test de Instrucciones Complejas
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="CEAL"> Test de Estilos de Liderazgo
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General
+                  </div>
+                </div>
               </div>
             </div>
-
-          </div>
 
 
           <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
@@ -1526,6 +1565,35 @@ function actualizarPreview() {
   } else {
     prev.style.display = "none";
   }
+}
+
+function toggleMultiSelect() {
+  var dd = document.getElementById("multi-dropdown");
+  dd.classList.toggle("open");
+  if (dd.classList.contains("open")) {
+    setTimeout(function(){
+      document.addEventListener("click", function cerrar(e){
+        var wrap = document.getElementById("multi-wrap");
+        if (wrap && !wrap.contains(e.target)) {
+          dd.classList.remove("open");
+          document.removeEventListener("click", cerrar);
+        }
+      });
+    }, 0);
+  }
+}
+
+function toggleTest(el) {
+  event.stopPropagation();
+  var cb = el.querySelector("input[type=checkbox]");
+  cb.checked = !cb.checked;
+  el.classList.toggle("checked", cb.checked);
+  var sel = Array.from(document.querySelectorAll(".check-test:checked"));
+  var label = document.getElementById("multi-label");
+  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General"};
+  if (sel.length === 0) label.textContent = "Seleccionar tests...";
+  else if (sel.length === 1) label.textContent = nombres[sel[0].value] || sel[0].value;
+  else label.textContent = sel.length + " tests seleccionados";
 }
 
 async function enviarEvaluacion() {
