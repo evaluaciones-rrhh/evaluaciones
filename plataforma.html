@@ -506,6 +506,18 @@ tbody tr:hover td { background: #fdf9f6; }
 .multi-select-option:hover { background: var(--bg); }
 .multi-select-option input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; }
 .multi-select-option.checked { background: #fdf3f1; color: var(--naranja); font-weight: 600; }
+
+/* ══ FIX VISIBILIDAD PÁGINAS ══ */
+#page-historial.activo,
+#page-tests.activo,
+#page-competencias.activo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: relative !important;
+}
 </style>
 </head>
 <body>
@@ -1175,6 +1187,10 @@ function irA(pag) {
   document.getElementById("topbar-title").textContent = titulos[pag];
   paginaActual = pag;
   if (pag === "historial") renderHistorial();
+  // Forzar scroll al top y repaint
+  window.scrollTo(0, 0);
+  var el = document.getElementById("page-"+pag);
+  if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
 }
 
 // CARGAR DATOS
@@ -1800,27 +1816,19 @@ function verInformeEntrevista(ent) {
 var IC_RESUMENES = {
   "Muy alto": {
     cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "Excelente capacidad de concentración, precisión y control atencional. Presenta bajo nivel de error y alta consistencia en tareas que requieren foco y seguimiento detallado."
+    texto: "Excelente capacidad de concentración, precisión y control atencional. Presenta bajo nivel de error y alta consistencia en tareas que requieren foco y seguimiento detallado. Precisión igual o superior al 85%."
   },
   "Alto": {
     cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "Buen nivel de atención y precisión en la ejecución de tareas. Mantiene adecuada concentración y control operativo."
-  },
-  "Medio alto": {
-    cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "Presenta adecuada capacidad atencional y nivel de precisión funcional para tareas operativas y administrativas habituales."
+    texto: "Buen nivel de atención y precisión en la ejecución de tareas. Mantiene adecuada concentración y control operativo. Precisión entre 70% y 84%."
   },
   "Medio": {
     cls: "ic-cat-regular", emoji: "⚠️",
-    texto: "Rendimiento atencional promedio. Puede desempeñarse adecuadamente en tareas estructuradas, aunque podría presentar fluctuaciones bajo presión o alta demanda."
-  },
-  "Medio bajo": {
-    cls: "ic-cat-regular", emoji: "⚠️",
-    texto: "Se observan dificultades moderadas en precisión y control atencional, pudiendo aumentar la probabilidad de errores en tareas repetitivas o de alto detalle."
+    texto: "Rendimiento atencional promedio. Puede desempeñarse adecuadamente en tareas estructuradas, aunque podría presentar fluctuaciones bajo presión o alta demanda. Precisión entre 55% y 69%."
   },
   "Bajo": {
     cls: "ic-cat-inferior", emoji: "🔴",
-    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
+    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión. Precisión inferior al 55%."
   },
   "Deficiente": {
     cls: "ic-cat-inferior", emoji: "🔴",
@@ -1844,9 +1852,9 @@ function abrirInformeIC(d) {
   document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
 
   // Percentil puede venir como "Pc 2" o número directo
-  var pct = parseInt(String(d.percentil || "0").replace(/[^0-9]/g, "")) || 0;
-  document.getElementById("ic-percentil-pct").textContent = "Percentil " + pct;
-  document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 99) + "%";
+  var pct = parseInt(String(d.percentil || d.precision || "0").replace(/[^0-9]/g, "")) || 0;
+  document.getElementById("ic-percentil-pct").textContent = "Precisión " + pct + "%";
+  document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 100) + "%";
 
   var barColor = info.cls === "ic-cat-adecuado" ? "var(--high)" : info.cls === "ic-cat-inferior" ? "var(--low)" : "var(--mid)";
   document.getElementById("ic-barra-percentil").style.background = barColor;
@@ -1960,7 +1968,7 @@ function imprimirInformeCEAL() { window.print(); }
         </div>
         <div class="ic-stat">
           <div class="ic-stat-num" id="ic-percentil">—</div>
-          <div class="ic-stat-lbl">Percentil</div>
+          <div class="ic-stat-lbl">Precisión</div>
         </div>
         <div class="ic-stat">
           <div class="ic-stat-num" id="ic-errores" style="color:var(--low);">—</div>
@@ -1975,7 +1983,7 @@ function imprimirInformeCEAL() { window.print(); }
       <!-- Barra percentil -->
       <div class="ic-barra-wrap">
         <div class="ic-barra-label">
-          <span>Percentil</span>
+          <span>Índice de precisión</span>
           <span id="ic-percentil-pct">—</span>
         </div>
         <div class="ic-barra-bg">
