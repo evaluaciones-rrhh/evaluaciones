@@ -126,7 +126,7 @@ body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: v
     <div class="intro-card">
       
       <div class="intro-title">Evaluación de Estilo Conductual</div>
-      <div class="intro-desc">Esta evaluación está orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales. No existen respuestas correctas o incorrectas.</div>
+      <div class="intro-desc">A continuación encontrarás una evaluación orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales.</div>
 
       <div class="form-nombre">
         <label>Tu nombre completo</label>
@@ -143,6 +143,32 @@ body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: v
   </div>
 </div>
 
+<!-- PANTALLA INSTRUCCIONES -->
+<div class="screen" id="screen-instrucciones">
+  <div class="test-wrap">
+    <div class="pregunta-card" style="max-width:600px;margin:0 auto;">
+      <h2 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;color:var(--ink);">Instrucciones</h2>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:14px;">A continuación encontrarás una evaluación orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales.</p>
+      <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:14px;"><strong>No existen respuestas correctas o incorrectas.</strong> Lo importante es responder de manera honesta y espontánea, seleccionando las alternativas que más se acerquen a cómo eres habitualmente.</p>
+      <div style="background:#f9f6f2;border-left:3px solid var(--naranja);border-radius:6px;padding:16px 18px;margin-bottom:16px;">
+        <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;">¿Cómo responder?</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:8px;">En cada pregunta encontrarás 4 descripciones o características. Deberás seleccionar:</p>
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">• La opción que <strong style="color:var(--naranja)">MÁS (+)</strong> te representa</p>
+        <p style="font-size:13px;color:var(--ink-soft);">• La opción que <strong style="color:var(--azul)">MENOS (−)</strong> te representa</p>
+      </div>
+      <div style="background:#f9f6f2;border-left:3px solid var(--azul);border-radius:6px;padding:16px 18px;margin-bottom:24px;">
+        <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;">Recomendaciones</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Responde pensando en cómo actúas normalmente, no en cómo crees que deberías responder</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Responde de forma natural y sincera</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• No dediques demasiado tiempo a cada pregunta</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Evita analizar excesivamente las alternativas</p>
+        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;"><strong>• Confía en tu primera impresión</strong></p>
+      </div>
+      <button class="btn-iniciar" onclick="comenzarTest()" style="width:100%;">Comenzar evaluación →</button>
+    </div>
+  </div>
+</div>
+
 <!-- PANTALLA TEST -->
 <div class="screen" id="screen-test">
   <div class="test-wrap">
@@ -150,10 +176,7 @@ body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: v
       <div class="pregunta-num" id="preg-num">Pregunta 1 de 24</div>
     </div>
     <div class="pregunta-card">
-      <div class="instrucciones" style="margin-bottom:16px;">
-        <p>En cada pregunta encontrarás <strong>4 descripciones</strong>.</p>
-        <p>Selecciona la opción que <strong>MÁS (+)</strong> te representa y la que <strong>MENOS (−)</strong> te representa.</p>
-      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Selecciona <strong style="color:var(--naranja)">MÁS (+)</strong> y <strong style="color:var(--azul)">MENOS (−)</strong></div>
       <div class="alternativas" id="alternativas-wrap"></div>
       <div class="aviso" id="aviso-doble">⚠ No puedes seleccionar la misma alternativa como MÁS y MENOS.</div>
     </div>
@@ -182,30 +205,30 @@ var TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
 
 // ══ PREGUNTAS ══
 var PREGUNTAS = [
-  ["Confiado, positivo","Flexible, condescendiente","Argumentativo, habla sin rodeos","Estable, relajado"],
-  ["Optimista, de actitud positiva","Inestable, vacilante","Respetuoso, obediente","Muestra iniciativa, quiere el cambio"],
-  ["Sociable, le gusta estar con la gente","Consciente, equilibrado","Independiente, de iniciativas propias","Escuchador, reservado"],
-  ["Bien intencionado, agradable","Cuidadoso, cauteloso","Decidido, determinado","Convincente, inspirador"],
-  ["Bondadoso, deseoso de ayudar","Ambiguo, indeterminado","Se gana la atención, admirable","De férrea voluntad, firme"],
-  ["Simpático, de fácil amistad","Distante, indiferente","Exacto, preciso","Directo, se expresa"],
-  ["Valora la información, especialista","Orientado a grupos, calza en el grupo","Temperamental, Enérgico","Fácil de tratar, tolerante con otros"],
-  ["Intrépido, de férrea voluntad","Considerado, de buenas maneras","Contento, feliz","Fácil de palabra, buen orador"],
-  ["Evita extremos, sensible","Fácilmente usado, autosacrificado","Centro del grupo, vivaz","Dominante, agresivo"],
-  ["Inquisitivo, observador","Amable, servicial","De férrea voluntad, orientado a metas","Jovial de buen temperamento"],
-  ["Humilde, seguidor","Consciente de si mismo, tímido","Seguro de sí mismo, intrépido","Entusiasta, que apoya"],
-  ["Enérgico, intransigente","Cree en las personas, buen orador","Comprensivo, compasivo","Tolerante, que acepta"],
-  ["Entretenido, ingenioso","Meticuloso, cumplidor","Firme, irreverente","Sereno, calmado"],
-  ["Disciplinado, autocontrolado","Vivaz, enérgico","Colaborador, buenas intenciones","No se rinde, fuerte"],
-  ["Confía, cree en las personas","Pacífico, satisfecho","Seguro de sí mismo, no deja lugar a dudas","Minucioso, callado"],
-  ["Ganador, competitivo","Sensible, solidario","Sociable, busca compañía","Adaptable, complaciente"],
-  ["Voluntarioso, servicial","Ajustable, adaptable","Entusiasta, que no se opone","Desenvuelto, que confía en si mismo"],
-  ["Seguidor, que cumple instrucciones","Intrépido, firme","Encantador, animador","Fiel, responsable"],
-  ["Toma riesgos, seguro de sí mismo","Amistoso, abierto","Ajustable, flexible","Moderado, cauteloso"],
-  ["Conversador, extrovertido","Cohíbido, moderado","Organizado, sigue reglas","Inflexible, firme"],
-  ["Rápido, promotor de cambios","Confiable, previsor","Popular, agrada a todos","Bien organizado, minucioso"],
-  ["Persuasivo, convincente","Reservado, silencioso","Dócil, bondadoso","Individual, personaje"],
-  ["Conciliador, complaciente","Testarudo, inquebrantable","Encantador, agradable","Despierta simpatía, dulce"],
-  ["Responsable, obediente","Amable, cohíbido","Ama la diversión, rebelde","Decidido, obstinado"]
+  ["Confiado, positivo", "Dispuesto, bondadoso", "Argumentativo, habla sin rodeos", "Exacto, preciso"],
+  ["Optimista, de actitud positiva", "Simpático, de fácil amistad", "Meticuloso, cuidadoso", "Muestra iniciativa, quiere el cambio"],
+  ["Sociable, hablador", "Decidido, de fuerte voluntad", "Gentil, Amable", "Diplomático, táctil"],
+  ["Convincente, persuasivo", "Competitivo, jugador", "Considerado, bondadoso", "Consistente, predecible"],
+  ["Refrescante, estimulante", "Aventurero, arriesgado", "Respetuoso, considerado", "Retraído, reservado"],
+  ["Vibrante, vivaz", "Valiente, audaz", "Comprensivo, bondadoso", "Objetivo, justo"],
+  ["Valora la información, especialista", "Orientado al trabajo en equipo", "Temperamental, Enérgico", "Fácil de tratar, tolerante con otros"],
+  ["Ánimado, vivaz", "Pionero, original", "Planificado, organizado", "Paciente, estable"],
+  ["Estimulante, inspirador", "Independiente, individualista", "Inofensivo, géntil", "Imparcial, objetivo"],
+  ["Inquisitivo, observador", "Amable, servicial", "De férrea voluntad, orientado a metas", "Alegre, de buen carácter"],
+  ["Humilde, seguidor", "Tímido/a, cohíbido", "Seguro de sí mismo, intrépido", "Entusiasta que apoya"],
+  ["Enérgico, intránsigente", "Cree en las personas, buen orador", "Comprensivo, compasivo", "Tolerante, que acepta"],
+  ["Entretenido, ingenioso", "Meticuloso, puntual", "Duro/a, desafiante", "Sereno, calmado"],
+  ["Disciplinado, autocontrolado", "Vivaz,  energético", "Cooperativo, bien intencionado", "No se rinde, fuerte"],
+  ["Confia, cree en las personas", "Pacífico, satisfecho", "Seguro de sí mismo, no deja lugar a dudas", "Minucioso, callado"],
+  ["Ganador, competitivo", "Sensible, solidario", "Sociable, busca compañía", "Adaptable,complaciente"],
+  ["Voluntarioso, servicial", "Ajustable, adaptable", "Entusiasta, que no se opone", "Desenvuelto, que confía en si mismo"],
+  ["Seguidor, que cumple instrucciones", "Intrépido, firme", "Encantador, animador", "Fiel responsable"],
+  ["Toma riesgos, seguro de sí mismo", "Amistoso, abierto", "Ajustable, flexible", "Moderado, cauteloso"],
+  ["Conversador, extrovertido", "Cohíbido, moderado", "Organizado, tradicional", "Inflexible, firme"],
+  ["Rápido, promotor de cambios", "Confiable, previsor", "Popular, agrada a todos", "Bien organizado, minucioso"],
+  ["Persuasivo, convincente", "Reservado, silencioso", "Dócil, bondadoso", "Individual, con carácter"],
+  ["Conciliador, complaciente", "Testarudo, inquenbrantable", "Encantador, agradable", "Despierta simpatía, dulce"],
+  ["Responsable, obediente", "Amable, cohíbido", "Ama la diversión, rebelde", "Decidido, obstinado"],
 ];
 
 // Matriz DISC: por pregunta, factor de cada alternativa A/B/C/D
@@ -268,6 +291,11 @@ function iniciarTest() {
     return;
   }
   document.getElementById('screen-intro').classList.remove('activo');
+  document.getElementById('screen-instrucciones').classList.add('activo');
+}
+
+function comenzarTest() {
+  document.getElementById('screen-instrucciones').classList.remove('activo');
   document.getElementById('screen-test').classList.add('activo');
   renderPregunta();
 }
