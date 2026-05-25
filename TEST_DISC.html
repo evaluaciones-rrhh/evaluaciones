@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test DISC — Evaluación Conductual</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --naranja: #c4432a;
+  --azul: #1e2d3d;
+  --bg: #f5f2ee;
+  --card: #ffffff;
+  --ink: #1a1410;
+  --muted: #888;
+  --border: #e8e0d4;
+  --D: #c4432a;
+  --I: #e8a020;
+  --S: #2d8a4e;
+  --C: #2563a8;
+}
+body { font-family: 'IBM Plex Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+/* ── HEADER ── */
+.header { background: var(--azul); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { color: #fff; font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+.header-sub { color: rgba(255,255,255,0.5); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+
+/* ── PROGRESS ── */
+.progress-wrap { background: rgba(255,255,255,0.1); height: 4px; }
+.progress-bar { height: 4px; background: var(--naranja); transition: width 0.4s ease; width: 0%; }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.activo { display: block; }
+
+/* ── INTRO ── */
+.intro-wrap { max-width: 640px; margin: 48px auto; padding: 0 20px; }
+.intro-card { background: var(--card); border-radius: 12px; padding: 40px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+.intro-badge { display: inline-block; background: var(--naranja); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 20px; }
+.intro-title { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; color: var(--ink); margin-bottom: 12px; }
+.intro-desc { font-size: 14px; color: #555; line-height: 1.8; margin-bottom: 24px; }
+.instrucciones { background: #f9f6f2; border-radius: 8px; padding: 18px 20px; margin-bottom: 28px; border-left: 3px solid var(--naranja); }
+.instrucciones p { font-size: 13px; color: #444; line-height: 1.7; margin-bottom: 8px; }
+.instrucciones p:last-child { margin-bottom: 0; }
+.instrucciones strong { color: var(--naranja); }
+.btn-iniciar { background: var(--naranja); color: #fff; border: none; padding: 14px 32px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s; }
+.btn-iniciar:hover { opacity: 0.9; }
+
+/* ── FORMULARIO NOMBRE ── */
+.form-nombre { margin-bottom: 20px; }
+.form-nombre label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+.form-nombre input { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+.form-nombre input:focus { outline: none; border-color: var(--naranja); }
+
+/* ── TEST ── */
+.test-wrap { max-width: 700px; margin: 0 auto; padding: 24px 20px 60px; }
+.pregunta-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.pregunta-num { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: var(--muted); }
+.pregunta-card { background: var(--card); border-radius: 12px; padding: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 16px; }
+.instruccion-inline { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.instruccion-inline strong { color: var(--naranja); }
+
+/* Alternativas */
+.alternativas { display: flex; flex-direction: column; gap: 10px; }
+.alt-row { display: grid; grid-template-columns: 44px 44px 1fr; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; background: #fafafa; transition: background 0.15s, border-color 0.15s; }
+.alt-row:hover { border-color: var(--naranja); background: #fdf3f1; }
+.alt-texto { font-size: 14px; color: var(--ink); }
+.btn-mas, .btn-menos {
+  width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border);
+  background: #fff; cursor: pointer; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.btn-mas:hover  { border-color: var(--naranja); background: #fdf3f1; color: var(--naranja); }
+.btn-menos:hover{ border-color: #555; background: #f5f5f5; }
+.btn-mas.activo  { background: var(--naranja); border-color: var(--naranja); color: #fff; }
+.btn-menos.activo{ background: var(--azul); border-color: var(--azul); color: #fff; }
+
+/* Advertencia doble selección */
+.aviso { display: none; font-size: 12px; color: var(--naranja); margin-top: 8px; padding: 8px 12px; background: #fdf3f1; border-radius: 6px; }
+.aviso.visible { display: block; }
+
+/* Navegación */
+.nav-btns { display: flex; gap: 12px; margin-top: 16px; }
+.btn-nav { padding: 12px 28px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-prev { background: #fff; border: 1.5px solid var(--border); color: var(--ink); }
+.btn-next { background: var(--naranja); color: #fff; flex: 1; }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── GRACIAS ── */
+.gracias-wrap { max-width: 520px; margin: 60px auto; padding: 0 20px; text-align: center; }
+.gracias-icon { font-size: 48px; margin-bottom: 16px; }
+.gracias-title { font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+.gracias-desc { font-size: 14px; color: var(--muted); }
+
+/* ── BLOQUEADO ── */
+#screen-bloqueado { display:none; position:fixed; inset:0; background:var(--bg); z-index:9999; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:32px; }
+#screen-bloqueado.visible { display:flex; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header-brand">Grupo Cygnus</div>
+    <div class="header-sub">Análisis de Estilo Conductual</div>
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<!-- PANTALLA BLOQUEADO -->
+<div id="screen-bloqueado">
+  <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+  <h2 style="font-family:'Sora',sans-serif;font-size:22px;margin-bottom:8px;">Evaluación no disponible</h2>
+  <p id="msg-bloqueado" style="color:var(--muted);font-size:14px;max-width:400px;line-height:1.7;"></p>
+</div>
+
+<!-- PANTALLA INTRO -->
+<div class="screen activo" id="screen-intro">
+  <div class="intro-wrap">
+    <div class="intro-card">
+      
+      <div class="intro-title">Evaluación de Estilo Conductual</div>
+      <div class="intro-desc">Esta evaluación está orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales. No existen respuestas correctas o incorrectas.</div>
+
+      <div class="form-nombre">
+        <label>Tu nombre completo</label>
+        <input type="text" id="inp-nombre" placeholder="Apellido Nombre" autocomplete="name">
+      </div>
+      <div class="form-nombre">
+        <label>Tu RUT</label>
+        <input type="text" id="inp-rut" placeholder="12.345.678-9">
+      </div>
+
+      <button class="btn-iniciar" onclick="iniciarTest()">Comenzar evaluación →</button>
+      <p id="intro-error" style="color:var(--naranja);font-size:13px;margin-top:10px;display:none;">Por favor ingresa tu nombre y RUT para continuar.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA TEST -->
+<div class="screen" id="screen-test">
+  <div class="test-wrap">
+    <div class="pregunta-header">
+      <div class="pregunta-num" id="preg-num">Pregunta 1 de 24</div>
+    </div>
+    <div class="pregunta-card">
+      <div class="instrucciones" style="margin-bottom:16px;">
+        <p>En cada pregunta encontrarás <strong>4 descripciones</strong>.</p>
+        <p>Selecciona la opción que <strong>MÁS (+)</strong> te representa y la que <strong>MENOS (−)</strong> te representa.</p>
+      </div>
+      <div class="alternativas" id="alternativas-wrap"></div>
+      <div class="aviso" id="aviso-doble">⚠ No puedes seleccionar la misma alternativa como MÁS y MENOS.</div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-nav btn-prev" id="btn-prev" onclick="irPrev()" style="display:none;">← Anterior</button>
+      <button class="btn-nav btn-next" id="btn-next" onclick="irNext()" disabled>Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PANTALLA GRACIAS -->
+<div class="screen" id="screen-gracias">
+  <div class="gracias-wrap">
+    <div class="gracias-icon">✅</div>
+    <div class="gracias-title">¡Evaluación completada!</div>
+    <p class="gracias-desc">Gracias por completar la evaluación DISC. Tus respuestas han sido registradas exitosamente.</p>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIGURACIÓN
+// ══════════════════════════════════════════════
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2YAyhAOswTezb8XEq6thtdwbIX3W9t0XYls0T753gMxmPsac-XwGQbyFpjeJjZ7Ut7g/exec';
+var TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
+
+// ══ PREGUNTAS ══
+var PREGUNTAS = [
+  ["Confiado, positivo","Flexible, condescendiente","Argumentativo, habla sin rodeos","Estable, relajado"],
+  ["Optimista, de actitud positiva","Inestable, vacilante","Respetuoso, obediente","Muestra iniciativa, quiere el cambio"],
+  ["Sociable, le gusta estar con la gente","Consciente, equilibrado","Independiente, de iniciativas propias","Escuchador, reservado"],
+  ["Bien intencionado, agradable","Cuidadoso, cauteloso","Decidido, determinado","Convincente, inspirador"],
+  ["Bondadoso, deseoso de ayudar","Ambiguo, indeterminado","Se gana la atención, admirable","De férrea voluntad, firme"],
+  ["Simpático, de fácil amistad","Distante, indiferente","Exacto, preciso","Directo, se expresa"],
+  ["Valora la información, especialista","Orientado a grupos, calza en el grupo","Temperamental, Enérgico","Fácil de tratar, tolerante con otros"],
+  ["Intrépido, de férrea voluntad","Considerado, de buenas maneras","Contento, feliz","Fácil de palabra, buen orador"],
+  ["Evita extremos, sensible","Fácilmente usado, autosacrificado","Centro del grupo, vivaz","Dominante, agresivo"],
+  ["Inquisitivo, observador","Amable, servicial","De férrea voluntad, orientado a metas","Jovial de buen temperamento"],
+  ["Humilde, seguidor","Consciente de si mismo, tímido","Seguro de sí mismo, intrépido","Entusiasta, que apoya"],
+  ["Enérgico, intransigente","Cree en las personas, buen orador","Comprensivo, compasivo","Tolerante, que acepta"],
+  ["Entretenido, ingenioso","Meticuloso, cumplidor","Firme, irreverente","Sereno, calmado"],
+  ["Disciplinado, autocontrolado","Vivaz, enérgico","Colaborador, buenas intenciones","No se rinde, fuerte"],
+  ["Confía, cree en las personas","Pacífico, satisfecho","Seguro de sí mismo, no deja lugar a dudas","Minucioso, callado"],
+  ["Ganador, competitivo","Sensible, solidario","Sociable, busca compañía","Adaptable, complaciente"],
+  ["Voluntarioso, servicial","Ajustable, adaptable","Entusiasta, que no se opone","Desenvuelto, que confía en si mismo"],
+  ["Seguidor, que cumple instrucciones","Intrépido, firme","Encantador, animador","Fiel, responsable"],
+  ["Toma riesgos, seguro de sí mismo","Amistoso, abierto","Ajustable, flexible","Moderado, cauteloso"],
+  ["Conversador, extrovertido","Cohíbido, moderado","Organizado, sigue reglas","Inflexible, firme"],
+  ["Rápido, promotor de cambios","Confiable, previsor","Popular, agrada a todos","Bien organizado, minucioso"],
+  ["Persuasivo, convincente","Reservado, silencioso","Dócil, bondadoso","Individual, personaje"],
+  ["Conciliador, complaciente","Testarudo, inquebrantable","Encantador, agradable","Despierta simpatía, dulce"],
+  ["Responsable, obediente","Amable, cohíbido","Ama la diversión, rebelde","Decidido, obstinado"]
+];
+
+// Matriz DISC: por pregunta, factor de cada alternativa A/B/C/D
+var MATRIZ = [
+  ["I","S","D","C"], // 1
+  ["I","S","C","D"], // 2
+  ["I","C","D","S"], // 3
+  ["S","C","D","I"], // 4
+  ["S","C","I","D"], // 5
+  ["I","S","C","D"], // 6
+  ["C","I","D","S"], // 7
+  ["D","S","I","C"], // 8
+  ["S","C","I","D"], // 9
+  ["C","S","D","I"], // 10
+  ["S","C","D","I"], // 11
+  ["D","I","S","C"], // 12
+  ["I","C","D","S"], // 13
+  ["C","I","S","D"], // 14
+  ["I","S","D","C"], // 15
+  ["D","S","I","C"], // 16
+  ["S","C","I","D"], // 17
+  ["C","D","I","S"], // 18
+  ["D","I","S","C"], // 19
+  ["I","S","C","D"], // 20
+  ["D","S","I","C"], // 21
+  ["I","C","S","D"], // 22
+  ["S","D","I","C"], // 23
+  ["C","S","I","D"]  // 24
+];
+
+// ══ ESTADO ══
+var nombre = "", rut = "";
+var respuestas = new Array(24).fill(null).map(function(){ return {mas: null, menos: null}; });
+var pregActual = 0;
+
+// ══ VALIDAR TOKEN ══
+function validarToken() {
+  if (!TOKEN_URL) return;
+  fetch(SCRIPT_URL + '?action=validarToken&token=' + TOKEN_URL, {method:'GET', redirect:'follow'})
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      var j = txt.indexOf('{'); if (j < 0) return;
+      var data = JSON.parse(txt.slice(j));
+      if (!data.valido) {
+        document.getElementById('msg-bloqueado').textContent = data.mensaje || 'Link inválido.';
+        document.getElementById('screen-bloqueado').classList.add('visible');
+      } else {
+        if (data.nombre) document.getElementById('inp-nombre').value = data.nombre;
+      }
+    }).catch(function(){});
+}
+validarToken();
+
+// ══ INICIO ══
+function iniciarTest() {
+  nombre = document.getElementById('inp-nombre').value.trim();
+  rut    = document.getElementById('inp-rut').value.trim();
+  if (!nombre || !rut) {
+    document.getElementById('intro-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('screen-intro').classList.remove('activo');
+  document.getElementById('screen-test').classList.add('activo');
+  renderPregunta();
+}
+
+// ══ RENDER PREGUNTA ══
+function renderPregunta() {
+  var alts = PREGUNTAS[pregActual];
+  var resp = respuestas[pregActual];
+
+  document.getElementById('preg-num').textContent = 'Pregunta ' + (pregActual+1) + ' de 24';
+  document.getElementById('progress-bar').style.width = ((pregActual+1)/24*100) + '%';
+  document.getElementById('btn-prev').style.display = pregActual > 0 ? '' : 'none';
+  document.getElementById('aviso-doble').classList.remove('visible');
+
+  var html = '';
+  alts.forEach(function(alt, i) {
+    var letraAlt = ['A','B','C','D'][i];
+    var masCls   = resp.mas   === i ? 'activo' : '';
+    var menosCls = resp.menos === i ? 'activo' : '';
+    html += '<div class="alt-row" id="row-'+i+'">'
+      + '<button class="btn-mas '  + masCls   + '" onclick="seleccionar(' + i + ',\'mas\')"  title="MÁS">+</button>'
+      + '<button class="btn-menos '+ menosCls + '" onclick="seleccionar(' + i + ',\'menos\')" title="MENOS">−</button>'
+      + '<span class="alt-texto">' + alt + '</span>'
+      + '</div>';
+  });
+  document.getElementById('alternativas-wrap').innerHTML = html;
+  actualizarBtnNext();
+}
+
+function seleccionar(idx, tipo) {
+  var resp = respuestas[pregActual];
+  var otro = tipo === 'mas' ? 'menos' : 'mas';
+
+  // Si ya tiene ese valor, deseleccionar
+  if (resp[tipo] === idx) {
+    resp[tipo] = null;
+  } else {
+    // Verificar que no sea el mismo que el otro
+    if (resp[otro] === idx) {
+      document.getElementById('aviso-doble').classList.add('visible');
+      setTimeout(function(){ document.getElementById('aviso-doble').classList.remove('visible'); }, 2000);
+      return;
+    }
+    resp[tipo] = idx;
+  }
+  renderPregunta();
+}
+
+function actualizarBtnNext() {
+  var resp = respuestas[pregActual];
+  var completa = resp.mas !== null && resp.menos !== null;
+  document.getElementById('btn-next').disabled = !completa;
+  document.getElementById('btn-next').textContent = pregActual === 23 ? 'Finalizar ✓' : 'Siguiente →';
+}
+
+function irNext() {
+  if (pregActual < 23) {
+    pregActual++;
+    renderPregunta();
+    window.scrollTo(0,0);
+  } else {
+    calcularYEnviar();
+  }
+}
+
+function irPrev() {
+  if (pregActual > 0) {
+    pregActual--;
+    renderPregunta();
+    window.scrollTo(0,0);
+  }
+}
+
+// ══ CALCULAR Y ENVIAR ══
+function calcularYEnviar() {
+  // ── Lógica DISC Extended: FRECUENCIA de MÁS → Adaptado, FRECUENCIA de MENOS → Natural ──
+  var factores = ['D','I','S','C'];
+
+  // Conteo de frecuencias
+  var freqMas   = {D:0, I:0, S:0, C:0}; // cuántas veces cada factor fue elegido como MÁS
+  var freqMenos = {D:0, I:0, S:0, C:0}; // cuántas veces cada factor fue elegido como MENOS
+
+  respuestas.forEach(function(resp, pi) {
+    var fs = MATRIZ[pi];
+    if (resp.mas   !== null) freqMas[fs[resp.mas]]++;
+    if (resp.menos !== null) freqMenos[fs[resp.menos]]++;
+  });
+
+  // Convertir frecuencias a porcentajes (total = 24 respuestas)
+  var totalMas   = 24;
+  var totalMenos = 24;
+
+  var adaptado = {}; // porcentaje basado en MÁS
+  var natural  = {}; // porcentaje basado en MENOS
+  factores.forEach(function(f) {
+    adaptado[f] = Math.round((freqMas[f]   / totalMas)   * 100);
+    natural[f]  = Math.round((freqMenos[f] / totalMenos) * 100);
+  });
+
+  // Nivel por factor según porcentaje
+  function getNivel(p) {
+    if (p >= 40) return 'Muy Alto';
+    if (p >= 30) return 'Alto';
+    if (p >= 20) return 'Medio';
+    if (p >= 10) return 'Bajo';
+    return 'Muy Bajo';
+  }
+
+  // Perfil predominante: 2 factores con mayor porcentaje
+  var ordenAd  = factores.slice().sort(function(a,b){ return adaptado[b]-adaptado[a]; });
+  var ordenNat = factores.slice().sort(function(a,b){ return natural[b]-natural[a]; });
+  var perfilAdaptado = ordenAd[0]  + ordenAd[1];
+  var perfilNatural  = ordenNat[0] + ordenNat[1];
+
+  // GAP = diferencia en puntos porcentuales entre adaptado y natural
+  var gap = {};
+  factores.forEach(function(f) {
+    gap[f] = Math.abs(adaptado[f] - natural[f]);
+  });
+
+  // Tensión adaptativa por factor
+  function getGapNivel(g) {
+    if (g >= 15) return 'Alto';
+    if (g >= 8)  return 'Moderado';
+    return 'Leve';
+  }
+
+  // Intensidad conductual: Adaptado > Natural → intensificado / Adaptado < Natural → moderado
+  var intensidad = {};
+  factores.forEach(function(f) {
+    if (adaptado[f] > natural[f] + 8)       intensidad[f] = 'intensificado';
+    else if (adaptado[f] < natural[f] - 8)  intensidad[f] = 'moderado';
+    else                                     intensidad[f] = 'estable';
+  });
+
+  // GAP total = promedio de gaps
+  var gapTotal = Math.round((gap.D + gap.I + gap.S + gap.C) / 4);
+  var gapNivelGlobal = getGapNivel(gapTotal);
+
+  var payload = {
+    test: 'DISC',
+    fecha: new Date().toLocaleString('es-CL'),
+    nombre: nombre,
+    rut: rut,
+    // Perfil Adaptado (% desde MÁS)
+    ad_d: adaptado.D, ad_i: adaptado.I, ad_s: adaptado.S, ad_c: adaptado.C,
+    nivel_ad_d: getNivel(adaptado.D), nivel_ad_i: getNivel(adaptado.I),
+    nivel_ad_s: getNivel(adaptado.S), nivel_ad_c: getNivel(adaptado.C),
+    perfil_adaptado: perfilAdaptado,
+    // Perfil Natural
+    nat_d: natural.D, nat_i: natural.I, nat_s: natural.S, nat_c: natural.C,
+    nivel_nat_d: getNivel(natural.D), nivel_nat_i: getNivel(natural.I),
+    nivel_nat_s: getNivel(natural.S), nivel_nat_c: getNivel(natural.C),
+    perfil_natural: perfilNatural,
+    // GAP
+    gap_d: gap.D, gap_i: gap.I, gap_s: gap.S, gap_c: gap.C,
+    gap_nivel_d: getGapNivel(gap.D), gap_nivel_i: getGapNivel(gap.I),
+    gap_nivel_s: getGapNivel(gap.S), gap_nivel_c: getGapNivel(gap.C),
+    // Factor predominante
+    factor_predominante: ordenAd[0],
+    intensidad_d: intensidad.D, intensidad_i: intensidad.I,
+    intensidad_s: intensidad.S, intensidad_c: intensidad.C,
+    gap_total: gapTotal, gap_nivel_global: gapNivelGlobal,
+    token: TOKEN_URL
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).catch(function(){});
+
+  if (TOKEN_URL) localStorage.setItem('test_completado_' + TOKEN_URL, 'completado');
+  document.getElementById('screen-test').classList.remove('activo');
+  document.getElementById('screen-gracias').classList.add('activo');
+}
+</script>
+</body>
+</html>
