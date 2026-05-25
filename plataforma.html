@@ -1298,7 +1298,7 @@ function renderRanking(datos) {
 
   var niveles = { alto:3, superior:3, promedio:2, medio:2, bajo:1, inferior:1 };
   var conPuntaje = datos.map(function(d) {
-    var niv = (d.nivel||"").toLowerCase();
+    var niv = String(d.nivel||"").toLowerCase();
     var puntaje = 0;
     Object.keys(niveles).forEach(function(k) { if(niv.includes(k)) puntaje = niveles[k]; });
     return Object.assign({}, d, {puntaje:puntaje});
@@ -1461,7 +1461,7 @@ function renderTablaComun(datos, tbodyId, cols) {
   var html = "";
   datos.forEach(function(d) {
     var testCls = "badge-"+(d.test||"").toLowerCase().replace("pf","pf").replace("wonderlic","wonderlic");
-    var niv = (d.nivel||"").toLowerCase();
+    var niv = String(d.nivel||"").toLowerCase();
     var nivCls = niv.includes("alto")||niv.includes("sup")?"badge-alto":niv.includes("bajo")||niv.includes("inf")?"badge-bajo":"badge-promedio";
     var dashUrl = DASH_HTML[d.test];
     var btnVer = dashUrl
