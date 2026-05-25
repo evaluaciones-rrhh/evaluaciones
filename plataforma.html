@@ -1,0 +1,1952 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cygnus — Plataforma de Evaluaciones</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --naranja: #c4432a;
+  --naranja-dark: #a3371f;
+  --naranja-light: #f5ede9;
+  --ink: #1a1410;
+  --ink-soft: #4a3f35;
+  --muted: #9a8a7a;
+  --border: #e8ddd4;
+  --bg: #faf7f4;
+  --white: #ffffff;
+  --azul: #1e2d3d;
+  --azul-soft: #e8ecf0;
+  --high: #2a6e47;
+  --high-bg: #e8f4ee;
+  --mid: #c07a00;
+  --mid-bg: #fef3e0;
+  --low: #c0392b;
+  --low-bg: #fdecea;
+  --shadow-sm: 0 1px 3px rgba(26,20,16,0.06);
+  --shadow: 0 2px 8px rgba(26,20,16,0.10);
+  --shadow-lg: 0 8px 32px rgba(26,20,16,0.14);
+  --radius: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; font-size: 14px; }
+h1,h2,h3 { font-family: 'Sora', sans-serif; }
+
+/* ══════════ LOGIN ══════════ */
+#login-screen {
+  min-height: 100vh; display: flex;
+  background: #f5f2ee;
+  position: relative; overflow: hidden;
+}
+
+/* Franja superior naranja */
+#login-screen::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 5px; background: var(--naranja); z-index: 10;
+}
+
+.login-left {
+  flex: 1; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 60px 64px; position: relative; z-index: 1;
+  background: var(--azul);
+}
+
+/* Patrón geométrico fondo izquierdo */
+.login-left::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 80%, rgba(196,67,42,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(196,67,42,0.08) 0%, transparent 40%);
+}
+
+.login-logo-area {
+  position: relative; z-index: 2;
+}
+
+.login-logo-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 8px 14px; margin-bottom: 48px;
+}
+.login-logo-dot {
+  width: 28px; height: 28px; background: var(--naranja); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px; color: #fff; letter-spacing: -0.5px;
+}
+.login-logo-text {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); letter-spacing: 0.5px;
+}
+
+.login-headline {
+  font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 700;
+  color: #fff; line-height: 1.1; margin-bottom: 20px; position: relative; z-index: 2;
+}
+.login-headline em { color: var(--naranja); font-style: italic; font-weight: 400; }
+.login-desc {
+  font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.8;
+  max-width: 380px; position: relative; z-index: 2;
+}
+
+.login-features {
+  display: flex; flex-direction: column; gap: 14px;
+  position: relative; z-index: 2; margin-top: 48px;
+}
+.login-feature-item {
+  display: flex; align-items: center; gap: 12px;
+}
+.login-feature-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: rgba(196,67,42,0.15); border: 1px solid rgba(196,67,42,0.25);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  flex-shrink: 0;
+}
+.login-feature-text { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.4; }
+.login-feature-text strong { color: rgba(255,255,255,0.9); display: block; font-size: 13px; }
+
+
+/* Logos bar */
+.login-logos-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 44px; gap: 16px;
+}
+.login-logo-img {
+  object-fit: contain; border-radius: 6px;
+}
+.login-logo-cygnus {
+  height: 52px; width: auto; max-width: 180px;
+  background: transparent; padding: 0; border-radius: 0;
+}
+.login-logo-postula {
+  height: 52px; width: auto; max-width: 80px;
+  border-radius: 8px; padding: 2px;
+}
+
+.login-footer-left {
+  margin-top: auto; padding-top: 48px; position: relative; z-index: 2;
+  font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px;
+}
+
+.login-right {
+  width: 440px; display: flex; align-items: center; justify-content: center;
+  padding: 48px 40px; position: relative; z-index: 1;
+  background: #f5f2ee;
+}
+.login-card {
+  width: 100%; max-width: 360px;
+}
+.login-card-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--naranja); margin-bottom: 12px;
+}
+.login-card-title {
+  font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700;
+  color: var(--ink); margin-bottom: 6px; line-height: 1.2;
+}
+.login-card-sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft);
+  margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase;
+}
+.field input {
+  width: 100%; border: 1.5px solid #ddd8d2; border-radius: 8px;
+  padding: 12px 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--ink); outline: none; transition: all 0.15s;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.field input:focus { border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(196,67,42,0.08); }
+.btn-login {
+  width: 100%; padding: 14px; background: var(--naranja); color: #fff;
+  border: none; border-radius: 8px; font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+  transition: all 0.15s; letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(196,67,42,0.3);
+}
+.btn-login:hover { background: var(--naranja-dark); box-shadow: 0 6px 18px rgba(196,67,42,0.35); transform: translateY(-1px); }
+.btn-login:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(196,67,42,0.25); }
+.login-error {
+  background: #fdecea; color: var(--low); font-size: 12px;
+  padding: 10px 14px; border-radius: 8px; margin-top: 12px;
+  text-align: center; display: none; border: 1px solid rgba(192,57,43,0.2);
+}
+.login-security {
+  display: flex; align-items: center; gap: 6px; margin-top: 20px;
+  justify-content: center; font-size: 11px; color: var(--muted);
+}
+
+/* ══════════ APP LAYOUT ══════════ */
+#app-screen { display: none; }
+
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 220px;
+  background: var(--azul); display: flex; flex-direction: column;
+  z-index: 200; transition: transform 0.3s;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-brand-name {
+  font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 700;
+  color: #fff; line-height: 1;
+}
+.sidebar-brand-sub {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-top: 4px;
+}
+.sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
+}
+.nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-item.activo { background: var(--naranja); color: #fff; }
+.nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-footer {
+  padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+  border-radius: 8px;
+}
+.user-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--naranja); display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+}
+.user-name { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; flex: 1; }
+.btn-logout-sidebar {
+  background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.3);
+  font-size: 14px; padding: 4px; transition: color 0.15s;
+}
+.btn-logout-sidebar:hover { color: rgba(255,255,255,0.7); }
+
+.main-content { margin-left: 220px; min-height: 100vh; }
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 56px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+.topbar-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 600; color: var(--ink); }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+.page { padding: 24px 28px 60px; display: none; }
+.page.activo { display: block; }
+
+/* ══════════ STATS ══════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--naranja); opacity: 0;
+}
+.stat-card.accent::before { opacity: 1; }
+.stat-num {
+  font-family: 'Sora', sans-serif; font-size: 36px; font-weight: 700;
+  color: var(--ink); line-height: 1; margin-bottom: 4px;
+}
+.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
+.stat-icon { position: absolute; right: 16px; top: 16px; font-size: 22px; opacity: 0.15; }
+
+/* ══════════ CARDS / SECTIONS ══════════ */
+.card {
+  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); margin-bottom: 18px;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; color: var(--ink); }
+.card-body { padding: 20px; }
+
+/* ══════════ TABLA ══════════ */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); padding: 10px 14px;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+  background: var(--bg);
+}
+tbody td {
+  padding: 12px 14px; border-bottom: 1px solid #f2ede8;
+  font-size: 13px; vertical-align: middle;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #fdf9f6; }
+.td-nombre { font-weight: 600; color: var(--ink); }
+.td-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+/* BADGES */
+.badge {
+  display: inline-flex; align-items: center; padding: 3px 9px;
+  border-radius: 20px; font-size: 10px; font-weight: 700;
+  letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+}
+.badge-ic { background: #e8f0fa; color: #1a4a9a; }
+.badge-ceal { background: #f0e8fa; color: #5a1a9a; }
+.badge-16pf { background: #e8f5ee; color: #1a6a4a; }
+.badge-ipv { background: var(--mid-bg); color: var(--mid); }
+.badge-wonderlic { background: #fce8e8; color: #8a1a1a; }
+.badge-alto { background: var(--high-bg); color: var(--high); }
+.badge-promedio, .badge-medio { background: var(--mid-bg); color: var(--mid); }
+.badge-bajo { background: var(--low-bg); color: var(--low); }
+.badge-enviado { background: var(--high-bg); color: var(--high); }
+.badge-pendiente { background: var(--mid-bg); color: var(--mid); }
+
+/* BOTONES */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--naranja); color: #fff; }
+.btn-primary:hover { background: var(--naranja-dark); }
+.btn-secondary { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-ghost { background: none; color: var(--muted); border: 1px solid var(--border); }
+.btn-ghost:hover { color: var(--ink); background: var(--bg); }
+.btn-sm { padding: 5px 12px; font-size: 11px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* FILTROS */
+.filtros-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.filtro-select, .filtro-input {
+  border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--ink);
+  background: var(--white); outline: none;
+}
+.filtro-select:focus, .filtro-input:focus { border-color: var(--naranja); }
+.filtro-input { flex: 1; min-width: 180px; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 600; color: var(--ink-soft); letter-spacing: 0.3px; }
+.form-group input, .form-group select {
+  border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: var(--ink);
+  background: var(--white); outline: none; transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(196,67,42,0.07);
+}
+
+/* ALERT */
+.alert { padding: 10px 14px; border-radius: 7px; font-size: 13px; margin-top: 12px; display: none; }
+.alert-ok { background: var(--high-bg); color: var(--high); border: 1px solid rgba(42,110,71,0.2); }
+.alert-err { background: var(--low-bg); color: var(--low); border: 1px solid rgba(192,57,43,0.2); }
+
+/* SPINNER */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* EMPTY */
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-state-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-text { font-size: 14px; }
+
+/* GRAFICO MINI */
+.grafico-barras { display: flex; gap: 12px; align-items: flex-end; height: 100px; padding: 0 4px; }
+.grafico-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.grafico-num { font-size: 12px; font-weight: 700; color: var(--ink); }
+.grafico-barra-wrap { width: 100%; display: flex; align-items: flex-end; height: 72px; }
+.grafico-barra { width: 100%; border-radius: 4px 4px 0 0; background: var(--naranja); opacity: 0.8; transition: opacity 0.2s, height 0.5s ease; }
+.grafico-barra:hover { opacity: 1; cursor: default; }
+.grafico-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .main-content { margin-left: 0; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .login-left { display: none; }
+  .login-right { width: 100%; }
+}
+
+.ranking-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.ranking-item:last-child { border-bottom:none; }
+.ranking-num {
+  font-family: 'Sora', sans-serif; font-size:20px; font-weight:700;
+  color:var(--muted); min-width:28px;
+}
+.ranking-num.gold { color:#c9a227; }
+.ranking-num.silver { color:#8a9bb0; }
+.ranking-num.bronze { color:#c4732a; }
+.ranking-info { flex:1; }
+.ranking-nombre { font-size:13px; font-weight:600; color:var(--ink); }
+.ranking-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+.ranking-badge { font-size:10px; font-weight:700; padding:3px 8px; border-radius:10px; }
+
+.pendiente-item {
+  display:flex; align-items:center; gap:12px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.pendiente-item:last-child { border-bottom:none; }
+.pendiente-dias {
+  background:var(--mid-bg); color:var(--mid); border-radius:6px;
+  padding:4px 8px; font-size:11px; font-weight:700; white-space:nowrap;
+}
+.pendiente-dias.urgente { background:var(--low-bg); color:var(--low); }
+
+.tasa-wrap { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.tasa-num { font-family:'Sora',sans-serif; font-size:48px; font-weight:700; color:var(--naranja); line-height:1; }
+.tasa-desc { font-size:13px; color:var(--muted); line-height:1.5; }
+.tasa-bar-wrap { height:8px; background:var(--border); border-radius:4px; margin-top:8px; }
+.tasa-bar { height:100%; border-radius:4px; background:var(--naranja); transition:width 0.5s; }
+
+/* ══════════ MODAL INFORME IC ══════════ */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(26,20,16,0.5); align-items: center; justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.activo { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 12px; width: 100%; max-width: 680px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.modal-header-title { font-family: "Sora",sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); }
+.modal-header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.modal-close { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--muted); padding: 4px 8px; border-radius: 6px; }
+.modal-close:hover { background: var(--bg); color: var(--ink); }
+.modal-body { padding: 24px; }
+.ic-categoria-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px; margin-bottom: 20px;
+}
+.ic-cat-adecuado { background: var(--high-bg); color: var(--high); }
+.ic-cat-regular   { background: var(--mid-bg);  color: var(--mid);  }
+.ic-cat-inferior  { background: var(--low-bg);  color: var(--low);  }
+.ic-stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+.ic-stat { background: var(--bg); border-radius: 8px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+.ic-stat-num { font-family: "Sora",sans-serif; font-size: 24px; font-weight: 700; color: var(--ink); }
+.ic-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.ic-resumen {
+  background: var(--bg); border-radius: 8px; padding: 16px 18px;
+  border-left: 4px solid var(--naranja); margin-bottom: 20px;
+}
+.ic-resumen-title { font-size: 11px; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.ic-resumen-text { font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
+.ic-barra-wrap { margin-bottom: 16px; }
+.ic-barra-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.ic-barra-bg { height: 8px; background: var(--border); border-radius: 4px; }
+.ic-barra-fill { height: 100%; border-radius: 4px; background: var(--naranja); transition: width 0.6s ease; }
+
+@media print {
+  body > * { display: none !important; }
+  #modal-ic.activo { display: block !important; }
+  #modal-ceal.activo { display: block !important; }
+  #modal-ic:not(.activo) { display: none !important; }
+  #modal-ceal:not(.activo) { display: none !important; }
+  .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
+  .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
+  .modal-close, .btn-primary { display: none !important; }
+  .modal-header { position: static !important; }
+}
+
+/* ══════════ MODAL INFORME CEAL ══════════ */
+.ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
+.ceal-est-integrado  { background:var(--high-bg);color:var(--high); }
+.ceal-est-relacionado{ background:var(--mid-bg);color:var(--mid); }
+.ceal-est-autoritario{ background:var(--mid-bg);color:var(--mid); }
+.ceal-est-separado   { background:var(--low-bg);color:var(--low); }
+.ceal-efect-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px; }
+.ceal-efect-alto  { background:var(--high-bg);color:var(--high); }
+.ceal-efect-medio { background:var(--mid-bg);color:var(--mid); }
+.ceal-efect-bajo  { background:var(--low-bg);color:var(--low); }
+.ceal-puntaje-wrap { display:flex;align-items:center;gap:12px;margin-bottom:20px; }
+.ceal-puntaje-num { font-family:"Sora",sans-serif;font-size:36px;font-weight:800;color:var(--ink); }
+.ceal-puntaje-lbl { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px; }
+
+/* ══ CHECK TESTS ══ */
+.check-test-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 8px; cursor: pointer;
+  border: 1.5px solid var(--border); background: #fff;
+  font-size: 13px; color: var(--ink); font-weight: 500;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.check-test-label:hover { border-color: var(--naranja); }
+.check-test-label input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; }
+.check-test-label:has(input:checked) { border-color: var(--naranja); background: #fdf3f1; color: var(--naranja); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+
+  <!-- LADO IZQUIERDO — Branding Cygnus -->
+  <div class="login-left">
+    <div class="login-logo-area">
+      <!-- Barra de logos superior -->
+      <div class="login-logos-bar">
+        <img src="data:image/jpeg;base64,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" alt="Grupo Cygnus" class="login-logo-img login-logo-cygnus">
+        
+      </div>
+      <h1 class="login-headline">Plataforma de<br><em>Evaluaciones</em><br>Psicolaborales</h1>
+      <p class="login-desc">Gestiona, envía y analiza evaluaciones psicolaborales de tus candidatos desde un solo lugar.</p>
+      <div class="login-features">
+        <div class="login-feature-item">
+          <div class="login-feature-icon">📋</div>
+          <div class="login-feature-text">
+            <strong>Tests psicolaborales online</strong>
+            Evaluación de Personalidad, Perfil Comercial, Habilidad Cognitiva y más
+          </div>
+        </div>
+        <div class="login-feature-item">
+          <div class="login-feature-icon">🎙️</div>
+          <div class="login-feature-text">
+            <strong>Entrevista por competencias</strong>
+            Metodología STAR con análisis conductual
+          </div>
+        </div>
+        <div class="login-feature-item">
+          <div class="login-feature-icon">📊</div>
+          <div class="login-feature-text">
+            <strong>Reportes e informes descargables</strong>
+            PDF con análisis ejecutivo integrado
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="login-footer-left">© 2026 Grupo Cygnus · PostulaAquí · Evaluaciones Psicolaborales</div>
+  </div>
+
+  <!-- LADO DERECHO — Formulario -->
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-card-eyebrow">Acceso restringido</div>
+      <div class="login-card-title">Bienvenido/a</div>
+      <div class="login-card-sub">Ingresa tus credenciales para acceder a la plataforma de evaluaciones.</div>
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" id="inp-user" placeholder="Ingresa tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="inp-pass" placeholder="••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn-login" onclick="login()">Ingresar →</button>
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos. Verifica tus credenciales.</div>
+      <div class="login-security">🔒 Acceso seguro · Solo personal autorizado</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="app-screen">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">PostulaAquí</div>
+      <div class="sidebar-brand-sub">Evaluaciones · Cygnus</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item activo" onclick="irA('panel')">
+        <span class="nav-icon">📊</span> Panel
+      </div>
+      <div class="nav-item" onclick="irA('candidatos')">
+        <span class="nav-icon">📁</span> Reporte Tests
+      </div>
+      <div class="nav-item" onclick="irA('entrevistas')">
+        <span class="nav-icon">🎙️</span> Reporte Entrevistas
+      </div>
+      <div class="nav-item" onclick="irA('enviar')">
+        <span class="nav-icon">📧</span> Enviar evaluación
+      </div>
+      <div class="nav-item" onclick="irA('enviar-entrevista')">
+        <span class="nav-icon">🎤</span> Enviar entrevista
+      </div>
+      <div class="nav-item" onclick="irA('historial')">
+        <span class="nav-icon">📋</span> Historial
+      </div>
+      <div class="nav-item" onclick="irA('tests')">
+        <span class="nav-icon">🧠</span> Tests disponibles
+      </div>
+      <div class="nav-item" onclick="irA('competencias')">
+        <span class="nav-icon">📐</span> Marco de competencias
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <div class="user-name" id="user-name">admin</div>
+        <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Panel principal</div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="cargarDatos()">↻ Actualizar</button>
+      </div>
+    </div>
+
+    <!-- PANEL -->
+    <div class="page activo" id="page-panel">
+      <div class="stats-grid">
+        <div class="stat-card accent">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num" id="st-total">—</div>
+          <div class="stat-lbl">Total evaluados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-num" id="st-hoy">—</div>
+          <div class="stat-lbl">Hoy</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📆</div>
+          <div class="stat-num" id="st-semana">—</div>
+          <div class="stat-lbl">Esta semana</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📧</div>
+          <div class="stat-num" id="st-enviados">—</div>
+          <div class="stat-lbl">Invitaciones enviadas</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Evaluaciones por test</div>
+          </div>
+          <div class="card-body">
+            <div class="grafico-barras" id="grafico-tests">
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ic">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ic" style="height:0px;"></div></div>
+                <div class="grafico-lbl">IC</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ceal">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ceal" style="height:0px;"></div></div>
+                <div class="grafico-lbl">CEAL</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-16pf">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-16pf" style="height:0px;"></div></div>
+                <div class="grafico-lbl">16PF</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-ipv">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ipv" style="height:0px;"></div></div>
+                <div class="grafico-lbl">IPV</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-wonderlic">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-wonderlic" style="height:0px;"></div></div>
+                <div class="grafico-lbl">WON</div>
+              </div>
+            </div>
+            <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Acceso rápido a tests</div>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:8px;">
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IC_V1_final.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IC — Instrucciones Complejas <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_CEAL.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">CEAL — Estilos de Liderazgo <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_16PF.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">16PF — Personalidad <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">IPV — Personalidad Vendedores <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Wonderlic — Habilidad Cognitiva <span>→</span></a>
+          </div>
+        </div>
+      </div>
+
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px;">
+        
+        <!-- TESTS PENDIENTES -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Tests pendientes</div>
+            <span id="num-pendientes" style="font-size:12px;color:var(--muted);"></span>
+          </div>
+          <div class="card-body" id="lista-pendientes">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">Cargando...</div>
+          </div>
+        </div>
+
+        <!-- RANKING -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Top candidatos</div>
+          </div>
+          <div class="card-body" id="lista-ranking">
+            <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">Cargando...</div>
+          </div>
+        </div>
+
+        <!-- TASA DE COMPLETITUD -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Tasa de completitud</div>
+          </div>
+          <div class="card-body">
+            <div class="tasa-wrap">
+              <div class="tasa-num" id="tasa-pct">—</div>
+              <div class="tasa-desc">de los candidatos invitados<br>completaron su evaluación</div>
+            </div>
+            <div class="tasa-bar-wrap">
+              <div class="tasa-bar" id="tasa-bar" style="width:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px;">
+              <span style="font-size:12px;color:var(--muted);">Completados: <strong id="tasa-completados" style="color:var(--ink);">—</strong></span>
+              <span style="font-size:12px;color:var(--muted);">Enviados: <strong id="tasa-enviados" style="color:var(--ink);">—</strong></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Últimas evaluaciones</div>
+          <button class="btn btn-ghost btn-sm" onclick="irA('candidatos')">Ver todas →</button>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Candidato</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
+              <tbody id="tabla-recientes"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Cargando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CANDIDATOS -->
+    <div class="page" id="page-candidatos">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reporte Tests Psicolaborales</div>
+          <span id="count-label" style="font-size:12px;color:var(--muted);"></span>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="filtros-row">
+            <select class="filtro-select" id="filtro-test" onchange="filtrar()">
+              <option value="">Todos los tests</option>
+              <option value="IC">IC</option>
+              <option value="CEAL">CEAL</option>
+              <option value="16PF">16PF</option>
+              <option value="IPV">IPV</option>
+              <option value="WONDERLIC">Wonderlic</option>
+            </select>
+            <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
+            <tbody id="tabla-candidatos"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTE ENTREVISTAS -->
+    <div class="page" id="page-entrevistas">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reporte Entrevistas por Competencias</div>
+          <button class="btn btn-ghost btn-sm" onclick="cargarEntrevistas()">↻ Actualizar</button>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="filtros-row">
+            <input class="filtro-input" type="text" id="filtro-entrevista" placeholder="Buscar nombre o RUT..." oninput="filtrarEntrevistas()" style="max-width:300px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Candidato</th>
+                <th>RUT</th>
+                <th>Cargo</th>
+                <th>Fecha</th>
+                <th>Resultado</th>
+                <th>Informe</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-entrevistas">
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR -->
+    <div class="page" id="page-enviar">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Enviar evaluación a candidato</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>NOMBRE DEL CANDIDATO</label>
+              <input type="text" id="env-nombre" placeholder="Apellido Nombre">
+            </div>
+            <div class="form-group">
+              <label>EMAIL</label>
+              <input type="email" id="env-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>TESTS A ENVIAR <span style="color:var(--muted);font-weight:400;font-size:11px;">(selecciona uno o más)</span></label>
+              <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;">
+                <label class="check-test-label"><input type="checkbox" class="check-test" value="IC"> Test de Instrucciones Complejas</label>
+                <label class="check-test-label"><input type="checkbox" class="check-test" value="CEAL"> Test de Estilos de Liderazgo</label>
+                <label class="check-test-label"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</label>
+                <label class="check-test-label"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</label>
+                <label class="check-test-label"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</label>
+              </div>
+            </div>
+
+          </div>
+
+
+          <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
+            🔗 Link a enviar: <span id="link-url" style="color:var(--naranja);font-weight:500;"></span>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary" onclick="enviarEvaluacion()" id="btn-env">📧 Enviar invitación</button>
+          </div>
+          <div class="alert alert-ok" id="env-ok"></div>
+          <div class="alert alert-err" id="env-err"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ENVIAR ENTREVISTA -->
+    <div class="page" id="page-enviar-entrevista">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Enviar entrevista a candidato</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>NOMBRE DEL CANDIDATO</label>
+              <input type="text" id="ent-nombre" placeholder="Apellido Nombre">
+            </div>
+            <div class="form-group">
+              <label>EMAIL</label>
+              <input type="email" id="ent-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group">
+              <label>NIVEL DE CARGO</label>
+              <select id="ent-nivel" onchange="actualizarPreviewEntrevista()">
+                <option value="">Seleccionar nivel...</option>
+                <option value="Operativo">Operativo — 4 competencias</option>
+                <option value="Administrativo">Administrativo — 5 competencias</option>
+                <option value="Comercial">Comercial — 5 competencias</option>
+                <option value="Profesional">Profesional / Especialista — 5 competencias</option>
+                <option value="Jefatura">Jefatura — 5 competencias</option>
+                <option value="Gerencia">Gerencia — 5 competencias</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Info del nivel seleccionado -->
+          <div id="ent-nivel-info" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:14px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem;">Competencias a evaluar</div>
+            <div id="ent-nivel-competencias" style="font-size:13px;color:var(--ink);line-height:1.7;"></div>
+          </div>
+
+          <div id="ent-link-preview" style="display:none;">
+            <span id="ent-link-url"></span>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary" onclick="enviarEntrevistaDesdePlataforma()" id="btn-ent">📧 Enviar invitación</button>
+          </div>
+          <div class="alert alert-ok" id="ent-ok"></div>
+          <div class="alert alert-err" id="ent-err"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTS DISPONIBLES -->
+    <div class="page" id="page-tests">
+      <div style="max-width:860px;">
+
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">🧠 Tests Psicolaborales disponibles</div></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:0;">Cada evaluación mide dimensiones específicas del candidato. Se recomienda combinar tests cognitivos con tests de personalidad para obtener un perfil más completo.</p>
+        </div>
+
+        <!-- IC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">⚡</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Instrucciones Complejas</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 7 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitudes administrativas</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad de comprensión y ejecución de instrucciones complejas</strong> bajo presión de tiempo. Mide atención al detalle, velocidad de procesamiento y seguimiento de reglas múltiples simultáneas.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Atención</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Velocidad de procesamiento</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Comprensión lectora</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos administrativos, analistas, operadores, cualquier rol que requiera seguir procedimientos precisos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CEAL -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#e8f4ee;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧭</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Estilos de Liderazgo</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#e8f4ee;color:var(--high);">Liderazgo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 15-20 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en modelo situacional Hersey y Blanchard</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Identifica el <strong>estilo de liderazgo predominante</strong> del evaluado: Directivo, Persuasivo, Participativo o Delegativo. Basado en el modelo situacional de Hersey y Blanchard.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Estilo de liderazgo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a tareas</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#e8f4ee;color:var(--high);">Orientación a personas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: jefaturas, supervisores, gerentes y cualquier cargo con responsabilidad de equipos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16PF -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:#f0e8f8;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧩</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Evaluación de Personalidad</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#f0e8f8;color:#6a1e9a;">Personalidad</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 35-45 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en modelo de 16 factores de Cattell</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa <strong>16 factores primarios de personalidad</strong> agrupados en 5 dimensiones globales. Es uno de los instrumentos más usados y validados a nivel mundial para selección de personal. Basado en el modelo de 16 factores de Cattell.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Extraversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Ansiedad</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Dureza</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Independencia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:#f0e8f8;color:#6a1e9a;">Auto-control</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: todos los cargos. Especialmente útil en procesos de selección gerencial y profesional.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IPV -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--mid-bg);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💼</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Perfil de Personalidad Comercial</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--mid-bg);color:var(--mid);">Ventas</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 20-30 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitudes para ventas</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Mide las <strong>características de personalidad asociadas al perfil vendedor</strong>. Evalúa Dinamismo, Dominancia, Extroversión, Tolerancia, Autocontrol, entre otras dimensiones clave para el desempeño comercial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dinamismo</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Dominancia</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Extroversión</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--mid-bg);color:var(--mid);">Autocontrol</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: ejecutivos de ventas, representantes comerciales, KAM, promotores y cargos de atención al cliente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WONDERLIC -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:flex-start;gap:1.25rem;">
+            <div style="width:48px;height:48px;border-radius:10px;background:var(--azul-soft);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🎯</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap;">
+                <h3 style="font-size:16px;font-weight:600;">Test de Habilidad Cognitiva General</h3>
+                <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--azul-soft);color:var(--azul);">Cognitivo</span>
+                <span style="font-size:11px;color:var(--muted);">⏱ 12 minutos</span>
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">Basado en metodología de aptitud mental</span>
+              </div>
+              <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad cognitiva general</strong> — habilidad para aprender, adaptarse y resolver problemas. Incluye razonamiento verbal, numérico y abstracto. Es uno de los test cognitivos más utilizados en selección de personal a nivel mundial.</p>
+              <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento verbal</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Razonamiento numérico</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--azul-soft);color:var(--azul);">Resolución de problemas</span>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos técnicos, profesionales, gerenciales y cualquier rol que requiera alta capacidad de aprendizaje.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- MARCO DE COMPETENCIAS -->
+    <div class="page" id="page-competencias">
+      <div style="max-width:860px;">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">📐 Marco de Competencias por Nivel de Cargo</div></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.7;padding:16px 20px;margin:0;">Basado en el diccionario de competencias de Martha Alles. Cada nivel tiene un set específico de competencias conductuales medidas mediante metodología STAR en la entrevista por competencias.</p>
+        </div>
+<div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f0fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔧</div><div><div style="font-size:16px;font-weight:700;color:#1a4a9a;margin-bottom:2px;">Operativo</div><div style="font-size:11px;color:#1a4a9a;opacity:0.6;">Operador, auxiliar, bodeguero, conductor</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a4a9a;">4 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de tareas, manejo de errores y aprendizaje.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a la seguridad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación y prevención de riesgos en el trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Coordinación y colaboración con pares en terreno.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión y prolijidad en la ejecución de tareas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#f0e8fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📄</div><div><div style="font-size:16px;font-weight:700;color:#5a1a9a;margin-bottom:2px;">Administrativo</div><div style="font-size:11px;color:#5a1a9a;opacity:0.6;">Secretaria, recepcionista, asistente, digitador</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#5a1a9a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo efectivo de información y relaciones interpersonales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento y manejo de errores con integridad.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión en tareas administrativas y documentación.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración interdepartamental y apoyo a otros.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Flexibilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Adaptación a cambios de prioridades y situaciones nuevas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fce8e8;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💼</div><div><div style="font-size:16px;font-weight:700;color:#8a1a1a;margin-bottom:2px;">Comercial</div><div style="font-size:11px;color:#8a1a1a;opacity:0.6;">Vendedor, ejecutivo comercial, promotor, KAM</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a1a1a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación al cliente</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Comprensión y satisfacción de necesidades del cliente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de metas y cuotas comerciales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Persuasión e influencia</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Capacidad de convencer y negociar efectivamente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Prospección autónoma e identificación de oportunidades.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo bajo presión</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de cuotas, rechazos y plazos ajustados.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f5ee;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔬</div><div><div style="font-size:16px;font-weight:700;color:#1a6a4a;margin-bottom:2px;">Profesional / Especialista</div><div style="font-size:11px;color:#1a6a4a;opacity:0.6;">Analista financiero, analista de selección, técnico especialista</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a6a4a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de objetivos técnicos y entregables.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación proactiva de mejoras y problemas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Presentación clara de análisis, reportes e informes.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de errores, autonomía y aprendizaje continuo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión eficiente de múltiples tareas y plazos.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fef3e2;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👥</div><div><div style="font-size:16px;font-weight:700;color:#8a4a00;margin-bottom:2px;">Mando Medio</div><div style="font-size:11px;color:#8a4a00;opacity:0.6;">Encargado, coordinador, supervisor, jefe de área</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a4a00;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción y motivación de equipos de trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración y articulación entre áreas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión operativa, plazos y recursos.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Transmisión efectiva de información en todos los niveles.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Toma de decisiones</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Resolución en situaciones complejas con información incompleta.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#1e2d3d;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏢</div><div><div style="font-size:16px;font-weight:700;color:#ffffff;margin-bottom:2px;">Gerencia</div><div style="font-size:11px;color:#ffffff;opacity:0.6;">Gerente, subgerente, director, VP</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#ffffff;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Visión de negocio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Lectura del entorno, oportunidades y amenazas estratégicas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción estratégica de equipos y organizaciones.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Pensamiento estratégico</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Planificación a largo plazo y decisiones complejas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">KPIs, metas organizacionales e impacto en el negocio.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Gestión del cambio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Liderazgo de transformaciones e innovación organizacional.</div></div></div></div></div>
+      </div>
+    </div>
+    <!-- HISTORIAL -->
+    <div class="page" id="page-historial">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Historial de envíos</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input class="filtro-input" id="filtro-historial" placeholder="Buscar por nombre o email..." oninput="filtrarHistorial()" style="max-width:260px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Test</th>
+                <th>Fecha envío</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-historial">
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const APPS_URL = "https://script.google.com/macros/s/AKfycbx2YAyhAOswTezb8XEq6thtdwbIX3W9t0XYls0T753gMxmPsac-XwGQbyFpjeJjZ7Ut7g/exec";
+const BASE = "https://evaluaciones-rrhh.github.io/evaluaciones/";
+const TESTS_LINKS = {
+  IC: BASE+"TEST_IC_V1_final.html",
+  CEAL: BASE+"TEST_CEAL.html",
+  "16PF": BASE+"TEST_16PF.html",
+  IPV: BASE+"TEST_IPV.html",
+  WONDERLIC: BASE+"TEST_WONDERLIC.html",
+  ENTREVISTA: BASE+"TEST_ENTREVISTA.html"
+};
+const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
+const DASH_HTML = {
+  "16PF":    BASE+"dashboard.html",
+  IPV:       BASE+"dashboard_ipv.html",
+  WONDERLIC: BASE+"dashboard_wonderlic.html",
+  IC:        "inline",
+  CEAL:      "inline"
+};
+// Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
+
+var usuarioActual = "";
+var todosLosDatos = [];
+var todosEnvios = [];
+
+// LOGIN SEGURO — valida contra Apps Script (contraseñas NO están en el HTML)
+async function login() {
+  var u = document.getElementById("inp-user").value.trim().toLowerCase();
+  var p = document.getElementById("inp-pass").value;
+  var u2 = u.replace(/@.*/,"");
+  if (!u2 || !p) return;
+
+  var btn = document.querySelector(".btn-login");
+  btn.textContent = "Verificando...";
+  btn.disabled = true;
+
+  try {
+    var resp = await fetch(APPS_URL + "?action=login&user=" + encodeURIComponent(u2) + "&pass=" + encodeURIComponent(p), {
+      method: "GET", redirect: "follow"
+    });
+    var texto = await resp.text();
+    var data = {}; var j = texto.indexOf("{");
+    if (j > -1) { try { data = JSON.parse(texto.slice(j)); } catch(e) {} }
+
+    if (data.ok === true) {
+      usuarioActual = u2;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app-screen").style.display = "block";
+      document.getElementById("user-name").textContent = u2;
+      document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
+      document.getElementById("login-error").style.display = "none";
+      cargarDatos();
+      cargarEntrevistas();
+    } else {
+      document.getElementById("login-error").style.display = "block";
+    }
+  } catch(err) {
+    document.getElementById("login-error").textContent = "Error de conexión: " + err.message;
+    document.getElementById("login-error").style.display = "block";
+  } finally {
+    btn.textContent = "Ingresar →";
+    btn.disabled = false;
+  }
+}
+function logout() {
+  document.getElementById("app-screen").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("inp-pass").value = "";
+}
+document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
+
+// NAVEGACION
+var paginaActual = "panel";
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", "enviar-entrevista":"Enviar entrevista", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias" };
+function irA(pag) {
+  document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
+  document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
+  document.getElementById("page-"+pag).classList.add("activo");
+  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
+  document.getElementById("topbar-title").textContent = titulos[pag];
+  paginaActual = pag;
+  if (pag === "historial") renderHistorial();
+}
+
+// CARGAR DATOS
+
+function renderPendientes(envios, completados) {
+  var hoy = new Date();
+  var pendientes = envios.filter(function(e) {
+    if (e.estado === "Enviado" || e.estado === "enviado") {
+      // Verificar si ya completó el test
+      var completo = completados.some(function(c) {
+        return c.nombre && e.nombre && c.nombre.toLowerCase() === e.nombre.toLowerCase() && c.test === e.test;
+      });
+      return !completo;
+    }
+    return false;
+  });
+
+  document.getElementById("num-pendientes").textContent = pendientes.length + " pendiente(s)";
+
+  if (!pendientes.length) {
+    document.getElementById("lista-pendientes").innerHTML = "<div style='color:var(--high);font-size:13px;text-align:center;padding:16px;'>✓ Sin pendientes</div>";
+    return;
+  }
+
+  var html = "";
+  pendientes.slice(0,5).forEach(function(e) {
+    var dias = 0;
+    try {
+      if (e.fecha) {
+        var partes = e.fecha.split("/");
+        var fechaEnvio = partes.length === 3 ? new Date(partes[2]+"-"+partes[1]+"-"+partes[0]) : new Date(e.fecha);
+        dias = isNaN(fechaEnvio) ? 0 : Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
+      }
+    } catch(ex) { dias = 0; }
+    var urgente = dias >= 3;
+    html += "<div class='pendiente-item'>" +
+      "<div style='flex:1'>" +
+        "<div style='font-size:13px;font-weight:600;color:var(--ink);'>" + (e.nombre||"—") + "</div>" +
+        "<div style='font-size:11px;color:var(--muted);margin-top:1px;'>" + (e.test||"") + " · " + (e.email||"") + "</div>" +
+      "</div>" +
+      "<div class='pendiente-dias" + (urgente?" urgente":"") + "'>" + (dias===0?"Hoy":dias===1?"1 día":dias+" días") + "</div>" +
+      "</div>";
+  });
+  document.getElementById("lista-pendientes").innerHTML = html;
+}
+
+function renderRanking(datos) {
+  if (!datos.length) {
+    document.getElementById("lista-ranking").innerHTML = "<div style='color:var(--muted);font-size:13px;text-align:center;padding:16px;'>Sin datos</div>";
+    return;
+  }
+
+  var niveles = { alto:3, superior:3, promedio:2, medio:2, bajo:1, inferior:1 };
+  var conPuntaje = datos.map(function(d) {
+    var niv = (d.nivel||"").toLowerCase();
+    var puntaje = 0;
+    Object.keys(niveles).forEach(function(k) { if(niv.includes(k)) puntaje = niveles[k]; });
+    return Object.assign({}, d, {puntaje:puntaje});
+  });
+  conPuntaje.sort(function(a,b){ return b.puntaje - a.puntaje; });
+
+  var html = "";
+  conPuntaje.slice(0,5).forEach(function(d, i) {
+    var numCls = i===0?"gold":i===1?"silver":i===2?"bronze":"";
+    var nivCls = d.puntaje===3?"badge-alto":d.puntaje===2?"badge-promedio":"badge-bajo";
+    html += "<div class='ranking-item'>" +
+      "<div class='ranking-num " + numCls + "'>#" + (i+1) + "</div>" +
+      "<div class='ranking-info'>" +
+        "<div class='ranking-nombre'>" + (d.nombre||"—") + "</div>" +
+        "<div class='ranking-sub'>" + (d.test||"") + " · " + (d.fecha||"") + "</div>" +
+      "</div>" +
+      (d.nivel ? "<span class='badge " + nivCls + "'>" + d.nivel + "</span>" : "") +
+      "</div>";
+  });
+  document.getElementById("lista-ranking").innerHTML = html;
+}
+
+function renderTasa(completados, enviados) {
+  var totalCompletados = Array.isArray(completados) ? completados.length : 0;
+  var totalEnviados = enviados && enviados.length ? enviados.length : 0;
+  var pct = totalEnviados > 0 ? Math.min(100, Math.round(totalCompletados / totalEnviados * 100)) : (totalCompletados > 0 ? 100 : 0);
+  document.getElementById("tasa-pct").textContent = pct + "%";
+  document.getElementById("tasa-bar").style.width = pct + "%";
+  document.getElementById("tasa-completados").textContent = totalCompletados;
+  document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
+}
+async function fetchJSON(url) {
+  var resp = await fetch(url, { method: "GET", redirect: "follow" });
+  var texto = await resp.text();
+  // Buscar inicio de JSON: puede ser objeto {} o array []
+  var jObj = texto.indexOf("{");
+  var jArr = texto.indexOf("[");
+  var j = (jArr > -1 && (jObj === -1 || jArr < jObj)) ? jArr : jObj;
+  if (j > -1) { try { return JSON.parse(texto.slice(j)); } catch(e) {} }
+  return {};
+}
+
+async function cargarDatos() {
+  // ── 1. Mostrar caché al instante ──
+  try {
+    var cache = localStorage.getItem("cygnus_cache");
+    if (cache) {
+      var cached = JSON.parse(cache);
+      todosLosDatos = cached.results || [];
+      todosEnvios   = cached.envios  || [];
+      pintarTodo();
+    }
+  } catch(x) {}
+
+  // ── 2. Lanzar ambos fetch en paralelo ──
+  try {
+    var promAll  = fetchJSON(APPS_URL + "?action=getAllResults&t=" + Date.now());
+    var promHist = fetchJSON(APPS_URL + "?action=getHistorial&t="  + Date.now());
+
+    // getHistorial (1 hoja) llega primero → pintar envíos rápido
+    promHist.then(function(dataH) {
+      if (Array.isArray(dataH.envios) && dataH.envios.length > todosEnvios.length) {
+        todosEnvios = dataH.envios;
+        document.getElementById("st-enviados").textContent = todosEnvios.length;
+        actualizarStats();
+        try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+        try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
+        renderHistorial();
+      }
+    }).catch(function(){});
+
+    // getAllResults (6 hojas) llega después → pintar todo completo
+    var dataR = await promAll;
+    todosLosDatos = dataR.results || [];
+    var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
+    if (enviosR.length > todosEnvios.length) todosEnvios = enviosR;
+
+    // Guardar caché
+    try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
+
+    pintarTodo();
+
+  } catch(e) {
+    console.error("cargarDatos:", e.message);
+    if (!todosLosDatos.length) {
+      document.getElementById("st-total").textContent    = "!";
+      document.getElementById("st-enviados").textContent = "!";
+    }
+  }
+}
+
+function pintarTodo() {
+  actualizarStats();
+  renderRecientes();
+  filtrar();
+  renderRanking(todosLosDatos);
+  document.getElementById("st-enviados").textContent = todosEnvios.length;
+  try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
+  try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
+  renderHistorial();
+}
+
+
+function parseFechaCL(str) {
+  // Acepta "21-05-2026", "21/05/2026", ISO y Date nativa
+  if (!str) return null;
+  var s = String(str).trim();
+  // formato dd-mm-yyyy o dd/mm/yyyy
+  var m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+  // ISO o cualquier otro
+  var d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+
+function actualizarStats() {
+  var ahora = new Date();
+  var dd    = String(ahora.getDate()).padStart(2,"0");
+  var mm    = String(ahora.getMonth()+1).padStart(2,"0");
+  var hoyStr = dd + "-" + mm + "-" + ahora.getFullYear();
+  var semana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+  semana.setDate(semana.getDate()-7);
+
+  document.getElementById("st-total").textContent = todosLosDatos.length;
+
+  // Hoy y Esta semana = tests completados
+  document.getElementById("st-hoy").textContent = todosLosDatos.filter(function(d){
+    return (d.fecha || "").trim() === hoyStr;
+  }).length;
+
+  document.getElementById("st-semana").textContent = todosLosDatos.filter(function(d){
+    var f = parseFechaCL(d.fecha);
+    return f && f >= semana;
+  }).length;
+  // Gráfico barras
+  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC"];
+  var conteos = {};
+  tests.forEach(function(t){ conteos[t] = todosLosDatos.filter(function(d){ return d.test===t; }).length; });
+  var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
+  tests.forEach(function(t){
+    var key = t.toLowerCase();
+    var bar = document.getElementById("bar-"+key);
+    var num = document.getElementById("num-"+key);
+    var px  = maxC > 0 ? Math.round((conteos[t]/maxC)*72) : 0;
+    if (bar) bar.style.height = (conteos[t] > 0 ? Math.max(px, 8) : 0) + "px";
+    if (num) { num.textContent = conteos[t]; num.style.visibility = conteos[t] > 0 ? "visible" : "hidden"; }
+  });
+  var ctEl = document.getElementById("conteos-tests");
+  if(ctEl) ctEl.innerHTML = tests.map(function(t){
+    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> "+t+"</span>";
+  }).join(" &nbsp;·&nbsp; ");
+}
+
+function renderTablaComun(datos, tbodyId, cols) {
+  var tbody = document.getElementById(tbodyId);
+  if (!datos.length) {
+    tbody.innerHTML = "<tr><td colspan='"+cols+"' style='text-align:center;padding:32px;color:var(--muted);'>Sin evaluaciones registradas</td></tr>";
+    return;
+  }
+  var html = "";
+  datos.forEach(function(d) {
+    var testCls = "badge-"+(d.test||"").toLowerCase().replace("pf","pf").replace("wonderlic","wonderlic");
+    var niv = (d.nivel||"").toLowerCase();
+    var nivCls = niv.includes("alto")||niv.includes("sup")?"badge-alto":niv.includes("bajo")||niv.includes("inf")?"badge-bajo":"badge-promedio";
+    var dashUrl = DASH_HTML[d.test];
+    var btnVer = dashUrl
+      ? "<button class='btn btn-ghost btn-sm' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver informe</button>"
+      : "<span style='color:var(--muted);font-size:11px;'>—</span>";
+    if(cols===5) {
+      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+    } else {
+      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+    }
+  });
+  tbody.innerHTML = html;
+}
+
+function renderRecientes() {
+  var recientes = todosLosDatos.slice().reverse().slice(0,8);
+  renderTablaComun(recientes, "tabla-recientes", 5);
+}
+
+function filtrar() {
+  var test = document.getElementById("filtro-test").value;
+  var nombre = (document.getElementById("filtro-nombre").value||"").toLowerCase();
+  var filtered = todosLosDatos.filter(function(d){
+    return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
+  });
+  document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
+  renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
+}
+
+// HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
+var TEST_NOMBRES_HTML = {
+  IC: "Test de Instrucciones Complejas",
+  CEAL: "Test de Estilos de Liderazgo",
+  "16PF": "Evaluación de Personalidad",
+  IPV: "Perfil de Personalidad Comercial",
+  WONDERLIC: "Test de Habilidad Cognitiva General"
+};
+
+function procesarEnvios(data) {
+  todosEnvios = data.envios || [];
+  var stEl = document.getElementById("st-enviados");
+  if (stEl) stEl.textContent = todosEnvios.length;
+  renderPendientes(todosEnvios, todosLosDatos);
+  renderTasa(todosLosDatos, todosEnvios);
+  renderHistorial();
+}
+
+function cargarHistorial() {
+  renderHistorial();
+}
+
+function filtrarHistorial() {
+  var q = (document.getElementById("filtro-historial").value || "").toLowerCase();
+  var filtrado = todosEnvios.filter(function(e) {
+    return (e.nombre || "").toLowerCase().includes(q)
+        || (e.email  || "").toLowerCase().includes(q)
+        || (e.test   || "").toLowerCase().includes(q);
+  });
+  _pintarTablaHistorial(filtrado);
+}
+
+function renderHistorial() {
+  _pintarTablaHistorial(todosEnvios);
+}
+
+function _pintarTablaHistorial(envios) {
+  var tbl = document.getElementById("tabla-historial");
+  if (!tbl) return;
+  if (!envios || !envios.length) {
+    tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+    return;
+  }
+  var html = "";
+  envios.slice().reverse().forEach(function(e) {
+    var testCls = "badge-" + (e.test || "").toLowerCase().replace("16pf","16pf");
+    var testNombre = TEST_NOMBRES_HTML[e.test] || e.test || "—";
+    var estCls = (e.estado || "").toLowerCase() === "enviado" ? "badge-enviado" : "badge-pendiente";
+    html += "<tr>"
+      + "<td class='td-nombre'>" + (e.nombre || "—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (e.email  || "—") + "</td>"
+      + "<td><span class='badge " + testCls + "'>" + testNombre + "</span></td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (e.fecha  || "—") + "</td>"
+      + "<td><span class='badge " + estCls + "'>" + (e.estado || "—") + "</span></td>"
+      + "</tr>";
+  });
+  tbl.innerHTML = html;
+}
+// ENVIAR
+async function abrirDash(test, rut, nombre) {
+  var dashUrl = DASH_HTML[test];
+  if (!dashUrl) { alert("Este test no tiene dashboard disponible aún."); return; }
+
+  // IC — cargar datos completos desde getDatosIC
+  if (test === "IC") {
+    var rutDec = decodeURIComponent(rut || "");
+    var nomDec = decodeURIComponent(nombre || "");
+    try {
+      var dataIC = await fetchJSON(APPS_URL + "?action=getDatosIC&t=" + Date.now());
+      var filas  = Array.isArray(dataIC) ? dataIC : [];
+      console.log("getDatosIC filas:", filas.length, "rut:", rutDec, "nombre:", nomDec);
+      // Buscar la fila del candidato
+      // Estructura: [fecha,nombre,rut,correctas,errores,omisiones,pb,percentil,categoria]
+      // Normalizar RUT quitando puntos y espacios para comparar
+      function normRut(s){ return String(s||"").replace(/[\.\s]/g,"").toLowerCase(); }
+      function normNom(s){ return String(s||"").trim().toLowerCase(); }
+      var rutNorm = normRut(rutDec);
+      var nomNorm = normNom(nomDec);
+      var fila = filas.find(function(r){
+        var rMatch = rutNorm && normRut(r[2]) === rutNorm;
+        var nMatch = nomNorm && normNom(r[1]) === nomNorm;
+        return rMatch || nMatch;
+      });
+      if (!fila) {
+        // Si no encuentra exacto, buscar por nombre parcial
+        fila = filas.find(function(r){
+          return nomNorm && normNom(r[1]).includes(nomNorm.split(" ")[0]);
+        });
+      }
+      if (!fila) { alert("No se encontraron datos del candidato."); return; }
+      var d = {
+        fecha:     fila[0] || "",
+        nombre:    fila[1] || "",
+        rut:       fila[2] || "",
+        correctas: fila[3] || 0,
+        errores:   fila[4] || 0,
+        omisiones: fila[5] || 0,
+        pb:        fila[6] || 0,
+        percentil: fila[7] || 0,
+        nivel:     fila[8] || ""
+      };
+      abrirInformeIC(d);
+    } catch(e) {
+      alert("Error cargando datos IC: " + e.message);
+    }
+    return;
+  }
+
+  // CEAL
+  if (test === "CEAL") { abrirInformeCEAL(test, rut, nombre); return; }
+
+  var endpointMap = {
+    "16PF": "getDatos16PF",
+    IPV: "getDatosIPV",
+    WONDERLIC: "getDatosWONDERLIC"
+  };
+  
+  try {
+    // Primero limpiar localStorage anterior
+    localStorage.removeItem("dash_datos_" + test);
+    // Cargar datos
+    var resp = await fetch(APPS_URL + "?action=" + endpointMap[test], {redirect:"follow", credentials:"omit"});
+    var data = await resp.json();
+    // Guardar en localStorage
+    localStorage.setItem("dash_datos_" + test, JSON.stringify(data));
+    localStorage.setItem("dash_filtro_rut", rut || "");
+    localStorage.setItem("dash_filtro_nombre", nombre || "");
+    // Verificar que se guardó
+    var check = localStorage.getItem("dash_datos_" + test);
+    if (!check) { alert("Error guardando datos. Intenta de nuevo."); return; }
+    // Abrir dashboard después de guardar
+    window.open(dashUrl + "?t=" + Date.now(), "_blank");
+  } catch(e) {
+    alert("Error cargando datos: " + e.message);
+  }
+}
+
+function actualizarPreview() {
+  var test = document.getElementById("env-test").value;
+  var prev = document.getElementById("link-preview");
+  var cargoWrap = document.getElementById("env-cargo-wrap");
+
+  if (test && TESTS_LINKS[test]) {
+    document.getElementById("link-url").textContent = TESTS_LINKS[test];
+    prev.style.display = "none"; // oculto
+  } else {
+    prev.style.display = "none";
+  }
+}
+
+async async function enviarEvaluacion() {
+  var nombre = document.getElementById("env-nombre").value.trim();
+  var email  = document.getElementById("env-email").value.trim();
+  var okEl   = document.getElementById("env-ok");
+  var errEl  = document.getElementById("env-err");
+  okEl.style.display="none"; errEl.style.display="none";
+
+  // Recoger tests seleccionados
+  var testsSeleccionados = [];
+  document.querySelectorAll(".check-test:checked").forEach(function(cb){ testsSeleccionados.push(cb.value); });
+
+  if (!nombre || !email) {
+    errEl.textContent="Por favor completa nombre y email.";
+    errEl.style.display="block"; return;
+  }
+  if (testsSeleccionados.length === 0) {
+    errEl.textContent="Selecciona al menos un test.";
+    errEl.style.display="block"; return;
+  }
+
+  var btn = document.getElementById("btn-env");
+  btn.disabled=true;
+  btn.innerHTML="<span class='spinner'></span> Enviando...";
+
+  try {
+    // Enviar cada test seleccionado
+    for (var i = 0; i < testsSeleccionados.length; i++) {
+      var test = testsSeleccionados[i];
+      await fetch(APPS_URL, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:"", link:TESTS_LINKS[test]})
+      });
+    }
+
+    var nombresTests = testsSeleccionados.map(function(t){
+      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC"};
+      return nombres[t]||t;
+    }).join(", ");
+
+    okEl.textContent="✓ " + testsSeleccionados.length + " invitación(es) enviada(s) a " + email + " — Tests: " + nombresTests;
+    okEl.style.display="block";
+    document.getElementById("env-nombre").value="";
+    document.getElementById("env-email").value="";
+    document.querySelectorAll(".check-test:checked").forEach(function(cb){ cb.checked=false; });
+    document.getElementById("link-preview").style.display="none";
+    setTimeout(function(){ cargarDatos(); }, 3000);
+  } catch(e) {
+    errEl.textContent="Error: "+e.message;
+    errEl.style.display="block";
+  }
+  btn.disabled=false;
+  btn.innerHTML="📧 Enviar invitación";
+}
+
+var NIVELES_INFO = {
+  "Operativo": "Responsabilidad · Orientación a la seguridad · Trabajo en equipo · Orden y calidad del trabajo",
+  "Administrativo": "Comunicación · Responsabilidad · Orden y calidad · Trabajo en equipo · Flexibilidad",
+  "Comercial": "Orientación al cliente · Orientación a resultados · Persuasión · Iniciativa · Trabajo bajo presión",
+  "Profesional": "Orientación a resultados · Iniciativa · Comunicación · Responsabilidad · Planificación",
+  "Jefatura": "Liderazgo · Trabajo en equipo · Planificación · Comunicación · Toma de decisiones",
+  "Gerencia": "Visión de negocio · Liderazgo estratégico · Pensamiento estratégico · Orientación a resultados · Gestión del cambio",
+};
+
+function actualizarPreviewEntrevista() {
+  var nivel = document.getElementById('ent-nivel').value;
+  var infoEl = document.getElementById('ent-nivel-info');
+  var linkEl = document.getElementById('ent-link-preview');
+  if (nivel) {
+    document.getElementById('ent-nivel-competencias').textContent = NIVELES_INFO[nivel] || '';
+    infoEl.style.display = 'block';
+    document.getElementById('ent-link-url').textContent = BASE + 'TEST_ENTREVISTA.html?cargo=' + encodeURIComponent(nivel);
+    linkEl.style.display = 'none'; // oculto
+  } else {
+    infoEl.style.display = 'none';
+    linkEl.style.display = 'none';
+  }
+}
+
+async function enviarEntrevistaDesdePlataforma() {
+  var nombre = document.getElementById('ent-nombre').value.trim();
+  var email = document.getElementById('ent-email').value.trim();
+  var nivel = document.getElementById('ent-nivel').value;
+  var okEl = document.getElementById('ent-ok');
+  var errEl = document.getElementById('ent-err');
+  okEl.style.display = 'none'; errEl.style.display = 'none';
+
+  if (!nombre || !email || !nivel) {
+    errEl.textContent = 'Por favor completa nombre, email y nivel de cargo.';
+    errEl.style.display = 'block'; return;
+  }
+  var btn = document.getElementById('btn-ent');
+  btn.disabled = true;
+  btn.innerHTML = "<span class='spinner'></span> Enviando...";
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'enviarEntrevista', nombre: nombre, email: email, cargo: nivel, competencias: [] })
+    });
+    okEl.textContent = '✓ Entrevista enviada a ' + email + ' — Nivel: ' + nivel;
+    okEl.style.display = 'block';
+    document.getElementById('ent-nombre').value = '';
+    document.getElementById('ent-email').value = '';
+    document.getElementById('ent-nivel').value = '';
+    document.getElementById('ent-nivel-info').style.display = 'none';
+    document.getElementById('ent-link-preview').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.innerHTML = '🎤 Enviar entrevista';
+}
+
+// ══ REPORTE ENTREVISTAS ══
+var datosEntrevistas = [];
+
+async function cargarEntrevistas() {
+  try {
+    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas");
+    var d = await r.json();
+    datosEntrevistas = (d.entrevistas || []).slice().reverse();
+    renderTablaEntrevistas(datosEntrevistas);
+  } catch(e) {
+    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
+  }
+}
+
+function filtrarEntrevistas() {
+  var q = document.getElementById("filtro-entrevista").value.toLowerCase();
+  var filtrado = datosEntrevistas.filter(function(e) {
+    return (e.nombre||"").toLowerCase().includes(q) || (e.rut||"").toLowerCase().includes(q);
+  });
+  renderTablaEntrevistas(filtrado);
+}
+
+function renderTablaEntrevistas(lista) {
+  var tbody = document.getElementById("tabla-entrevistas");
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
+    return;
+  }
+
+  var GRADO_VAL = { A:4, B:3, C:2, D:1 };
+
+  tbody.innerHTML = lista.map(function(ent) {
+    // Calcular recomendación
+    var analisis = ent.analisis_star || [];
+    var cntA=0, cntB=0, cntC=0, cntD=0;
+    analisis.forEach(function(a) {
+      var g = a.analisis ? a.analisis.grado : 'D';
+      if (g==='A') cntA++; else if (g==='B') cntB++; else if (g==='C') cntC++; else cntD++;
+    });
+    var total = analisis.length;
+    var satisf = cntA + cntB;
+    var rec, recColor, recEmoji;
+
+    if (cntD >= 3 || cntD === total || (satisf === 0 && cntD >= 2)) {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    } else if (satisf >= Math.ceil(total * 0.6) && cntD <= 1) {
+      rec = 'Recomendado'; recColor = 'var(--high)'; recEmoji = '🟢';
+    } else if (satisf >= 1 && cntD <= 2) {
+      rec = 'Con reservas'; recColor = 'var(--mid)'; recEmoji = '🟡';
+    } else {
+      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
+    }
+
+    if (analisis.length === 0) { rec = 'Sin datos'; recColor = 'var(--muted)'; recEmoji = '⚪'; }
+
+    return '<tr>'
+      + '<td><strong>' + (ent.nombre||'—') + '</strong></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.rut||'—') + '</td>'
+      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.1);color:var(--naranja);">' + (ent.cargo||'—') + '</span></td>'
+      + '<td style="color:var(--muted);font-size:12px;">' + (ent.fecha||'—') + '</td>'
+      + '<td><span style="font-size:12px;font-weight:600;color:' + recColor + ';">' + recEmoji + ' ' + rec + '</span></td>'
+      + '<td><button class="btn btn-ghost btn-sm" onclick="verInformeEntrevista(' + JSON.stringify(ent).replace(/"/g,"&quot;") + ')">Ver informe</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function verInformeEntrevista(ent) {
+  localStorage.setItem('dash_entrevista', JSON.stringify(ent));
+  window.open(BASE + 'dashboard_entrevista.html', '_blank');
+}
+
+
+// ══════════ INFORME IC ══════════
+var IC_RESUMENES = {
+  "Muy alto": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "Excelente capacidad de concentración, precisión y control atencional. Presenta bajo nivel de error y alta consistencia en tareas que requieren foco y seguimiento detallado."
+  },
+  "Alto": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "Buen nivel de atención y precisión en la ejecución de tareas. Mantiene adecuada concentración y control operativo."
+  },
+  "Medio alto": {
+    cls: "ic-cat-adecuado", emoji: "✅",
+    texto: "Presenta adecuada capacidad atencional y nivel de precisión funcional para tareas operativas y administrativas habituales."
+  },
+  "Medio": {
+    cls: "ic-cat-regular", emoji: "⚠️",
+    texto: "Rendimiento atencional promedio. Puede desempeñarse adecuadamente en tareas estructuradas, aunque podría presentar fluctuaciones bajo presión o alta demanda."
+  },
+  "Medio bajo": {
+    cls: "ic-cat-regular", emoji: "⚠️",
+    texto: "Se observan dificultades moderadas en precisión y control atencional, pudiendo aumentar la probabilidad de errores en tareas repetitivas o de alto detalle."
+  },
+  "Bajo": {
+    cls: "ic-cat-inferior", emoji: "🔴",
+    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
+  },
+  "Deficiente": {
+    cls: "ic-cat-inferior", emoji: "🔴",
+    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
+  }
+};
+
+function abrirInformeIC(d) {
+  var cat = d.nivel || d.categoria || "";
+  var info = IC_RESUMENES[cat] || { cls: "ic-cat-regular", emoji: "📋", texto: "No se encontró interpretación para la categoría: " + cat };
+
+  document.getElementById("ic-modal-sub").textContent = (d.nombre || "—") + (d.rut ? "  ·  " + d.rut : "");
+
+  var badge = document.getElementById("ic-categoria-badge");
+  badge.className = "ic-categoria-badge " + info.cls;
+  badge.textContent = info.emoji + "  " + cat;
+
+  document.getElementById("ic-pb").textContent        = d.pb !== undefined ? d.pb : (d.correctas || "—");
+  document.getElementById("ic-percentil").textContent  = d.percentil || "—";
+  document.getElementById("ic-errores").textContent    = d.errores   || "0";
+  document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
+
+  // Percentil puede venir como "Pc 2" o número directo
+  var pct = parseInt(String(d.percentil || "0").replace(/[^0-9]/g, "")) || 0;
+  document.getElementById("ic-percentil-pct").textContent = "Percentil " + pct;
+  document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 99) + "%";
+
+  var barColor = info.cls === "ic-cat-adecuado" ? "var(--high)" : info.cls === "ic-cat-inferior" ? "var(--low)" : "var(--mid)";
+  document.getElementById("ic-barra-percentil").style.background = barColor;
+
+  document.getElementById("ic-resumen-texto").textContent = info.texto;
+  document.getElementById("ic-fecha").textContent = d.fecha || "—";
+
+  document.getElementById("modal-ic").classList.add("activo");
+  document.body.style.overflow = "hidden";
+}
+
+function imprimirInformeIC() {
+  window.print();
+}
+
+function cerrarModalIC() {
+  document.getElementById("modal-ic").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
+
+// ══════════ INFORME CEAL ══════════
+var CEAL_TEXTOS = {
+  "Integrado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad muy alto. Combina de manera sobresaliente el enfoque en resultados y tareas con una genuina preocupación por las personas y el equipo. Fija estándares elevados, motiva activamente a sus colaboradores y toma decisiones de manera participativa. Su capacidad para adaptarse a distintos contextos y generar compromiso colectivo lo posiciona como un líder altamente efectivo, capaz de sostener resultados de excelencia sin sacrificar el clima organizacional.",
+  "Integrado|Líder efectivo": "El candidato presenta un estilo de liderazgo Integrado con un buen nivel de efectividad. Equilibra adecuadamente el enfoque en tareas y resultados con el cuidado de las relaciones interpersonales. Promueve la participación, establece metas claras y genera un ambiente de trabajo colaborativo. Con un desarrollo sostenido de sus habilidades de liderazgo, tiene potencial para alcanzar niveles de desempeño aún más altos en roles de conducción.",
+  "Integrado|Normal": "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad promedio. Si bien muestra capacidad para equilibrar el foco en tareas y relaciones, aún existen áreas de mejora en la consistencia de su liderazgo. Puede desempeñarse bien en contextos estructurados, aunque podría beneficiarse de mayor desarrollo en habilidades de conducción para maximizar su impacto en el equipo.",
+  "Integrado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Integrado, sin embargo su nivel de efectividad actual es bajo. A pesar de contar con las bases conceptuales de un liderazgo equilibrado, no logra trasladar este estilo a resultados concretos. Se recomienda explorar las causas de esta brecha, ya que podrían estar asociadas a falta de experiencia, contexto organizacional adverso o necesidades de desarrollo específicas en habilidades de conducción.",
+  "Autoritario|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad muy alto. Se orienta fuertemente al cumplimiento de metas y resultados, ejerciendo una conducción directiva y estructurada. En contextos que requieren rapidez de respuesta, dirección clara y control de procesos, logra resultados sobresalientes. Se sugiere monitorear el impacto de este estilo en el clima y la motivación del equipo a largo plazo.",
+  "Autoritario|Líder efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un buen nivel de efectividad. Conduce con claridad, define roles y supervisa el cumplimiento de tareas de manera efectiva. Es especialmente útil en contextos de alta exigencia o con equipos que requieren dirección y estructura. Se recomienda desarrollar habilidades relacionales para complementar su perfil directivo y ampliar su impacto en diferentes tipos de equipos.",
+  "Autoritario|Normal": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad promedio. Si bien muestra una orientación clara hacia las tareas y el control, sus resultados de liderazgo son moderados. Podría estar generando resistencia en el equipo o no aprovechando plenamente el potencial de sus colaboradores. Se sugiere trabajar en el desarrollo de habilidades de comunicación y gestión de personas para mejorar su efectividad.",
+  "Autoritario|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad bajo. Su orientación al control y las tareas no está generando los resultados esperados, lo que podría estar asociado a dificultades en la gestión del equipo, clima organizacional deteriorado o resistencia de los colaboradores. Se recomienda una intervención de desarrollo en liderazgo que contemple el fortalecimiento de habilidades relacionales y de motivación.",
+  "Relacionado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad muy alto. Prioriza el bienestar del equipo, la armonía grupal y las relaciones interpersonales, logrando un clima de alta confianza y colaboración. En equipos maduros y automotivados, este estilo genera resultados excelentes. Se sugiere complementar con mayor foco en la definición de metas y seguimiento de resultados para maximizar el rendimiento del equipo.",
+  "Relacionado|Líder efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un buen nivel de efectividad. Muestra empatía, escucha activa y una genuina preocupación por las personas, generando equipos cohesionados y comprometidos. Para potenciar aún más su efectividad, se recomienda desarrollar mayor asertividad en la gestión del desempeño y la toma de decisiones difíciles.",
+  "Relacionado|Normal": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad promedio. Si bien genera buenas relaciones interpersonales, puede presentar dificultades para establecer límites claros, exigir resultados o tomar decisiones que impliquen tensión en el equipo. Se sugiere trabajar en el equilibrio entre el cuidado de las personas y el cumplimiento de objetivos organizacionales.",
+  "Relacionado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad bajo. La priorización de las relaciones por sobre los resultados no está generando el impacto esperado en el desempeño del equipo. Puede estar generando ambigüedad de roles o bajo rendimiento. Se recomienda desarrollar habilidades de conducción orientadas al logro y la gestión del desempeño.",
+  "Separado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad sorprendentemente alto. Aunque mantiene distancia tanto en lo relacional como en lo operativo, logra resultados positivos, posiblemente a través de una gestión técnica sólida o en contextos que valoran la autonomía. Se sugiere explorar en qué tipo de entornos específicos este estilo genera mayor impacto y si es sostenible a largo plazo.",
+  "Separado|Líder efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad aceptable. Tiende a mantener una postura distante en lo relacional y operativo, lo que puede funcionar en contextos técnicos o con equipos muy autónomos. Para ampliar su efectividad, se recomienda desarrollar mayor presencia y conexión con el equipo.",
+  "Separado|Normal": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad promedio. Su distancia tanto en tareas como en relaciones puede generar falta de dirección y desconexión en el equipo. Se recomienda trabajar activamente en el desarrollo de habilidades de liderazgo, tanto en la orientación a resultados como en la gestión de personas.",
+  "Separado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad bajo. Este perfil combina baja orientación a las tareas y baja orientación a las relaciones, lo que dificulta significativamente la conducción efectiva de equipos. Se recomienda una intervención de desarrollo integral en liderazgo antes de asumir roles de conducción de mayor responsabilidad."
+};
+
+async function abrirInformeCEAL(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut || "");
+  var nomDec = decodeURIComponent(nombre || "");
+  try {
+    var dataCEAL = await fetchJSON(APPS_URL + "?action=getDatosCEAL&t=" + Date.now());
+    var filas = Array.isArray(dataCEAL) ? dataCEAL : [];
+    function normStr(s){ return String(s||"").replace(/[.\s]/g,"").toLowerCase(); }
+    var fila = filas.find(function(r){ return normStr(r[2])===normStr(rutDec) || normStr(r[1])===normStr(nomDec); });
+    if (!fila) fila = filas.find(function(r){ return String(r[1]||"").toLowerCase().includes(nomDec.split(" ")[0].toLowerCase()); });
+    if (!fila) { alert("No se encontraron datos del candidato."); return; }
+
+    var estilo=String(fila[3]||"—"), descripcion=String(fila[4]||"—"), efectividad=String(fila[5]||"—");
+    var puntaje=fila[6]!==undefined?fila[6]:"—", fecha=String(fila[0]||"—");
+
+    document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
+
+    var estiloClsMap={"Integrado":"ceal-est-integrado","Relacionado":"ceal-est-relacionado","Autoritario":"ceal-est-autoritario","Separado":"ceal-est-separado"};
+    var estiloEmojiMap={"Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴"};
+    var badge=document.getElementById("ceal-estilo-badge");
+    badge.className="ceal-estilo-badge "+(estiloClsMap[estilo]||"ceal-est-autoritario");
+    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo;
+
+    var efectCls=efectividad.includes("muy")?"ceal-efect-alto":efectividad.includes("efectivo")&&!efectividad.includes("poco")?"ceal-efect-alto":efectividad==="Normal"?"ceal-efect-medio":"ceal-efect-bajo";
+    var efBadge=document.getElementById("ceal-efect-badge");
+    efBadge.className="ceal-efect-badge "+efectCls;
+    efBadge.textContent="Efectividad: "+efectividad;
+
+    document.getElementById("ceal-puntaje").textContent=puntaje;
+    var textoFinal=CEAL_TEXTOS[estilo+"|"+efectividad]||descripcion;
+    document.getElementById("ceal-descripcion").textContent=textoFinal;
+    document.getElementById("ceal-fecha").textContent=fecha;
+    document.getElementById("modal-ceal").classList.add("activo");
+    document.body.style.overflow="hidden";
+  } catch(e) { alert("Error cargando datos CEAL: "+e.message); }
+}
+
+function cerrarModalCEAL() {
+  document.getElementById("modal-ceal").classList.remove("activo");
+  document.body.style.overflow="";
+}
+function imprimirInformeCEAL() { window.print(); }
+
+</script>
+
+
+<!-- ══════════ MODAL INFORME IC ══════════ -->
+<div class="modal-overlay" id="modal-ic" onclick="if(event.target===this)cerrarModalIC()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">⚡ Informe — Test de Instrucciones Complejas</div>
+        <div class="modal-header-sub" id="ic-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirInformeIC()" style="gap:6px;">
+          ⬇ Descargar PDF
+        </button>
+        <button class="modal-close" onclick="cerrarModalIC()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <!-- Categoría -->
+      <div id="ic-categoria-badge" class="ic-categoria-badge">—</div>
+
+      <!-- Stats -->
+      <div class="ic-stats-grid">
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-pb">—</div>
+          <div class="ic-stat-lbl">Puntaje bruto</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-percentil">—</div>
+          <div class="ic-stat-lbl">Percentil</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-errores" style="color:var(--low);">—</div>
+          <div class="ic-stat-lbl">Errores</div>
+        </div>
+        <div class="ic-stat">
+          <div class="ic-stat-num" id="ic-omisiones" style="color:var(--mid);">—</div>
+          <div class="ic-stat-lbl">Omisiones</div>
+        </div>
+      </div>
+
+      <!-- Barra percentil -->
+      <div class="ic-barra-wrap">
+        <div class="ic-barra-label">
+          <span>Percentil</span>
+          <span id="ic-percentil-pct">—</span>
+        </div>
+        <div class="ic-barra-bg">
+          <div class="ic-barra-fill" id="ic-barra-percentil" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Resumen ejecutivo -->
+      <div class="ic-resumen">
+        <div class="ic-resumen-title">📋 Resumen ejecutivo</div>
+        <div class="ic-resumen-text" id="ic-resumen-texto">—</div>
+      </div>
+
+      <!-- Fecha -->
+      <div style="font-size:11px;color:var(--muted);text-align:right;">
+        Evaluación realizada el <span id="ic-fecha">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ MODAL INFORME CEAL ══════════ -->
+<div class="modal-overlay" id="modal-ceal" onclick="if(event.target===this)cerrarModalCEAL()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">🎯 Informe — Test de Estilos de Liderazgo</div>
+        <div class="modal-header-sub" id="ceal-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirInformeCEAL()">⬇ Descargar PDF</button>
+        <button class="modal-close" onclick="cerrarModalCEAL()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="ceal-estilo-badge" class="ceal-estilo-badge">—</div>
+      <div id="ceal-efect-badge" class="ceal-efect-badge">—</div>
+      <div class="ceal-puntaje-wrap">
+        <div>
+          <div class="ceal-puntaje-num" id="ceal-puntaje">—</div>
+          <div class="ceal-puntaje-lbl">Puntaje total</div>
+        </div>
+      </div>
+      <div class="ic-resumen">
+        <div class="ic-resumen-title">📋 Descripción del estilo</div>
+        <div class="ic-resumen-text" id="ceal-descripcion">—</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:right;">
+        Evaluación realizada el <span id="ceal-fecha">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
