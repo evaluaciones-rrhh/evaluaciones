@@ -518,6 +518,53 @@ tbody tr:hover td { background: #fdf9f6; }
   overflow: visible !important;
   position: relative !important;
 }
+
+/* ══════════ MODAL INFORME DISC ══════════ */
+.disc-modal-box { max-width: 760px; }
+.disc-header-perfil { display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
+.disc-perfil-card {
+  flex:1; min-width:200px; background:var(--bg); border-radius:10px;
+  padding:16px; border:1.5px solid var(--border);
+}
+.disc-perfil-title { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; }
+.disc-bars { display:flex; flex-direction:column; gap:6px; }
+.disc-bar-row { display:flex; align-items:center; gap:8px; }
+.disc-bar-label { font-size:11px; font-weight:700; width:14px; flex-shrink:0; }
+.disc-bar-bg { flex:1; height:10px; background:var(--border); border-radius:5px; overflow:hidden; }
+.disc-bar-fill { height:100%; border-radius:5px; transition:width 0.6s ease; }
+.disc-bar-d { background:#CC3333; }
+.disc-bar-i { background:#E8A020; }
+.disc-bar-s { background:#2E8B2E; }
+.disc-bar-c { background:#2563a8; }
+.disc-bar-pct { font-size:11px; color:var(--muted); width:32px; text-align:right; flex-shrink:0; }
+.disc-badge-perfil {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 14px; border-radius:8px; font-weight:700; font-size:13px; margin-bottom:6px;
+  background:var(--azul); color:#fff;
+}
+.disc-gap-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+.disc-gap-chip {
+  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;
+  display:flex; align-items:center; gap:5px;
+}
+.disc-gap-leve    { background:#e8f4ee; color:#2a6e47; }
+.disc-gap-moderado{ background:#fef3e0; color:#c07a00; }
+.disc-gap-alto    { background:#fdecea; color:#c0392b; }
+.disc-seccion { margin-bottom:20px; }
+.disc-seccion-title { font-size:11px; font-weight:700; color:var(--naranja); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
+.disc-seccion-body { font-size:13px; color:var(--ink-soft); line-height:1.75; }
+.disc-dos-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.disc-col-card { background:var(--bg); border-radius:8px; padding:14px; }
+.disc-col-title { font-size:11px; font-weight:700; margin-bottom:8px; }
+.disc-col-ok { color:var(--high); }
+.disc-col-dev { color:var(--low); }
+.disc-list { list-style:none; padding:0; margin:0; }
+.disc-list li { font-size:12px; color:var(--ink-soft); padding:3px 0; display:flex; gap:6px; }
+.disc-list li::before { content:"•"; color:var(--naranja); flex-shrink:0; }
+.disc-preguntas { background:#f9f6f2; border-radius:8px; padding:14px; }
+.disc-pregunta-item { font-size:12px; color:var(--ink-soft); padding:5px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; }
+.disc-pregunta-item:last-child { border-bottom:none; }
+.disc-pregunta-item::before { content:"?"; font-weight:700; color:var(--naranja); flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -708,6 +755,7 @@ tbody tr:hover td { background: #fdf9f6; }
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_16PF.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Evaluación de Personalidad <span>→</span></a>
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Perfil de Personalidad Comercial <span>→</span></a>
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Test de Habilidad Cognitiva General <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_DISC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Análisis de Estilo Conductual <span>→</span></a>
           </div>
         </div>
       </div>
@@ -870,6 +918,9 @@ tbody tr:hover td { background: #fdf9f6; }
                   </div>
                   <div class="multi-select-option" onclick="toggleTest(this)">
                     <input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual
                   </div>
                 </div>
               </div>
@@ -1114,7 +1165,8 @@ const TESTS_LINKS = {
   "16PF": BASE+"TEST_16PF.html",
   IPV: BASE+"TEST_IPV.html",
   WONDERLIC: BASE+"TEST_WONDERLIC.html",
-  ENTREVISTA: BASE+"TEST_ENTREVISTA.html"
+  ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
+  DISC:       BASE+"TEST_DISC.html"
 };
 const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
 const DASH_HTML = {
@@ -1122,7 +1174,8 @@ const DASH_HTML = {
   IPV:       BASE+"dashboard_ipv.html",
   WONDERLIC: BASE+"dashboard_wonderlic.html",
   IC:        "inline",
-  CEAL:      "inline"
+  CEAL:      "inline",
+  DISC:      "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -1549,6 +1602,9 @@ async function abrirDash(test, rut, nombre) {
   // CEAL
   if (test === "CEAL") { abrirInformeCEAL(test, rut, nombre); return; }
 
+  // DISC — modal inline
+  if (test === "DISC") { abrirInformeDISC(test, rut, nombre); return; }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -1611,7 +1667,7 @@ function toggleTest(el) {
   el.classList.toggle("checked", cb.checked);
   var sel = Array.from(document.querySelectorAll(".check-test:checked"));
   var label = document.getElementById("multi-label");
-  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General"};
+  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General",DISC:"Análisis de Estilo Conductual"};
   if (sel.length === 0) label.textContent = "Seleccionar tests...";
   else if (sel.length === 1) label.textContent = nombres[sel[0].value] || sel[0].value;
   else label.textContent = sel.length + " tests seleccionados";
@@ -1938,6 +1994,217 @@ function cerrarModalCEAL() {
 }
 function imprimirInformeCEAL() { window.print(); }
 
+
+// ══════════ INFORME DISC ══════════
+var DISC_PERFILES = {
+  "DI": {
+    caracteristicas: "Líder dinámico que combina orientación a resultados con habilidades para influir en las personas. Actúa con rapidez, toma decisiones con confianza y sabe cómo motivar a su entorno para alcanzar objetivos. Su energía conductual es alta tanto en el logro de metas como en la gestión de relaciones.",
+    atributos: "Decidido, persuasivo, competitivo, entusiasta, directo, orientado al cambio y a los resultados, sociable, emprendedor.",
+    motivadores: ["Proyectos desafiantes con impacto visible","Libertad para actuar y tomar decisiones","Reconocimiento por logros y resultados","Equipos que respondan con rapidez","Variedad y dinamismo en el trabajo"],
+    desmotivadores: ["Procesos lentos o burocráticos","Falta de reconocimiento","Tareas repetitivas sin propósito claro","Ambientes sin desafíos","Supervisión excesiva o microgestión"],
+    fortalezas: ["Capacidad para movilizar equipos hacia resultados","Visión clara y toma de decisiones ágil","Habilidad para vender ideas y generar entusiasmo","Alta tolerancia al riesgo y la incertidumbre","Energía sostenida en contextos de presión"],
+    areas_desarrollo: ["Tendencia a pasar por alto detalles importantes","Puede ser percibido como impaciente o impulsivo","Dificultad para escuchar antes de actuar","Puede descuidar el seguimiento de procesos","Riesgo de sobreestimar la capacidad del equipo"],
+    comunicacion: "Su comunicación es directa, enérgica y persuasiva. Prefiere mensajes concisos orientados a la acción. Puede ser muy convincente y motivador, aunque en ocasiones puede parecer poco receptivo a otros puntos de vista.",
+    decisiones: "Toma decisiones rápidamente, confiando en su intuición y experiencia. Prefiere actuar antes que esperar más información. Puede asumir riesgos calculados con naturalidad.",
+    preguntas: ["¿Cómo ha liderado equipos bajo presión de resultados?","¿Describe una situación donde tuviste que persuadir a otros para adoptar tu visión.","¿Cómo equilibras la necesidad de actuar rápido con la calidad del proceso?","¿Qué haces cuando el equipo no responde a tu ritmo?"]
+  },
+  "DC": {
+    caracteristicas: "Perfil orientado al logro con alto estándar de calidad. Combina la decisión y el enfoque en resultados con la precisión y el análisis. Su energía conductual se orienta a alcanzar objetivos de manera sistemática y eficiente.",
+    atributos: "Analítico, exigente, orientado a resultados, metódico, independiente, preciso, competitivo, autodisciplinado.",
+    motivadores: ["Desafíos intelectuales con criterios claros de éxito","Autonomía para planificar y ejecutar","Reconocimiento basado en resultados concretos","Trabajo que requiera rigor y análisis","Sistemas y procesos bien definidos"],
+    desmotivadores: ["Trabajo sin estándares claros","Ambientes caóticos o desorganizados","Falta de control sobre los procesos","Decisiones basadas en emociones sin datos","Interrupciones frecuentes al trabajo profundo"],
+    fortalezas: ["Capacidad analítica orientada a resultados","Alta exigencia personal y del equipo","Habilidad para identificar errores y oportunidades de mejora","Planificación rigurosa con foco en eficiencia","Autonomía y autogestión"],
+    areas_desarrollo: ["Puede ser percibido como frío o inflexible","Dificultad para aceptar errores propios","Puede generar tensión al exigir altos estándares","Tendencia al perfeccionismo que frena la acción","Baja tolerancia a la ambigüedad"],
+    comunicacion: "Comunicación directa, precisa y basada en datos. Prefiere los hechos por sobre las emociones. Puede ser conciso al punto de parecer distante. Valora la eficiencia en la comunicación.",
+    decisiones: "Decide basándose en análisis y datos. Evalúa las alternativas con cuidado antes de actuar. Puede ser cauteloso cuando la información es incompleta, pero firme una vez que decide.",
+    preguntas: ["¿Cómo abordas un problema complejo con información incompleta?","¿Describe una situación donde tuviste que mantener estándares de calidad bajo presión.","¿Cómo gestionas el equilibrio entre perfección y plazos?","¿Qué estrategias usas para tomar decisiones difíciles?"]
+  },
+  "IS": {
+    caracteristicas: "Perfil orientado a las personas, con alta capacidad relacional y estabilidad emocional. Combina entusiasmo social con lealtad y consistencia. Su energía conductual fluye con naturalidad en entornos colaborativos y de servicio a otros.",
+    atributos: "Sociable, empático, leal, colaborador, entusiasta, paciente, comunicativo, orientado al equipo.",
+    motivadores: ["Ambientes de trabajo positivos y colaborativos","Relaciones interpersonales significativas","Proyectos con impacto en las personas","Reconocimiento social y apreciación del equipo","Trabajo con propósito y valores compartidos"],
+    desmotivadores: ["Conflictos interpersonales no resueltos","Ambientes competitivos o agresivos","Cambios abruptos sin explicación","Trabajo aislado sin interacción","Tareas que requieran confrontación directa"],
+    fortalezas: ["Habilidad para construir relaciones de confianza","Capacidad de escucha activa y empatía","Facilidad para mantener el ánimo del equipo","Consistencia y compromiso en el tiempo","Habilidad para mediar y resolver conflictos"],
+    areas_desarrollo: ["Dificultad para establecer límites claros","Puede evitar conversaciones difíciles","Tendencia a priorizar el bienestar grupal sobre los resultados","Puede ser influenciado por el ambiente emocional del equipo","Dificultad para decir no"],
+    comunicacion: "Comunicación cálida, abierta y orientada a las personas. Es un oyente activo y hace sentir a los demás valorados. Puede evitar mensajes difíciles para no afectar el clima relacional.",
+    decisiones: "Decide considerando el impacto en las personas. Busca consenso y prefiere decisiones que generen acuerdo. Puede demorar decisiones difíciles para evitar conflictos.",
+    preguntas: ["¿Cómo manejas situaciones donde debes dar feedback difícil a alguien?","¿Describe una situación donde debiste priorizar resultados por sobre el bienestar del equipo.","¿Cómo gestionas conflictos dentro de un equipo?","¿Qué haces cuando debes tomar una decisión impopular?"]
+  },
+  "SC": {
+    caracteristicas: "Perfil altamente orientado a la estabilidad, la consistencia y el cumplimiento de normas. Combina paciencia con precisión y compromiso con los procedimientos establecidos. Su energía conductual se expresa en entornos predecibles con roles bien definidos.",
+    atributos: "Meticuloso, confiable, paciente, sistemático, leal, ordenado, prudente, persistente.",
+    motivadores: ["Ambientes de trabajo estables y predecibles","Claridad en roles, responsabilidades y expectativas","Reconocimiento por consistencia y calidad del trabajo","Trabajo con procedimientos bien definidos","Tiempo suficiente para realizar las tareas correctamente"],
+    desmotivadores: ["Cambios frecuentes sin planificación","Ambientes caóticos o ambiguos","Presión para tomar decisiones rápidas sin información","Falta de reconocimiento por el trabajo bien hecho","Tareas sin estructura clara"],
+    fortalezas: ["Alta confiabilidad y consistencia en el trabajo","Atención al detalle y orientación a la calidad","Capacidad para mantener procesos ordenados","Lealtad y compromiso de largo plazo","Habilidad para trabajar con metodología y rigor"],
+    areas_desarrollo: ["Dificultad para adaptarse a cambios rápidos","Puede resistirse a ideas nuevas no probadas","Tendencia a la parálisis por análisis","Puede evitar conflictos necesarios","Baja tolerancia a la ambigüedad y la incertidumbre"],
+    comunicacion: "Comunicación cuidadosa, precisa y formal. Prefiere expresarse con claridad y certeza antes de hablar. Puede ser percibido como reservado pero es extremadamente confiable en sus compromisos.",
+    decisiones: "Decide con cuidado y sobre la base de precedentes y datos. Evalúa los riesgos con detalle antes de actuar. Prefiere la certeza y puede demorar decisiones en contextos ambiguos.",
+    preguntas: ["¿Cómo gestionas situaciones de cambio inesperado en tu trabajo?","¿Describe una situación donde debiste adaptarte rápidamente a nuevas condiciones.","¿Cómo manejas la presión cuando los plazos son muy ajustados?","¿Qué haces cuando no tienes suficiente información para decidir?"]
+  },
+  "D": {
+    caracteristicas: "Perfil de alta dominancia. Orientado al logro, directo y decidido. Su energía conductual se focaliza en superar obstáculos y alcanzar resultados con rapidez y autonomía.",
+    atributos: "Decisivo, competitivo, directo, independiente, orientado a resultados, exigente, de voluntad firme.",
+    motivadores: ["Retos y metas ambiciosas","Autonomía total para actuar","Posiciones de liderazgo y autoridad","Reconocimiento por resultados concretos","Velocidad y eficiencia"],
+    desmotivadores: ["Supervisión excesiva","Procesos lentos o burocráticos","Ambientes sin desafíos claros","Trabajo en equipo sin resultados visibles","Tareas administrativas rutinarias"],
+    fortalezas: ["Capacidad para tomar decisiones difíciles","Alta orientación al logro","Energía sostenida bajo presión","Autonomía y autogestión","Habilidad para movilizar acciones"],
+    areas_desarrollo: ["Puede ser percibido como agresivo o insensible","Dificultad para escuchar otras perspectivas","Puede descuidar procesos y detalles","Tendencia a asumir demasiado control","Baja tolerancia a la incertidumbre relacional"],
+    comunicacion: "Directa, concisa y orientada a la acción. Va al punto sin rodeos. Puede parecer imponente o poco empático en situaciones sensibles.",
+    decisiones: "Rápido y firme. Decide con confianza y no le teme a la incertidumbre. Puede asumir riesgos altos cuando ve una oportunidad.",
+    preguntas: ["¿Cómo manejas situaciones donde tu decisión es impopular pero necesaria?","¿Describe una situación donde debiste actuar sin contar con toda la información.","¿Cómo gestionas el trabajo con personas más lentas o metódicas que tú?","¿Qué haces cuando alguien desafía tu autoridad?"]
+  },
+  "I": {
+    caracteristicas: "Perfil de alta influencia. Extrovertido, entusiasta y orientado a las personas. Su energía conductual fluye en la interacción social, la persuasión y la creación de ambientes positivos.",
+    atributos: "Sociable, optimista, comunicativo, entusiasta, creativo, persuasivo, espontáneo.",
+    motivadores: ["Trabajo con personas y en equipo","Reconocimiento social y visibilidad","Proyectos creativos y variados","Ambientes positivos y dinámicos","Libertad para expresarse e innovar"],
+    desmotivadores: ["Trabajo aislado o solitario","Tareas repetitivas y detalladas","Ambientes fríos o formales","Falta de reconocimiento","Exceso de normas o restricciones"],
+    fortalezas: ["Habilidad para motivar y entusiasmar","Facilidad para conectar con personas","Creatividad e innovación","Comunicación persuasiva","Capacidad para generar ambientes positivos"],
+    areas_desarrollo: ["Puede dispersarse con facilidad","Dificultad para mantenerse en el detalle","Puede ser demasiado optimista sin base","Tendencia a evitar conflictos necesarios","Puede comprometerse más de lo que puede cumplir"],
+    comunicacion: "Expresiva, cálida y persuasiva. Se comunica con energía y entusiasmo. Puede ser muy efectivo inspirando a otros pero puede pecar de impreciso.",
+    decisiones: "Decide basándose en intuición y en el impacto en las personas. Puede ser impulsivo y luego reconsiderar. Busca que las decisiones sean bien recibidas socialmente.",
+    preguntas: ["¿Cómo manejas proyectos que requieren trabajo detallado y metódico?","¿Describe una situación donde debiste mantener foco sin distracciones.","¿Cómo gestionas compromisos cuando tienes demasiadas tareas simultáneas?","¿Qué estrategias usas para mantener la objetividad en tus decisiones?"]
+  },
+  "S": {
+    caracteristicas: "Perfil de alta estabilidad. Paciente, leal y orientado al servicio. Su energía conductual se expresa con naturalidad en entornos de colaboración, apoyo y consistencia.",
+    atributos: "Paciente, leal, colaborador, confiable, empático, consistente, estable emocionalmente.",
+    motivadores: ["Ambientes armoniosos y colaborativos","Relaciones de largo plazo basadas en confianza","Trabajo con propósito y sentido","Reconocimiento genuino por el apoyo brindado","Estabilidad en el rol y las responsabilidades"],
+    desmotivadores: ["Cambios frecuentes o inesperados","Conflictos interpersonales sin resolver","Presión excesiva para cambiar rápidamente","Ambientes competitivos o agresivos","Falta de aprecio por el trabajo cotidiano"],
+    fortalezas: ["Confiabilidad y consistencia","Capacidad de escucha y empatía","Habilidad para apoyar y sostener al equipo","Paciencia para procesos de largo aliento","Compromiso y lealtad organizacional"],
+    areas_desarrollo: ["Puede resistirse al cambio necesario","Dificultad para confrontar situaciones difíciles","Tendencia a postergar decisiones incómodas","Puede sacrificar sus necesidades por las del grupo","Baja tolerancia a ambientes de alta presión"],
+    comunicacion: "Cálida, pausada y orientada a la relación. Escucha antes de hablar. Transmite seguridad y confianza. Puede evitar decir lo que piensa para no generar tensión.",
+    decisiones: "Reflexiva y consensuada. Busca el acuerdo antes de decidir. Puede necesitar más tiempo en contextos de presión o cambio.",
+    preguntas: ["¿Cómo manejas situaciones donde debes implementar un cambio impopular?","¿Describe una situación donde debiste priorizar resultados sobre relaciones.","¿Cómo gestionas el trabajo cuando hay conflictos no resueltos en el equipo?","¿Qué haces cuando debes decir no a una petición que te incomoda?"]
+  },
+  "C": {
+    caracteristicas: "Perfil de alta consciencia. Analítico, preciso y orientado a la calidad. Su energía conductual se expresa en entornos que valoran el rigor, la exactitud y el cumplimiento de normas.",
+    atributos: "Analítico, preciso, meticuloso, sistemático, cauteloso, orientado a la calidad, introvertido.",
+    motivadores: ["Trabajo con estándares claros y medibles","Tiempo para analizar antes de decidir","Reconocimiento por la calidad del trabajo","Sistemas y procesos bien definidos","Autonomía intelectual"],
+    desmotivadores: ["Decisiones sin datos suficientes","Trabajo apresurado con baja calidad","Ambientes caóticos o desorganizados","Cambios sin justificación clara","Falta de estructura y procedimientos"],
+    fortalezas: ["Alta capacidad analítica","Atención excepcional al detalle","Rigor y consistencia en el trabajo","Habilidad para identificar errores","Pensamiento crítico y objetivo"],
+    areas_desarrollo: ["Puede ser excesivamente perfeccionista","Dificultad para tomar decisiones sin datos completos","Puede ser percibido como distante o frío","Tendencia a la parálisis analítica","Baja tolerancia al caos o la ambigüedad"],
+    comunicacion: "Precisa, formal y basada en datos. Prefiere comunicarse por escrito cuando es posible. Puede ser percibido como distante pero sus comunicaciones son altamente confiables y exactas.",
+    decisiones: "Metódica y basada en evidencia. Evalúa múltiples alternativas antes de decidir. Puede ser percibido como lento pero sus decisiones son de alta calidad.",
+    preguntas: ["¿Cómo gestionas situaciones donde debes decidir sin toda la información necesaria?","¿Describe una situación donde tu análisis previno un error importante.","¿Cómo equilibras la búsqueda de perfección con la necesidad de entregar resultados a tiempo?","¿Qué haces cuando alguien toma una decisión que consideras incorrecta?"]
+  }
+};
+
+function renderDiscBars(containerId, scores, colorClass) {
+  var factores = ['D','I','S','C'];
+  var colores = {D:'disc-bar-d', I:'disc-bar-i', S:'disc-bar-s', C:'disc-bar-c'};
+  var html = '';
+  factores.forEach(function(f) {
+    var pct = scores[f] || 0;
+    html += '<div class="disc-bar-row">'
+      + '<span class="disc-bar-label" style="color:' + ({D:'#CC3333',I:'#E8A020',S:'#2E8B2E',C:'#2563a8'}[f]) + '">' + f + '</span>'
+      + '<div class="disc-bar-bg"><div class="disc-bar-fill ' + colores[f] + '" style="width:' + Math.min(pct,100) + '%"></div></div>'
+      + '<span class="disc-bar-pct">' + pct + '%</span>'
+      + '</div>';
+  });
+  document.getElementById(containerId).innerHTML = html;
+}
+
+function renderDiscList(containerId, items) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = (items||[]).map(function(item) {
+    return '<li>' + item + '</li>';
+  }).join('');
+}
+
+async function abrirInformeDISC(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut || "");
+  var nomDec = decodeURIComponent(nombre || "");
+  try {
+    var dataDISC = await fetchJSON(APPS_URL + "?action=getDatosDISC&t=" + Date.now());
+    var filas = Array.isArray(dataDISC) ? dataDISC : [];
+    console.log("getDatosDISC filas:", filas.length);
+
+    function normStr(s){ return String(s||"").replace(/[.\s]/g,"").toLowerCase(); }
+    var fila = filas.find(function(r){
+      return normStr(r[2]) === normStr(rutDec) || normStr(r[1]) === normStr(nomDec);
+    });
+    if (!fila) fila = filas.find(function(r){
+      return String(r[1]||"").toLowerCase().includes(nomDec.split(" ")[0].toLowerCase());
+    });
+    if (!fila) { alert("No se encontraron datos del candidato."); return; }
+
+    // Estructura hoja DISC:
+    // [0]fecha [1]nombre [2]rut [3]perfil_adaptado [4]perfil_natural
+    // [5]ad_d [6]ad_i [7]ad_s [8]ad_c
+    // [9]nat_d [10]nat_i [11]nat_s [12]nat_c
+    // [13]gap_d [14]gap_i [15]gap_s [16]gap_c [17]factor_predominante
+    var perfilAd  = String(fila[3]||"");
+    var perfilNat = String(fila[4]||"");
+    var adScore   = {D:fila[5]||0, I:fila[6]||0, S:fila[7]||0, C:fila[8]||0};
+    var natScore  = {D:fila[9]||0, I:fila[10]||0, S:fila[11]||0, C:fila[12]||0};
+    var gapScore  = {D:fila[13]||0, I:fila[14]||0, S:fila[15]||0, C:fila[16]||0};
+    var factor    = String(fila[17]||perfilAd[0]||"D");
+
+    // Textos del perfil
+    var textos = DISC_PERFILES[perfilAd] || DISC_PERFILES[factor] || DISC_PERFILES["D"];
+
+    // Header
+    document.getElementById("disc-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
+
+    // Badges
+    document.getElementById("disc-badge-adaptado").textContent = "▶ Adaptado: " + perfilAd;
+    document.getElementById("disc-badge-natural").textContent  = "◎ Natural: "  + perfilNat;
+
+    // Gráficos
+    renderDiscBars("disc-bars-adaptado", adScore);
+    renderDiscBars("disc-bars-natural",  natScore);
+
+    // GAP chips
+    var gapColors = {D:'#CC3333',I:'#E8A020',S:'#2E8B2E',C:'#2563a8'};
+    var gapHtml = ['D','I','S','C'].map(function(f) {
+      var g = gapScore[f] || 0;
+      var cls = g >= 15 ? 'disc-gap-alto' : g >= 8 ? 'disc-gap-moderado' : 'disc-gap-leve';
+      var lbl = g >= 15 ? 'Alto' : g >= 8 ? 'Moderado' : 'Leve';
+      return '<span class="disc-gap-chip ' + cls + '">' + f + ': ' + g + 'pts — ' + lbl + '</span>';
+    }).join('');
+    document.getElementById("disc-gap-chips").innerHTML = gapHtml;
+
+    // Texto GAP
+    var gapTotal = Math.round(((gapScore.D||0)+(gapScore.I||0)+(gapScore.S||0)+(gapScore.C||0))/4);
+    var gapTexto = gapTotal >= 15
+      ? "Se observa una tensión adaptativa significativa entre el estilo natural y el adaptado. Esto puede requerir un esfuerzo conductual sostenido para mantener el estilo de trabajo actual, lo que podría generar desgaste a largo plazo."
+      : gapTotal >= 8
+      ? "Existe una adaptación moderada entre el estilo natural y el observable en el contexto laboral. La persona realiza ajustes conductuales que son manejables pero que merecen atención en el tiempo."
+      : "El estilo conductual natural y el adaptado son consistentes. La persona actúa con comodidad en su entorno laboral actual, lo que favorece la sostenibilidad y el bienestar.";
+    document.getElementById("disc-gap-texto").textContent = gapTexto;
+
+    // Secciones de texto
+    document.getElementById("disc-caracteristicas").textContent = textos.caracteristicas;
+    document.getElementById("disc-atributos").textContent = textos.atributos;
+    renderDiscList("disc-motivadores", textos.motivadores);
+    renderDiscList("disc-desmotivadores", textos.desmotivadores);
+    renderDiscList("disc-fortalezas", textos.fortalezas);
+    renderDiscList("disc-areas-desarrollo", textos.areas_desarrollo);
+    document.getElementById("disc-comunicacion").textContent = textos.comunicacion;
+    document.getElementById("disc-decisiones").textContent = textos.decisiones;
+
+    // Preguntas
+    var pregHtml = (textos.preguntas||[]).map(function(p){
+      return '<div class="disc-pregunta-item">' + p + '</div>';
+    }).join('');
+    document.getElementById("disc-preguntas").innerHTML = pregHtml;
+
+    // Fecha
+    document.getElementById("disc-fecha").textContent = String(fila[0]||"—");
+
+    document.getElementById("modal-disc").classList.add("activo");
+    document.body.style.overflow = "hidden";
+  } catch(e) {
+    alert("Error cargando datos DISC: " + e.message);
+  }
+}
+
+function cerrarModalDISC() {
+  document.getElementById("modal-disc").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
+function imprimirModalDISC() { window.print(); }
+
 </script>
 
 
@@ -2034,6 +2301,105 @@ function imprimirInformeCEAL() { window.print(); }
       </div>
       <div style="font-size:11px;color:var(--muted);text-align:right;">
         Evaluación realizada el <span id="ceal-fecha">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL INFORME DISC ══════════ -->
+<div class="modal-overlay" id="modal-disc" onclick="if(event.target===this)cerrarModalDISC()">
+  <div class="modal-box disc-modal-box">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">🎯 Informe — Análisis de Estilo Conductual</div>
+        <div class="modal-header-sub" id="disc-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirModalDISC()">⬇ Descargar PDF</button>
+        <button class="modal-close" onclick="cerrarModalDISC()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Badges de perfil -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <div class="disc-badge-perfil" id="disc-badge-adaptado">—</div>
+        <div class="disc-badge-perfil" id="disc-badge-natural" style="background:var(--azul-soft);color:var(--azul);">—</div>
+      </div>
+
+      <!-- Gráficos perfiles -->
+      <div class="disc-header-perfil">
+        <div class="disc-perfil-card">
+          <div class="disc-perfil-title">▶ Perfil Adaptado (conducta observable)</div>
+          <div class="disc-bars" id="disc-bars-adaptado"></div>
+        </div>
+        <div class="disc-perfil-card">
+          <div class="disc-perfil-title">◎ Perfil Natural (tendencia subyacente)</div>
+          <div class="disc-bars" id="disc-bars-natural"></div>
+        </div>
+      </div>
+
+      <!-- GAP / Tensión adaptativa -->
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">⚡ Tensión adaptativa (GAP)</div>
+        <div class="disc-gap-row" id="disc-gap-chips"></div>
+        <div class="disc-seccion-body" id="disc-gap-texto"></div>
+      </div>
+
+      <!-- Características generales -->
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">📋 Características generales</div>
+        <div class="disc-seccion-body" id="disc-caracteristicas"></div>
+      </div>
+
+      <!-- Atributos y motivadores -->
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">✨ Atributos conductuales</div>
+        <div class="disc-seccion-body" id="disc-atributos"></div>
+      </div>
+
+      <!-- Motivadores y desmotivadores -->
+      <div class="disc-dos-col" style="margin-bottom:20px;">
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-ok">✅ Situaciones motivadoras</div>
+          <ul class="disc-list" id="disc-motivadores"></ul>
+        </div>
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-dev">⚡ Situaciones que reducen motivación</div>
+          <ul class="disc-list" id="disc-desmotivadores"></ul>
+        </div>
+      </div>
+
+      <!-- Fortalezas y áreas de desarrollo -->
+      <div class="disc-dos-col" style="margin-bottom:20px;">
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-ok">💪 Fortalezas</div>
+          <ul class="disc-list" id="disc-fortalezas"></ul>
+        </div>
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-dev">🔧 Áreas de desarrollo</div>
+          <ul class="disc-list" id="disc-areas-desarrollo"></ul>
+        </div>
+      </div>
+
+      <!-- Comunicación y decisiones -->
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">💬 Estilo de comunicación</div>
+        <div class="disc-seccion-body" id="disc-comunicacion"></div>
+      </div>
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">🧭 Toma de decisiones</div>
+        <div class="disc-seccion-body" id="disc-decisiones"></div>
+      </div>
+
+      <!-- Preguntas sugeridas -->
+      <div class="disc-seccion">
+        <div class="disc-seccion-title">❓ Preguntas sugeridas para entrevista</div>
+        <div class="disc-preguntas" id="disc-preguntas"></div>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:12px;">
+        Evaluación realizada el <span id="disc-fecha">—</span>
       </div>
     </div>
   </div>
