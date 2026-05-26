@@ -449,9 +449,11 @@ tbody tr:hover td { background: #fdf9f6; }
   #modal-ic.activo { display: block !important; }
   #modal-ceal.activo { display: block !important; }
   #modal-16pf.activo { display: block !important; }
+  #modal-ipv.activo { display: block !important; }
   #modal-ic:not(.activo) { display: none !important; }
   #modal-ceal:not(.activo) { display: none !important; }
   #modal-16pf:not(.activo) { display: none !important; }
+  #modal-ipv:not(.activo) { display: none !important; }
   .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
   .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
   .modal-close, .btn-primary { display: none !important; }
@@ -477,6 +479,59 @@ tbody tr:hover td { background: #fdf9f6; }
 .pf-interp { background:var(--bg);border-radius:8px;padding:14px;font-size:13px;color:var(--ink-soft);line-height:1.8; }
 .pf-radar-wrap { max-width:300px;margin:0 auto; }
 .pf-nota { font-size:11px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:8px;border-top:1px solid var(--border); }
+
+/* ══════════ MODAL INFORME IPV ══════════ */
+.ipv-hero { background:var(--azul);color:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px; }
+.ipv-hero-nombre { font-size:20px;font-weight:700;margin-bottom:4px; }
+.ipv-hero-meta { font-size:11px;color:rgba(255,255,255,0.5); }
+.ipv-dgv-banner { display:flex;align-items:center;gap:14px;background:var(--azul);color:#fff;border-radius:10px;padding:16px 18px;margin-bottom:14px; }
+.ipv-dgv-circle { width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0; }
+.ipv-dgv-pt { font-size:22px;font-weight:700;line-height:1; }
+.ipv-dgv-lbl { font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.4);text-transform:uppercase; }
+.ipv-dgv-info h4 { font-size:14px;font-weight:700;margin-bottom:4px; }
+.ipv-dgv-info p { font-size:11px;color:rgba(255,255,255,0.6);line-height:1.5; }
+.ipv-dgv-nivel { margin-left:auto;padding:4px 12px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;flex-shrink:0; }
+.ipv-nvl-alto { background:rgba(46,125,82,0.4);color:#72d4a0; }
+.ipv-nvl-promedio { background:rgba(212,131,10,0.4);color:#f5c842; }
+.ipv-nvl-bajo { background:rgba(192,57,43,0.4);color:#ff8a7a; }
+.ipv-dim-header { font-size:11px;font-weight:700;color:var(--azul);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding:6px 10px;background:var(--azul-soft);border-radius:4px;display:flex;justify-content:space-between;border-left:3px solid var(--azul); }
+.ipv-escalas-grid { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px; }
+.ipv-esc-card { border-radius:8px;padding:10px 12px;border:1px solid var(--border);background:#fff; }
+.ipv-esc-alto { border-top:3px solid var(--high);background:var(--high-bg); }
+.ipv-esc-promedio { border-top:3px solid var(--mid);background:var(--mid-bg); }
+.ipv-esc-bajo { border-top:3px solid var(--low);background:var(--low-bg); }
+.ipv-esc-head { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px; }
+.ipv-esc-nombre { font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:.03em; }
+.ipv-esc-badge { font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;text-transform:uppercase; }
+.ipv-b-alto { background:var(--high-bg);color:var(--high); }
+.ipv-b-promedio { background:var(--mid-bg);color:var(--mid); }
+.ipv-b-bajo { background:var(--low-bg);color:var(--low); }
+.ipv-puntos { display:flex;gap:3px;margin:5px 0; }
+.ipv-punto { width:10px;height:10px;border-radius:50%;background:var(--border); }
+.ipv-punto-alto { background:var(--high); }
+.ipv-punto-promedio { background:var(--mid); }
+.ipv-punto-bajo { background:var(--low); }
+.ipv-esc-texto { font-size:10px;color:var(--muted);line-height:1.5;border-top:1px solid var(--border);padding-top:5px;margin-top:3px; }
+.ipv-fort-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px; }
+.ipv-fort-card { background:var(--high-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--high);line-height:1.5; }
+.ipv-fort-card strong { display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px; }
+.ipv-alerta-grid { display:grid;grid-template-columns:1fr 1fr;gap:6px; }
+.ipv-alerta-card { background:#fff;border:1px solid var(--border);border-left:3px solid var(--mid);border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px; }
+.ipv-alerta-titulo { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mid);margin-bottom:3px; }
+.ipv-alerta-desc { font-size:11px;color:var(--muted);line-height:1.45; }
+.ipv-sin-alertas { background:var(--high-bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--high); }
+.ipv-sintesis { background:var(--azul);color:#fff;border-radius:10px;padding:16px 18px;margin-bottom:12px; }
+.ipv-sintesis .ipv-sec-tit { color:rgba(255,255,255,0.45);border-bottom-color:rgba(255,255,255,0.12);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid; }
+.ipv-sintesis-texto { font-size:12px;color:rgba(255,255,255,0.75);line-height:1.8; }
+.ipv-resumen { background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px; }
+.ipv-resumen-texto { font-size:14px;color:var(--ink-soft);line-height:1.9;font-style:italic; }
+.ipv-integ-wrap { display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:12px;letter-spacing:.02em; }
+.ipv-integ-ok { background:var(--high-bg);color:var(--high);border:1.5px solid #a8d5b8; }
+.ipv-integ-leve { background:var(--mid-bg);color:var(--mid);border:1.5px solid #e6c84a; }
+.ipv-integ-riesgo { background:var(--low-bg);color:var(--low);border:1.5px solid #d4a0a0; }
+.ipv-semaforo-wrap { display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:14px; }
+.ipv-seccion { margin-bottom:16px; }
+.ipv-seccion-title { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border); }
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
@@ -1665,6 +1720,9 @@ async function abrirDash(test, rut, nombre) {
   // 16PF — modal inline
   if (test === "16PF") { abrirInforme16PF(test, rut, nombre); return; }
 
+  // IPV — modal inline
+  if (test === "IPV") { abrirInformeIPV(test, rut, nombre); return; }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -2522,6 +2580,236 @@ function cerrarModal16PF() {
 
 function imprimirModal16PF() { window.print(); }
 
+// ══════════ INFORME IPV ══════════
+var IPV_NOMBRES_ESC = {I:'Comprensión',II:'Adaptabilidad',III:'Control de sí mismo',
+  IV:'Tolerancia a la frustración',V:'Combatividad',VI:'Dominio',
+  VII:'Seguridad',VIII:'Actividad',IX:'Sociabilidad'};
+
+var IPV_INTERP_ESC = {
+  I:{alto:'Alta empatía y escucha activa. Se sitúa fácilmente en el lugar del cliente, generando confianza.',
+     promedio:'Capacidad empática dentro de lo esperado. Comprende al cliente en situaciones habituales.',
+     bajo:'Menor tendencia a ponerse en el lugar del otro. Puede mostrar dificultades en situaciones que requieren alta sintonía emocional.'},
+  II:{alto:'Alta flexibilidad conductual. Ajusta su estilo según el tipo de cliente y contexto.',
+      promedio:'Flexibilidad adecuada. Se adapta sin dificultad.',
+      bajo:'Menor facilidad para cambiar de enfoque ante situaciones inesperadas.'},
+  III:{alto:'Disciplinado, perseverante y organizado. Maneja bien sus emociones bajo presión.',
+       promedio:'Autocontrol adecuado para situaciones cotidianas.',
+       bajo:'Puede tener dificultades en la gestión emocional ante presión sostenida.'},
+  IV:{alto:'Alta capacidad para sobreponerse a rechazos y fracasos sin personalizarlos.',
+      promedio:'Tolerancia a la frustración dentro del rango esperado.',
+      bajo:'Mayor sensibilidad al fracaso y rechazo. Puede desmotivarse ante resultados negativos reiterados.'},
+  V:{alto:'Competitivo y orientado al logro. Disfruta el desafío comercial.',
+     promedio:'Puede sostener posiciones y negociar sin dificultad.',
+     bajo:'Menor orientación al conflicto. Puede ceder rápidamente en negociaciones.'},
+  VI:{alto:'Alta capacidad de influencia y ascendencia natural. Persuade con convicción.',
+      promedio:'Capacidad de influencia dentro de lo esperado.',
+      bajo:'Menor tendencia al dominio interpersonal. Puede mostrarse deferente cuando se requiere firmeza.'},
+  VII:{alto:'Alta confianza en sí mismo. Enfrenta situaciones nuevas o de riesgo sin inhibición.',
+       promedio:'Se desenvuelve bien sin inseguridad marcada.',
+       bajo:'Menor confianza personal. Puede dudar en situaciones de riesgo.'},
+  VIII:{alto:'Persona dinámica y enérgica. Busca acción constante.',
+        promedio:'Mantiene un ritmo de trabajo estable.',
+        bajo:'Menor orientación a la actividad dinámica.'},
+  IX:{alto:'Extravertida, con facilidad para crear vínculos. Base esencial para roles comerciales.',
+      promedio:'Establece contactos sin dificultad.',
+      bajo:'Menor orientación al contacto social. Puede preferir trabajar de forma más independiente.'}
+};
+
+var IPV_INTERP_DGV = {
+  alto:'Vocación comercial clara: combina habilidad relacional con ímpetu persuasivo y autocontrol.',
+  promedio:'Capacidades comerciales dentro del rango esperado. Con motivación adecuada puede desempeñarse bien.',
+  bajo:'Baja orientación a la venta. Conviene explorar otras áreas o trabajar el desarrollo de competencias comerciales.'
+};
+
+var IPV_DESC_AREAS = {
+  'Comprensión':'Puede mostrar dificultades para ponerse en el lugar del cliente o captar sus necesidades implícitas.',
+  'Adaptabilidad':'Menor flexibilidad ante diferentes tipos de clientes o situaciones comerciales inesperadas.',
+  'Control de sí mismo':'Puede experimentar dificultades para mantener la calma bajo presión o ante resultados negativos sostenidos.',
+  'Tolerancia a la frustración':'Mayor sensibilidad al rechazo. Puede desmotivarse ante ciclos de venta largos o con muchas negativas.',
+  'Combatividad':'Tendencia a ceder rápidamente en negociaciones. Puede tener dificultades para sostener posiciones.',
+  'Dominio':'Menor ascendencia sobre el cliente. Puede costarle conducir la conversación comercial con firmeza.',
+  'Seguridad':'Puede dudar antes de tomar iniciativa o proponer soluciones en situaciones nuevas o de riesgo.',
+  'Actividad':'Menor orientación a la acción dinámica. Puede preferir ambientes tranquilos sobre roles de alta actividad.',
+  'Sociabilidad':'Menor facilidad para crear vínculos nuevos. Puede preferir trabajar de forma independiente.'
+};
+
+function ipvNvl(pt){ return pt<=3?'bajo':pt<=7?'promedio':'alto'; }
+function ipvNvlLabel(pt){ return pt<=3?'Bajo':pt<=7?'Promedio':'Alto'; }
+
+function ipvPuntos(pt, niv) {
+  var html = '';
+  for (var i = 1; i <= 10; i++) {
+    var cls = i <= pt ? ' ipv-punto-'+niv.toLowerCase() : '';
+    html += '<span class="ipv-punto'+cls+'"></span>';
+  }
+  return html;
+}
+
+function ipvGetSemaforo(dgvN, areas) {
+  var n = areas.filter(function(a){ return a.trim(); }).length;
+  if (dgvN==='Alto' && n===0) return { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)', titulo:'Perfil comercial sólido', texto:'Muestra clara disposición para la venta con fortalezas en las dimensiones clave.' };
+  if (dgvN==='Bajo' || n>=3) return { dot:'pf-sem-rojo', wrap:'pf-sw-rojo', color:'var(--low)', titulo:'Perfil con áreas de atención', texto:'Se recomienda profundizar en entrevista antes de tomar una decisión de selección.' };
+  return { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)', titulo:'Perfil dentro del rango esperado', texto:'El candidato muestra capacidades comerciales con algunas áreas a desarrollar.' };
+}
+
+function ipvGenerarResumen(nombre, dgvN, perfilRA, escPT, fortalezas, areas) {
+  var KEYS = ['I','II','III','IV','V','VI','VII','VIII','IX'];
+  var nc = nombre.split(' ')[0];
+  var txt = '';
+  if (dgvN==='Alto') txt += nc+' presenta una sólida disposición hacia la actividad comercial, con características de personalidad claramente alineadas al perfil de vendedor. ';
+  else if (dgvN==='Bajo') txt += nc+' muestra una orientación comercial limitada, lo que sugiere que roles de venta directa pueden no ser su área de mayor fortaleza. ';
+  else txt += nc+' presenta características de personalidad compatibles con roles comerciales, con un perfil equilibrado que puede desarrollarse con la motivación y el contexto adecuados. ';
+  if (perfilRA==='Receptivo') txt += 'Su perfil es predominantemente receptivo, con mayor afinidad hacia la fidelización de clientes y la venta en mercados ya establecidos. ';
+  else if (perfilRA==='Agresivo') txt += 'Su perfil es predominantemente activo, con mayor orientación hacia la apertura de nuevos mercados y la prospección de clientes. ';
+  else txt += 'Su perfil muestra un equilibrio entre la venta receptiva y la venta activa. ';
+  var altas = KEYS.filter(function(e,i){ return escPT[i]>=7; }).map(function(e){ return IPV_NOMBRES_ESC[e].toLowerCase(); });
+  var bajas  = KEYS.filter(function(e,i){ return escPT[i]<=3; }).map(function(e){ return IPV_NOMBRES_ESC[e].toLowerCase(); });
+  if (altas.length) txt += 'Entre sus principales recursos se destaca'+(altas.length>1?'n':'')+' la '+altas.join(', la ')+'. ';
+  if (bajas.length) txt += 'Como área'+(bajas.length>1?'s':'')+' de desarrollo se identifica'+(bajas.length>1?'n':'')+' la '+bajas.join(', la ')+', aspecto que conviene explorar en entrevista. ';
+  if (dgvN==='Alto' && bajas.length===0) txt += 'En términos generales, el perfil es consistente con los requerimientos de un cargo comercial.';
+  else if (dgvN==='Bajo' || bajas.length>=3) txt += 'Se recomienda complementar esta evaluación con una entrevista en profundidad.';
+  else txt += 'En términos generales, el perfil es compatible con funciones comerciales.';
+  return txt;
+}
+
+async function abrirInformeIPV(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut || "");
+  var nomDec = decodeURIComponent(nombre || "");
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getDatosIPV&t=" + Date.now());
+    var filas = Array.isArray(data) ? data : [];
+    function normRut(s){ return String(s||"").replace(/[\.\s]/g,"").toLowerCase(); }
+    function normNom(s){ return String(s||"").trim().toLowerCase(); }
+    var rutNorm = normRut(rutDec), nomNorm = normNom(nomDec);
+    var fila = filas.find(function(r){ return (rutNorm && normRut(r[2])===rutNorm)||(nomNorm && normNom(r[1])===nomNorm); });
+    if (!fila) fila = filas.find(function(r){ return nomNorm && normNom(r[1]).includes(nomNorm.split(" ")[0]); });
+    if (!fila) { alert("No se encontraron datos del candidato."); return; }
+
+    // c[0]=fecha, c[1]=nombre, c[2]=rut, c[3]=edad, c[4]=sexo, c[5]=cargo,
+    // c[6]=dgv_pt, c[7]=dgv_nivel, c[8]=perfil_ra, c[9]=fortalezas,
+    // c[10]=areas, c[11]=interpretacion, c[12]=escalas_pt, c[13]=pt_r, c[14]=pt_a, c[15]=cambios_foco
+    var dgvPT    = parseInt(fila[6])||5;
+    var dgvN     = fila[7] || ipvNvlLabel(dgvPT);
+    var perfilRA = fila[8] || 'Equilibrado';
+    var fortalezas = (fila[9]||'').split(',').map(function(f){return f.trim();}).filter(function(f){return f && f!=='Sin fortalezas destacadas';});
+    var areas      = (fila[10]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a && a!=='Sin areas criticas';});
+    var interp     = fila[11]||'';
+    var escPT      = (fila[12]||'').split(',').map(function(v){return parseInt(v.trim())||5;});
+    while (escPT.length < 9) escPT.push(5);
+    var ptR  = parseInt(fila[13])||0;
+    var ptA  = parseInt(fila[14])||0;
+    var foco = parseInt(fila[15])||0;
+
+    // Header
+    document.getElementById("ipv-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  "+fila[2] : "");
+
+    // Hero
+    document.getElementById("ipv-hero-nombre").textContent = fila[1]||"—";
+    document.getElementById("ipv-hero-meta").textContent =
+      "RUT: "+(fila[2]||"—") +
+      (fila[3] ? "  ·  Edad: "+fila[3] : "") +
+      (fila[4] ? "  ·  "+fila[4] : "") +
+      "  ·  Fecha: "+(fila[0]||"—");
+
+    // Semáforo
+    var sem = ipvGetSemaforo(dgvN, areas);
+    document.getElementById("ipv-semaforo").innerHTML =
+      '<div class="ipv-semaforo-wrap '+sem.wrap+'">' +
+      '<div class="pf-semaforo-dot '+sem.dot+'"></div>' +
+      '<div><div class="pf-sem-titulo" style="color:'+sem.color+'">'+sem.titulo+'</div>' +
+      '<div style="color:var(--muted);font-size:12px;margin-top:3px;">'+sem.texto+'</div></div></div>';
+
+    // DGV
+    document.getElementById("ipv-dgv").innerHTML =
+      '<div class="ipv-dgv-banner">' +
+      '<div class="ipv-dgv-circle"><div class="ipv-dgv-pt">'+dgvPT+'</div><div class="ipv-dgv-lbl">PT</div></div>' +
+      '<div class="ipv-dgv-info"><h4>DGV — Disposición General para la Venta</h4>' +
+      '<p>'+IPV_INTERP_DGV[ipvNvl(dgvPT)]+'</p></div>' +
+      '<div class="ipv-dgv-nivel ipv-nvl-'+ipvNvl(dgvPT)+'">'+dgvN+'</div></div>';
+
+    // Integridad
+    document.getElementById("ipv-integridad").innerHTML = foco === 0
+      ? "<div class='ipv-integ-wrap ipv-integ-ok'><span style='font-size:16px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana. Resultado confiable.</div></div></div>"
+      : foco <= 3
+      ? "<div class='ipv-integ-wrap ipv-integ-leve'><span style='font-size:16px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente.</div></div></div>"
+      : "<div class='ipv-integ-wrap ipv-integ-riesgo'><span style='font-size:16px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Evaluar validez del resultado.</div></div></div>";
+
+    // Dimensiones
+    var KEYS = ['I','II','III','IV','V','VI','VII','VIII','IX'];
+    var dimsHtml = '';
+    // Receptividad
+    dimsHtml += '<div class="ipv-dim-header"><span>R — Receptividad | Escalas I a IV</span><span>PT '+ptR+' — '+ipvNvlLabel(ptR)+'</span></div>';
+    dimsHtml += '<div class="ipv-escalas-grid">';
+    ['I','II','III','IV'].forEach(function(e,i){
+      var pt=escPT[i]||5, niv=ipvNvlLabel(pt), nvlKey=ipvNvl(pt);
+      dimsHtml += '<div class="ipv-esc-card ipv-esc-'+nvlKey+'">' +
+        '<div class="ipv-esc-head"><div class="ipv-esc-nombre">'+e+' — '+IPV_NOMBRES_ESC[e]+'</div>' +
+        '<div class="ipv-esc-badge ipv-b-'+nvlKey+'">'+niv+'</div></div>' +
+        '<div class="ipv-puntos">'+ipvPuntos(pt,nvlKey)+'</div>' +
+        '<div class="ipv-esc-texto">'+IPV_INTERP_ESC[e][nvlKey]+'</div></div>';
+    });
+    dimsHtml += '</div>';
+    // Agresividad
+    dimsHtml += '<div class="ipv-dim-header" style="margin-top:8px;"><span>A — Agresividad Comercial | Escalas V a VIII</span><span>PT '+ptA+' — '+ipvNvlLabel(ptA)+'</span></div>';
+    dimsHtml += '<div class="ipv-escalas-grid">';
+    ['V','VI','VII','VIII'].forEach(function(e,i){
+      var pt=escPT[i+4]||5, niv=ipvNvlLabel(pt), nvlKey=ipvNvl(pt);
+      dimsHtml += '<div class="ipv-esc-card ipv-esc-'+nvlKey+'">' +
+        '<div class="ipv-esc-head"><div class="ipv-esc-nombre">'+e+' — '+IPV_NOMBRES_ESC[e]+'</div>' +
+        '<div class="ipv-esc-badge ipv-b-'+nvlKey+'">'+niv+'</div></div>' +
+        '<div class="ipv-puntos">'+ipvPuntos(pt,nvlKey)+'</div>' +
+        '<div class="ipv-esc-texto">'+IPV_INTERP_ESC[e][nvlKey]+'</div></div>';
+    });
+    dimsHtml += '</div>';
+    // Sociabilidad
+    var ptIX=escPT[8]||5, nivIX=ipvNvlLabel(ptIX), nvlIX=ipvNvl(ptIX);
+    dimsHtml += '<div class="ipv-dim-header" style="margin-top:8px;"><span>Escala IX — Sociabilidad</span><span>PT '+ptIX+' — '+nivIX+'</span></div>';
+    dimsHtml += '<div class="ipv-escalas-grid"><div class="ipv-esc-card ipv-esc-'+nvlIX+'">' +
+      '<div class="ipv-esc-head"><div class="ipv-esc-nombre">IX — Sociabilidad</div>' +
+      '<div class="ipv-esc-badge ipv-b-'+nvlIX+'">'+nivIX+'</div></div>' +
+      '<div class="ipv-puntos">'+ipvPuntos(ptIX,nvlIX)+'</div>' +
+      '<div class="ipv-esc-texto">'+IPV_INTERP_ESC.IX[nvlIX]+'</div></div></div>';
+    document.getElementById("ipv-dims").innerHTML = dimsHtml;
+
+    // Fortalezas
+    var secForts = document.getElementById("ipv-sec-forts");
+    if (fortalezas.length) {
+      document.getElementById("ipv-forts").innerHTML = fortalezas.slice(0,6).map(function(f){
+        return '<div class="ipv-fort-card"><strong>✓ Fortaleza</strong>'+f+'</div>';
+      }).join('');
+      secForts.style.display = 'block';
+    } else { secForts.style.display = 'none'; }
+
+    // Áreas
+    document.getElementById("ipv-alertas").innerHTML = areas.length
+      ? '<div class="ipv-alerta-grid">'+areas.map(function(a){
+          var desc = IPV_DESC_AREAS[a] || 'Aspecto a explorar en entrevista.';
+          return '<div class="ipv-alerta-card"><div class="ipv-alerta-titulo">⚠ '+a+'</div><div class="ipv-alerta-desc">'+desc+'</div></div>';
+        }).join('')+'</div>'
+      : '<div class="ipv-sin-alertas">✓ No se identifican áreas de atención relevantes en este perfil.</div>';
+
+    // Síntesis
+    var lineas = interp.split('|').map(function(l){return l.trim();}).filter(Boolean);
+    document.getElementById("ipv-sintesis-texto").textContent = lineas.slice(0,4).join(' — ') || interp;
+
+    // Resumen ejecutivo
+    document.getElementById("ipv-resumen-texto").textContent =
+      ipvGenerarResumen(fila[1]||'El candidato', dgvN, perfilRA, escPT, fortalezas, areas);
+
+    document.getElementById("modal-ipv").classList.add("activo");
+    document.body.style.overflow = "hidden";
+  } catch(e) {
+    alert("Error cargando datos IPV: " + e.message);
+  }
+}
+
+function cerrarModalIPV() {
+  document.getElementById("modal-ipv").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
+function imprimirModalIPV() { window.print(); }
+
 </script>
 
 
@@ -2764,6 +3052,73 @@ function imprimirModal16PF() { window.print(); }
       <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px;">
         Evaluación realizada el <span id="pf-fecha">—</span>
       </div>
+    </div>
+  </div>
+</div>
+<!-- ══════════ MODAL INFORME IPV ══════════ -->
+<div class="modal-overlay" id="modal-ipv" onclick="if(event.target===this)cerrarModalIPV()">
+  <div class="modal-box" style="max-width:800px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">💼 Informe — Perfil de Personalidad Comercial IPV</div>
+        <div class="modal-header-sub" id="ipv-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirModalIPV()">⬇ Descargar PDF</button>
+        <button class="modal-close" onclick="cerrarModalIPV()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Hero -->
+      <div class="ipv-hero">
+        <div class="ipv-hero-nombre" id="ipv-hero-nombre">—</div>
+        <div class="ipv-hero-meta" id="ipv-hero-meta">—</div>
+      </div>
+
+      <!-- Semáforo -->
+      <div id="ipv-semaforo"></div>
+
+      <!-- DGV -->
+      <div id="ipv-dgv"></div>
+
+      <!-- Integridad -->
+      <div id="ipv-integridad"></div>
+
+      <!-- Dimensiones y escalas -->
+      <div class="ipv-seccion">
+        <div class="ipv-seccion-title">📊 Escalas por dimensión</div>
+        <div id="ipv-dims"></div>
+      </div>
+
+      <!-- Fortalezas -->
+      <div class="ipv-seccion" id="ipv-sec-forts" style="display:none;">
+        <div class="ipv-seccion-title">✅ Fortalezas identificadas</div>
+        <div class="ipv-fort-grid" id="ipv-forts"></div>
+      </div>
+
+      <!-- Áreas de atención -->
+      <div class="ipv-seccion">
+        <div class="ipv-seccion-title">⚠️ Áreas de atención</div>
+        <div id="ipv-alertas"></div>
+      </div>
+
+      <!-- Síntesis -->
+      <div class="ipv-sintesis">
+        <div class="ipv-sec-tit">Síntesis interpretativa</div>
+        <div class="ipv-sintesis-texto" id="ipv-sintesis-texto">—</div>
+      </div>
+
+      <!-- Resumen ejecutivo -->
+      <div class="ipv-resumen">
+        <div class="ipv-seccion-title">📋 Resumen ejecutivo</div>
+        <div class="ipv-resumen-texto" id="ipv-resumen-texto">—</div>
+      </div>
+
+      <div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.
+      </div>
+
     </div>
   </div>
 </div>
