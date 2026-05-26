@@ -89,7 +89,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);font
       <div style="display:flex;flex-direction:column;gap:18px;">
         <div class="form-row">
           <div class="form-group"><label>Nombre completo</label><input type="text" id="i-nom" placeholder="Apellido Nombre"></div>
-          <div class="form-group"><label>RUT</label><input type="text" id="i-rut" placeholder="Ej: 12.345.678-9"></div>
+          <div class="form-group"><label>RUT</label><input type="text" id="i-rut" placeholder="Ej: 12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
         </div>
         <div class="form-row-3">
           <div class="form-group"><label>Edad</label><input type="number" id="i-edad" placeholder="Ej: 32" min="15" max="99"></div>
@@ -308,9 +308,40 @@ function setFecha(){
 }
 window.addEventListener("load",setFecha);
 
+// ══════════════════════════════════════════════
+// VALIDACIÓN Y FORMATO DE RUT CHILENO
+// ══════════════════════════════════════════════
+function limpiarRut(r){return String(r).trim().replace(/[\.\-\s]/g,"").toUpperCase();}
+function calcularDv(rutNum){var s=0,m=2,a=String(rutNum).split("").reverse();for(var i=0;i<a.length;i++){s+=parseInt(a[i])*m;m=m===7?2:m+1;}var r=s%11;if(r===0)return"0";if(r===1)return"K";return String(11-r);}
+function validarRut(rut){var l=limpiarRut(rut);if(l.length<2)return false;var dv=l.slice(-1),num=l.slice(0,-1);if(!/^\d+$/.test(num))return false;var n=parseInt(num,10);if(n<1000000||n>99999999)return false;return calcularDv(n)===dv;}
+function formatearRut(rut){var l=limpiarRut(rut);if(l.length<2)return rut;var dv=l.slice(-1),num=l.slice(0,-1);if(!/^\d+$/.test(num))return rut;return num.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv;}
+document.addEventListener("DOMContentLoaded",function(){
+  var el=document.getElementById("i-rut"),err=document.getElementById("err-rut");
+  if(!el)return;
+  el.addEventListener("input",function(){
+    var raw=limpiarRut(this.value);
+    if(raw.length>1){var dv=raw.slice(-1),num=raw.slice(0,-1).replace(/\D/g,"");if(num)this.value=num.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv;}
+    if(err)err.style.display="none";this.style.borderColor="";
+  });
+  el.addEventListener("blur",function(){
+    if(!this.value.trim())return;
+    if(!validarRut(this.value)){if(err){err.textContent="⚠ RUT inválido. Revisa el número y dígito verificador.";err.style.display="block";}this.style.borderColor="#e55";}
+    else{this.value=formatearRut(this.value);this.style.borderColor="";if(err)err.style.display="none";}
+  });
+});
+
 function iniciar(){
   var nom=document.getElementById("i-nom").value.trim();
   if(!nom){alert("Por favor ingresa el nombre.");return;}
+  var rutVal=document.getElementById("i-rut").value.trim();
+  var errRut=document.getElementById("err-rut");
+  if(!validarRut(rutVal)){
+    if(errRut){errRut.textContent="⚠ RUT inválido. Revisa el número y dígito verificador.";errRut.style.display="block";}
+    document.getElementById("i-rut").style.borderColor="#e55";return;
+  }
+  document.getElementById("i-rut").value=formatearRut(rutVal);
+  document.getElementById("i-rut").style.borderColor="";
+  if(errRut)errRut.style.display="none";
   cand={
     nombre:nom,
     rut:document.getElementById("i-rut").value.trim(),
