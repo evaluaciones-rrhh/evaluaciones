@@ -568,6 +568,26 @@ tbody tr:hover td { background: #fdf9f6; }
 .wl-seccion{margin-bottom:16px;}
 .wl-seccion-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 
+/* ══ LÍNEA DE TIEMPO ACTIVIDAD ══ */
+.timeline { padding: 4px 0; }
+.tl-item { display:flex; align-items:flex-start; gap:14px; padding:10px 0; border-bottom:1px solid var(--border); }
+.tl-item:last-child { border-bottom:none; }
+.tl-dot-wrap { display:flex; flex-direction:column; align-items:center; flex-shrink:0; padding-top:3px; }
+.tl-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.tl-dot-IC      { background:#3b82f6; }
+.tl-dot-CEAL    { background:#8b5cf6; }
+.tl-dot-16PF    { background:#f59e0b; }
+.tl-dot-IPV     { background:#10b981; }
+.tl-dot-WONDERLIC { background:#6366f1; }
+.tl-dot-DISC    { background:#ec4899; }
+.tl-dot-default { background:var(--muted); }
+.tl-body { flex:1; min-width:0; }
+.tl-texto { font-size:13px; color:var(--ink); line-height:1.4; }
+.tl-texto strong { font-weight:600; }
+.tl-texto .tl-test { font-weight:600; }
+.tl-tiempo { font-size:11px; color:var(--muted); margin-top:2px; }
+.tl-informe { flex-shrink:0; }
+
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
 .ceal-est-integrado  { background:var(--high-bg);color:var(--high); }
@@ -924,15 +944,12 @@ tbody tr:hover td { background: #fdf9f6; }
       </div>
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Últimas evaluaciones</div>
+          <div class="card-title">Actividad reciente</div>
           <button class="btn btn-ghost btn-sm" onclick="irA('candidatos')">Ver todas →</button>
         </div>
-        <div class="card-body" style="padding:0;">
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Candidato</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
-              <tbody id="tabla-recientes"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Cargando...</td></tr></tbody>
-            </table>
+        <div class="card-body">
+          <div class="timeline" id="timeline-recientes">
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:13px;">Cargando...</div>
           </div>
         </div>
       </div>
@@ -1634,13 +1651,69 @@ function renderTablaComun(datos, tbodyId, cols) {
   tbody.innerHTML = html;
 }
 
+function tiempoRelativo(fecha) {
+  var f = parseFechaCL(fecha);
+  if (!f) return fecha || "—";
+  var ahora = new Date();
+  var diff = ahora - f; // ms
+  var mins  = Math.floor(diff / 60000);
+  var horas = Math.floor(diff / 3600000);
+  var dias  = Math.floor(diff / 86400000);
+  if (mins < 1)   return "hace un momento";
+  if (mins < 60)  return "hace " + mins + " minuto" + (mins===1?"":"s");
+  if (horas < 24) return "hace " + horas + " hora" + (horas===1?"":"s");
+  if (dias === 1) return "ayer";
+  if (dias < 7)   return "hace " + dias + " días";
+  // Más de una semana: mostrar fecha corta
+  var dd = String(f.getDate()).padStart(2,"0");
+  var mm = String(f.getMonth()+1).padStart(2,"0");
+  return dd + "/" + mm + "/" + f.getFullYear();
+}
+
+var TEST_NOMBRES_TL = {
+  IC: "Test de Instrucciones Complejas",
+  CEAL: "Test de Estilos de Liderazgo",
+  "16PF": "Evaluación de Personalidad",
+  IPV: "Perfil de Personalidad Comercial",
+  WONDERLIC: "Test de Habilidad Cognitiva",
+  DISC: "Análisis de Estilo Conductual"
+};
+
 function renderRecientes() {
   var recientes = todosLosDatos.slice().sort(function(a,b){
     var fa=parseFechaCL(a.fecha), fb=parseFechaCL(b.fecha);
     if(!fa&&!fb) return 0; if(!fa) return 1; if(!fb) return -1;
     return fb-fa;
   }).slice(0,8);
-  renderTablaComun(recientes, "tabla-recientes", 5);
+
+  var cont = document.getElementById("timeline-recientes");
+  if (!cont) return;
+  if (!recientes.length) {
+    cont.innerHTML = "<div style='text-align:center;padding:24px;color:var(--muted);font-size:13px;'>Sin evaluaciones registradas</div>";
+    return;
+  }
+
+  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC"];
+  var html = "";
+  recientes.forEach(function(d) {
+    var dotCls = "tl-dot-" + (d.test||"default").replace(/[^a-zA-Z0-9]/g,"");
+    if (!["IC","CEAL","16PF","IPV","WONDERLIC","DISC"].includes(d.test)) dotCls = "tl-dot-default";
+    var testNombre = TEST_NOMBRES_TL[d.test] || d.test || "Test";
+    var nombre = d.nombre || "—";
+    var tiempo = tiempoRelativo(d.fecha);
+    var btnVer = TESTS_CON_INFORME.includes(d.test)
+      ? "<button class='btn btn-ghost btn-sm' style='font-size:11px;padding:4px 10px;' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver →</button>"
+      : "";
+    html += "<div class='tl-item'>" +
+      "<div class='tl-dot-wrap'><div class='tl-dot "+dotCls+"'></div></div>" +
+      "<div class='tl-body'>" +
+        "<div class='tl-texto'><strong>"+nombre+"</strong> completó <span class='tl-test'>"+testNombre+"</span></div>" +
+        "<div class='tl-tiempo'>"+tiempo+"</div>" +
+      "</div>" +
+      "<div class='tl-informe'>"+btnVer+"</div>" +
+    "</div>";
+  });
+  cont.innerHTML = html;
 }
 
 function filtrar() {
