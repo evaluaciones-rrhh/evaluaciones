@@ -653,51 +653,47 @@ tbody tr:hover td { background: #fdf9f6; }
 }
 
 /* ══════════ MODAL INFORME DISC ══════════ */
-.disc-modal-box { max-width: 760px; }
-.disc-header-perfil { display:flex; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
-.disc-perfil-card {
-  flex:1; min-width:200px; background:var(--bg); border-radius:10px;
-  padding:16px; border:1.5px solid var(--border);
-}
-.disc-perfil-title { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:10px; }
-.disc-bars { display:flex; flex-direction:column; gap:6px; }
-.disc-bar-row { display:flex; align-items:center; gap:8px; }
-.disc-bar-label { font-size:11px; font-weight:700; width:14px; flex-shrink:0; }
-.disc-bar-bg { flex:1; height:10px; background:var(--border); border-radius:5px; overflow:hidden; }
-.disc-bar-fill { height:100%; border-radius:5px; transition:width 0.6s ease; }
-.disc-bar-d { background:#CC3333; }
-.disc-bar-i { background:#E8A020; }
-.disc-bar-s { background:#2E8B2E; }
-.disc-bar-c { background:#2563a8; }
-.disc-bar-pct { font-size:11px; color:var(--muted); width:32px; text-align:right; flex-shrink:0; }
-.disc-badge-perfil {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 14px; border-radius:8px; font-weight:700; font-size:13px; margin-bottom:6px;
-  background:var(--azul); color:#fff;
-}
-.disc-gap-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
-.disc-gap-chip {
-  padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;
-  display:flex; align-items:center; gap:5px;
-}
-.disc-gap-leve    { background:#e8f4ee; color:#2a6e47; }
+.disc-modal-box { max-width: 780px; }
+.disc-modal-header-dark { background:#1a2e4a; padding:18px 22px; display:flex; justify-content:space-between; align-items:flex-start; border-radius:12px 12px 0 0; }
+.disc-mh-supertitle { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:4px; }
+.disc-mh-nombre { font-size:18px; font-weight:600; color:#fff; }
+.disc-mh-meta { font-size:12px; color:rgba(255,255,255,0.4); margin-top:3px; }
+.disc-mh-btns { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.disc-mh-btn-dl { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18); color:#fff; border-radius:6px; padding:5px 12px; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; }
+.disc-mh-btn-x { background:rgba(255,255,255,0.08); border:none; color:rgba(255,255,255,0.5); border-radius:6px; padding:5px 10px; font-size:15px; cursor:pointer; line-height:1; }
+.disc-hero { display:grid; grid-template-columns:1fr 1fr; border-bottom:1px solid var(--border); }
+.disc-hero-card { padding:16px 20px; }
+.disc-hero-card:first-child { border-right:1px solid var(--border); }
+.disc-hero-lbl { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.disc-hero-perfil { display:flex; align-items:center; gap:10px; }
+.disc-hero-icon { width:38px; height:38px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+.disc-hi-adapt { background:#e8f0fa; color:#1a3a6b; }
+.disc-hi-nat   { background:#edf7f1; color:#1a5c3a; }
+.disc-hero-nombre { font-size:15px; font-weight:600; color:var(--ink); }
+.disc-hero-tipo  { font-size:11px; color:var(--muted); margin-top:1px; }
+.disc-integridad-ok   { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:8px; background:#edf7f1; border:1px solid #a8d5b8; font-size:12px; color:#1a5c3a; font-weight:500; margin-bottom:16px; }
+.disc-integridad-leve { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:8px; background:#fef3e0; border:1px solid #e6c84a; font-size:12px; color:#7a5c10; font-weight:500; margin-bottom:16px; }
+.disc-integridad-riesgo { display:flex; align-items:center; gap:10px; padding:9px 14px; border-radius:8px; background:#fdecea; border:1px solid #d4a0a0; font-size:12px; color:#8b2020; font-weight:500; margin-bottom:16px; }
+.disc-gap-row  { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.disc-gap-chip { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+.disc-gap-leve    { background:#edf7f1; color:#2a6e47; }
 .disc-gap-moderado{ background:#fef3e0; color:#c07a00; }
 .disc-gap-alto    { background:#fdecea; color:#c0392b; }
-.disc-seccion { margin-bottom:20px; }
-.disc-seccion-title { font-size:11px; font-weight:700; color:var(--naranja); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; }
-.disc-seccion-body { font-size:13px; color:var(--ink-soft); line-height:1.75; }
-.disc-dos-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.disc-col-card { background:var(--bg); border-radius:8px; padding:14px; }
-.disc-col-title { font-size:11px; font-weight:700; margin-bottom:8px; }
-.disc-col-ok { color:var(--high); }
+.disc-seccion { margin-bottom:18px; }
+.disc-seccion-title { font-size:10px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:7px; padding-bottom:5px; border-bottom:1px solid var(--border); }
+.disc-seccion-body  { font-size:13px; color:var(--ink-soft); line-height:1.75; }
+.disc-dos-col  { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.disc-col-card { background:var(--bg); border-radius:8px; padding:12px 14px; border:1px solid var(--border); }
+.disc-col-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.disc-col-ok  { color:var(--high); }
 .disc-col-dev { color:var(--low); }
 .disc-list { list-style:none; padding:0; margin:0; }
-.disc-list li { font-size:12px; color:var(--ink-soft); padding:3px 0; display:flex; gap:6px; }
-.disc-list li::before { content:"•"; color:var(--naranja); flex-shrink:0; }
-.disc-preguntas { background:#f9f6f2; border-radius:8px; padding:14px; }
-.disc-pregunta-item { font-size:12px; color:var(--ink-soft); padding:5px 0; border-bottom:1px solid var(--border); display:flex; gap:8px; }
+.disc-list li { font-size:12px; color:var(--ink-soft); padding:3px 0; display:flex; gap:6px; line-height:1.5; }
+.disc-list li::before { content:"·"; font-weight:700; flex-shrink:0; color:var(--muted); }
+.disc-preguntas { background:var(--bg); border-radius:8px; padding:12px 14px; border:1px solid var(--border); }
+.disc-pregunta-item { font-size:12px; color:var(--ink-soft); padding:6px 0; border-bottom:1px solid var(--border); display:flex; gap:10px; line-height:1.55; }
 .disc-pregunta-item:last-child { border-bottom:none; }
-.disc-pregunta-item::before { content:"?"; font-weight:700; color:var(--naranja); flex-shrink:0; }
+.disc-pregunta-n { font-size:10px; font-weight:700; color:var(--muted); flex-shrink:0; padding-top:2px; min-width:14px; }
 </style>
 </head>
 <body>
@@ -2461,12 +2457,45 @@ async function abrirInformeDISC(test, rut, nombre) {
     // Textos del perfil
     var textos = DISC_PERFILES[perfilAd] || DISC_PERFILES[factor] || DISC_PERFILES["D"];
 
-    // Header
-    document.getElementById("disc-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
+    // Header oscuro
+    var nombreCand = String(fila[1]||nomDec);
+    document.getElementById("disc-modal-nombre").textContent = nombreCand;
+    document.getElementById("disc-modal-sub").textContent = (fila[2] ? fila[2]+"  ·  " : "") + String(fila[0]||"");
 
-    // Badges
-    document.getElementById("disc-badge-adaptado").textContent = "▶ Adaptado: " + perfilAd;
-    document.getElementById("disc-badge-natural").textContent  = "◎ Natural: "  + perfilNat;
+    // Hero perfiles — icono con iniciales del perfil
+    var DISC_TIPO = {
+      "D":"Dominante","I":"Influyente","S":"Estable","C":"Concienzudo",
+      "DI":"Dominante / Influyente","DC":"Dominante / Concienzudo",
+      "ID":"Influyente / Dominante","IS":"Influyente / Estable",
+      "SD":"Estable / Dominante","SI":"Estable / Influyente",
+      "SC":"Estable / Concienzudo","CD":"Concienzudo / Dominante",
+      "CS":"Concienzudo / Estable","CI":"Concienzudo / Influyente",
+      "DS":"Dominante / Estable","IC":"Influyente / Concienzudo"
+    };
+    var DISC_DESC = {
+      "D":"Orientado a resultados y control","I":"Orientado a la influencia y relaciones",
+      "S":"Orientado a la estabilidad y apoyo","C":"Orientado a la calidad y análisis",
+      "DI":"Orientado a resultados con influencia","DC":"Orientado a resultados con precisión",
+      "ID":"Influyente con orientación a resultados","IS":"Influyente con orientación a personas",
+      "SD":"Estable con orientación a resultados","SI":"Estable con orientación a relaciones",
+      "SC":"Metódico y orientado a la calidad","CD":"Preciso con orientación a resultados",
+      "CS":"Analítico con orientación al equipo","CI":"Analítico con influencia social",
+      "DS":"Orientado a resultados con consistencia","IC":"Influyente con orientación al detalle"
+    };
+    document.getElementById("disc-hero-icon-adapt").textContent = perfilAd.substring(0,2);
+    document.getElementById("disc-hero-nombre-adapt").textContent = DISC_TIPO[perfilAd] || perfilAd;
+    document.getElementById("disc-hero-tipo-adapt").textContent  = DISC_DESC[perfilAd] || "";
+    document.getElementById("disc-hero-icon-nat").textContent  = perfilNat.substring(0,2);
+    document.getElementById("disc-hero-nombre-nat").textContent = DISC_TIPO[perfilNat] || perfilNat;
+    document.getElementById("disc-hero-tipo-nat").textContent   = DISC_DESC[perfilNat] || "";
+
+    // Integridad
+    var foco = parseInt(fila[18]||0)||0;
+    document.getElementById("disc-integridad").innerHTML = foco===0
+      ? "<div class='disc-integridad-ok'><span style='font-size:16px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      : foco<=3
+      ? "<div class='disc-integridad-leve'><span style='font-size:16px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente.</div></div></div>"
+      : "<div class='disc-integridad-riesgo'><span style='font-size:16px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Evaluar validez del resultado.</div></div></div>";
 
     // Gráfico SVG estilo DISC clásico
     document.getElementById("disc-graficos-svg").innerHTML = renderDiscGraficoSVG(adScore, natScore);
@@ -2500,9 +2529,9 @@ async function abrirInformeDISC(test, rut, nombre) {
     document.getElementById("disc-comunicacion").textContent = textos.comunicacion;
     document.getElementById("disc-decisiones").textContent = textos.decisiones;
 
-    // Preguntas
-    var pregHtml = (textos.preguntas||[]).map(function(p){
-      return '<div class="disc-pregunta-item">' + p + '</div>';
+    // Preguntas numeradas
+    var pregHtml = (textos.preguntas||[]).map(function(p, i){
+      return '<div class="disc-pregunta-item"><span class="disc-pregunta-n">'+(i+1)+'</span>' + p + '</div>';
     }).join('');
     document.getElementById("disc-preguntas").innerHTML = pregHtml;
 
@@ -3149,88 +3178,115 @@ function imprimirModalWONDERLIC() { window.print(); }
 
 <!-- ══════════ MODAL INFORME DISC ══════════ -->
 <div class="modal-overlay" id="modal-disc" onclick="if(event.target===this)cerrarModalDISC()">
-  <div class="modal-box disc-modal-box">
-    <div class="modal-header">
+  <div class="modal-box disc-modal-box" style="padding:0;overflow:hidden;">
+
+    <!-- Header oscuro -->
+    <div class="disc-modal-header-dark">
       <div>
-        <div class="modal-header-title">🎯 Informe — Análisis de Estilo Conductual</div>
-        <div class="modal-header-sub" id="disc-modal-sub">Candidato</div>
+        <div class="disc-mh-supertitle">Análisis de estilo conductual</div>
+        <div class="disc-mh-nombre" id="disc-modal-nombre">—</div>
+        <div class="disc-mh-meta" id="disc-modal-sub">—</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirModalDISC()">⬇ Descargar PDF</button>
-        <button class="modal-close" onclick="cerrarModalDISC()">✕</button>
+      <div class="disc-mh-btns">
+        <button class="disc-mh-btn-dl" onclick="imprimirModalDISC()">⬇ Descargar PDF</button>
+        <button class="disc-mh-btn-x" onclick="cerrarModalDISC()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
 
-      <!-- Badges de perfil -->
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
-        <div class="disc-badge-perfil" id="disc-badge-adaptado">—</div>
-        <div class="disc-badge-perfil" id="disc-badge-natural" style="background:var(--azul-soft);color:var(--azul);">—</div>
+    <!-- Hero perfiles -->
+    <div class="disc-hero">
+      <div class="disc-hero-card">
+        <div class="disc-hero-lbl">Perfil adaptado</div>
+        <div class="disc-hero-perfil">
+          <div class="disc-hero-icon disc-hi-adapt" id="disc-hero-icon-adapt">—</div>
+          <div>
+            <div class="disc-hero-nombre" id="disc-hero-nombre-adapt">—</div>
+            <div class="disc-hero-tipo" id="disc-hero-tipo-adapt">—</div>
+          </div>
+        </div>
       </div>
+      <div class="disc-hero-card">
+        <div class="disc-hero-lbl">Perfil natural</div>
+        <div class="disc-hero-perfil">
+          <div class="disc-hero-icon disc-hi-nat" id="disc-hero-icon-nat">—</div>
+          <div>
+            <div class="disc-hero-nombre" id="disc-hero-nombre-nat">—</div>
+            <div class="disc-hero-tipo" id="disc-hero-tipo-nat">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      <!-- Gráficos perfiles SVG -->
-      <div id="disc-graficos-svg" style="margin-bottom:20px;background:var(--bg);border-radius:10px;border:1.5px solid var(--border);padding:8px;"></div>
+    <div class="modal-body" style="padding:18px 22px;">
 
-      <!-- GAP / Tensión adaptativa -->
+      <!-- Integridad -->
+      <div id="disc-integridad"></div>
+
+      <!-- Gráfico SVG líneas -->
+      <div id="disc-graficos-svg" style="margin-bottom:18px;background:var(--bg);border-radius:10px;border:1px solid var(--border);padding:8px;"></div>
+
+      <!-- GAP -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">⚡ Tensión adaptativa (GAP)</div>
+        <div class="disc-seccion-title">Tensión adaptativa (GAP)</div>
         <div class="disc-gap-row" id="disc-gap-chips"></div>
         <div class="disc-seccion-body" id="disc-gap-texto"></div>
       </div>
 
       <!-- Características generales -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">📋 Características generales</div>
+        <div class="disc-seccion-title">Características generales</div>
         <div class="disc-seccion-body" id="disc-caracteristicas"></div>
       </div>
 
-      <!-- Atributos y motivadores -->
+      <!-- Atributos conductuales -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">✨ Atributos conductuales</div>
+        <div class="disc-seccion-title">Atributos conductuales</div>
         <div class="disc-seccion-body" id="disc-atributos"></div>
       </div>
 
-      <!-- Motivadores y desmotivadores -->
-      <div class="disc-dos-col" style="margin-bottom:20px;">
+      <!-- Fortalezas / Áreas -->
+      <div class="disc-dos-col" style="margin-bottom:16px;">
         <div class="disc-col-card">
-          <div class="disc-col-title disc-col-ok">✅ Situaciones motivadoras</div>
-          <ul class="disc-list" id="disc-motivadores"></ul>
-        </div>
-        <div class="disc-col-card">
-          <div class="disc-col-title disc-col-dev">⚡ Situaciones que reducen motivación</div>
-          <ul class="disc-list" id="disc-desmotivadores"></ul>
-        </div>
-      </div>
-
-      <!-- Fortalezas y áreas de desarrollo -->
-      <div class="disc-dos-col" style="margin-bottom:20px;">
-        <div class="disc-col-card">
-          <div class="disc-col-title disc-col-ok">💪 Fortalezas</div>
+          <div class="disc-col-title disc-col-ok">Fortalezas</div>
           <ul class="disc-list" id="disc-fortalezas"></ul>
         </div>
         <div class="disc-col-card">
-          <div class="disc-col-title disc-col-dev">🔧 Áreas de desarrollo</div>
+          <div class="disc-col-title disc-col-dev">Áreas de desarrollo</div>
           <ul class="disc-list" id="disc-areas-desarrollo"></ul>
         </div>
       </div>
 
-      <!-- Comunicación y decisiones -->
+      <!-- Motivadores / Desmotivadores -->
+      <div class="disc-dos-col" style="margin-bottom:16px;">
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-ok">Situaciones motivadoras</div>
+          <ul class="disc-list" id="disc-motivadores"></ul>
+        </div>
+        <div class="disc-col-card">
+          <div class="disc-col-title disc-col-dev">Reducen motivación</div>
+          <ul class="disc-list" id="disc-desmotivadores"></ul>
+        </div>
+      </div>
+
+      <!-- Comunicación -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">💬 Estilo de comunicación</div>
+        <div class="disc-seccion-title">Estilo de comunicación</div>
         <div class="disc-seccion-body" id="disc-comunicacion"></div>
       </div>
+
+      <!-- Decisiones -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">🧭 Toma de decisiones</div>
+        <div class="disc-seccion-title">Toma de decisiones</div>
         <div class="disc-seccion-body" id="disc-decisiones"></div>
       </div>
 
-      <!-- Preguntas sugeridas -->
+      <!-- Preguntas -->
       <div class="disc-seccion">
-        <div class="disc-seccion-title">❓ Preguntas sugeridas para entrevista</div>
+        <div class="disc-seccion-title">Preguntas sugeridas para entrevista</div>
         <div class="disc-preguntas" id="disc-preguntas"></div>
       </div>
 
-      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:12px;">
+      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);">
         Evaluación realizada el <span id="disc-fecha">—</span>
       </div>
     </div>
