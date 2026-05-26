@@ -1826,7 +1826,8 @@ async function abrirDash(test, rut, nombre) {
         omisiones: fila[5] || 0,
         pb:        fila[6] || 0,
         percentil: fila[7] || 0,
-        nivel:     fila[8] || ""
+        nivel:     fila[8] || "",
+        foco:      parseInt(fila[9]||0)||0
       };
       abrirInformeIC(d);
     } catch(e) {
@@ -2163,6 +2164,17 @@ function abrirInformeIC(d) {
   document.getElementById("ic-resumen-texto").textContent = info.texto;
   document.getElementById("ic-fecha").textContent = d.fecha || "—";
 
+  // Integridad IC
+  var focoIC = parseInt(d.foco||0)||0;
+  var icIntegEl = document.getElementById("ic-integridad");
+  if (icIntegEl) {
+    icIntegEl.innerHTML = focoIC === 0
+      ? "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#edf7f1;border:1px solid #a8d5b8;font-size:12px;color:#1a5c3a;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      : focoIC <= 3
+      ? "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#fef3e0;border:1px solid #e6c84a;font-size:12px;color:#7a5c10;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>⚠</span><div><strong>Alerta leve — "+focoIC+" cambio(s) de ventana detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente al interpretar el resultado.</div></div></div>"
+      : "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#fdecea;border:1px solid #d4a0a0;font-size:12px;color:#8b2020;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>⚠</span><div><strong>Alerta de integridad — "+focoIC+" cambios de ventana detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Se recomienda evaluar la validez del resultado.</div></div></div>";
+  }
+
   document.getElementById("modal-ic").classList.add("activo");
   document.body.style.overflow = "hidden";
 }
@@ -2210,6 +2222,7 @@ async function abrirInformeCEAL(test, rut, nombre) {
 
     var estilo=String(fila[3]||"—"), descripcion=String(fila[4]||"—"), efectividad=String(fila[5]||"—");
     var puntaje=fila[6]!==undefined?fila[6]:"—", fecha=String(fila[0]||"—");
+    var focoCEAL = parseInt(fila[7]||0)||0;
 
     document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
 
@@ -2228,6 +2241,16 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var textoFinal=CEAL_TEXTOS[estilo+"|"+efectividad]||descripcion;
     document.getElementById("ceal-descripcion").textContent=textoFinal;
     document.getElementById("ceal-fecha").textContent=fecha;
+
+    // Integridad CEAL
+    var cealIntegEl = document.getElementById("ceal-integridad");
+    if (cealIntegEl) {
+      cealIntegEl.innerHTML = focoCEAL === 0
+        ? "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#edf7f1;border:1px solid #a8d5b8;font-size:12px;color:#1a5c3a;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+        : focoCEAL <= 3
+        ? "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#fef3e0;border:1px solid #e6c84a;font-size:12px;color:#7a5c10;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>⚠</span><div><strong>Alerta leve — "+focoCEAL+" cambio(s) de ventana detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente al interpretar el resultado.</div></div></div>"
+        : "<div style='display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;background:#fdecea;border:1px solid #d4a0a0;font-size:12px;color:#8b2020;font-weight:500;margin-bottom:14px;'><span style='font-size:16px;'>⚠</span><div><strong>Alerta de integridad — "+focoCEAL+" cambios de ventana detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Se recomienda evaluar la validez del resultado.</div></div></div>";
+    }
     document.getElementById("modal-ceal").classList.add("activo");
     document.body.style.overflow="hidden";
   } catch(e) { alert("Error cargando datos CEAL: "+e.message); }
@@ -2243,94 +2266,94 @@ function imprimirInformeCEAL() { window.print(); }
 // ══════════ INFORME DISC ══════════
 var DISC_PERFILES = {
   "DI": {
-    caracteristicas: "Líder dinámico que combina orientación a resultados con habilidades para influir en las personas. Actúa con rapidez, toma decisiones con confianza y sabe cómo motivar a su entorno para alcanzar objetivos. Su energía conductual es alta tanto en el logro de metas como en la gestión de relaciones.",
-    atributos: "Decidido, persuasivo, competitivo, entusiasta, directo, orientado al cambio y a los resultados, sociable, emprendedor.",
-    motivadores: ["Proyectos desafiantes con impacto visible","Libertad para actuar y tomar decisiones","Reconocimiento por logros y resultados","Equipos que respondan con rapidez","Variedad y dinamismo en el trabajo"],
-    desmotivadores: ["Procesos lentos o burocráticos","Falta de reconocimiento","Tareas repetitivas sin propósito claro","Ambientes sin desafíos","Supervisión excesiva o microgestión"],
-    fortalezas: ["Capacidad para movilizar equipos hacia resultados","Visión clara y toma de decisiones ágil","Habilidad para vender ideas y generar entusiasmo","Alta tolerancia al riesgo y la incertidumbre","Energía sostenida en contextos de presión"],
-    areas_desarrollo: ["Tendencia a pasar por alto detalles importantes","Puede ser percibido como impaciente o impulsivo","Dificultad para escuchar antes de actuar","Puede descuidar el seguimiento de procesos","Riesgo de sobreestimar la capacidad del equipo"],
-    comunicacion: "Su comunicación es directa, enérgica y persuasiva. Prefiere mensajes concisos orientados a la acción. Puede ser muy convincente y motivador, aunque en ocasiones puede parecer poco receptivo a otros puntos de vista.",
-    decisiones: "Toma decisiones rápidamente, confiando en su intuición y experiencia. Prefiere actuar antes que esperar más información. Puede asumir riesgos calculados con naturalidad.",
-    preguntas: ["¿Cómo ha liderado equipos bajo presión de resultados?","¿Describe una situación donde tuviste que persuadir a otros para adoptar tu visión.","¿Cómo equilibras la necesidad de actuar rápido con la calidad del proceso?","¿Qué haces cuando el equipo no responde a tu ritmo?"]
+    caracteristicas: "Persona activa, entusiasta y orientada a los resultados. Le gusta emprender, moverse rápido y estar donde hay acción. Combina energía para lograr objetivos con una marcada facilidad para relacionarse y convencer a otros. Se desenvuelve bien en ambientes dinámicos, variados y con libertad para actuar.",
+    atributos: "Franco, activo, entusiasta, conversador, social, positivo, centrado en los objetivos, amable, hablador, le gusta el cambio.",
+    motivadores: ["Proyectos variados con contacto con personas","Libertad para actuar e improvisar","Reconocimiento verbal y social","Ambientes dinámicos y cambiantes","Desafíos que generen entusiasmo"],
+    desmotivadores: ["Tareas rutinarias y repetitivas","Ambientes fríos o demasiado formales","Falta de reconocimiento o apreciación","Procesos lentos o exceso de burocracia","Trabajo aislado sin contacto con personas"],
+    fortalezas: ["Facilidad para relacionarse y generar confianza rápida","Energía y entusiasmo contagioso","Capacidad para convencer e inspirar a otros","Orientación clara al resultado","Adaptabilidad ante situaciones nuevas"],
+    areas_desarrollo: ["Puede dispersarse con múltiples tareas simultáneas","Tendencia a comprometerse más de lo que puede cumplir","Puede pasar por alto los detalles importantes","Dificultad para mantener foco en tareas rutinarias","Puede actuar sin considerar suficientemente las consecuencias"],
+    comunicacion: "Muy activa y expresiva. Se comunica con entusiasmo y facilidad, y se lleva bien con la mayoría de las personas. Prefiere hablar antes que escuchar, especialmente cuando el tema le resulta estimulante. Puede saltarse detalles en favor de la rapidez.",
+    decisiones: "Decide con rapidez apoyándose en su intuición y en el impacto que la decisión tendrá en las personas. Quiere ser aceptado y evita situaciones donde deba tomar decisiones que generen conflicto o pérdida de apreciación.",
+    preguntas: ["¿Cómo organizas tu trabajo cuando tienes muchas tareas al mismo tiempo?","¿Cuéntame de una situación donde debiste mantener foco en algo rutinario durante un período largo. ¿Cómo lo manejaste?","¿Cómo reaccionas cuando algo no sale como lo planeaste?","¿Qué haces cuando debes cumplir un compromiso que se te hizo difícil de sostener?"]
   },
   "DC": {
-    caracteristicas: "Perfil orientado al logro con alto estándar de calidad. Combina la decisión y el enfoque en resultados con la precisión y el análisis. Su energía conductual se orienta a alcanzar objetivos de manera sistemática y eficiente.",
-    atributos: "Analítico, exigente, orientado a resultados, metódico, independiente, preciso, competitivo, autodisciplinado.",
-    motivadores: ["Desafíos intelectuales con criterios claros de éxito","Autonomía para planificar y ejecutar","Reconocimiento basado en resultados concretos","Trabajo que requiera rigor y análisis","Sistemas y procesos bien definidos"],
-    desmotivadores: ["Trabajo sin estándares claros","Ambientes caóticos o desorganizados","Falta de control sobre los procesos","Decisiones basadas en emociones sin datos","Interrupciones frecuentes al trabajo profundo"],
-    fortalezas: ["Capacidad analítica orientada a resultados","Alta exigencia personal y del equipo","Habilidad para identificar errores y oportunidades de mejora","Planificación rigurosa con foco en eficiencia","Autonomía y autogestión"],
-    areas_desarrollo: ["Puede ser percibido como frío o inflexible","Dificultad para aceptar errores propios","Puede generar tensión al exigir altos estándares","Tendencia al perfeccionismo que frena la acción","Baja tolerancia a la ambigüedad"],
-    comunicacion: "Comunicación directa, precisa y basada en datos. Prefiere los hechos por sobre las emociones. Puede ser conciso al punto de parecer distante. Valora la eficiencia en la comunicación.",
-    decisiones: "Decide basándose en análisis y datos. Evalúa las alternativas con cuidado antes de actuar. Puede ser cauteloso cuando la información es incompleta, pero firme una vez que decide.",
-    preguntas: ["¿Cómo abordas un problema complejo con información incompleta?","¿Describe una situación donde tuviste que mantener estándares de calidad bajo presión.","¿Cómo gestionas el equilibrio entre perfección y plazos?","¿Qué estrategias usas para tomar decisiones difíciles?"]
+    caracteristicas: "Persona exigente, metódica y muy orientada a los resultados con calidad. Combina la urgencia por lograr objetivos con la necesidad de que las cosas se hagan bien y con rigor. Prefiere trabajar de manera autónoma, planificada y bajo criterios claros de éxito.",
+    atributos: "Analítico, exigente, preciso, competitivo, autodisciplinado, independiente, metódico, orientado al logro.",
+    motivadores: ["Desafíos con criterios claros de éxito","Autonomía para planificar y ejecutar a su manera","Reconocimiento por resultados concretos y calidad del trabajo","Trabajo que requiera análisis y rigor","Sistemas y procesos bien definidos"],
+    desmotivadores: ["Ambientes desorganizados o sin estándares","Trabajo apresurado que comprometa la calidad","Decisiones basadas en emociones sin respaldo en datos","Interrupciones frecuentes al trabajo profundo","Falta de control sobre los procesos"],
+    fortalezas: ["Capacidad analítica y orientación a resultados","Alta exigencia personal con el propio trabajo","Identificación temprana de errores o inconsistencias","Planificación rigurosa y eficiente","Autonomía y autogestión"],
+    areas_desarrollo: ["Puede ser percibido como frío o difícil de acercar","Tendencia al perfeccionismo que puede frenar la acción","Dificultad para aceptar que otros tengan estándares diferentes","Puede generar tensión cuando exige alto nivel a su entorno","Baja tolerancia a la ambigüedad o al caos"],
+    comunicacion: "Directa, precisa y basada en hechos. Prefiere ir al punto sin rodeos y valora la eficiencia en la comunicación. Puede parecer distante o poco empático, aunque sus mensajes son altamente confiables y claros.",
+    decisiones: "Analítica y cuidadosa. Evalúa alternativas antes de actuar y puede ser cauteloso cuando la información es incompleta. Una vez que decide, es firme y consistente con su postura.",
+    preguntas: ["¿Cómo abordas un problema complejo cuando no tienes toda la información que necesitas?","¿Cuéntame de una situación donde mantuviste la calidad de tu trabajo bajo presión de tiempo.","¿Cómo reaccionas cuando alguien de tu entorno no cumple con los estándares que tú consideras necesarios?","¿Qué haces cuando debes entregar algo que no quedó como tú lo hubieras hecho?"]
   },
   "IS": {
-    caracteristicas: "Perfil orientado a las personas, con alta capacidad relacional y estabilidad emocional. Combina entusiasmo social con lealtad y consistencia. Su energía conductual fluye con naturalidad en entornos colaborativos y de servicio a otros.",
-    atributos: "Sociable, empático, leal, colaborador, entusiasta, paciente, comunicativo, orientado al equipo.",
-    motivadores: ["Ambientes de trabajo positivos y colaborativos","Relaciones interpersonales significativas","Proyectos con impacto en las personas","Reconocimiento social y apreciación del equipo","Trabajo con propósito y valores compartidos"],
-    desmotivadores: ["Conflictos interpersonales no resueltos","Ambientes competitivos o agresivos","Cambios abruptos sin explicación","Trabajo aislado sin interacción","Tareas que requieran confrontación directa"],
-    fortalezas: ["Habilidad para construir relaciones de confianza","Capacidad de escucha activa y empatía","Facilidad para mantener el ánimo del equipo","Consistencia y compromiso en el tiempo","Habilidad para mediar y resolver conflictos"],
-    areas_desarrollo: ["Dificultad para establecer límites claros","Puede evitar conversaciones difíciles","Tendencia a priorizar el bienestar grupal sobre los resultados","Puede ser influenciado por el ambiente emocional del equipo","Dificultad para decir no"],
-    comunicacion: "Comunicación cálida, abierta y orientada a las personas. Es un oyente activo y hace sentir a los demás valorados. Puede evitar mensajes difíciles para no afectar el clima relacional.",
-    decisiones: "Decide considerando el impacto en las personas. Busca consenso y prefiere decisiones que generen acuerdo. Puede demorar decisiones difíciles para evitar conflictos.",
-    preguntas: ["¿Cómo manejas situaciones donde debes dar feedback difícil a alguien?","¿Describe una situación donde debiste priorizar resultados por sobre el bienestar del equipo.","¿Cómo gestionas conflictos dentro de un equipo?","¿Qué haces cuando debes tomar una decisión impopular?"]
+    caracteristicas: "Persona cálida, sociable y muy orientada a las relaciones. Le gusta trabajar con gente, generar buen ambiente y colaborar. Combina entusiasmo e influencia social con una profunda lealtad y estabilidad emocional. Se desenvuelve mejor en entornos positivos, armoniosos y con propósito compartido.",
+    atributos: "Sociable, empático, leal, colaborador, entusiasta, paciente, comunicativo, generoso, orientado a las personas.",
+    motivadores: ["Trabajo en equipo en ambientes positivos","Relaciones interpersonales significativas y duraderas","Proyectos con impacto visible en las personas","Reconocimiento genuino y apreciación del entorno","Tareas con propósito y sentido compartido"],
+    desmotivadores: ["Conflictos interpersonales sin resolver","Ambientes competitivos, agresivos o fríos","Cambios abruptos sin explicación o preparación","Trabajo aislado sin contacto humano","Situaciones que exijan confrontación directa"],
+    fortalezas: ["Habilidad natural para construir relaciones de confianza","Escucha activa y empatía genuina","Capacidad para mantener el ánimo y cohesión del grupo","Consistencia y compromiso sostenido en el tiempo","Facilidad para mediar y suavizar tensiones"],
+    areas_desarrollo: ["Puede evitar conversaciones difíciles para no generar conflicto","Dificultad para establecer límites cuando los demás lo necesitan","Tendencia a priorizar el bienestar del grupo sobre sus propias necesidades","Puede ser influenciado por el estado emocional del entorno","Puede demorar decisiones para no afectar a nadie"],
+    comunicacion: "Cálida, abierta y orientada a hacer sentir bien a los demás. Escucha con genuino interés antes de hablar. Puede evitar decir cosas difíciles si percibe que generarán tensión o malestar en la otra persona.",
+    decisiones: "Busca el consenso y considera cómo la decisión afectará a quienes le rodean. Puede necesitar más tiempo cuando la decisión implica tensión interpersonal o impactar negativamente a alguien cercano.",
+    preguntas: ["¿Cómo manejas situaciones donde debes dar una retroalimentación difícil a alguien?","¿Cuéntame de una situación donde tuviste que decir no a algo que te pidieron.","¿Cómo reaccionas cuando hay un conflicto no resuelto en tu entorno de trabajo?","¿Qué haces cuando sientes que estás cargando con más de lo que te corresponde?"]
   },
   "SC": {
-    caracteristicas: "Perfil altamente orientado a la estabilidad, la consistencia y el cumplimiento de normas. Combina paciencia con precisión y compromiso con los procedimientos establecidos. Su energía conductual se expresa en entornos predecibles con roles bien definidos.",
-    atributos: "Meticuloso, confiable, paciente, sistemático, leal, ordenado, prudente, persistente.",
-    motivadores: ["Ambientes de trabajo estables y predecibles","Claridad en roles, responsabilidades y expectativas","Reconocimiento por consistencia y calidad del trabajo","Trabajo con procedimientos bien definidos","Tiempo suficiente para realizar las tareas correctamente"],
-    desmotivadores: ["Cambios frecuentes sin planificación","Ambientes caóticos o ambiguos","Presión para tomar decisiones rápidas sin información","Falta de reconocimiento por el trabajo bien hecho","Tareas sin estructura clara"],
-    fortalezas: ["Alta confiabilidad y consistencia en el trabajo","Atención al detalle y orientación a la calidad","Capacidad para mantener procesos ordenados","Lealtad y compromiso de largo plazo","Habilidad para trabajar con metodología y rigor"],
-    areas_desarrollo: ["Dificultad para adaptarse a cambios rápidos","Puede resistirse a ideas nuevas no probadas","Tendencia a la parálisis por análisis","Puede evitar conflictos necesarios","Baja tolerancia a la ambigüedad y la incertidumbre"],
-    comunicacion: "Comunicación cuidadosa, precisa y formal. Prefiere expresarse con claridad y certeza antes de hablar. Puede ser percibido como reservado pero es extremadamente confiable en sus compromisos.",
-    decisiones: "Decide con cuidado y sobre la base de precedentes y datos. Evalúa los riesgos con detalle antes de actuar. Prefiere la certeza y puede demorar decisiones en contextos ambiguos.",
-    preguntas: ["¿Cómo gestionas situaciones de cambio inesperado en tu trabajo?","¿Describe una situación donde debiste adaptarte rápidamente a nuevas condiciones.","¿Cómo manejas la presión cuando los plazos son muy ajustados?","¿Qué haces cuando no tienes suficiente información para decidir?"]
+    caracteristicas: "Persona muy confiable, metódica y orientada a la calidad. Valora la estabilidad, la precisión y el cumplimiento de los compromisos. Prefiere entornos predecibles con roles claros y procedimientos bien definidos. Su fortaleza está en la consistencia, el rigor y la profundidad con que aborda cada tarea.",
+    atributos: "Meticuloso, confiable, paciente, sistemático, leal, ordenado, prudente, persistente, reservado.",
+    motivadores: ["Entornos estables y predecibles","Claridad en roles, tareas y expectativas","Reconocimiento por la calidad y consistencia del trabajo","Procedimientos y estándares bien definidos","Tiempo suficiente para hacer las cosas correctamente"],
+    desmotivadores: ["Cambios frecuentes sin planificación ni aviso","Presión para decidir o actuar sin información suficiente","Ambientes caóticos o desorganizados","Falta de reconocimiento por el trabajo bien hecho","Tareas ambiguas sin estructura clara"],
+    fortalezas: ["Alta confiabilidad y consistencia en sus compromisos","Atención al detalle y orientación a la calidad","Capacidad para mantener procesos ordenados en el tiempo","Lealtad y compromiso de largo plazo","Trabajo metódico y riguroso"],
+    areas_desarrollo: ["Puede resistirse a cambios necesarios aunque sean beneficiosos","Tendencia a la parálisis cuando falta información o hay ambigüedad","Puede evitar conflictos que sería mejor abordar directamente","Dificultad para adaptarse rápidamente a contextos nuevos o cambiantes","Puede guardar incomodidades antes de expresarlas"],
+    comunicacion: "Cuidadosa, precisa y reservada. Prefiere asegurarse de lo que va a decir antes de hablar. No es de comunicación espontánea, pero cuando habla sus palabras son confiables y bien pensadas.",
+    decisiones: "Cuidadosa y basada en precedentes y datos. Evalúa los riesgos con detalle antes de comprometerse. Prefiere la certeza y puede necesitar más tiempo cuando el contexto es ambiguo o cambia con rapidez.",
+    preguntas: ["¿Cómo reaccionas cuando en tu trabajo ocurre un cambio inesperado que altera tu rutina?","¿Cuéntame de una situación donde debiste adaptarte rápidamente a condiciones nuevas.","¿Cómo manejas la presión cuando los plazos son muy ajustados y no puedes hacer las cosas como te gustaría?","¿Qué haces cuando tienes que tomar una decisión importante con información incompleta?"]
   },
   "D": {
-    caracteristicas: "Perfil de alta dominancia. Orientado al logro, directo y decidido. Su energía conductual se focaliza en superar obstáculos y alcanzar resultados con rapidez y autonomía.",
-    atributos: "Decisivo, competitivo, directo, independiente, orientado a resultados, exigente, de voluntad firme.",
-    motivadores: ["Retos y metas ambiciosas","Autonomía total para actuar","Posiciones de liderazgo y autoridad","Reconocimiento por resultados concretos","Velocidad y eficiencia"],
-    desmotivadores: ["Supervisión excesiva","Procesos lentos o burocráticos","Ambientes sin desafíos claros","Trabajo en equipo sin resultados visibles","Tareas administrativas rutinarias"],
-    fortalezas: ["Capacidad para tomar decisiones difíciles","Alta orientación al logro","Energía sostenida bajo presión","Autonomía y autogestión","Habilidad para movilizar acciones"],
-    areas_desarrollo: ["Puede ser percibido como agresivo o insensible","Dificultad para escuchar otras perspectivas","Puede descuidar procesos y detalles","Tendencia a asumir demasiado control","Baja tolerancia a la incertidumbre relacional"],
-    comunicacion: "Directa, concisa y orientada a la acción. Va al punto sin rodeos. Puede parecer imponente o poco empático en situaciones sensibles.",
-    decisiones: "Rápido y firme. Decide con confianza y no le teme a la incertidumbre. Puede asumir riesgos altos cuando ve una oportunidad.",
-    preguntas: ["¿Cómo manejas situaciones donde tu decisión es impopular pero necesaria?","¿Describe una situación donde debiste actuar sin contar con toda la información.","¿Cómo gestionas el trabajo con personas más lentas o metódicas que tú?","¿Qué haces cuando alguien desafía tu autoridad?"]
+    caracteristicas: "Persona directa, decidida y con alta orientación al logro. Actúa con rapidez, confía en sus propios criterios y no le teme a los desafíos. Prefiere la autonomía y valora los entornos donde se espera iniciativa y resultados concretos. Su fortaleza es la capacidad de avanzar incluso en condiciones de incertidumbre.",
+    atributos: "Decisivo, competitivo, directo, independiente, exigente, autónomo, de voluntad firme, orientado a la acción.",
+    motivadores: ["Retos y metas concretas y ambiciosas","Autonomía para actuar a su propio ritmo","Reconocimiento por resultados y eficiencia","Velocidad y poco tiempo perdido en procesos innecesarios","Variedad y desafíos que pongan a prueba sus capacidades"],
+    desmotivadores: ["Supervisión excesiva o microgestión","Procesos lentos, burocráticos o sin sentido claro","Ambientes sin desafíos ni metas definidas","Tareas repetitivas de bajo impacto","Trabajo que no da espacio para tomar iniciativa"],
+    fortalezas: ["Capacidad para tomar decisiones difíciles con rapidez","Alta orientación al logro y la eficiencia","Energía sostenida incluso en contextos de presión","Autonomía y autogestión sin necesidad de dirección constante","Iniciativa para enfrentar obstáculos sin esperar"],
+    areas_desarrollo: ["Puede ser percibido como brusco o poco considerado con los demás","Dificultad para escuchar perspectivas distintas a la propia","Puede descuidar procesos o detalles en favor de la velocidad","Tendencia a imponer el ritmo propio en contextos colaborativos","Puede subestimar el impacto de sus acciones en el entorno"],
+    comunicacion: "Directa, concisa y orientada a la acción. Va al punto sin rodeos y no le gustan las conversaciones largas que no llevan a nada. Puede parecer imponente o poco empático en situaciones que requieren más delicadeza.",
+    decisiones: "Rápida y segura. Decide con confianza apoyándose en su propio criterio. No le teme a la incertidumbre y puede asumir riesgos cuando considera que vale la pena.",
+    preguntas: ["¿Cuéntame de una situación donde debiste actuar sin contar con toda la información que hubieras querido tener.","¿Cómo reaccionas cuando alguien en tu entorno tiene un ritmo de trabajo muy diferente al tuyo?","¿Cómo manejas situaciones donde debes coordinar con otros antes de poder avanzar?","¿Qué haces cuando recibes una retroalimentación con la que no estás de acuerdo?"]
   },
   "I": {
-    caracteristicas: "Perfil de alta influencia. Extrovertido, entusiasta y orientado a las personas. Su energía conductual fluye en la interacción social, la persuasión y la creación de ambientes positivos.",
-    atributos: "Sociable, optimista, comunicativo, entusiasta, creativo, persuasivo, espontáneo.",
-    motivadores: ["Trabajo con personas y en equipo","Reconocimiento social y visibilidad","Proyectos creativos y variados","Ambientes positivos y dinámicos","Libertad para expresarse e innovar"],
-    desmotivadores: ["Trabajo aislado o solitario","Tareas repetitivas y detalladas","Ambientes fríos o formales","Falta de reconocimiento","Exceso de normas o restricciones"],
-    fortalezas: ["Habilidad para motivar y entusiasmar","Facilidad para conectar con personas","Creatividad e innovación","Comunicación persuasiva","Capacidad para generar ambientes positivos"],
-    areas_desarrollo: ["Puede dispersarse con facilidad","Dificultad para mantenerse en el detalle","Puede ser demasiado optimista sin base","Tendencia a evitar conflictos necesarios","Puede comprometerse más de lo que puede cumplir"],
-    comunicacion: "Expresiva, cálida y persuasiva. Se comunica con energía y entusiasmo. Puede ser muy efectivo inspirando a otros pero puede pecar de impreciso.",
-    decisiones: "Decide basándose en intuición y en el impacto en las personas. Puede ser impulsivo y luego reconsiderar. Busca que las decisiones sean bien recibidas socialmente.",
-    preguntas: ["¿Cómo manejas proyectos que requieren trabajo detallado y metódico?","¿Describe una situación donde debiste mantener foco sin distracciones.","¿Cómo gestionas compromisos cuando tienes demasiadas tareas simultáneas?","¿Qué estrategias usas para mantener la objetividad en tus decisiones?"]
+    caracteristicas: "Persona extrovertida, entusiasta y con una marcada facilidad para relacionarse con otros. Le gusta comunicarse, convencer e inspirar. Se mueve bien en ambientes dinámicos, abiertos y sociales. Su energía se orienta naturalmente hacia las personas y la creación de ambientes positivos.",
+    atributos: "Sociable, optimista, comunicativo, entusiasta, espontáneo, persuasivo, creativo, animado.",
+    motivadores: ["Trabajo con y para personas","Reconocimiento social y visibilidad positiva","Proyectos creativos, variados y estimulantes","Ambientes positivos, abiertos y con buen clima","Libertad para expresarse, improvisar y ser creativo"],
+    desmotivadores: ["Trabajo solitario sin contacto con otros","Tareas repetitivas, detalladas o muy estructuradas","Ambientes fríos, formales o rígidos","Falta de reconocimiento o de espacio para opinar","Exceso de normas, controles o restricciones"],
+    fortalezas: ["Facilidad para conectar rápidamente con personas distintas","Comunicación cálida, expresiva y persuasiva","Entusiasmo contagioso que anima el ambiente","Creatividad e ideas originales","Adaptabilidad a contextos sociales variados"],
+    areas_desarrollo: ["Puede perder el foco con facilidad ante estímulos nuevos","Dificultad para mantenerse en el detalle o la rutina","Tiende a comprometerse con más de lo que puede cumplir","Puede ser excesivamente optimista sin considerar los riesgos","Tendencia a evitar conflictos aunque sean necesarios"],
+    comunicacion: "Expresiva, cálida y animada. Habla con facilidad y entusiasmo, y conecta rápidamente con las personas. Prefiere hablar antes que escuchar. Puede ser impreciso cuando la conversación le parece poco estimulante.",
+    decisiones: "Decide apoyándose en su intuición y en cómo la decisión será recibida por su entorno. Puede ser impulsivo y luego reconsiderar. Busca que las decisiones sean bien vistas y no generen rechazo.",
+    preguntas: ["¿Cómo organizas tu trabajo cuando tienes muchas cosas en paralelo?","¿Cuéntame de una situación donde debiste mantener foco en algo rutinario o repetitivo.","¿Cómo gestionas los compromisos cuando se te acumulan las tareas?","¿Qué haces cuando debes tomar una decisión que sabes que no será bien recibida?"]
   },
   "S": {
-    caracteristicas: "Perfil de alta estabilidad. Paciente, leal y orientado al servicio. Su energía conductual se expresa con naturalidad en entornos de colaboración, apoyo y consistencia.",
-    atributos: "Paciente, leal, colaborador, confiable, empático, consistente, estable emocionalmente.",
-    motivadores: ["Ambientes armoniosos y colaborativos","Relaciones de largo plazo basadas en confianza","Trabajo con propósito y sentido","Reconocimiento genuino por el apoyo brindado","Estabilidad en el rol y las responsabilidades"],
-    desmotivadores: ["Cambios frecuentes o inesperados","Conflictos interpersonales sin resolver","Presión excesiva para cambiar rápidamente","Ambientes competitivos o agresivos","Falta de aprecio por el trabajo cotidiano"],
-    fortalezas: ["Confiabilidad y consistencia","Capacidad de escucha y empatía","Habilidad para apoyar y sostener al equipo","Paciencia para procesos de largo aliento","Compromiso y lealtad organizacional"],
-    areas_desarrollo: ["Puede resistirse al cambio necesario","Dificultad para confrontar situaciones difíciles","Tendencia a postergar decisiones incómodas","Puede sacrificar sus necesidades por las del grupo","Baja tolerancia a ambientes de alta presión"],
-    comunicacion: "Cálida, pausada y orientada a la relación. Escucha antes de hablar. Transmite seguridad y confianza. Puede evitar decir lo que piensa para no generar tensión.",
-    decisiones: "Reflexiva y consensuada. Busca el acuerdo antes de decidir. Puede necesitar más tiempo en contextos de presión o cambio.",
-    preguntas: ["¿Cómo manejas situaciones donde debes implementar un cambio impopular?","¿Describe una situación donde debiste priorizar resultados sobre relaciones.","¿Cómo gestionas el trabajo cuando hay conflictos no resueltos en el equipo?","¿Qué haces cuando debes decir no a una petición que te incomoda?"]
+    caracteristicas: "Persona paciente, leal y orientada al apoyo de los demás. Le gusta contribuir en ambientes de colaboración y construir relaciones de confianza a largo plazo. Su fortaleza está en la consistencia, la empatía y la capacidad de sostener compromisos en el tiempo sin llamar la atención.",
+    atributos: "Paciente, leal, colaborador, confiable, empático, consistente, tranquilo, comprometido, buen oyente.",
+    motivadores: ["Entornos de trabajo armoniosos y colaborativos","Relaciones de largo plazo basadas en confianza mutua","Trabajo con propósito y sentido para los demás","Reconocimiento genuino por la contribución cotidiana","Estabilidad y claridad en el rol y las responsabilidades"],
+    desmotivadores: ["Cambios frecuentes o inesperados sin preparación","Conflictos interpersonales sin resolver","Ambientes competitivos, agresivos o de alta tensión","Presión sostenida sin espacio para recuperarse","Falta de aprecio o reconocimiento por el trabajo diario"],
+    fortalezas: ["Confiabilidad y consistencia en sus compromisos","Capacidad de escucha genuina y empatía hacia los demás","Apoyo sostenido sin necesidad de reconocimiento inmediato","Paciencia y perseverancia en proyectos de largo plazo","Lealtad y compromiso organizacional duradero"],
+    areas_desarrollo: ["Puede resistirse a cambios aunque sean necesarios","Dificultad para confrontar situaciones o personas de manera directa","Tendencia a posponer decisiones incómodas para evitar tensión","Puede anteponer las necesidades de los demás a las propias","Puede acumular incomodidades antes de expresarlas"],
+    comunicacion: "Cálida, pausada y orientada a la relación. Escucha con genuino interés antes de opinar. Transmite tranquilidad y confianza. Puede evitar decir lo que piensa si siente que puede generar tensión o malestar.",
+    decisiones: "Reflexiva y orientada al consenso. Prefiere asegurarse de que las decisiones sean aceptadas por quienes le rodean. Puede necesitar más tiempo en situaciones de presión o cuando la decisión implica afectar a alguien del entorno.",
+    preguntas: ["¿Cómo manejas situaciones donde debes implementar algo que sabes que no va a ser bien recibido?","¿Cuéntame de una situación donde debiste decir no a algo que te pidieron.","¿Cómo reaccionas cuando hay un conflicto no resuelto en tu entorno de trabajo?","¿Qué haces cuando sientes que estás cargando con más responsabilidad de la que te corresponde?"]
   },
   "C": {
-    caracteristicas: "Perfil de alta consciencia. Analítico, preciso y orientado a la calidad. Su energía conductual se expresa en entornos que valoran el rigor, la exactitud y el cumplimiento de normas.",
-    atributos: "Analítico, preciso, meticuloso, sistemático, cauteloso, orientado a la calidad, introvertido.",
-    motivadores: ["Trabajo con estándares claros y medibles","Tiempo para analizar antes de decidir","Reconocimiento por la calidad del trabajo","Sistemas y procesos bien definidos","Autonomía intelectual"],
-    desmotivadores: ["Decisiones sin datos suficientes","Trabajo apresurado con baja calidad","Ambientes caóticos o desorganizados","Cambios sin justificación clara","Falta de estructura y procedimientos"],
-    fortalezas: ["Alta capacidad analítica","Atención excepcional al detalle","Rigor y consistencia en el trabajo","Habilidad para identificar errores","Pensamiento crítico y objetivo"],
-    areas_desarrollo: ["Puede ser excesivamente perfeccionista","Dificultad para tomar decisiones sin datos completos","Puede ser percibido como distante o frío","Tendencia a la parálisis analítica","Baja tolerancia al caos o la ambigüedad"],
-    comunicacion: "Precisa, formal y basada en datos. Prefiere comunicarse por escrito cuando es posible. Puede ser percibido como distante pero sus comunicaciones son altamente confiables y exactas.",
-    decisiones: "Metódica y basada en evidencia. Evalúa múltiples alternativas antes de decidir. Puede ser percibido como lento pero sus decisiones son de alta calidad.",
-    preguntas: ["¿Cómo gestionas situaciones donde debes decidir sin toda la información necesaria?","¿Describe una situación donde tu análisis previno un error importante.","¿Cómo equilibras la búsqueda de perfección con la necesidad de entregar resultados a tiempo?","¿Qué haces cuando alguien toma una decisión que consideras incorrecta?"]
+    caracteristicas: "Persona analítica, precisa y con alta orientación a la calidad. Prefiere trabajar de manera ordenada, con acceso a información suficiente y tiempo para pensar antes de actuar. Su fortaleza está en el rigor, la exactitud y la capacidad para identificar errores o inconsistencias que otros pueden pasar por alto.",
+    atributos: "Analítico, preciso, meticuloso, sistemático, cauteloso, independiente, orientado a la calidad, reflexivo.",
+    motivadores: ["Trabajo con estándares claros y criterios de calidad definidos","Tiempo para analizar y pensar antes de decidir","Reconocimiento por el rigor y la exactitud del trabajo","Sistemas, procesos y metodologías bien definidas","Autonomía intelectual para trabajar a su propio ritmo"],
+    desmotivadores: ["Decisiones tomadas sin información suficiente","Trabajo apresurado que comprometa la calidad","Ambientes desorganizados o sin procedimientos claros","Cambios sin justificación o explicación lógica","Falta de estructura o de criterios claros para evaluar el trabajo"],
+    fortalezas: ["Capacidad analítica para identificar problemas antes de que ocurran","Atención excepcional al detalle","Rigor y consistencia en la calidad del trabajo","Pensamiento crítico y objetivo","Organización y método para abordar tareas complejas"],
+    areas_desarrollo: ["Puede ser excesivamente perfeccionista al punto de frenar la entrega","Dificultad para decidir cuando la información no es completa","Puede ser percibido como distante o difícil de acercar","Tendencia a la parálisis analítica en contextos de incertidumbre","Baja tolerancia al desorden o a las ambigüedades"],
+    comunicacion: "Precisa, cuidadosa y basada en datos. Prefiere asegurarse de lo que va a decir antes de hablar. No es de comunicación espontánea, pero cuando se expresa, sus mensajes son confiables, bien fundamentados y exactos.",
+    decisiones: "Metódica y basada en evidencia. Evalúa múltiples alternativas y considera los posibles errores antes de decidir. Puede necesitar más tiempo que otros, pero sus decisiones son de alta calidad y bien fundamentadas.",
+    preguntas: ["¿Cómo abordas una situación donde debes decidir sin tener toda la información que necesitas?","¿Cuéntame de una situación donde tu análisis previno un error o problema importante.","¿Cómo manejas la tensión entre querer hacer las cosas perfectas y tener que entregarlas dentro de un plazo?","¿Qué haces cuando alguien de tu entorno toma una decisión con la que no estás de acuerdo?"]
   }
-};
+}
 
 function renderDiscBars(containerId, scores, colorClass) {
   // Barras horizontales simples como fallback
@@ -2349,82 +2372,84 @@ function renderDiscBars(containerId, scores, colorClass) {
 }
 
 function renderDiscGraficoSVG(adScore, natScore) {
-  var colores    = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
-  var colBg      = {D:'#fde8e8', I:'#fef6e0', S:'#e8f5ee', C:'#e8f0fa'};
-  var colHeader  = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
-  var factores   = ['D','I','S','C'];
+  var colores   = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
+  var colBg     = {D:'#fde8e8', I:'#fef6e0', S:'#e8f5ee', C:'#e8f0fa'};
+  var colHeader = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
+  var factores  = ['D','I','S','C'];
 
   function buildGrafico(scores, titulo) {
-    var W = 200, H = 280;
-    var padTop = 52, padBot = 48, padLR = 12;
-    var colW = (W - padLR*2) / 4;
-    var maxH = H - padTop - padBot;
-    var midY = padTop + maxH/2;
+    var W = 210, H = 290;
+    var padTop = 52, padBot = 48, padLeft = 36, padRight = 12;
+    var areaW = W - padLeft - padRight;
+    var colW  = areaW / 4;
+    var maxH  = H - padTop - padBot;
 
-    // Columnas de color de fondo
+    // Escala dinámica
+    var vals = factores.map(function(f){ return parseFloat(scores[f])||0; });
+    var dataMin = Math.min.apply(null, vals);
+    var dataMax = Math.max.apply(null, vals);
+    var range = dataMax - dataMin || 10;
+    var scaleMin = Math.max(0,  Math.floor((dataMin - range*0.4) / 10) * 10);
+    var scaleMax = Math.min(100, Math.ceil((dataMax + range*0.4) / 10) * 10);
+    var scaleRange = scaleMax - scaleMin || 10;
+    function toY(val) { return padTop + maxH - ((val - scaleMin) / scaleRange) * maxH; }
+
     var fondos = factores.map(function(f, idx) {
-      var x = padLR + colW * idx;
+      var x = padLeft + colW * idx;
       return '<rect x="'+x.toFixed(1)+'" y="'+padTop+'" width="'+colW.toFixed(1)+'" height="'+maxH+'" fill="'+colBg[f]+'"/>';
     }).join('');
 
-    // Bordes verticales entre columnas
-    var separadores = [1,2,3].map(function(i) {
-      var x = (padLR + colW * i).toFixed(1);
+    var seps = [1,2,3].map(function(i){
+      var x = (padLeft + colW*i).toFixed(1);
       return '<line x1="'+x+'" y1="'+padTop+'" x2="'+x+'" y2="'+(padTop+maxH)+'" stroke="#fff" stroke-width="2"/>';
     }).join('');
 
-    // Borde exterior del área de gráfico
-    var borde = '<rect x="'+padLR+'" y="'+padTop+'" width="'+(W-padLR*2)+'" height="'+maxH+'" fill="none" stroke="#ccc" stroke-width="1" rx="2"/>';
+    var borde = '<rect x="'+padLeft+'" y="'+padTop+'" width="'+areaW+'" height="'+maxH+'" fill="none" stroke="#ccc" stroke-width="1" rx="2"/>';
 
-    // Headers de factor (rectángulos de color con letra)
     var headers = factores.map(function(f, idx) {
-      var x = padLR + colW * idx;
+      var x = padLeft + colW * idx;
       return '<rect x="'+x.toFixed(1)+'" y="'+(padTop-26)+'" width="'+colW.toFixed(1)+'" height="22" fill="'+colHeader[f]+'" rx="2"/>'
            + '<text x="'+(x+colW/2).toFixed(1)+'" y="'+(padTop-10)+'" text-anchor="middle" font-size="13" font-weight="700" font-family="system-ui,sans-serif" fill="#fff">'+f+'</text>';
     }).join('');
 
-    // Línea media punteada
-    var lineaMedia = '<line x1="'+padLR+'" y1="'+midY.toFixed(1)+'" x2="'+(W-padLR)+'" y2="'+midY.toFixed(1)+'" stroke="#999" stroke-width="1" stroke-dasharray="4,3"/>';
-
-    // Calcular posición de puntos
-    var puntos = factores.map(function(f, idx) {
-      var pct = parseFloat(scores[f]) || 0;
-      var cx = padLR + colW * idx + colW/2;
-      var cy = padTop + maxH - (pct/100) * maxH;
-      return {x: cx, y: cy, f: f, pct: pct};
+    var marcas = '';
+    [0, 25, 50, 75, 100].filter(function(n){ return n >= scaleMin-5 && n <= scaleMax+5; }).forEach(function(n) {
+      var y = toY(n).toFixed(1);
+      var esMed = n === 50;
+      marcas += '<line x1="'+padLeft+'" y1="'+y+'" x2="'+(padLeft+areaW)+'" y2="'+y+'" stroke="'+(esMed?'#aaa':'#ddd')+'" stroke-width="'+(esMed?'1.2':'0.7')+'" stroke-dasharray="'+(esMed?'5,3':'3,3')+'"/>';
+      marcas += '<text x="'+(padLeft-5)+'" y="'+(parseFloat(y)+3.5)+'" text-anchor="end" font-size="9" font-family="system-ui,sans-serif" fill="#999">'+n+'</text>';
     });
 
-    // Path de línea
-    var pathD = puntos.map(function(p, i) {
-      return (i===0 ? 'M' : 'L') + ' ' + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
-    }).join(' ');
+    var puntos = factores.map(function(f, idx) {
+      var pct = parseFloat(scores[f])||0;
+      return {x: padLeft + colW*idx + colW/2, y: toY(pct), f:f, pct:pct};
+    });
+
+    var pathD = puntos.map(function(p,i){ return (i===0?'M':'L')+' '+p.x.toFixed(1)+' '+p.y.toFixed(1); }).join(' ');
     var linea = '<path d="'+pathD+'" fill="none" stroke="#CC3333" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
 
-    // Puntos
-    var circles = puntos.map(function(p) {
+    var circles = puntos.map(function(p){
       return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="6" fill="'+colores[p.f]+'" stroke="#fff" stroke-width="2"/>';
     }).join('');
 
-    // Valores bajo el gráfico — cajitas de color
     var valores = factores.map(function(f, idx) {
-      var x = padLR + colW * idx;
-      var pct = parseFloat(scores[f]) || 0;
+      var x = padLeft + colW*idx;
+      var pct = parseFloat(scores[f])||0;
       return '<rect x="'+x.toFixed(1)+'" y="'+(padTop+maxH+4)+'" width="'+colW.toFixed(1)+'" height="20" fill="'+colHeader[f]+'" rx="2"/>'
            + '<text x="'+(x+colW/2).toFixed(1)+'" y="'+(padTop+maxH+17)+'" text-anchor="middle" font-size="11" font-weight="700" font-family="system-ui,sans-serif" fill="#fff">'+pct+'</text>';
     }).join('');
 
-    // Título
-    var tit = '<text x="'+(W/2)+'" y="14" text-anchor="middle" font-size="11" font-weight="600" font-family="system-ui,sans-serif" fill="#444" letter-spacing="0.2">'+titulo+'</text>';
+    var tit = '<text x="'+(padLeft+areaW/2)+'" y="14" text-anchor="middle" font-size="11" font-weight="600" font-family="system-ui,sans-serif" fill="#444">'+titulo+'</text>';
 
     return '<svg width="'+W+'" height="'+H+'" style="overflow:visible">'
-      + tit + fondos + separadores + borde + headers + lineaMedia + linea + circles + valores
+      + tit + fondos + seps + borde + marcas + headers + linea + circles + valores
       + '</svg>';
   }
 
   var svgAd  = buildGrafico(adScore,  'Perfil I — Estilo Adaptado');
   var svgNat = buildGrafico(natScore, 'Perfil II — Estilo Natural');
 
-  return '<div style="display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:16px 20px 8px;">'
+  return '<div style="display:flex;gap:36px;justify-content:center;align-items:flex-start;padding:16px 20px 8px;">'
     + '<div>' + svgAd  + '</div>'
     + '<div>' + svgNat + '</div>'
     + '</div>';
@@ -3124,6 +3149,9 @@ function imprimirModalWONDERLIC() { window.print(); }
         </div>
       </div>
 
+      <!-- Integridad IC -->
+      <div id="ic-integridad"></div>
+
       <!-- Resumen ejecutivo -->
       <div class="ic-resumen">
         <div class="ic-resumen-title">📋 Resumen ejecutivo</div>
@@ -3161,6 +3189,9 @@ function imprimirModalWONDERLIC() { window.print(); }
           <div class="ceal-puntaje-lbl">Puntaje total</div>
         </div>
       </div>
+      <!-- Integridad CEAL -->
+      <div id="ceal-integridad"></div>
+
       <div class="ic-resumen">
         <div class="ic-resumen-title">📋 Descripción del estilo</div>
         <div class="ic-resumen-text" id="ceal-descripcion">—</div>
