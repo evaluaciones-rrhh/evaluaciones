@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cygnus — Plataforma de Evaluaciones</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <style>
 :root {
   --naranja: #c4432a;
@@ -447,13 +448,35 @@ tbody tr:hover td { background: #fdf9f6; }
   body > * { display: none !important; }
   #modal-ic.activo { display: block !important; }
   #modal-ceal.activo { display: block !important; }
+  #modal-16pf.activo { display: block !important; }
   #modal-ic:not(.activo) { display: none !important; }
   #modal-ceal:not(.activo) { display: none !important; }
+  #modal-16pf:not(.activo) { display: none !important; }
   .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
   .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
   .modal-close, .btn-primary { display: none !important; }
   .modal-header { position: static !important; }
 }
+
+/* ══════════ MODAL INFORME 16PF ══════════ */
+.pf-semaforo-wrap { display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:10px;margin-bottom:16px; }
+.pf-semaforo-dot { width:40px;height:40px;border-radius:50%;flex-shrink:0; }
+.pf-sem-verde { background:#1a5c3a; } .pf-sem-amarillo { background:#e6a817; } .pf-sem-rojo { background:#8b2020; }
+.pf-sw-verde { background:#e8f5ee; } .pf-sw-amarillo { background:#fdf5e0; } .pf-sw-rojo { background:#f5e8e8; }
+.pf-sem-titulo { font-weight:700;font-size:14px; }
+.pf-integridad-ok { display:flex;align-items:center;gap:10px;background:#e8f5ee;border:1px solid #a8d5b8;border-radius:8px;padding:12px 14px;font-size:13px;color:#1a5c3a;margin-bottom:14px;font-weight:500; }
+.pf-integridad-leve { background:#fdf5e0;border:2px solid #e6a817;border-radius:8px;padding:12px 14px;font-size:13px;color:#7a5c10;margin-bottom:14px; }
+.pf-integridad-riesgo { background:#fdecea;border:2px solid #8b2020;border-radius:8px;padding:12px 14px;font-size:13px;color:#8b2020;margin-bottom:14px; }
+.pf-seccion { margin-bottom:18px; }
+.pf-seccion-title { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border); }
+.pf-cards-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px; }
+.pf-card-fort { background:var(--high-bg);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--high);line-height:1.5; }
+.pf-card-fort strong { display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px; }
+.pf-card-alerta { background:var(--mid-bg);border:1px solid #f0d080;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mid);line-height:1.5;margin-bottom:6px; }
+.pf-sin-alertas { background:var(--high-bg);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--high); }
+.pf-interp { background:var(--bg);border-radius:8px;padding:14px;font-size:13px;color:var(--ink-soft);line-height:1.8; }
+.pf-radar-wrap { max-width:300px;margin:0 auto; }
+.pf-nota { font-size:11px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:8px;border-top:1px solid var(--border); }
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
@@ -1622,6 +1645,9 @@ async function abrirDash(test, rut, nombre) {
   // DISC — modal inline
   if (test === "DISC") { abrirInformeDISC(test, rut, nombre); return; }
 
+  // 16PF — modal inline
+  if (test === "16PF") { abrirInforme16PF(test, rut, nombre); return; }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -2295,6 +2321,190 @@ function cerrarModalDISC() {
 
 function imprimirModalDISC() { window.print(); }
 
+// ══════════ INFORME 16PF ══════════
+var PF_ALERTAS = {
+  'A_bajo':'Prefiere trabajar de forma independiente. Puede tener dificultades en roles con mucho contacto con personas o trabajo en equipo.',
+  'A_alto':'Muy orientada hacia las personas. Puede tener dificultades para tomar decisiones difíciles o mantener límites profesionales.',
+  'B_bajo':'Puede requerir más tiempo para aprender tareas nuevas o manejar situaciones complejas. Se recomienda evaluar con prueba de razonamiento complementaria.',
+  'B_alto':'Alta capacidad para aprender rápido y resolver problemas complejos.',
+  'C_bajo':'Puede presentar dificultades para manejar situaciones de presión, estrés o conflicto. Requiere ambiente laboral estructurado y apoyo.',
+  'C_alto':'Muy estable emocionalmente, maneja bien el estrés y los conflictos.',
+  'E_bajo':'Puede tener dificultades para expresar opiniones, defender ideas o asumir roles de liderazgo.',
+  'E_alto':'Alta asertividad. En cargos de supervisión podría percibirse como dominante.',
+  'F_bajo':'Muestra bajo nivel de energía o entusiasmo. Puede reflejar desmotivación o características que vale explorar en entrevista.',
+  'F_alto':'Muy activa y entusiasta. Puede ser impulsiva o con dificultades para mantener concentración en tareas rutinarias.',
+  'G_bajo':'Tendencia a saltarse reglas o procedimientos. Requiere supervisión en cargos donde el cumplimiento es clave.',
+  'G_alto':'Muy apegada a normas. Puede tener dificultades para adaptarse a cambios o situaciones excepcionales.',
+  'H_bajo':'Timidez social marcada. Puede presentar dificultades en roles que requieren relacionarse con personas nuevas.',
+  'H_alto':'Muy segura socialmente. Ideal para roles de representación o ventas.',
+  'I_bajo':'Perfil muy práctico y poco emocional. Puede presentar dificultades en roles que requieren empatía.',
+  'I_alto':'Muy sensible a las necesidades de otros. Puede verse afectada por críticas o conflictos interpersonales.',
+  'L_bajo':'Alta confianza en los demás. Puede ser poco precavida en entornos que requieren discernimiento.',
+  'L_alto':'Desconfianza elevada. Puede presentar dificultades para integrarse a equipos o aceptar retroalimentación.',
+  'M_bajo':'Perfil muy práctico y concreto. Puede tener dificultades con tareas que requieren creatividad.',
+  'M_alto':'Muy orientada a las ideas. Puede descuidar detalles prácticos importantes.',
+  'N_bajo':'Muy abierta y espontánea. Puede compartir información confidencial sin filtro.',
+  'N_alto':'Muy reservada y discreta. Puede percibirse como distante o poco transparente.',
+  'O_bajo':'Alta seguridad personal. Muy confiada en sí misma.',
+  'O_alto':'Inseguridad marcada y tendencias ansiosas frecuentes. Puede afectar el desempeño y relaciones laborales.',
+  'Q1_bajo':'Resistencia al cambio. Poco adecuada para entornos dinámicos o que cambian constantemente.',
+  'Q1_alto':'Muy abierta a lo nuevo. Puede ser poco constante.',
+  'Q2_bajo':'Alta dependencia del grupo. Puede tener dificultades para trabajar de forma autónoma.',
+  'Q2_alto':'Prefiere trabajar sola. Puede tener dificultades para colaborar o pedir ayuda.',
+  'Q3_bajo':'Flexible con normas y errores. Puede descuidar la calidad o el orden.',
+  'Q3_alto':'Muy exigente consigo misma. Puede tener dificultades para delegar o aceptar resultados imperfectos.',
+  'Q4_bajo':'Muy relajada y tranquila.',
+  'Q4_alto':'Nivel de tensión elevado e irritabilidad frecuente. Puede afectar el rendimiento y relaciones con compañeros.'
+};
+
+var PF_FORTALEZAS = {
+  'A_alto':'Orientación hacia las personas — trabaja bien en equipo y establece relaciones de confianza.',
+  'B_alto':'Alta capacidad de aprendizaje — aprende rápido y resuelve problemas complejos.',
+  'C_alto':'Estabilidad emocional — maneja bien el estrés, los conflictos y la presión laboral.',
+  'E_alto':'Liderazgo y asertividad — capaz de dirigir equipos y defender ideas con seguridad.',
+  'F_alto':'Energía y entusiasmo — activa, motivada y con buen nivel de energía para el trabajo.',
+  'G_alto':'Respeto por las normas — responsable y apegada a los procedimientos.',
+  'H_alto':'Seguridad social — se relaciona fácilmente con personas nuevas, ideal para roles de representación.',
+  'Q3_alto':'Perfeccionismo y organización — alta exigencia personal y atención al detalle.',
+  'Q2_alto':'Autonomía — trabaja bien de forma independiente.',
+  'M_bajo':'Sentido práctico — orientada a lo concreto y resultados tangibles.',
+  'L_bajo':'Confianza en los demás — fácil de integrar a equipos y receptiva a la retroalimentación.',
+  'O_bajo':'Seguridad personal — confiada en sí misma y sus capacidades.',
+  'Q4_bajo':'Tranquilidad — relajada, paciente y con buen manejo de la presión.'
+};
+
+function pf16GetAlertas(deVals) {
+  var ESCA = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+  var out = [];
+  deVals.forEach(function(v, i) {
+    if (v <= 3) out.push({ escala: ESCA[i], v: v, key: ESCA[i]+'_bajo' });
+    else if (v >= 8) out.push({ escala: ESCA[i], v: v, key: ESCA[i]+'_alto' });
+  });
+  return out;
+}
+
+function pf16GetFortalezas(deVals) {
+  var ESCA = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+  var out = [];
+  deVals.forEach(function(v, i) {
+    var key = v >= 8 ? ESCA[i]+'_alto' : v <= 3 ? ESCA[i]+'_bajo' : null;
+    if (key && PF_FORTALEZAS[key]) out.push(PF_FORTALEZAS[key]);
+  });
+  return out;
+}
+
+async function abrirInforme16PF(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut || "");
+  var nomDec = decodeURIComponent(nombre || "");
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getDatos16PF&t=" + Date.now());
+    var filas = Array.isArray(data) ? data : [];
+    function normRut(s){ return String(s||"").replace(/[\.\s]/g,"").toLowerCase(); }
+    function normNom(s){ return String(s||"").trim().toLowerCase(); }
+    var rutNorm = normRut(rutDec), nomNorm = normNom(nomDec);
+    var fila = filas.find(function(r){ return (rutNorm && normRut(r[2])===rutNorm) || (nomNorm && normNom(r[1])===nomNorm); });
+    if (!fila) fila = filas.find(function(r){ return nomNorm && normNom(r[1]).includes(nomNorm.split(" ")[0]); });
+    if (!fila) { alert("No se encontraron datos del candidato."); return; }
+
+    // fila: [fecha, nombre, rut, genero, cargo_perfil(eliminado→género), decatipos_escalas, decatipos_dims, nivel_perfil, fortalezas, areas_riesgo, interpretacion, cambios_foco]
+    var deStr   = String(fila[5] || "");
+    var dimStr  = String(fila[6] || "");
+    var deVals  = deStr.split(',').map(function(v){ return parseInt(v.trim())||5; });
+    var dimVals = dimStr.split(',').map(function(v){ return parseInt(v.trim())||5; });
+    while (dimVals.length < 5) dimVals.push(5);
+
+    var alertas = pf16GetAlertas(deVals);
+    var forts   = pf16GetFortalezas(deVals);
+    var foco    = parseInt(fila[11]) || 0;
+
+    // Header
+    document.getElementById("pf-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  " + fila[2] : "") + (fila[3] ? "  ·  " + fila[3] : "");
+
+    // Semáforo
+    var n = alertas.length;
+    var sem = n === 0
+      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)', titulo:'Sin alertas significativas', texto:'El perfil se encuentra dentro de la zona promedio en todas las escalas evaluadas.' }
+      : n <= 2
+      ? { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)', titulo:'Algunas áreas de atención', texto:'El perfil presenta ' + n + ' escala(s) con alejamiento significativo que el evaluador debe considerar.' }
+      : { dot:'pf-sem-rojo', wrap:'pf-sw-rojo', color:'var(--low)', titulo:'Varias áreas de atención', texto:'El perfil presenta ' + n + ' escalas con alejamiento significativo. Se recomienda evaluación complementaria.' };
+    document.getElementById("pf-semaforo").innerHTML =
+      '<div class="pf-semaforo-wrap ' + sem.wrap + '">' +
+      '<div class="pf-semaforo-dot ' + sem.dot + '"></div>' +
+      '<div><div class="pf-sem-titulo" style="color:' + sem.color + '">' + sem.titulo + '</div>' +
+      '<div style="color:var(--muted);font-size:12px;margin-top:3px;">' + sem.texto + '</div></div></div>';
+
+    // Integridad
+    document.getElementById("pf-integridad").innerHTML = foco === 0
+      ? "<div class='pf-integridad-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      : foco <= 3
+      ? "<div class='pf-integridad-leve'><strong>⚠ Alerta leve — " + foco + " cambio(s) de ventana detectado(s)</strong><div style='font-size:12px;margin-top:4px;'>Puede ser accidental. Se recomienda considerar este antecedente al interpretar el resultado.</div></div>"
+      : "<div class='pf-integridad-riesgo'><strong>⚠ ALERTA DE INTEGRIDAD — " + foco + " cambios de ventana detectados</strong><div style='font-size:12px;margin-top:4px;'>Existe riesgo de que el candidato haya consultado recursos externos. Se recomienda evaluar la validez del resultado.</div></div>";
+
+    // Fortalezas
+    var fortsTexto = (fila[8]||"").split("|").map(function(f){return f.trim();}).filter(function(f){return f && f!=="No se identifican fortalezas destacadas";});
+    var todasForts = fortsTexto.slice();
+    forts.forEach(function(f){ if (!todasForts.some(function(t){return t.substring(0,20)===f.substring(0,20);})) todasForts.push(f); });
+    var secForts = document.getElementById("pf-sec-forts");
+    if (todasForts.length) {
+      document.getElementById("pf-forts").innerHTML = todasForts.slice(0,4).map(function(f){
+        return "<div class='pf-card-fort'><strong>✓ Fortaleza</strong>" + f + "</div>";
+      }).join("");
+      secForts.style.display = "block";
+    } else { secForts.style.display = "none"; }
+
+    // Alertas
+    var riesgosTexto = (fila[9]||"").split("|").map(function(r){return r.trim();}).filter(function(r){return r && r!=="No se identifican áreas de atención relevantes";});
+    var todasAlertas = riesgosTexto.map(function(r){return {texto:r, escala:null};});
+    alertas.forEach(function(a){
+      var desc = PF_ALERTAS[a.key] || "";
+      if (desc && !todasAlertas.some(function(t){return t.texto.substring(0,20)===desc.substring(0,20);}))
+        todasAlertas.push({texto:desc, escala:a.escala});
+    });
+    document.getElementById("pf-alertas").innerHTML = todasAlertas.length
+      ? todasAlertas.slice(0,6).map(function(a){
+          var prefix = a.escala ? "<strong>" + a.escala + ":</strong> " : "<strong>⚠</strong> ";
+          return "<div class='pf-card-alerta'>" + prefix + a.texto + "</div>";
+        }).join("")
+      : "<div class='pf-sin-alertas'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
+
+    // Interpretación
+    document.getElementById("pf-interp").textContent = fila[10] || "—";
+    document.getElementById("pf-fecha").textContent = fila[0] || "—";
+
+    // Radar Chart.js
+    if (window._pf16Chart) { window._pf16Chart.destroy(); window._pf16Chart = null; }
+    var ctx = document.getElementById("pf-chart-radar").getContext("2d");
+    window._pf16Chart = new Chart(ctx, {
+      type: "radar",
+      data: {
+        labels: ["Extraversión","Ansiedad","Dureza","Independencia","Autocontrol"],
+        datasets: [{
+          label: "Perfil", data: dimVals,
+          backgroundColor: "rgba(26,58,92,0.15)", borderColor: "#1a3a5c", borderWidth: 2,
+          pointBackgroundColor: dimVals.map(function(v){ return v<=3?"#c0392b":v>=8?"#1a3a5c":"#1a6a4a"; }),
+          pointRadius: 5
+        }]
+      },
+      options: {
+        scales:{ r:{ min:1, max:10, ticks:{ stepSize:2, font:{size:9}, backdropColor:"transparent" }, grid:{color:"#d8d6ce"}, pointLabels:{font:{size:11}} } },
+        plugins:{ legend:{display:false} }, animation:{duration:400}
+      }
+    });
+
+    document.getElementById("modal-16pf").classList.add("activo");
+    document.body.style.overflow = "hidden";
+  } catch(e) {
+    alert("Error cargando datos 16PF: " + e.message);
+  }
+}
+
+function cerrarModal16PF() {
+  document.getElementById("modal-16pf").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
+function imprimirModal16PF() { window.print(); }
+
 </script>
 
 
@@ -2481,6 +2691,61 @@ function imprimirModalDISC() { window.print(); }
 
       <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:12px;">
         Evaluación realizada el <span id="disc-fecha">—</span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══════════ MODAL INFORME 16PF ══════════ -->
+<div class="modal-overlay" id="modal-16pf" onclick="if(event.target===this)cerrarModal16PF()">
+  <div class="modal-box" style="max-width:760px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">🧠 Informe — Evaluación de Personalidad 16PF-5</div>
+        <div class="modal-header-sub" id="pf-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirModal16PF()">⬇ Descargar PDF</button>
+        <button class="modal-close" onclick="cerrarModal16PF()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Semáforo -->
+      <div id="pf-semaforo"></div>
+
+      <!-- Integridad -->
+      <div id="pf-integridad"></div>
+
+      <!-- Fortalezas -->
+      <div class="pf-seccion" id="pf-sec-forts" style="display:none;">
+        <div class="pf-seccion-title">✅ Fortalezas identificadas</div>
+        <div class="pf-cards-grid" id="pf-forts"></div>
+      </div>
+
+      <!-- Alertas -->
+      <div class="pf-seccion" id="pf-sec-alertas">
+        <div class="pf-seccion-title">⚠️ Áreas de atención</div>
+        <div id="pf-alertas"></div>
+      </div>
+
+      <!-- Radar dimensiones globales -->
+      <div class="pf-seccion">
+        <div class="pf-seccion-title">📊 Perfil de dimensiones globales</div>
+        <div class="pf-radar-wrap">
+          <canvas id="pf-chart-radar" height="280"></canvas>
+        </div>
+      </div>
+
+      <!-- Interpretación -->
+      <div class="pf-seccion">
+        <div class="pf-seccion-title">📋 Interpretación del perfil</div>
+        <div class="pf-interp" id="pf-interp">—</div>
+        <div class="pf-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
+      </div>
+
+      <!-- Fecha -->
+      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px;">
+        Evaluación realizada el <span id="pf-fecha">—</span>
       </div>
     </div>
   </div>
