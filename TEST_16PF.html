@@ -59,7 +59,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid #d8d6ce;border-radius:
     <div class="card">
       <div class="fg4">
         <div><label>Nombre completo</label><input type="text" id="nombre" placeholder="Apellido Nombre"></div>
-        <div><label>RUT</label><input type="text" id="rut" placeholder="12.345.678-9"></div>
+        <div><label>RUT</label><input type="text" id="rut" placeholder="12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
         <div><label>Sexo</label><select id="sexo"><option value="m">Masculino</option><option value="f">Femenino</option></select></div>
         <div><label>Perfil cargo</label><select id="perfil"><option value="admin">Administrativo</option><option value="prof">Profesional</option><option value="mando">Mando medio/alto</option></select></div>
       </div>
@@ -166,10 +166,41 @@ var BV={A:{0:1,1:1,2:1,3:1,4:1,5:2,6:2,7:3,8:3,9:3,10:4,11:4,12:4,13:4,14:5,15:6
 
 var PERFILES={admin:{nombre:'Cargo Administrativo',dims:{Ext:[4,7],Ans:[1,5],Dur:[3,7],Ind:[3,6],AuC:[6,10]}},prof:{nombre:'Cargo Profesional',dims:{Ext:[4,8],Ans:[1,6],Dur:[3,8],Ind:[5,10],AuC:[5,9]}},mando:{nombre:'Cargo Mando Medio/Alto',dims:{Ext:[6,10],Ans:[1,5],Dur:[4,8],Ind:[6,10],AuC:[6,10]}}};
 
+// ══════════════════════════════════════════════
+// VALIDACIÓN Y FORMATO DE RUT CHILENO
+// ══════════════════════════════════════════════
+function limpiarRut(r){return String(r).trim().replace(/[\.\-\s]/g,"").toUpperCase();}
+function calcularDv(rutNum){var s=0,m=2,a=String(rutNum).split("").reverse();for(var i=0;i<a.length;i++){s+=parseInt(a[i])*m;m=m===7?2:m+1;}var r=s%11;if(r===0)return"0";if(r===1)return"K";return String(11-r);}
+function validarRut(rut){var l=limpiarRut(rut);if(l.length<2)return false;var dv=l.slice(-1),num=l.slice(0,-1);if(!/^\d+$/.test(num))return false;var n=parseInt(num,10);if(n<1000000||n>99999999)return false;return calcularDv(n)===dv;}
+function formatearRut(rut){var l=limpiarRut(rut);if(l.length<2)return rut;var dv=l.slice(-1),num=l.slice(0,-1);if(!/^\d+$/.test(num))return rut;return num.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv;}
+(function(){
+  var el=document.getElementById("rut"),err=document.getElementById("err-rut");
+  if(!el)return;
+  el.addEventListener("input",function(){
+    var raw=limpiarRut(this.value);
+    if(raw.length>1){var dv=raw.slice(-1),num=raw.slice(0,-1).replace(/\D/g,"");if(num)this.value=num.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv;}
+    if(err)err.style.display="none";this.style.borderColor="";
+  });
+  el.addEventListener("blur",function(){
+    if(!this.value.trim())return;
+    if(!validarRut(this.value)){if(err){err.textContent="⚠ RUT inválido. Revisa el número y dígito verificador.";err.style.display="block";}this.style.borderColor="#e55";}
+    else{this.value=formatearRut(this.value);this.style.borderColor="";if(err)err.style.display="none";}
+  });
+})();
+
 document.getElementById('btn-ini').onclick=function(){
   var n=document.getElementById('nombre').value.trim();
   if(!n){document.getElementById('err-n').style.display='block';return;}
   document.getElementById('err-n').style.display='none';
+  var rutVal=document.getElementById('rut').value.trim();
+  var errRut=document.getElementById('err-rut');
+  if(!validarRut(rutVal)){
+    if(errRut){errRut.textContent="⚠ RUT inválido. Revisa el número y dígito verificador.";errRut.style.display='block';}
+    document.getElementById('rut').style.borderColor='#e55';return;
+  }
+  document.getElementById('rut').value=formatearRut(rutVal);
+  document.getElementById('rut').style.borderColor='';
+  if(errRut)errRut.style.display='none';
   document.getElementById('s-inicio').style.display='none';
   document.getElementById('s-carga').style.display='block';
   setTimeout(function(){buildQ();},50);
