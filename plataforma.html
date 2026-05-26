@@ -680,7 +680,6 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="topbar">
       <div class="topbar-title" id="topbar-title">Panel principal</div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="cargarDatos()">↻ Actualizar</button>
       </div>
     </div>
 
@@ -1209,7 +1208,6 @@ async function login() {
 
     if (data.ok === true) {
       usuarioActual = u2;
-      sessionStorage.setItem("cygnus_user", u2);
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app-screen").style.display = "block";
       document.getElementById("user-name").textContent = u2;
@@ -1229,27 +1227,11 @@ async function login() {
   }
 }
 function logout() {
-  sessionStorage.removeItem("cygnus_user");
-  usuarioActual = "";
   document.getElementById("app-screen").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
   document.getElementById("inp-pass").value = "";
 }
 document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
-
-// AUTO-RESTORE: si hay sesión activa en esta pestaña, no pedir login de nuevo
-(function() {
-  var savedUser = sessionStorage.getItem("cygnus_user");
-  if (savedUser) {
-    usuarioActual = savedUser;
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app-screen").style.display = "block";
-    document.getElementById("user-name").textContent = savedUser;
-    document.getElementById("user-avatar").textContent = savedUser[0].toUpperCase();
-    cargarDatos();
-    cargarEntrevistas();
-  }
-})();
 
 // NAVEGACION
 var paginaActual = "panel";
@@ -1426,25 +1408,12 @@ function pintarTodo() {
 
 
 function parseFechaCL(str) {
-  // Acepta "21-05-2026", "21/05/2026", "21-05-2026, 3:36:17 p.m.", ISO y Date nativa
+  // Acepta "21-05-2026", "21/05/2026", ISO y Date nativa
   if (!str) return null;
   var s = String(str).trim();
-
-  // formato dd-mm-yyyy o dd/mm/yyyy, con hora opcional tipo "3:36:17 p.m." o "15:36:17"
-  var m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})(?:[,\s]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?)?/i);
-  if (m) {
-    var yr=+m[3], mo=+m[2]-1, dy=+m[1];
-    var hr=0, mn=0, sc=0;
-    if (m[4] !== undefined) {
-      hr = +m[4];
-      mn = m[5] ? +m[5] : 0;
-      sc = m[6] ? +m[6] : 0;
-      var ampm = (m[7]||"").replace(/\./g,"").toLowerCase();
-      if (ampm === "pm" && hr < 12) hr += 12;
-      if (ampm === "am" && hr === 12) hr = 0;
-    }
-    return new Date(yr, mo, dy, hr, mn, sc);
-  }
+  // formato dd-mm-yyyy o dd/mm/yyyy
+  var m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]);
   // ISO o cualquier otro
   var d = new Date(s);
   return isNaN(d) ? null : d;
@@ -1524,13 +1493,7 @@ function renderTablaComun(datos, tbodyId, cols) {
 }
 
 function renderRecientes() {
-  var recientes = todosLosDatos.slice().sort(function(a, b) {
-    var fa = parseFechaCL(a.fecha), fb = parseFechaCL(b.fecha);
-    if (!fa && !fb) return 0;
-    if (!fa) return 1;
-    if (!fb) return -1;
-    return fb - fa;
-  }).slice(0, 8);
+  var recientes = todosLosDatos.slice().reverse().slice(0,8);
   renderTablaComun(recientes, "tabla-recientes", 5);
 }
 
