@@ -1359,6 +1359,10 @@ function logout() {
   document.getElementById("app-screen").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
   document.getElementById("inp-pass").value = "";
+  document.getElementById("inp-user").value = "";
+  document.getElementById("login-error").style.display = "none";
+  var btn = document.querySelector(".btn-login");
+  if (btn) { btn.textContent = "Ingresar →"; btn.disabled = false; }
 }
 document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
 
@@ -2345,75 +2349,87 @@ function renderDiscBars(containerId, scores, colorClass) {
 }
 
 function renderDiscGraficoSVG(adScore, natScore) {
-  // Gráfico estilo DISC clásico: puntos conectados verticalmente
   var colores = {D:'#CC3333', I:'#E8A020', S:'#2E8B2E', C:'#2563a8'};
   var factores = ['D','I','S','C'];
 
   function buildGrafico(scores, titulo) {
-    var W = 130, H = 220, padTop = 30, padBot = 30, padLR = 20;
+    var W = 180, H = 240, padTop = 36, padBot = 32, padLR = 28;
     var colW = (W - padLR*2) / 4;
     var maxH = H - padTop - padBot;
 
-    // Zonas de fondo (franjas horizontales alternadas como el original)
-    var zonas = '';
-    var franjas = 5;
-    for (var z = 0; z < franjas; z++) {
-      var fy = padTop + (z/franjas)*maxH;
-      var fh = maxH/franjas;
-      if (z % 2 === 0) {
-        zonas += '<rect x="' + padLR + '" y="' + fy.toFixed(1) + '" width="' + (W-padLR*2) + '" height="' + fh.toFixed(1) + '" fill="#b2f0e8" rx="0"/>';
-      }
+    // Líneas de guía horizontales sutiles
+    var guias = '';
+    for (var g = 0; g <= 4; g++) {
+      var gy = padTop + (g/4)*maxH;
+      guias += '<line x1="'+(padLR)+'" y1="'+gy.toFixed(1)+'" x2="'+(W-padLR)+'" y2="'+gy.toFixed(1)+'" stroke="#e0ddd8" stroke-width="'+(g===2?'1.5':'0.75')+'"/>';
     }
 
-    // Línea central
+    // Zona media sombreada suave
     var midY = padTop + maxH/2;
-    var lineaH = '<line x1="' + padLR + '" y1="' + midY.toFixed(1) + '" x2="' + (W-padLR) + '" y2="' + midY.toFixed(1) + '" stroke="#fff" stroke-width="1.5"/>';
+    var zonaMedia = '<rect x="'+padLR+'" y="'+(midY-maxH/8).toFixed(1)+'" width="'+(W-padLR*2)+'" height="'+(maxH/4).toFixed(1)+'" fill="#f0ede8" rx="2"/>';
 
-    // Puntos y línea conectora
+    // Calcular puntos
     var puntos = [];
     factores.forEach(function(f, idx) {
       var pct = scores[f] || 0;
       var cx = padLR + colW * idx + colW/2;
-      // 0% = abajo, 100% = arriba
       var cy = padTop + maxH - (pct/100)*maxH;
       puntos.push({x: cx, y: cy, f: f, pct: pct});
     });
 
-    // Línea conectora
-    var linea = '';
-    for (var i = 0; i < puntos.length-1; i++) {
-      linea += '<line x1="' + puntos[i].x.toFixed(1) + '" y1="' + puntos[i].y.toFixed(1) + '" x2="' + puntos[i+1].x.toFixed(1) + '" y2="' + puntos[i+1].y.toFixed(1) + '" stroke="#333" stroke-width="1.5"/>';
+    // Path suavizado (curva cuadrática)
+    var path = 'M '+puntos[0].x.toFixed(1)+' '+puntos[0].y.toFixed(1);
+    for (var i = 1; i < puntos.length; i++) {
+      var mx = ((puntos[i-1].x + puntos[i].x)/2).toFixed(1);
+      path += ' C '+mx+' '+puntos[i-1].y.toFixed(1)+' '+mx+' '+puntos[i].y.toFixed(1)+' '+puntos[i].x.toFixed(1)+' '+puntos[i].y.toFixed(1);
     }
 
-    // Puntos de color
-    var circles = puntos.map(function(p) {
-      return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="6" fill="' + colores[p.f] + '" stroke="#fff" stroke-width="1.5"/>';
+    // Área bajo la curva
+    var areaPath = path + ' L '+puntos[puntos.length-1].x.toFixed(1)+' '+(padTop+maxH)+' L '+puntos[0].x.toFixed(1)+' '+(padTop+maxH)+' Z';
+
+    // Líneas de columna sutiles
+    var colLines = factores.map(function(f, idx) {
+      var cx = (padLR + colW * idx + colW/2).toFixed(1);
+      return '<line x1="'+cx+'" y1="'+padTop+'" x2="'+cx+'" y2="'+(padTop+maxH)+'" stroke="#e8e5e0" stroke-width="0.5" stroke-dasharray="3,3"/>';
     }).join('');
 
-    // Labels arriba (letra factor)
+    // Línea conectora principal
+    var linea = '<path d="'+path+'" fill="none" stroke="#1a2e4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+
+    // Área relleno
+    var area = '<path d="'+areaPath+'" fill="rgba(26,46,74,0.06)"/>';
+
+    // Puntos (outer ring + inner dot)
+    var circles = puntos.map(function(p) {
+      return '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="7" fill="#fff" stroke="'+colores[p.f]+'" stroke-width="2.5"/>'
+           + '<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="3.5" fill="'+colores[p.f]+'"/>';
+    }).join('');
+
+    // Labels factor arriba
     var labelsTop = puntos.map(function(p) {
-      return '<text x="' + p.x.toFixed(1) + '" y="' + (padTop-8) + '" text-anchor="middle" font-size="11" font-weight="800" fill="' + colores[p.f] + '">' + p.f + '</text>';
+      return '<text x="'+p.x.toFixed(1)+'" y="'+(padTop-14)+'" text-anchor="middle" font-size="12" font-weight="700" font-family="system-ui,sans-serif" fill="'+colores[p.f]+'">'+p.f+'</text>';
     }).join('');
 
     // Valores abajo
     var labelsBot = puntos.map(function(p) {
-      return '<text x="' + p.x.toFixed(1) + '" y="' + (H-8) + '" text-anchor="middle" font-size="10" fill="#555">' + p.pct + '</text>';
+      return '<text x="'+p.x.toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" font-family="system-ui,sans-serif" fill="#888">'+p.pct+'%</text>';
     }).join('');
 
     // Título
-    var tit = '<text x="' + (W/2) + '" y="14" text-anchor="middle" font-size="10" font-weight="600" fill="#333">' + titulo + '</text>';
+    var tit = '<text x="'+(W/2)+'" y="15" text-anchor="middle" font-size="10" font-weight="600" font-family="system-ui,sans-serif" letter-spacing="0.5" fill="#666" text-transform="uppercase">'+titulo+'</text>';
 
-    return '<svg width="' + W + '" height="' + H + '" style="overflow:visible">'
-      + tit + zonas + lineaH + linea + circles + labelsTop + labelsBot
+    return '<svg width="'+W+'" height="'+H+'" style="overflow:visible">'
+      + tit + guias + zonaMedia + colLines + area + linea + circles + labelsTop + labelsBot
       + '</svg>';
   }
 
   var svgAd  = buildGrafico(adScore,  'Perfil Adaptado');
   var svgNat = buildGrafico(natScore, 'Perfil Natural');
 
-  return '<div style="display:flex;gap:24px;justify-content:center;align-items:flex-start;padding:16px 0;">'
-    + '<div style="text-align:center;">' + svgAd + '</div>'
-    + '<div style="text-align:center;">' + svgNat + '</div>'
+  return '<div style="display:flex;gap:32px;justify-content:center;align-items:flex-start;padding:20px 16px 12px;">'
+    + '<div>' + svgAd  + '</div>'
+    + '<div style="width:1px;background:var(--border);margin-top:36px;"></div>'
+    + '<div>' + svgNat + '</div>'
     + '</div>';
 }
 
