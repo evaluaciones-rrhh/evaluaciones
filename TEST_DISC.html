@@ -146,66 +146,62 @@
 
 <!-- PANTALLA INTRO -->
 <div class="screen activo" id="screen-intro">
-  <div class="intro-wrap">
-    <div class="intro-card">
-      
-      <div class="intro-title">Evaluación de Estilo Conductual</div>
-      <div class="intro-desc">A continuación encontrarás una evaluación orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales.</div>
-
-      <div class="form-nombre">
-        <label>Tu nombre completo</label>
-        <input type="text" id="inp-nombre" placeholder="Apellido Nombre" autocomplete="name">
+  <div class="page">
+    <div class="card">
+      <div class="card-label">Datos del candidato</div>
+      <div class="field-grid" style="margin-bottom:1rem;">
+        <div>
+          <label for="inp-nombre">Nombre completo</label>
+          <input type="text" id="inp-nombre" placeholder="Apellido Nombre" autocomplete="name">
+        </div>
+        <div>
+          <label for="inp-rut">RUT</label>
+          <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
+        </div>
       </div>
-      <div class="form-nombre">
-        <label>Tu RUT</label>
-        <input type="text" id="inp-rut" placeholder="12.345.678-9">
-      </div>
-
-      <button class="btn-primary" onclick="iniciarTest()">Comenzar evaluación →</button>
-      <p class="note">Asegúrate de tener tiempo suficiente antes de comenzar</p>
-      <p id="intro-error" style="color:var(--naranja);font-size:13px;margin-top:10px;display:none;">Por favor ingresa tu nombre y RUT para continuar.</p>
+      <div id="intro-error" class="err-msg" style="display:none;">Por favor ingresa tu nombre y RUT para continuar.</div>
     </div>
+
+    <button class="btn-primary" onclick="iniciarTest()">Continuar →</button>
+    <p class="note">Asegúrate de tener tiempo suficiente antes de comenzar</p>
   </div>
 </div>
 
 <!-- PANTALLA INSTRUCCIONES -->
 <div class="screen" id="screen-instrucciones">
-  <div class="test-wrap">
-    <div class="pregunta-card" style="max-width:600px;margin:0 auto;">
-      <h2 style="font-family:'Sora',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px;color:var(--ink);">Instrucciones</h2>
+  <div class="page">
+    <div class="card">
+      <div class="card-label">Instrucciones</div>
       <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:14px;">A continuación encontrarás una evaluación orientada a conocer tu estilo de comportamiento y forma habitual de actuar en distintos contextos laborales.</p>
       <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin-bottom:14px;"><strong>No existen respuestas correctas o incorrectas.</strong> Lo importante es responder de manera honesta y espontánea, seleccionando las alternativas que más se acerquen a cómo eres habitualmente.</p>
-      <div style="background:#f9f6f2;border-left:3px solid var(--naranja);border-radius:6px;padding:16px 18px;margin-bottom:16px;">
-        <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;">¿Cómo responder?</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:8px;">En cada pregunta encontrarás 4 descripciones o características. Deberás seleccionar:</p>
-        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:4px;">• La opción que <strong style="color:var(--naranja)">MÁS (+)</strong> te representa</p>
-        <p style="font-size:13px;color:var(--ink-soft);">• La opción que <strong style="color:var(--azul)">MENOS (−)</strong> te representa</p>
+      <div style="font-size:14px;color:var(--text-muted);line-height:1.8;border-left:3px solid var(--border);padding-left:1rem;margin-bottom:1.25rem;">
+        En cada pregunta encontrarás <strong style="color:var(--text);">4 descripciones</strong>. Deberás seleccionar:<br>
+        • La opción que <strong style="color:var(--accent);">MÁS (+)</strong> te representa<br>
+        • La opción que <strong style="color:var(--text);">MENOS (−)</strong> te representa
       </div>
-      <div style="background:#f9f6f2;border-left:3px solid var(--azul);border-radius:6px;padding:16px 18px;margin-bottom:24px;">
-        <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;">Recomendaciones</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Responde pensando en cómo actúas normalmente, no en cómo crees que deberías responder</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Responde de forma natural y sincera</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• No dediques demasiado tiempo a cada pregunta</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:4px;">• Evita analizar excesivamente las alternativas</p>
-        <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;"><strong>• Confía en tu primera impresión</strong></p>
+      <div style="padding:14px 16px;background:#fafaf8;border-left:3px solid var(--border);border-radius:0 4px 4px 0;font-size:13px;color:var(--text-muted);line-height:1.75;margin-bottom:1rem;">
+        <strong style="color:var(--text);font-style:normal;">Recomendaciones:</strong><br>
+        Responde pensando en cómo actúas normalmente — no como crees que deberías responder.<br>
+        No dediques demasiado tiempo a cada pregunta. <strong>Confía en tu primera impresión.</strong>
       </div>
-      <button class="btn-primary" onclick="comenzarTest()">Comenzar evaluación →</button>
     </div>
+    <button class="btn-primary" onclick="comenzarTest()">Comenzar evaluación →</button>
+    <p class="note">Responde con honestidad — no hay respuestas correctas o incorrectas</p>
   </div>
 </div>
 
 <!-- PANTALLA TEST -->
 <div class="screen" id="screen-test">
-  <div class="test-wrap">
-    <div class="pregunta-header">
-      <div class="pregunta-num" id="preg-num">Pregunta 1 de 24</div>
+  <div class="page">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);" id="preg-num">Pregunta 1 de 24</div>
     </div>
-    <div class="pregunta-card">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px;">Selecciona <strong style="color:var(--naranja)">MÁS (+)</strong> y <strong style="color:var(--azul)">MENOS (−)</strong></div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;border-left:3px solid var(--border);padding-left:10px;">Selecciona <strong style="color:var(--accent)">MÁS (+)</strong> y <strong style="color:var(--text)">MENOS (−)</strong></div>
       <div class="alternativas" id="alternativas-wrap"></div>
       <div class="aviso" id="aviso-doble">⚠ No puedes seleccionar la misma alternativa como MÁS y MENOS.</div>
     </div>
-    <div class="nav-btns">
+    <div style="display:flex;gap:12px;margin-top:1rem;">
       <button class="btn-nav btn-prev" id="btn-prev" onclick="irPrev()" style="display:none;">← Anterior</button>
       <button class="btn-nav btn-next" id="btn-next" onclick="irNext()" disabled>Siguiente →</button>
     </div>
