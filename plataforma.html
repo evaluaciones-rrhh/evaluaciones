@@ -739,7 +739,12 @@ tbody tr:hover td { background: #fdf9f6; }
               <div class="grafico-col">
                 <div class="grafico-num" id="num-wonderlic">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-wonderlic" style="height:0px;"></div></div>
-                <div class="grafico-lbl">WON</div>
+                <div class="grafico-lbl">WOND</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-disc">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-disc" style="height:0px;"></div></div>
+                <div class="grafico-lbl">DISC</div>
               </div>
             </div>
             <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
@@ -1360,7 +1365,8 @@ async function cargarDatos() {
 
     // getHistorial (1 hoja) llega primero → pintar envíos rápido
     promHist.then(function(dataH) {
-      if (Array.isArray(dataH.envios) && dataH.envios.length > todosEnvios.length) {
+      if (Array.isArray(dataH.envios) && dataH.envios.length > 0) {
+        // Siempre actualizar con datos frescos del servidor
         todosEnvios = dataH.envios;
         document.getElementById("st-enviados").textContent = todosEnvios.length;
         actualizarStats();
@@ -1374,7 +1380,7 @@ async function cargarDatos() {
     var dataR = await promAll;
     todosLosDatos = dataR.results || [];
     var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
-    if (enviosR.length > todosEnvios.length) todosEnvios = enviosR;
+    if (enviosR.length >= 0) todosEnvios = enviosR; // siempre tomar datos frescos
 
     // Guardar caché
     try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
@@ -1433,13 +1439,21 @@ function actualizarStats() {
     var f = parseFechaCL(d.fecha);
     return f && f >= semana;
   }).length;
-  // Gráfico barras
-  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC"];
+  // Gráfico barras — nombres completos
+  var testNombresCortos = {
+    "IC":"Test de Instrucciones Complejas",
+    "CEAL":"Estilos de Liderazgo",
+    "16PF":"Personalidad",
+    "IPV":"Personalidad Comercial",
+    "WONDERLIC":"Habilidad Cognitiva",
+    "DISC":"Análisis Conductual"
+  };
+  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC"];
   var conteos = {};
   tests.forEach(function(t){ conteos[t] = todosLosDatos.filter(function(d){ return d.test===t; }).length; });
   var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
   tests.forEach(function(t){
-    var key = t.toLowerCase();
+    var key = t === "16PF" ? "16pf" : t.toLowerCase();
     var bar = document.getElementById("bar-"+key);
     var num = document.getElementById("num-"+key);
     var px  = maxC > 0 ? Math.round((conteos[t]/maxC)*72) : 0;
@@ -1447,8 +1461,8 @@ function actualizarStats() {
     if (num) { num.textContent = conteos[t]; num.style.visibility = conteos[t] > 0 ? "visible" : "hidden"; }
   });
   var ctEl = document.getElementById("conteos-tests");
-  if(ctEl) ctEl.innerHTML = tests.map(function(t){
-    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> "+t+"</span>";
+  if(ctEl) ctEl.innerHTML = tests.filter(function(t){ return conteos[t] > 0; }).map(function(t){
+    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> " + t + "</span>";
   }).join(" &nbsp;·&nbsp; ");
 }
 
@@ -1497,7 +1511,8 @@ var TEST_NOMBRES_HTML = {
   CEAL: "Test de Estilos de Liderazgo",
   "16PF": "Evaluación de Personalidad",
   IPV: "Perfil de Personalidad Comercial",
-  WONDERLIC: "Test de Habilidad Cognitiva General"
+  WONDERLIC: "Test de Habilidad Cognitiva General",
+  DISC: "Análisis de Estilo Conductual"
 };
 
 function procesarEnvios(data) {
