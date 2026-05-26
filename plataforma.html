@@ -1231,6 +1231,7 @@ async function login() {
 
     if (data.ok === true) {
       usuarioActual = u2;
+      sessionStorage.setItem("cygnus_user", u2);
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app-screen").style.display = "block";
       document.getElementById("user-name").textContent = u2;
@@ -1250,11 +1251,27 @@ async function login() {
   }
 }
 function logout() {
+  sessionStorage.removeItem("cygnus_user");
+  usuarioActual = "";
   document.getElementById("app-screen").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
   document.getElementById("inp-pass").value = "";
 }
 document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
+
+// AUTO-RESTORE: si hay sesión activa en esta pestaña, no pedir login de nuevo
+(function() {
+  var savedUser = sessionStorage.getItem("cygnus_user");
+  if (savedUser) {
+    usuarioActual = savedUser;
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app-screen").style.display = "block";
+    document.getElementById("user-name").textContent = savedUser;
+    document.getElementById("user-avatar").textContent = savedUser[0].toUpperCase();
+    cargarDatos();
+    cargarEntrevistas();
+  }
+})();
 
 // NAVEGACION
 var paginaActual = "panel";
