@@ -60,8 +60,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid #d8d6ce;border-radius:
       <div class="fg4">
         <div><label>Nombre completo</label><input type="text" id="nombre" placeholder="Apellido Nombre"></div>
         <div><label>RUT</label><input type="text" id="rut" placeholder="12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
-        <div><label>Sexo</label><select id="sexo"><option value="m">Masculino</option><option value="f">Femenino</option></select></div>
-        <div><label>Perfil cargo</label><select id="perfil"><option value="admin">Administrativo</option><option value="prof">Profesional</option><option value="mando">Mando medio/alto</option></select></div>
+        <div><label>Género</label><select id="sexo"><option value="m">Masculino</option><option value="f">Femenino</option><option value="nd">Prefiero no indicar</option></select></div>
       </div>
       <div id="err-n" class="err">Ingresa el nombre del candidato.</div>
     </div>
@@ -412,21 +411,21 @@ function calcular(resp){
   167: {"H":{"tipo":"d"}},
   168: {"G":{"tipo":"i"}},
   169: {"H":{"tipo":"d"}},
-  177: {"B":{"tipo":"B","val":1}},
+  171: {"B":{"tipo":"B","val":1}},
+  172: {"B":{"tipo":"B","val":3}},
+  173: {"B":{"tipo":"B","val":1}},
+  174: {"B":{"tipo":"B","val":1}},
+  175: {"B":{"tipo":"B","val":3}},
+  176: {"B":{"tipo":"B","val":1}},
+  177: {"B":{"tipo":"B","val":2}},
   178: {"B":{"tipo":"B","val":3}},
-  179: {"B":{"tipo":"B","val":1}},
-  180: {"B":{"tipo":"B","val":1}},
-  181: {"B":{"tipo":"B","val":3}},
-  182: {"B":{"tipo":"B","val":1}},
+  179: {"B":{"tipo":"B","val":3}},
+  180: {"B":{"tipo":"B","val":3}},
+  181: {"B":{"tipo":"B","val":2}},
+  182: {"B":{"tipo":"B","val":2}},
   183: {"B":{"tipo":"B","val":2}},
-  184: {"B":{"tipo":"B","val":3}},
-  185: {"B":{"tipo":"B","val":3}},
-  186: {"B":{"tipo":"B","val":3}},
-  187: {"B":{"tipo":"B","val":2}},
-  188: {"B":{"tipo":"B","val":2}},
-  189: {"B":{"tipo":"B","val":2}},
-  190: {"B":{"tipo":"B","val":2}},
-  191: {"B":{"tipo":"B","val":2}},
+  184: {"B":{"tipo":"B","val":2}},
+  185: {"B":{"tipo":"B","val":2}},
 };
 
   // Calcular PD con puntuación 0,1,2 por ítem
@@ -455,9 +454,31 @@ function calcular(resp){
     if(r===item.B.val) pd['B']=(pd['B']||0)+1;
   }
 
-  // Decatipos según sexo
+  // Decatipos según género
   var sexo=document.getElementById('sexo').value;
-  var bar=sexo==='f'?BM:BV;
+  var bar;
+  if (sexo === 'f') {
+    bar = BM;
+  } else if (sexo === 'nd') {
+    // Baremo promedio (BV+BM)/2 — para "Prefiero no indicar"
+    bar = {};
+    var ESCA_ALL = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+    ESCA_ALL.forEach(function(e) {
+      bar[e] = {};
+      var maxPD = Math.max(
+        Math.max.apply(null, Object.keys(BV[e]).map(Number)),
+        Math.max.apply(null, Object.keys(BM[e]).map(Number))
+      );
+      for (var pd = 0; pd <= maxPD; pd++) {
+        var v = BV[e][pd], m = BM[e][pd];
+        if (v !== undefined && m !== undefined) bar[e][pd] = Math.round((v + m) / 2);
+        else if (v !== undefined) bar[e][pd] = v;
+        else if (m !== undefined) bar[e][pd] = m;
+      }
+    });
+  } else {
+    bar = BV;
+  }
   var de={};
   ESCA.forEach(function(e){
     var b=bar[e];
@@ -561,15 +582,11 @@ function calcular(resp){
   var nivelStr=alertas.length+' escala(s) en zona de alejamiento'+
     (alertas.length>0?': '+alertas.join(', '):'');
 
-  var perfilKey=document.getElementById('perfil').value;
-  var perf=PERFILES[perfilKey];
-
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
     nombre:document.getElementById('nombre').value.trim(),
     rut:document.getElementById('rut').value.trim(),
-    sexo:sexo==='f'?'Femenino':'Masculino',
-    cargo_perfil:perf?perf.nombre:perfilKey,
+    sexo:sexo==='f'?'Femenino':sexo==='nd'?'Prefiero no indicar':'Masculino',
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
     nivel_perfil:nivelStr,
