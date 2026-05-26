@@ -450,10 +450,12 @@ tbody tr:hover td { background: #fdf9f6; }
   #modal-ceal.activo { display: block !important; }
   #modal-16pf.activo { display: block !important; }
   #modal-ipv.activo { display: block !important; }
+  #modal-wonderlic.activo { display: block !important; }
   #modal-ic:not(.activo) { display: none !important; }
   #modal-ceal:not(.activo) { display: none !important; }
   #modal-16pf:not(.activo) { display: none !important; }
   #modal-ipv:not(.activo) { display: none !important; }
+  #modal-wonderlic:not(.activo) { display: none !important; }
   .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
   .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
   .modal-close, .btn-primary { display: none !important; }
@@ -532,6 +534,39 @@ tbody tr:hover td { background: #fdf9f6; }
 .ipv-semaforo-wrap { display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;margin-bottom:14px; }
 .ipv-seccion { margin-bottom:16px; }
 .ipv-seccion-title { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border); }
+
+/* ══════════ MODAL INFORME WONDERLIC ══════════ */
+.wl-banner{display:flex;align-items:center;gap:16px;background:var(--azul);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;}
+.wl-circle{width:70px;height:70px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
+.wl-circle-val{font-size:26px;font-weight:700;line-height:1;}
+.wl-circle-lbl{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.5);text-transform:uppercase;}
+.wl-info h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+.wl-info p{font-size:11px;color:rgba(255,255,255,0.65);line-height:1.5;}
+.wl-nivel-badge{margin-left:auto;padding:5px 14px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;flex-shrink:0;}
+.wl-nb-superior{background:rgba(26,92,58,0.4);color:#7de0a8;}
+.wl-nb-promedio-alto{background:rgba(26,58,92,0.5);color:#a0c8f0;}
+.wl-nb-promedio{background:rgba(230,168,23,0.35);color:#f5d06e;}
+.wl-nb-bajo-promedio{background:rgba(196,67,42,0.35);color:#ffaa88;}
+.wl-nb-bajo{background:rgba(139,32,32,0.5);color:#f59090;}
+.wl-scores{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.wl-score-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;text-align:center;}
+.wl-score-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:4px;}
+.wl-score-val{font-size:22px;font-weight:700;color:var(--ink);}
+.wl-score-sub{font-size:10px;color:var(--muted);}
+.wl-rec-continuar{background:var(--high-bg);border-left:4px solid var(--high);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:12px;}
+.wl-rec-cautela{background:var(--mid-bg);border-left:4px solid var(--mid);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:12px;}
+.wl-rec-no{background:var(--low-bg);border-left:4px solid var(--low);border-radius:0 8px 8px 0;padding:12px 14px;margin-bottom:12px;}
+.wl-rec-titulo{font-size:12px;font-weight:700;margin-bottom:4px;}
+.wl-rec-texto{font-size:12px;color:var(--ink-soft);line-height:1.6;}
+.wl-interp{background:var(--bg);border-radius:8px;padding:14px;font-size:13px;color:var(--ink-soft);line-height:1.8;}
+.wl-resumen{background:var(--azul);color:#fff;border-radius:10px;padding:16px 18px;margin-bottom:12px;}
+.wl-resumen-tit{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,0.45);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.12);}
+.wl-resumen-texto{font-size:13px;color:rgba(255,255,255,0.85);line-height:1.9;font-style:italic;}
+.wl-integ-ok{background:var(--high-bg);border:1px solid #a8d5b8;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--high);margin-bottom:12px;display:flex;align-items:center;gap:10px;font-weight:500;}
+.wl-integ-leve{background:var(--mid-bg);border:2px solid #e6a817;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--mid);margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;}
+.wl-integ-riesgo{background:var(--low-bg);border:2px solid var(--low);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--low);margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;}
+.wl-seccion{margin-bottom:16px;}
+.wl-seccion-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
@@ -1723,6 +1758,9 @@ async function abrirDash(test, rut, nombre) {
   // IPV — modal inline
   if (test === "IPV") { abrirInformeIPV(test, rut, nombre); return; }
 
+  // WONDERLIC — modal inline
+  if (test === "WONDERLIC") { abrirInformeWONDERLIC(test, rut, nombre); return; }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -2810,6 +2848,115 @@ function cerrarModalIPV() {
 
 function imprimirModalIPV() { window.print(); }
 
+// ══════════ INFORME WONDERLIC ══════════
+function wlGetNivelBadge(nivel){
+  if(nivel==="Superior") return "wl-nb-superior";
+  if(nivel==="Promedio alto") return "wl-nb-promedio-alto";
+  if(nivel==="Promedio") return "wl-nb-promedio";
+  if(nivel==="Bajo promedio") return "wl-nb-bajo-promedio";
+  return "wl-nb-bajo";
+}
+
+function wlGetRecomendacion(nivel, foco){
+  if((nivel==="Superior"||nivel==="Promedio alto") && foco<=3)
+    return {cls:"wl-rec-continuar",titulo:"Continuar proceso",texto:nivel==="Superior"
+      ?"El candidato demuestra una capacidad cognitiva sólida. Aprende con rapidez y resuelve problemas complejos. Se recomienda avanzar en el proceso."
+      :"El candidato presenta buenas capacidades cognitivas, por encima del promedio general. Es adecuado para la mayoría de los cargos."};
+  if(nivel==="Promedio")
+    return {cls:"wl-rec-cautela",titulo:"Evaluar con el contexto del cargo",texto:"Capacidades cognitivas dentro del rango promedio. Para cargos de alta complejidad se recomienda complementar con otras evaluaciones antes de decidir."};
+  if(nivel==="Bajo promedio")
+    return {cls:"wl-rec-cautela",titulo:"Evaluar con cautela",texto:"Capacidades cognitivas por debajo del promedio. Se recomienda evaluar la complejidad del cargo y complementar con entrevista en profundidad."};
+  if(nivel==="Bajo")
+    return {cls:"wl-rec-no",titulo:"No recomendado para cargos de alta complejidad",texto:"El resultado sugiere dificultades en resolución de problemas y aprendizaje. Se recomienda considerar cargos de baja complejidad o realizar evaluación complementaria."};
+  if(foco>5)
+    return {cls:"wl-rec-cautela",titulo:"Evaluar validez del resultado",texto:"Se detectaron "+foco+" cambios de ventana. Se recomienda verificar la validez antes de tomar una decisión."};
+  return {cls:"wl-rec-cautela",titulo:"Evaluar con el contexto del cargo",texto:"Se recomienda complementar este resultado con otros antecedentes del candidato."};
+}
+
+function wlGenerarResumen(nombre, nivel, percentil, cargo, pb, pa, tiempo){
+  var n = nombre.split(" ")[0];
+  var txt = "";
+  if(nivel==="Superior") txt = n+" obtiene un resultado en el rango superior, indicando una capacidad cognitiva claramente por encima del promedio. Aprende con rapidez y procesa información compleja con facilidad. ";
+  else if(nivel==="Promedio alto") txt = n+" obtiene un resultado sobre el promedio general, con buenas habilidades para razonar y manejar situaciones de mediana complejidad. ";
+  else if(nivel==="Promedio") txt = n+" obtiene un resultado dentro del rango promedio. Puede desempeñarse adecuadamente en cargos de complejidad moderada con la estructura adecuada. ";
+  else if(nivel==="Bajo promedio") txt = n+" obtiene un resultado por debajo del promedio, lo que puede implicar mayor dificultad para aprender procedimientos nuevos con rapidez. ";
+  else txt = n+" obtiene un resultado en el rango bajo, lo que sugiere dificultades en el procesamiento de información y la resolución de problemas. ";
+  if(cargo){ txt += "Para el cargo de "+cargo+", "; if(nivel==="Superior"||nivel==="Promedio alto") txt+="el perfil cognitivo es adecuado. "; else if(nivel==="Promedio") txt+="el nivel cognitivo es compatible si el cargo no requiere alta complejidad analítica. "; else txt+="se recomienda evaluar si las exigencias cognitivas del cargo son acordes al perfil. "; }
+  txt += "Completó la prueba en "+tiempo+" minutos. ";
+  if(pa!=pb) txt += "Se aplicó un ajuste por edad que modifica el puntaje bruto ("+pb+") al ajustado ("+pa+"), reflejado en el percentil reportado.";
+  return txt;
+}
+
+async function abrirInformeWONDERLIC(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut||"");
+  var nomDec = decodeURIComponent(nombre||"");
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getDatosWONDERLIC&t=" + Date.now());
+    var filas = Array.isArray(data) ? data : [];
+    function normRut(s){ return String(s||"").replace(/[\. ]/g,"").toLowerCase(); }
+    function normNom(s){ return String(s||"").trim().toLowerCase(); }
+    var rutNorm=normRut(rutDec), nomNorm=normNom(nomDec);
+    var fila = filas.find(function(r){ return (rutNorm&&normRut(r[2])===rutNorm)||(nomNorm&&normNom(r[1])===nomNorm); });
+    if(!fila) fila = filas.find(function(r){ return nomNorm&&normNom(r[1]).includes(nomNorm.split(" ")[0]); });
+    if(!fila){ alert("No se encontraron datos del candidato."); return; }
+
+    // cols: 0=fecha,1=nombre,2=rut,3=edad,4=sexo,5=cargo,6=PB,7=ajuste,8=PA,9=percentil,10=nivel,11=tiempo,12=interp,13=cambios_foco
+    var pb       = parseInt(fila[6])||0;
+    var ajuste   = parseInt(fila[7])||0;
+    var pa       = parseInt(fila[8])||0;
+    var percentil= parseInt(fila[9])||0;
+    var nivel    = fila[10]||"-";
+    var tiempo   = fila[11]||"-";
+    var interp   = fila[12]||"-";
+    var foco     = parseInt(fila[13])||0;
+
+    document.getElementById("wl-modal-sub").textContent = (fila[1]||"—")+(fila[2]?"  ·  "+fila[2]:"")+(fila[0]?"  ·  "+fila[0]:"");
+
+    // Banner
+    document.getElementById("wl-banner").innerHTML =
+      "<div class='wl-circle'><div class='wl-circle-val'>"+percentil+"</div><div class='wl-circle-lbl'>Percentil</div></div>"+
+      "<div class='wl-info'><h3>"+nivel+"</h3><p>Test de Habilidad Cognitiva General — Wonderlic.</p></div>"+
+      "<div class='wl-nivel-badge "+wlGetNivelBadge(nivel)+"'>"+nivel+"</div>";
+
+    // Scores
+    document.getElementById("wl-scores").innerHTML =
+      "<div class='wl-score-card'><div class='wl-score-lbl'>Puntaje Bruto</div><div class='wl-score-val'>"+pb+"</div><div class='wl-score-sub'>de 50 preguntas</div></div>"+
+      "<div class='wl-score-card'><div class='wl-score-lbl'>Ajuste por Edad</div><div class='wl-score-val'>"+(ajuste>0?"+"+ajuste:"0")+"</div><div class='wl-score-sub'>puntos extra</div></div>"+
+      "<div class='wl-score-card'><div class='wl-score-lbl'>Puntaje Ajustado</div><div class='wl-score-val'>"+pa+"</div><div class='wl-score-sub'>puntaje final</div></div>";
+
+    // Integridad
+    document.getElementById("wl-integridad").innerHTML = foco===0
+      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      : foco<=3
+      ? "<div class='wl-integ-leve'><span style='font-size:18px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente al interpretar el resultado.</div></div></div>"
+      : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Se recomienda evaluar la validez del resultado antes de tomar una decisión.</div></div></div>";
+
+    // Recomendación
+    var rec = wlGetRecomendacion(nivel, foco);
+    document.getElementById("wl-recomendacion").innerHTML =
+      "<div class='"+rec.cls+"'><div class='wl-rec-titulo'>"+rec.titulo+"</div><div class='wl-rec-texto'>"+rec.texto+"</div></div>";
+
+    // Interpretación
+    document.getElementById("wl-interp").textContent = interp;
+
+    // Resumen
+    document.getElementById("wl-resumen-texto").textContent =
+      wlGenerarResumen(fila[1]||"El candidato", nivel, percentil, fila[5]||"", pb, pa, tiempo);
+
+    document.getElementById("modal-wonderlic").classList.add("activo");
+    document.body.style.overflow = "hidden";
+  } catch(e) {
+    alert("Error cargando datos Wonderlic: " + e.message);
+  }
+}
+
+function cerrarModalWONDERLIC() {
+  document.getElementById("modal-wonderlic").classList.remove("activo");
+  document.body.style.overflow = "";
+}
+
+function imprimirModalWONDERLIC() { window.print(); }
+
 </script>
 
 
@@ -3113,6 +3260,55 @@ function imprimirModalIPV() { window.print(); }
       <div class="ipv-resumen">
         <div class="ipv-seccion-title">📋 Resumen ejecutivo</div>
         <div class="ipv-resumen-texto" id="ipv-resumen-texto">—</div>
+      </div>
+
+      <div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+        Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- ══════════ MODAL INFORME WONDERLIC ══════════ -->
+<div class="modal-overlay" id="modal-wonderlic" onclick="if(event.target===this)cerrarModalWONDERLIC()">
+  <div class="modal-box" style="max-width:720px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-header-title">🧠 Informe — Test de Habilidad Cognitiva General</div>
+        <div class="modal-header-sub" id="wl-modal-sub">Candidato</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="imprimirModalWONDERLIC()">⬇ Descargar PDF</button>
+        <button class="modal-close" onclick="cerrarModalWONDERLIC()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+
+      <!-- Banner percentil -->
+      <div class="wl-banner" id="wl-banner"></div>
+
+      <!-- Scores -->
+      <div class="wl-scores" id="wl-scores"></div>
+
+      <!-- Integridad -->
+      <div id="wl-integridad"></div>
+
+      <!-- Recomendación -->
+      <div class="wl-seccion">
+        <div class="wl-seccion-title">✅ Recomendación para el proceso</div>
+        <div id="wl-recomendacion"></div>
+      </div>
+
+      <!-- Interpretación -->
+      <div class="wl-seccion">
+        <div class="wl-seccion-title">📋 Interpretación del resultado</div>
+        <div class="wl-interp" id="wl-interp"></div>
+      </div>
+
+      <!-- Resumen ejecutivo -->
+      <div class="wl-resumen">
+        <div class="wl-resumen-tit">Resumen ejecutivo</div>
+        <div class="wl-resumen-texto" id="wl-resumen-texto"></div>
       </div>
 
       <div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
