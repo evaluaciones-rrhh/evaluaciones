@@ -1422,17 +1422,20 @@ function parseFechaCL(str) {
 
 function actualizarStats() {
   var ahora = new Date();
-  var dd    = String(ahora.getDate()).padStart(2,"0");
-  var mm    = String(ahora.getMonth()+1).padStart(2,"0");
-  var hoyStr = dd + "-" + mm + "-" + ahora.getFullYear();
+  var hoyRef = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
   var semana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
   semana.setDate(semana.getDate()-7);
 
   document.getElementById("st-total").textContent = todosLosDatos.length;
 
   // Hoy y Esta semana = tests completados
+  // Usamos parseFechaCL para tolerar dd-mm-yyyy, dd/mm/yyyy, ISO, etc.
   document.getElementById("st-hoy").textContent = todosLosDatos.filter(function(d){
-    return (d.fecha || "").trim() === hoyStr;
+    var f = parseFechaCL(d.fecha);
+    if (!f) return false;
+    return f.getFullYear() === hoyRef.getFullYear() &&
+           f.getMonth()    === hoyRef.getMonth()    &&
+           f.getDate()     === hoyRef.getDate();
   }).length;
 
   document.getElementById("st-semana").textContent = todosLosDatos.filter(function(d){
