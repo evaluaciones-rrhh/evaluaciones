@@ -654,7 +654,7 @@ tbody tr:hover td { background: #fdf9f6; }
 
 /* ══════════ MODAL INFORME DISC ══════════ */
 .disc-modal-box { max-width: 780px; }
-.disc-modal-header-dark { background:#1a2e4a; padding:18px 22px; display:flex; justify-content:space-between; align-items:flex-start; border-radius:12px 12px 0 0; }
+.disc-modal-header-dark { background:#1a2e4a; padding:18px 22px; display:flex; justify-content:space-between; align-items:flex-start; border-radius:12px 12px 0 0; position:sticky; top:0; z-index:2; }
 .disc-mh-supertitle { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.45); margin-bottom:4px; }
 .disc-mh-nombre { font-size:18px; font-weight:600; color:#fff; }
 .disc-mh-meta { font-size:12px; color:rgba(255,255,255,0.4); margin-top:3px; }
@@ -2458,36 +2458,18 @@ async function abrirInformeDISC(test, rut, nombre) {
     var textos = DISC_PERFILES[perfilAd] || DISC_PERFILES[factor] || DISC_PERFILES["D"];
 
     // Header oscuro
-    var nombreCand = String(fila[1]||nomDec);
-    document.getElementById("disc-modal-nombre").textContent = nombreCand;
+    document.getElementById("disc-modal-nombre").textContent = String(fila[1]||nomDec);
     document.getElementById("disc-modal-sub").textContent = (fila[2] ? fila[2]+"  ·  " : "") + String(fila[0]||"");
 
-    // Hero perfiles — icono con iniciales del perfil
-    var DISC_TIPO = {
-      "D":"Dominante","I":"Influyente","S":"Estable","C":"Concienzudo",
-      "DI":"Dominante / Influyente","DC":"Dominante / Concienzudo",
-      "ID":"Influyente / Dominante","IS":"Influyente / Estable",
-      "SD":"Estable / Dominante","SI":"Estable / Influyente",
-      "SC":"Estable / Concienzudo","CD":"Concienzudo / Dominante",
-      "CS":"Concienzudo / Estable","CI":"Concienzudo / Influyente",
-      "DS":"Dominante / Estable","IC":"Influyente / Concienzudo"
-    };
-    var DISC_DESC = {
-      "D":"Orientado a resultados y control","I":"Orientado a la influencia y relaciones",
-      "S":"Orientado a la estabilidad y apoyo","C":"Orientado a la calidad y análisis",
-      "DI":"Orientado a resultados con influencia","DC":"Orientado a resultados con precisión",
-      "ID":"Influyente con orientación a resultados","IS":"Influyente con orientación a personas",
-      "SD":"Estable con orientación a resultados","SI":"Estable con orientación a relaciones",
-      "SC":"Metódico y orientado a la calidad","CD":"Preciso con orientación a resultados",
-      "CS":"Analítico con orientación al equipo","CI":"Analítico con influencia social",
-      "DS":"Orientado a resultados con consistencia","IC":"Influyente con orientación al detalle"
-    };
+    // Hero perfiles
+    var DISC_TIPO = {"D":"Dominante","I":"Influyente","S":"Estable","C":"Concienzudo","DI":"Dominante / Influyente","DC":"Dominante / Concienzudo","ID":"Influyente / Dominante","IS":"Influyente / Estable","SD":"Estable / Dominante","SI":"Estable / Influyente","SC":"Estable / Concienzudo","CD":"Concienzudo / Dominante","CS":"Concienzudo / Estable","CI":"Concienzudo / Influyente","DS":"Dominante / Estable","IC":"Influyente / Concienzudo"};
+    var DISC_DESC = {"D":"Orientado a resultados y control","I":"Orientado a la influencia y relaciones","S":"Orientado a la estabilidad y apoyo","C":"Orientado a la calidad y análisis","DI":"Orientado a resultados con influencia","DC":"Orientado a resultados con precisión","ID":"Influyente con orientación a resultados","IS":"Influyente con orientación a personas","SD":"Estable con orientación a resultados","SI":"Estable con orientación a relaciones","SC":"Metódico y orientado a la calidad","CD":"Preciso con orientación a resultados","CS":"Analítico con orientación al equipo","CI":"Analítico con influencia social","DS":"Orientado a resultados con consistencia","IC":"Influyente con orientación al detalle"};
     document.getElementById("disc-hero-icon-adapt").textContent = perfilAd.substring(0,2);
-    document.getElementById("disc-hero-nombre-adapt").textContent = DISC_TIPO[perfilAd] || perfilAd;
-    document.getElementById("disc-hero-tipo-adapt").textContent  = DISC_DESC[perfilAd] || "";
+    document.getElementById("disc-hero-nombre-adapt").textContent = DISC_TIPO[perfilAd]||perfilAd;
+    document.getElementById("disc-hero-tipo-adapt").textContent  = DISC_DESC[perfilAd]||"";
     document.getElementById("disc-hero-icon-nat").textContent  = perfilNat.substring(0,2);
-    document.getElementById("disc-hero-nombre-nat").textContent = DISC_TIPO[perfilNat] || perfilNat;
-    document.getElementById("disc-hero-tipo-nat").textContent   = DISC_DESC[perfilNat] || "";
+    document.getElementById("disc-hero-nombre-nat").textContent = DISC_TIPO[perfilNat]||perfilNat;
+    document.getElementById("disc-hero-tipo-nat").textContent   = DISC_DESC[perfilNat]||"";
 
     // Integridad
     var foco = parseInt(fila[18]||0)||0;
@@ -2496,6 +2478,7 @@ async function abrirInformeDISC(test, rut, nombre) {
       : foco<=3
       ? "<div class='disc-integridad-leve'><span style='font-size:16px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente.</div></div></div>"
       : "<div class='disc-integridad-riesgo'><span style='font-size:16px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Evaluar validez del resultado.</div></div></div>";
+
 
     // Gráfico SVG estilo DISC clásico
     document.getElementById("disc-graficos-svg").innerHTML = renderDiscGraficoSVG(adScore, natScore);
@@ -2530,7 +2513,7 @@ async function abrirInformeDISC(test, rut, nombre) {
     document.getElementById("disc-decisiones").textContent = textos.decisiones;
 
     // Preguntas numeradas
-    var pregHtml = (textos.preguntas||[]).map(function(p, i){
+    var pregHtml = (textos.preguntas||[]).map(function(p,i){
       return '<div class="disc-pregunta-item"><span class="disc-pregunta-n">'+(i+1)+'</span>' + p + '</div>';
     }).join('');
     document.getElementById("disc-preguntas").innerHTML = pregHtml;
@@ -3178,9 +3161,9 @@ function imprimirModalWONDERLIC() { window.print(); }
 
 <!-- ══════════ MODAL INFORME DISC ══════════ -->
 <div class="modal-overlay" id="modal-disc" onclick="if(event.target===this)cerrarModalDISC()">
-  <div class="modal-box disc-modal-box" style="padding:0;overflow:hidden;">
+  <div class="modal-box disc-modal-box">
 
-    <!-- Header oscuro -->
+    <!-- Header oscuro sticky -->
     <div class="disc-modal-header-dark">
       <div>
         <div class="disc-mh-supertitle">Análisis de estilo conductual</div>
@@ -3222,7 +3205,7 @@ function imprimirModalWONDERLIC() { window.print(); }
       <!-- Integridad -->
       <div id="disc-integridad"></div>
 
-      <!-- Gráfico SVG líneas -->
+      <!-- Gráfico SVG -->
       <div id="disc-graficos-svg" style="margin-bottom:18px;background:var(--bg);border-radius:10px;border:1px solid var(--border);padding:8px;"></div>
 
       <!-- GAP -->
@@ -3232,13 +3215,13 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div class="disc-seccion-body" id="disc-gap-texto"></div>
       </div>
 
-      <!-- Características generales -->
+      <!-- Características -->
       <div class="disc-seccion">
         <div class="disc-seccion-title">Características generales</div>
         <div class="disc-seccion-body" id="disc-caracteristicas"></div>
       </div>
 
-      <!-- Atributos conductuales -->
+      <!-- Atributos -->
       <div class="disc-seccion">
         <div class="disc-seccion-title">Atributos conductuales</div>
         <div class="disc-seccion-body" id="disc-atributos"></div>
