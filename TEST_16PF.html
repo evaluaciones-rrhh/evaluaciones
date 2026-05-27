@@ -626,7 +626,8 @@ function calcular(resp){
     fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas',
     areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
     interpretacion:interp,
-    cambios_foco:cambiosFoco
+    cambios_foco:cambiosFoco,
+    respuestas:resp.join(',')
   };
 
   payload.token = TOKEN_URL;
