@@ -274,161 +274,172 @@ function calcular(resp){
   ESCA.forEach(function(e){pd[e]=0;});
 
   var CLAVE_REAL = {
-  1: {"A":{"tipo":"d"}},
-  2: {"C":{"tipo":"i"}},
-  3: {"E":{"tipo":"i"}},
-  4: {"F":{"tipo":"i"}},
-  5: {"G":{"tipo":"i"}},
-  6: {"F":{"tipo":"d"}},
-  7: {"G":{"tipo":"i"}},
-  9: {"H":{"tipo":"i"}},
-  12: {"I":{"tipo":"i"}},
-  14: {"I":{"tipo":"i"}},
-  15: {"L":{"tipo":"d"}},
-  17: {"I":{"tipo":"d"}},
-  18: {"L":{"tipo":"d"}},
-  19: {"M":{"tipo":"d"}},
-  20: {"N":{"tipo":"i"}},
-  21: {"M":{"tipo":"d"}},
-  22: {"N":{"tipo":"i"}},
-  24: {"N":{"tipo":"d"}},
-  25: {"O":{"tipo":"d"}},
-  26: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  27: {"O":{"tipo":"i"}},
-  28: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
-  29: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  30: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
-  31: {"A":{"tipo":"i"}},
-  32: {"C":{"tipo":"d"}},
-  33: {"A":{"tipo":"i"}},
-  35: {"C":{"tipo":"d"}},
-  36: {"E":{"tipo":"i"}},
+  17: {"A":{"tipo":"i"}},
+  19: {"C":{"tipo":"d"}},
+  20: {"E":{"tipo":"d"}},
+  21: {"F":{"tipo":"d"}},
+  22: {"G":{"tipo":"d"}},
+  23: {"H":{"tipo":"d"}},
+  24: {"I":{"tipo":"i"}},
+  25: {"L":{"tipo":"d"}},
+  26: {"M":{"tipo":"d"}},
+  27: {"N":{"tipo":"i"}},
+  28: {"O":{"tipo":"d"}},
+  29: {"Q1":{"tipo":"d"}},
+  30: {"Q2":{"tipo":"i"}},
+  31: {"Q3":{"tipo":"d"}},
+  32: {"Q4":{"tipo":"d"}},
+  33: {"A":{"tipo":"d"}},
+  35: {"C":{"tipo":"i"}},
+  36: {"E":{"tipo":"d"}},
   37: {"F":{"tipo":"d"}},
-  38: {"E":{"tipo":"i"}},
-  39: {"F":{"tipo":"i"}},
-  40: {"G":{"tipo":"i"}},
-  41: {"H":{"tipo":"d"}},
-  46: {"I":{"tipo":"d"}},
-  47: {"L":{"tipo":"i"}},
-  49: {"I":{"tipo":"d"}},
-  50: {"L":{"tipo":"i"}},
-  51: {"M":{"tipo":"i"}},
-  52: {"N":{"tipo":"d"}},
-  53: {"N":{"tipo":"i"}},
-  54: {"M":{"tipo":"i"}},
-  55: {"N":{"tipo":"d"}},
-  56: {"O":{"tipo":"d"}},
-  57: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  59: {"O":{"tipo":"i"}},
-  60: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
-  61: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
-  62: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
-  63: {"A":{"tipo":"d"}},
-  64: {"C":{"tipo":"i"}},
+  38: {"G":{"tipo":"d"}},
+  39: {"H":{"tipo":"d"}},
+  40: {"I":{"tipo":"d"}},
+  41: {"L":{"tipo":"d"}},
+  42: {"M":{"tipo":"i"}},
+  43: {"N":{"tipo":"i"}},
+  44: {"O":{"tipo":"i"}},
+  45: {"Q1":{"tipo":"i"}},
+  46: {"Q2":{"tipo":"m"}},
+  47: {"Q3":{"tipo":"d"}},
+  48: {"Q4":{"tipo":"i"}},
+  49: {"A":{"tipo":"d"}},
+  51: {"C":{"tipo":"i"}},
+  52: {"E":{"tipo":"d"}},
+  53: {"F":{"tipo":"d"}},
+  54: {"G":{"tipo":"d"}},
+  55: {"H":{"tipo":"d"}},
+  56: {"I":{"tipo":"m"}},
+  57: {"L":{"tipo":"i"}},
+  58: {"M":{"tipo":"d"}},
+  59: {"N":{"tipo":"d"}},
+  60: {"O":{"tipo":"d"}},
+  61: {"Q1":{"tipo":"d"}},
+  62: {"Q2":{"tipo":"d"}},
+  63: {"Q3":{"tipo":"i"}},
+  64: {"Q4":{"tipo":"i"}},
   65: {"A":{"tipo":"d"}},
-  66: {"E":{"tipo":"i"}},
   67: {"C":{"tipo":"d"}},
-  68: {"F":{"tipo":"i"}},
-  69: {"G":{"tipo":"i"}},
-  70: {"F":{"tipo":"d"}},
+  68: {"E":{"tipo":"i"}},
+  69: {"F":{"tipo":"d"}},
+  70: {"G":{"tipo":"i"}},
   71: {"H":{"tipo":"d"}},
-  72: {"G":{"tipo":"d"}},
-  73: {"H":{"tipo":"i"}},
-  79: {"I":{"tipo":"i"}},
-  80: {"L":{"tipo":"i"}},
-  81: {"I":{"tipo":"d"}},
-  82: {"M":{"tipo":"d"}},
-  83: {"N":{"tipo":"i"}},
-  84: {"L":{"tipo":"d"}},
-  86: {"N":{"tipo":"d"}},
-  87: {"M":{"tipo":"i"}},
-  88: {"N":{"tipo":"i"}},
-  89: {"O":{"tipo":"i"}},
-  90: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  91: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
-  92: {"O":{"tipo":"d"}},
-  93: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
-  94: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
-  96: {"A":{"tipo":"i"}},
-  97: {"C":{"tipo":"i"}},
-  98: {"A":{"tipo":"d"}},
-  99: {"E":{"tipo":"i"}},
-  100: {"F":{"tipo":"i"}},
-  102: {"E":{"tipo":"d"}},
-  103: {"F":{"tipo":"i"}},
-  104: {"G":{"tipo":"i"}},
-  105: {"H":{"tipo":"d"}},
-  106: {"G":{"tipo":"d"}},
-  107: {"H":{"tipo":"d"}},
-  111: {"I":{"tipo":"i"}},
-  113: {"L":{"tipo":"i"}},
-  114: {"I":{"tipo":"d"}},
-  116: {"M":{"tipo":"i"}},
-  117: {"L":{"tipo":"d"}},
-  118: {"N":{"tipo":"i"}},
-  119: {"M":{"tipo":"d"}},
-  120: {"N":{"tipo":"i"}},
-  121: {"O":{"tipo":"i"}},
-  122: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  123: {"O":{"tipo":"d"}},
-  124: {"Q2":{"tipo":"d"},"Q4":{"tipo":"d"}},
-  125: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
-  126: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
-  127: {"A":{"tipo":"i"}},
-  128: {"C":{"tipo":"i"}},
-  129: {"A":{"tipo":"d"}},
-  130: {"E":{"tipo":"i"}},
-  131: {"C":{"tipo":"d"}},
+  72: {"I":{"tipo":"d"}},
+  73: {"L":{"tipo":"i"}},
+  74: {"M":{"tipo":"i"}},
+  75: {"N":{"tipo":"i"}},
+  76: {"O":{"tipo":"i"}},
+  77: {"Q1":{"tipo":"d"}},
+  78: {"Q2":{"tipo":"i"}},
+  79: {"Q3":{"tipo":"d"}},
+  80: {"Q4":{"tipo":"d"}},
+  81: {"A":{"tipo":"i"}},
+  83: {"C":{"tipo":"i"}},
+  84: {"E":{"tipo":"d"}},
+  85: {"F":{"tipo":"m"}},
+  86: {"G":{"tipo":"i"}},
+  87: {"H":{"tipo":"i"}},
+  88: {"I":{"tipo":"i"}},
+  89: {"L":{"tipo":"d"}},
+  90: {"M":{"tipo":"i"}},
+  91: {"N":{"tipo":"i"}},
+  92: {"O":{"tipo":"i"}},
+  93: {"Q1":{"tipo":"d"}},
+  94: {"Q2":{"tipo":"i"}},
+  95: {"Q3":{"tipo":"d"}},
+  96: {"Q4":{"tipo":"d"}},
+  97: {"A":{"tipo":"d"}},
+  99: {"C":{"tipo":"d"}},
+  100: {"E":{"tipo":"d"}},
+  101: {"F":{"tipo":"i"}},
+  102: {"G":{"tipo":"i"}},
+  103: {"H":{"tipo":"d"}},
+  104: {"I":{"tipo":"i"}},
+  105: {"L":{"tipo":"i"}},
+  106: {"M":{"tipo":"i"}},
+  107: {"N":{"tipo":"d"}},
+  108: {"O":{"tipo":"d"}},
+  109: {"Q1":{"tipo":"d"}},
+  110: {"Q2":{"tipo":"d"}},
+  111: {"Q3":{"tipo":"m"}},
+  112: {"Q4":{"tipo":"d"}},
+  113: {"A":{"tipo":"d"}},
+  115: {"C":{"tipo":"i"}},
+  116: {"E":{"tipo":"m"}},
+  117: {"F":{"tipo":"i"}},
+  118: {"G":{"tipo":"i"}},
+  119: {"H":{"tipo":"d"}},
+  120: {"I":{"tipo":"d"}},
+  121: {"L":{"tipo":"i"}},
+  122: {"M":{"tipo":"i"}},
+  123: {"N":{"tipo":"i"}},
+  124: {"O":{"tipo":"i"}},
+  125: {"Q1":{"tipo":"d"}},
+  126: {"Q2":{"tipo":"i"}},
+  127: {"Q3":{"tipo":"i"}},
+  128: {"Q4":{"tipo":"i"}},
+  129: {"A":{"tipo":"i"}},
+  131: {"C":{"tipo":"i"}},
   132: {"E":{"tipo":"i"}},
-  133: {"G":{"tipo":"d"}},
-  134: {"F":{"tipo":"i"}},
+  133: {"F":{"tipo":"d"}},
+  134: {"G":{"tipo":"d"}},
   135: {"H":{"tipo":"i"}},
-  136: {"G":{"tipo":"d"}},
-  137: {"H":{"tipo":"i"}},
-  142: {"I":{"tipo":"i"}},
-  143: {"L":{"tipo":"i"}},
-  145: {"I":{"tipo":"i"}},
-  146: {"M":{"tipo":"i"}},
-  147: {"N":{"tipo":"d"}},
-  148: {"L":{"tipo":"i"}},
-  149: {"N":{"tipo":"i"}},
-  150: {"M":{"tipo":"i"}},
-  151: {"N":{"tipo":"d"}},
-  152: {"O":{"tipo":"i"}},
-  154: {"Q1":{"tipo":"d"},"Q3":{"tipo":"d"}},
-  155: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
+  136: {"I":{"tipo":"i"}},
+  137: {"L":{"tipo":"i"}},
+  138: {"M":{"tipo":"i"}},
+  139: {"N":{"tipo":"d"}},
+  140: {"O":{"tipo":"d"}},
+  141: {"Q1":{"tipo":"d"}},
+  142: {"Q2":{"tipo":"i"}},
+  143: {"Q3":{"tipo":"d"}},
+  144: {"Q4":{"tipo":"d"}},
+  145: {"A":{"tipo":"i"}},
+  147: {"C":{"tipo":"i"}},
+  148: {"E":{"tipo":"d"}},
+  149: {"F":{"tipo":"i"}},
+  150: {"G":{"tipo":"d"}},
+  151: {"H":{"tipo":"d"}},
+  152: {"I":{"tipo":"i"}},
+  153: {"L":{"tipo":"d"}},
+  154: {"M":{"tipo":"i"}},
+  155: {"N":{"tipo":"d"}},
   156: {"O":{"tipo":"d"}},
-  157: {"Q1":{"tipo":"i"},"Q3":{"tipo":"i"}},
-  158: {"Q2":{"tipo":"i"},"Q4":{"tipo":"i"}},
-  159: {"A":{"tipo":"i"}},
-  160: {"C":{"tipo":"i"}},
+  157: {"Q1":{"tipo":"i"}},
+  158: {"Q2":{"tipo":"m"}},
+  159: {"Q3":{"tipo":"i"}},
+  160: {"Q4":{"tipo":"i"}},
   161: {"A":{"tipo":"i"}},
-  162: {"C":{"tipo":"i"}},
-  163: {"E":{"tipo":"d"}},
-  164: {"F":{"tipo":"d"}},
-  165: {"E":{"tipo":"i"}},
+  163: {"C":{"tipo":"i"}},
+  164: {"E":{"tipo":"i"}},
+  165: {"F":{"tipo":"d"}},
   166: {"G":{"tipo":"d"}},
   167: {"H":{"tipo":"d"}},
-  168: {"G":{"tipo":"i"}},
-  169: {"H":{"tipo":"d"}},
-  171: {"B":{"tipo":"B","val":1}},
+  168: {"I":{"tipo":"i"}},
+  169: {"L":{"tipo":"d"}},
+  170: {"M":{"tipo":"i"}},
+  171: {"A":{"tipo":"d"}, "B":{"tipo":"B","val":1}},
   172: {"B":{"tipo":"B","val":3}},
-  173: {"B":{"tipo":"B","val":1}},
-  174: {"B":{"tipo":"B","val":1}},
-  175: {"B":{"tipo":"B","val":3}},
-  176: {"B":{"tipo":"B","val":1}},
-  177: {"B":{"tipo":"B","val":2}},
-  178: {"B":{"tipo":"B","val":3}},
-  179: {"B":{"tipo":"B","val":3}},
-  180: {"B":{"tipo":"B","val":3}},
+  173: {"C":{"tipo":"i"}, "B":{"tipo":"B","val":1}},
+  174: {"E":{"tipo":"d"}, "B":{"tipo":"B","val":1}},
+  175: {"F":{"tipo":"d"}, "B":{"tipo":"B","val":3}},
+  176: {"G":{"tipo":"i"}, "B":{"tipo":"B","val":1}},
+  177: {"H":{"tipo":"i"}, "B":{"tipo":"B","val":2}},
+  178: {"I":{"tipo":"m"}, "B":{"tipo":"B","val":3}},
+  179: {"L":{"tipo":"i"}, "B":{"tipo":"B","val":3}},
+  180: {"M":{"tipo":"i"}, "B":{"tipo":"B","val":3}},
   181: {"B":{"tipo":"B","val":2}},
   182: {"B":{"tipo":"B","val":2}},
   183: {"B":{"tipo":"B","val":2}},
   184: {"B":{"tipo":"B","val":2}},
-  185: {"B":{"tipo":"B","val":2}},
-};
+  185: {"B":{"tipo":"B","val":2}}
+  };
 
-  // Calcular PD con puntuación 0,1,2 por ítem
+
+  // Calcular PD — ítems 1-170 para escalas normales
+  // tipo 'd': resp1→0, resp2→1, resp3→2
+  // tipo 'i': resp1→2, resp2→1, resp3→0
+  // tipo 'm': resp1→0, resp2→1, resp3→0 (solo B da punto)
   for(var i=0;i<170;i++){
     var num=i+1;
     var r=parseInt(resp[i]);
@@ -437,21 +448,34 @@ function calcular(resp){
     if(!item) continue;
     Object.keys(item).forEach(function(escala){
       var t=item[escala];
+      if(t.tipo==='B') return; // B se calcula aparte
       var pts=0;
-      if(t.tipo==='d') pts=r-1;        // 1→0, 2→1, 3→2
-      else if(t.tipo==='i') pts=(3-r); // 1→2, 2→1, 3→0
+      if(t.tipo==='d')      pts = r-1;       // 1→0, 2→1, 3→2
+      else if(t.tipo==='i') pts = 3-r;       // 1→2, 2→1, 3→0
+      else if(t.tipo==='m') pts = (r===2)?1:0; // solo B da 1
       pd[escala]=(pd[escala]||0)+pts;
     });
   }
 
-  // Escala B (razonamiento): respuesta correcta = 1 punto
-  var B_ITEMS=CLAVE_REAL;
+  // Ítems 171-185: escala B (razonamiento) + escalas normales que comparten ítems
   for(var i=170;i<185;i++){
     var num=i+1;
     var r=parseInt(resp[i]);
+    if(!r||r<1||r>3) continue;
     var item=CLAVE_REAL[num];
-    if(!item||!item.B) continue;
-    if(r===item.B.val) pd['B']=(pd['B']||0)+1;
+    if(!item) continue;
+    // Escala B: respuesta exacta = 1 punto
+    if(item.B && r===item.B.val) pd['B']=(pd['B']||0)+1;
+    // Escalas normales que comparten este ítem
+    Object.keys(item).forEach(function(escala){
+      if(escala==='B') return;
+      var t=item[escala];
+      var pts=0;
+      if(t.tipo==='d')      pts = r-1;
+      else if(t.tipo==='i') pts = 3-r;
+      else if(t.tipo==='m') pts = (r===2)?1:0;
+      pd[escala]=(pd[escala]||0)+pts;
+    });
   }
 
   // Decatipos según género
@@ -509,7 +533,7 @@ function calcular(resp){
   else if(ans_de>=8) riesgos.push('Nivel de ansiedad elevado que puede afectar el desempeño');
   if(de.C>=8) forts.push('Alta estabilidad emocional y madurez psicológica');
   else if(de.C<=3) riesgos.push('Baja estabilidad emocional — posible dificultad ante la presión');
-  if(de.G>=8) forts.push('Alto respeto por normas y sentido del deber');
+  if(de.G>=8) forts.push('Alto respeto por normas y sentido del deber — confiable en roles que requieren rigor y cumplimiento');
   else if(de.G<=3) riesgos.push('Tendencia al inconformismo y escasa atención a normas');
   if(de.E>=8) forts.push('Alta capacidad de liderazgo y asertividad');
   else if(de.E<=3) riesgos.push('Tendencia a la sumisión — dificultad para defender ideas propias');
@@ -522,18 +546,27 @@ function calcular(resp){
   if(de.H>=8) forts.push('Alta seguridad social y disposición a relacionarse con otros');
   else if(de.H<=3) riesgos.push('Timidez social marcada — dificultad para relacionarse con personas nuevas');
 
-  // Interpretación descriptiva
-  // Interpretación combinada e interpretativa
+  // Interpretación descriptiva — género adaptativo
+  var sexoVal = document.getElementById('sexo').value;
+  var esMasc = (sexoVal === 'm');
+  var esFem  = (sexoVal === 'f');
+  // Función para adaptar género en textos
+  function gAdj(masc, fem, neutro) {
+    if (esMasc) return masc;
+    if (esFem)  return fem;
+    return neutro || fem;
+  }
+
   var parrafos = [];
 
   // Párrafo 1: Orientación interpersonal y social
   var social = [];
   if(ext_de>=7 && de.A>=7) social.push('Se trata de una persona con marcada orientación hacia las personas, que disfruta del contacto social y trabaja bien en equipo.');
   else if(ext_de<=3 && de.A<=4) social.push('Muestra una clara preferencia por el trabajo individual y los ambientes tranquilos. Puede presentar dificultades en roles que requieren alta exposición social o trabajo en equipo constante.');
-  else if(ext_de<=4) social.push('Tiende a ser más reservada en contextos sociales, prefiriendo ambientes de trabajo estructurados con interacción social moderada.');
+  else if(ext_de<=4) social.push('Tiende a ser más ' + gAdj('reservado','reservada','reservado/a') + ' en contextos sociales, prefiriendo ambientes de trabajo estructurados con interacción social moderada.');
   else social.push('Presenta un equilibrio entre el trabajo individual y el trabajo con otros, adaptándose a distintos ambientes laborales.');
   if(de.H<=3) social.push('Su timidez social puede ser un obstáculo en roles que requieren relacionarse con personas nuevas o hablar en público.');
-  else if(de.H>=8) social.push('Muestra alta seguridad al relacionarse con personas nuevas, lo que la hace apta para roles de representación o atención de público.');
+  else if(de.H>=8) social.push('Muestra alta seguridad al relacionarse con personas nuevas, lo que lo/la hace apto/a para roles de representación o atención de público.');
   parrafos.push(social.join(' '));
 
   // Párrafo 2: Estabilidad emocional y manejo del estrés
@@ -543,7 +576,7 @@ function calcular(resp){
   else if(de.C>=8 && ans_de<=4) emocional.push('Destaca por su alta estabilidad emocional y capacidad para manejar situaciones de presión sin perder el equilibrio. Es una característica valiosa en ambientes de alta demanda.');
   else emocional.push('Muestra un nivel de estabilidad emocional dentro del rango esperado, con capacidad para manejar la mayoría de las situaciones laborales cotidianas.');
   if(de.Q4>=8) emocional.push('Su nivel de tensión elevado puede traducirse en irritabilidad o impaciencia, especialmente bajo presión.');
-  else if(de.Q4<=3) emocional.push('Se muestra relajada y paciente, lo que contribuye a un buen clima de trabajo.');
+  else if(de.Q4<=3) emocional.push('Se muestra ' + gAdj('relajado','relajada','relajado/a') + ' y paciente, lo que contribuye a un buen clima de trabajo.');
   if(de.O>=8) emocional.push('Presenta tendencias a la inseguridad y a la autocrítica excesiva, lo que puede afectar su confianza al tomar decisiones.');
   parrafos.push(emocional.join(' '));
 
@@ -552,7 +585,7 @@ function calcular(resp){
   if(de.E>=8 && ind_de>=7) liderazgo.push('Muestra un perfil con alta capacidad de liderazgo, asertividad e independencia. Se desempeña bien en roles donde debe tomar decisiones y dirigir a otros.');
   else if(de.E<=3) liderazgo.push('Presenta tendencia a la sumisión y puede tener dificultades para expresar sus opiniones o defender sus ideas, lo que limita su desempeño en roles de liderazgo o negociación.');
   if(de.G<=3) liderazgo.push('Muestra escasa atención a las normas y procedimientos establecidos. Requiere supervisión en roles donde el cumplimiento de reglas es fundamental.');
-  else if(de.G>=8) liderazgo.push('Muy apegada a las normas y procedimientos, lo que la hace confiable en roles que requieren rigor y cumplimiento estricto.');
+  else if(de.G>=8) liderazgo.push('Muy ' + gAdj('apegado','apegada','apegado/a') + ' a las normas y procedimientos, lo que lo/la hace ' + gAdj('confiable','confiable','confiable') + ' en roles que requieren rigor y cumplimiento estricto. En entornos de alta variabilidad o cambio puede necesitar apoyo para adaptarse.');
   if(auc_de<=3) liderazgo.push('Su bajo autocontrol puede traducirse en impulsividad o dificultad para seguir procedimientos de manera consistente.');
   else if(auc_de>=8) liderazgo.push('Muestra buen autocontrol e impulsividad baja, siendo capaz de actuar de manera disciplinada y organizada.');
   if(liderazgo.length>0) parrafos.push(liderazgo.join(' '));
@@ -562,7 +595,7 @@ function calcular(resp){
   if(de.B<=3) cognitivo.push('Su capacidad de razonamiento se encuentra por debajo del promedio, lo que puede dificultar el aprendizaje de tareas complejas o la resolución de problemas nuevos. Se recomienda evaluar con una prueba complementaria.');
   else if(de.B>=8) cognitivo.push('Destaca por su alta capacidad de razonamiento abstracto, aprendiendo rápidamente y resolviendo problemas con facilidad.');
   if(de.Q1<=3) cognitivo.push('Presenta resistencia al cambio y rigidez ante situaciones nuevas, lo que puede ser una limitación en entornos dinámicos o en constante evolución.');
-  else if(de.Q1>=8) cognitivo.push('Muestra alta apertura al cambio y disposición a aprender cosas nuevas, lo que la hace adaptable a distintos contextos laborales.');
+  else if(de.Q1>=8) cognitivo.push('Muestra alta apertura al cambio y disposición a aprender cosas nuevas, lo que lo/la hace ' + gAdj('adaptable','adaptable','adaptable') + ' a distintos contextos laborales.');
   if(cognitivo.length>0) parrafos.push(cognitivo.join(' '));
 
   // Párrafo 5: Conclusión según alertas
