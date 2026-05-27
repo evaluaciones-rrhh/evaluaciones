@@ -397,13 +397,17 @@ function calcularYEnviar(porTiempo){
     });
   });
 
-  // ── Nueva lógica de corrección (doc Logica_Correccion_Test_IC) ──
+  // ── Lógica de corrección Test IC ──
   // PB = Aciertos - Errores (omisiones no penalizan)
   let pb = correctas - incorrectas;
 
-  // Precisión = Aciertos / (Aciertos + Errores) × 100
-  let precision = (correctas + incorrectas) > 0
-    ? Math.round((correctas / (correctas + incorrectas)) * 100)
+  // Total de posiciones a responder: 25 ítems × 3 columnas = 75
+  let totalPosiciones = 75;
+
+  // Precisión = Aciertos / (Aciertos + Errores + Omisiones) × 100
+  // Considera el total de posiciones para no inflar el % de quien responde poco
+  let precision = totalPosiciones > 0
+    ? Math.round((correctas / totalPosiciones) * 100)
     : 0;
 
   // Velocidad = respuestas realizadas / minutos usados
@@ -412,39 +416,42 @@ function calcularYEnviar(porTiempo){
   let respuestasRealizadas = correctas + incorrectas;
   let velocidad = Math.round((respuestasRealizadas / minutosUsados) * 10) / 10;
 
-  // Categoría basada en precisión
-  function getCategoria(prec) {
-    if (prec >= 85) return 'Muy alto';
-    if (prec >= 70) return 'Alto';
-    if (prec >= 55) return 'Medio';
+  // Categoría basada en precisión + volumen mínimo de respuestas
+  // Un candidato debe responder al menos 20 posiciones para optar a Alto/Muy alto
+  function getCategoria(prec, realizadas) {
+    if (realizadas < 20) return 'Bajo'; // no respondió suficiente
+    if (prec >= 75) return 'Muy alto';
+    if (prec >= 55) return 'Alto';
+    if (prec >= 35) return 'Medio';
     return 'Bajo';
   }
-  let categoria = getCategoria(precision);
+  let categoria = getCategoria(precision, respuestasRealizadas);
 
   // Perfil conductual
   function getEstiloConductual(prec, vel, err, omit) {
-    if (vel > 5 && prec < 70) return 'Impulsivo';
-    if (vel < 3 && prec >= 80) return 'Cauteloso';
-    if (prec >= 80 && vel >= 4) return 'Eficiente';
+    if (vel > 8 && prec < 55) return 'Impulsivo';
+    if (vel < 3 && prec >= 55) return 'Cauteloso';
+    if (prec >= 55 && vel >= 5) return 'Eficiente';
     if (err > 10 && omit > 10)  return 'Desorganizado';
     return 'Promedio';
   }
   let estiloConductual = getEstiloConductual(precision, velocidad, incorrectas, omitidas);
-  let percentil = precision; // usar precisión como indicador porcentual
 
   let fecha = new Date().toLocaleString('es-CL');
   let nombre = document.getElementById('nombre').value.trim();
   let rut = document.getElementById('rut').value.trim();
 
+  // NOTA: "percentil" renombrado a "indice_precision" — no es un percentil normativo
+  // Se guardan también velocidad y estilo_conductual en Sheets
   let payload = {
     fecha, nombre, rut,
     correctas, errores: incorrectas,
     omisiones: omitidas,
     pb,
-    precision,
+    indice_precision: precision + '%',
     velocidad,
     estilo_conductual: estiloConductual,
-    percentil: precision + '%',
+    percentil: precision + '%',   // campo legacy para compatibilidad con Sheets existente
     categoria
   };
 
