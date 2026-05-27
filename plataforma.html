@@ -1758,7 +1758,8 @@ function filtrar() {
     return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
   });
   document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
-  renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
+  var ordenado = filtered.slice().sort(function(a,b){ var fa=parseFechaCL(String(a.fecha||"")), fb=parseFechaCL(String(b.fecha||"")); if(!fa&&!fb)return 0; if(!fa)return 1; if(!fb)return -1; return fb-fa; });
+  renderTablaComun(ordenado, "tabla-candidatos", 6);
 }
 
 // HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
