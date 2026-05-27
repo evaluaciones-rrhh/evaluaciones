@@ -1758,7 +1758,16 @@ function filtrar() {
     return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
   });
   document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
-  renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
+  // Ordenar por fecha y hora descendente (más reciente primero)
+  var ordenado = filtered.slice().sort(function(a, b) {
+    var fa = parseFechaCL(String(a.fecha || ""));
+    var fb = parseFechaCL(String(b.fecha || ""));
+    if (!fa && !fb) return 0;
+    if (!fa) return 1;
+    if (!fb) return -1;
+    return fb - fa;
+  });
+  renderTablaComun(ordenado, "tabla-candidatos", 6);
 }
 
 // HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
@@ -2173,13 +2182,15 @@ function abrirInformeIC(d) {
   badge.textContent = info.emoji + "  " + cat;
 
   document.getElementById("ic-pb").textContent        = d.pb !== undefined ? d.pb : (d.correctas || "—");
-  document.getElementById("ic-percentil").textContent  = d.percentil || "—";
+  // percentil en Sheets guarda el índice de precisión (campo legacy)
+  var precisionVal = d.percentil || d.indice_precision || d.precision || "—";
+  document.getElementById("ic-percentil").textContent  = precisionVal;
   document.getElementById("ic-errores").textContent    = d.errores   || "0";
   document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
 
-  // Percentil puede venir como "Pc 2" o número directo
-  var pct = parseInt(String(d.percentil || d.precision || "0").replace(/[^0-9]/g, "")) || 0;
-  document.getElementById("ic-percentil-pct").textContent = "Precisión " + pct + "%";
+  // Índice de precisión como barra visual
+  var pct = parseInt(String(precisionVal).replace(/[^0-9]/g, "")) || 0;
+  document.getElementById("ic-percentil-pct").textContent = "Índice de precisión " + pct + "%";
   document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 100) + "%";
 
   var barColor = info.cls === "ic-cat-adecuado" ? "var(--high)" : info.cls === "ic-cat-inferior" ? "var(--low)" : "var(--mid)";
