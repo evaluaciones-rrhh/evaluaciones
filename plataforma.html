@@ -1758,8 +1758,7 @@ function filtrar() {
     return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
   });
   document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
-  var ordenado = filtered.slice().sort(function(a,b){ var fa=parseFechaCL(String(a.fecha||"")), fb=parseFechaCL(String(b.fecha||"")); if(!fa&&!fb)return 0; if(!fa)return 1; if(!fb)return -1; return fb-fa; });
-  renderTablaComun(ordenado, "tabla-candidatos", 6);
+  renderTablaComun(filtered.slice().reverse(), "tabla-candidatos", 6);
 }
 
 // HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
@@ -2573,63 +2572,71 @@ function cerrarModalDISC() {
 function imprimirModalDISC() { window.print(); }
 
 // ══════════ INFORME 16PF ══════════
+
+// Escalas que al estar ALTAS son fortalezas puras (no deben aparecer como alertas)
+var PF_SOLO_FORTALEZA = ['B_alto','C_alto','H_alto','O_bajo','Q4_bajo'];
+
+// Alertas: solo escalas con implicación negativa real para el cargo
+// Textos en género neutro (sin "orientada/o", "apegada/o", etc.)
 var PF_ALERTAS = {
   'A_bajo':'Prefiere trabajar de forma independiente. Puede tener dificultades en roles con mucho contacto con personas o trabajo en equipo.',
-  'A_alto':'Muy orientada hacia las personas. Puede tener dificultades para tomar decisiones difíciles o mantener límites profesionales.',
+  'A_alto':'Marcada orientación hacia las personas. En roles con decisiones difíciles o límites profesionales estrictos, puede generar dificultades.',
   'B_bajo':'Puede requerir más tiempo para aprender tareas nuevas o manejar situaciones complejas. Se recomienda evaluar con prueba de razonamiento complementaria.',
-  'B_alto':'Alta capacidad para aprender rápido y resolver problemas complejos.',
+  // B_alto eliminado de alertas — es fortaleza pura
   'C_bajo':'Puede presentar dificultades para manejar situaciones de presión, estrés o conflicto. Requiere ambiente laboral estructurado y apoyo.',
-  'C_alto':'Muy estable emocionalmente, maneja bien el estrés y los conflictos.',
+  // C_alto eliminado de alertas — es fortaleza pura
   'E_bajo':'Puede tener dificultades para expresar opiniones, defender ideas o asumir roles de liderazgo.',
   'E_alto':'Alta asertividad. En cargos de supervisión podría percibirse como dominante.',
   'F_bajo':'Muestra bajo nivel de energía o entusiasmo. Puede reflejar desmotivación o características que vale explorar en entrevista.',
-  'F_alto':'Muy activa y entusiasta. Puede ser impulsiva o con dificultades para mantener concentración en tareas rutinarias.',
+  'F_alto':'Nivel muy alto de actividad y entusiasmo. Puede resultar impulsivo/a o con dificultades para mantener concentración en tareas rutinarias.',
   'G_bajo':'Tendencia a saltarse reglas o procedimientos. Requiere supervisión en cargos donde el cumplimiento es clave.',
-  'G_alto':'Muy apegada a normas. Puede tener dificultades para adaptarse a cambios o situaciones excepcionales.',
+  'G_alto':'Muy apegado/a a normas y procedimientos establecidos. Puede tener dificultades para adaptarse a cambios o situaciones que requieren flexibilidad.',
   'H_bajo':'Timidez social marcada. Puede presentar dificultades en roles que requieren relacionarse con personas nuevas.',
-  'H_alto':'Muy segura socialmente. Ideal para roles de representación o ventas.',
-  'I_bajo':'Perfil muy práctico y poco emocional. Puede presentar dificultades en roles que requieren empatía.',
-  'I_alto':'Muy sensible a las necesidades de otros. Puede verse afectada por críticas o conflictos interpersonales.',
-  'L_bajo':'Alta confianza en los demás. Puede ser poco precavida en entornos que requieren discernimiento.',
-  'L_alto':'Desconfianza elevada. Puede presentar dificultades para integrarse a equipos o aceptar retroalimentación.',
-  'M_bajo':'Perfil muy práctico y concreto. Puede tener dificultades con tareas que requieren creatividad.',
-  'M_alto':'Muy orientada a las ideas. Puede descuidar detalles prácticos importantes.',
-  'N_bajo':'Muy abierta y espontánea. Puede compartir información confidencial sin filtro.',
-  'N_alto':'Muy reservada y discreta. Puede percibirse como distante o poco transparente.',
-  'O_bajo':'Alta seguridad personal. Muy confiada en sí misma.',
-  'O_alto':'Inseguridad marcada y tendencias ansiosas frecuentes. Puede afectar el desempeño y relaciones laborales.',
-  'Q1_bajo':'Resistencia al cambio. Poco adecuada para entornos dinámicos o que cambian constantemente.',
-  'Q1_alto':'Muy abierta a lo nuevo. Puede ser poco constante.',
-  'Q2_bajo':'Alta dependencia del grupo. Puede tener dificultades para trabajar de forma autónoma.',
-  'Q2_alto':'Prefiere trabajar sola. Puede tener dificultades para colaborar o pedir ayuda.',
-  'Q3_bajo':'Flexible con normas y errores. Puede descuidar la calidad o el orden.',
-  'Q3_alto':'Muy exigente consigo misma. Puede tener dificultades para delegar o aceptar resultados imperfectos.',
-  'Q4_bajo':'Muy relajada y tranquila.',
-  'Q4_alto':'Nivel de tensión elevado e irritabilidad frecuente. Puede afectar el rendimiento y relaciones con compañeros.'
+  // H_alto eliminado de alertas — es fortaleza pura
+  'I_bajo':'Perfil muy práctico y orientado a los hechos. Puede presentar dificultades en roles que requieren alta empatía o sensibilidad interpersonal.',
+  'I_alto':'Alta sensibilidad emocional. Puede verse afectado/a por críticas o conflictos interpersonales frecuentes.',
+  'L_bajo':'Alta confianza en los demás. Puede ser poco precavido/a en entornos que requieren mayor discernimiento.',
+  'L_alto':'Desconfianza elevada hacia los demás. Puede presentar dificultades para integrarse a equipos o aceptar retroalimentación.',
+  'M_bajo':'Perfil muy práctico y concreto. Puede tener dificultades con tareas que requieren pensamiento abstracto o creatividad.',
+  'M_alto':'Muy orientado/a a las ideas y lo abstracto. Puede descuidar detalles prácticos importantes.',
+  'N_bajo':'Muy abierto/a y espontáneo/a. Puede compartir información confidencial sin filtro en contextos que lo requieren.',
+  'N_alto':'Muy reservado/a y diplomático/a. Puede percibirse como distante o poco transparente.',
+  // O_bajo eliminado de alertas — es fortaleza pura
+  'O_alto':'Inseguridad marcada y tendencias ansiosas frecuentes. Puede afectar el desempeño y las relaciones laborales.',
+  'Q1_bajo':'Resistencia al cambio marcada. Puede presentar dificultades en entornos dinámicos o que cambian constantemente.',
+  'Q1_alto':'Muy abierto/a a lo nuevo y al cambio. Puede ser poco constante en proyectos de largo plazo.',
+  'Q2_bajo':'Alta dependencia del grupo. Puede tener dificultades para trabajar de forma autónoma o tomar iniciativas propias.',
+  'Q2_alto':'Prefiere trabajar de forma independiente. Puede tener dificultades para colaborar o pedir ayuda cuando es necesario.',
+  'Q3_bajo':'Flexible con normas y errores propios. Puede descuidar la calidad o el orden en entornos que lo requieren.',
+  'Q3_alto':'Muy exigente consigo mismo/a. Puede tener dificultades para delegar o aceptar resultados imperfectos.',
+  // Q4_bajo eliminado de alertas — es fortaleza pura
+  'Q4_alto':'Nivel de tensión elevado e irritabilidad frecuente. Puede afectar el rendimiento y las relaciones con compañeros.'
 };
 
+// Fortalezas: textos en género neutro
 var PF_FORTALEZAS = {
   'A_alto':'Orientación hacia las personas — trabaja bien en equipo y establece relaciones de confianza.',
   'B_alto':'Alta capacidad de aprendizaje — aprende rápido y resuelve problemas complejos.',
   'C_alto':'Estabilidad emocional — maneja bien el estrés, los conflictos y la presión laboral.',
   'E_alto':'Liderazgo y asertividad — capaz de dirigir equipos y defender ideas con seguridad.',
-  'F_alto':'Energía y entusiasmo — activa, motivada y con buen nivel de energía para el trabajo.',
-  'G_alto':'Respeto por las normas — responsable y apegada a los procedimientos.',
+  'F_alto':'Energía y entusiasmo — activo/a, motivado/a y con buen nivel de energía para el trabajo.',
+  'G_alto':'Respeto por las normas — responsable y comprometido/a con los procedimientos establecidos.',
   'H_alto':'Seguridad social — se relaciona fácilmente con personas nuevas, ideal para roles de representación.',
   'Q3_alto':'Perfeccionismo y organización — alta exigencia personal y atención al detalle.',
-  'Q2_alto':'Autonomía — trabaja bien de forma independiente.',
-  'M_bajo':'Sentido práctico — orientada a lo concreto y resultados tangibles.',
-  'L_bajo':'Confianza en los demás — fácil de integrar a equipos y receptiva a la retroalimentación.',
-  'O_bajo':'Seguridad personal — confiada en sí misma y sus capacidades.',
-  'Q4_bajo':'Tranquilidad — relajada, paciente y con buen manejo de la presión.'
+  'Q2_alto':'Autonomía — trabaja bien de forma independiente sin necesidad de supervisión constante.',
+  'M_bajo':'Sentido práctico — orientado/a a lo concreto y a resultados tangibles.',
+  'L_bajo':'Confianza en los demás — fácil de integrar a equipos y receptivo/a a la retroalimentación.',
+  'O_bajo':'Seguridad personal — confiado/a en sí mismo/a y en sus capacidades.',
+  'Q4_bajo':'Tranquilidad — relajado/a, paciente y con buen manejo de la presión.'
 };
 
 function pf16GetAlertas(deVals) {
   var ESCA = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
   var out = [];
   deVals.forEach(function(v, i) {
-    if (v <= 3) out.push({ escala: ESCA[i], v: v, key: ESCA[i]+'_bajo' });
-    else if (v >= 8) out.push({ escala: ESCA[i], v: v, key: ESCA[i]+'_alto' });
+    var key = v <= 3 ? ESCA[i]+'_bajo' : v >= 8 ? ESCA[i]+'_alto' : null;
+    // Solo agregar si existe en PF_ALERTAS (excluye fortalezas puras)
+    if (key && PF_ALERTAS[key]) out.push({ escala: ESCA[i], v: v, key: key });
   });
   return out;
 }
@@ -2642,6 +2649,32 @@ function pf16GetFortalezas(deVals) {
     if (key && PF_FORTALEZAS[key]) out.push(PF_FORTALEZAS[key]);
   });
   return out;
+}
+
+// Adapta texto según género del candidato (fila[3]: Masculino/Femenino/Prefiero no indicar)
+function pf16AdaptarGenero(texto, genero) {
+  if (!texto) return texto;
+  var esMasc = genero && genero.toLowerCase().indexOf('masc') !== -1;
+  var esFem  = genero && genero.toLowerCase().indexOf('fem') !== -1;
+  if (!esMasc && !esFem) return texto; // neutro: no cambiar
+  if (esMasc) {
+    return texto
+      .replace(/apegada/g,'apegado').replace(/orientada/g,'orientado')
+      .replace(/segura/g,'seguro').replace(/confiada/g,'confiado')
+      .replace(/receptiva/g,'receptivo').replace(/relajada/g,'relajado')
+      .replace(/activa/g,'activo').replace(/motivada/g,'motivado')
+      .replace(/espontánea/g,'espontáneo').replace(/reservada/g,'reservado')
+      .replace(/abierta/g,'abierto').replace(/exigente consigo misma/g,'exigente consigo mismo')
+      .replace(/trabaja sola/g,'trabaja solo').replace(/adecuada/g,'adecuado')
+      .replace(/afectada/g,'afectado').replace(/precavida/g,'precavido')
+      .replace(/\/a\b/g,'').replace(/\bo\/a\b/g,'o');
+  }
+  if (esFem) {
+    return texto
+      .replace(/\/a\b/g,'a').replace(/\bo\/a\b/g,'a')
+      .replace(/apegado/g,'apegada').replace(/orientado/g,'orientada');
+  }
+  return texto;
 }
 
 async function abrirInforme16PF(test, rut, nombre) {
@@ -2666,6 +2699,7 @@ async function abrirInforme16PF(test, rut, nombre) {
     var alertas = pf16GetAlertas(deVals);
     var forts   = pf16GetFortalezas(deVals);
     var foco    = parseInt(fila[11]) || 0;
+    var genero  = String(fila[3] || "");  // Masculino / Femenino / Prefiero no indicar
 
     // Header
     document.getElementById("pf-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  " + fila[2] : "") + (fila[3] ? "  ·  " + fila[3] : "");
@@ -2690,10 +2724,21 @@ async function abrirInforme16PF(test, rut, nombre) {
       ? "<div class='pf-integridad-leve'><strong>⚠ Alerta leve — " + foco + " cambio(s) de ventana detectado(s)</strong><div style='font-size:12px;margin-top:4px;'>Puede ser accidental. Se recomienda considerar este antecedente al interpretar el resultado.</div></div>"
       : "<div class='pf-integridad-riesgo'><strong>⚠ ALERTA DE INTEGRIDAD — " + foco + " cambios de ventana detectados</strong><div style='font-size:12px;margin-top:4px;'>Existe riesgo de que el candidato haya consultado recursos externos. Se recomienda evaluar la validez del resultado.</div></div>";
 
-    // Fortalezas
+    // Fortalezas — adaptar género, filtrar duplicados con alertas
+    var alertasKeys = alertas.map(function(a){ return a.key; });
     var fortsTexto = (fila[8]||"").split("|").map(function(f){return f.trim();}).filter(function(f){return f && f!=="No se identifican fortalezas destacadas";});
-    var todasForts = fortsTexto.slice();
-    forts.forEach(function(f){ if (!todasForts.some(function(t){return t.substring(0,20)===f.substring(0,20);})) todasForts.push(f); });
+    var todasForts = fortsTexto.map(function(f){ return pf16AdaptarGenero(f, genero); });
+    forts.forEach(function(f){
+      var fa = pf16AdaptarGenero(f, genero);
+      if (!todasForts.some(function(t){return t.substring(0,20)===fa.substring(0,20);})) todasForts.push(fa);
+    });
+    // Filtrar fortalezas que contradigan alertas activas (ej: G_alto no debe ser fortaleza si ya es alerta)
+    todasForts = todasForts.filter(function(f){
+      var fLow = f.toLowerCase();
+      // Si G_alto está en alertas, no mostrar "respeto por normas" como fortaleza
+      if (alertasKeys.indexOf('G_alto') !== -1 && fLow.indexOf('normas') !== -1 && fLow.indexOf('responsable') !== -1) return false;
+      return true;
+    });
     var secForts = document.getElementById("pf-sec-forts");
     if (todasForts.length) {
       document.getElementById("pf-forts").innerHTML = todasForts.slice(0,4).map(function(f){
@@ -2702,11 +2747,11 @@ async function abrirInforme16PF(test, rut, nombre) {
       secForts.style.display = "block";
     } else { secForts.style.display = "none"; }
 
-    // Alertas
+    // Alertas — adaptar género
     var riesgosTexto = (fila[9]||"").split("|").map(function(r){return r.trim();}).filter(function(r){return r && r!=="No se identifican áreas de atención relevantes";});
-    var todasAlertas = riesgosTexto.map(function(r){return {texto:r, escala:null};});
+    var todasAlertas = riesgosTexto.map(function(r){return {texto: pf16AdaptarGenero(r, genero), escala:null};});
     alertas.forEach(function(a){
-      var desc = PF_ALERTAS[a.key] || "";
+      var desc = pf16AdaptarGenero(PF_ALERTAS[a.key] || "", genero);
       if (desc && !todasAlertas.some(function(t){return t.texto.substring(0,20)===desc.substring(0,20);}))
         todasAlertas.push({texto:desc, escala:a.escala});
     });
@@ -2717,8 +2762,8 @@ async function abrirInforme16PF(test, rut, nombre) {
         }).join("")
       : "<div class='pf-sin-alertas'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
-    // Interpretación
-    document.getElementById("pf-interp").textContent = fila[10] || "—";
+    // Interpretación — adaptar género
+    document.getElementById("pf-interp").textContent = pf16AdaptarGenero(fila[10] || "—", genero);
     document.getElementById("pf-fecha").textContent = fila[0] || "—";
 
     // Radar Chart.js
