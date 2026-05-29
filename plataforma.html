@@ -2704,28 +2704,39 @@ async function abrirInforme16PF(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, rutNorm, nomNorm);
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    // fila: [fecha, nombre, rut, genero, cargo_perfil(eliminado→género), decatipos_escalas, decatipos_dims, nivel_perfil, fortalezas, areas_riesgo, interpretacion, cambios_foco]
-    var deStr   = String(fila[5] || "");
-    var dimStr  = String(fila[6] || "");
+    // fila: [fecha, nombre, rut, sexo, decatipos_escalas, decatipos_dims, nivel_perfil, fortalezas, areas_riesgo, interpretacion, cambios_foco, respuestas]
+    // Nota: cargo_perfil fue eliminado — índices corregidos
+    var deStr   = String(fila[4] || "");   // decatipos_escalas
+    var dimStr  = String(fila[5] || "");   // decatipos_dims
     var deVals  = deStr.split(',').map(function(v){ return parseInt(v.trim())||5; });
     var dimVals = dimStr.split(',').map(function(v){ return parseInt(v.trim())||5; });
     while (dimVals.length < 5) dimVals.push(5);
 
     var alertas = pf16GetAlertas(deVals);
     var forts   = pf16GetFortalezas(deVals);
-    var foco    = parseInt(fila[11]) || 0;
-    var genero  = String(fila[3] || "");  // Masculino / Femenino / Prefiero no indicar
+    var foco    = parseInt(fila[10]) || 0;  // cambios_foco
+    var genero  = String(fila[3] || "");    // sexo/género
 
     // Header
     document.getElementById("pf-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  " + fila[2] : "") + (fila[3] ? "  ·  " + fila[3] : "");
 
     // Semáforo
+    // Semáforo calibrado: con 16 escalas se esperan 5-8 alertas por candidato
+    // Verde: ≤2 (bajo la media), Amarillo: 3-5 (normal), Rojo: ≥6 (sobre la media)
     var n = alertas.length;
-    var sem = n === 0
-      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)', titulo:'Sin alertas significativas', texto:'El perfil se encuentra dentro de la zona promedio en todas las escalas evaluadas.' }
-      : n <= 2
-      ? { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)', titulo:'Algunas áreas de atención', texto:'El perfil presenta ' + n + ' escala(s) con alejamiento significativo que el evaluador debe considerar.' }
-      : { dot:'pf-sem-rojo', wrap:'pf-sw-rojo', color:'var(--low)', titulo:'Varias áreas de atención', texto:'El perfil presenta ' + n + ' escalas con alejamiento significativo. Se recomienda evaluación complementaria.' };
+    var sem = n <= 2
+      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
+          titulo: n === 0 ? 'Sin áreas de atención' : 'Perfil favorable',
+          texto: n === 0
+            ? 'El perfil se encuentra dentro de la zona promedio en todas las escalas. No se identifican áreas de atención relevantes.'
+            : 'El perfil presenta solo ' + n + ' área(s) de atención. Perfil equilibrado con buen pronóstico de desempeño.' }
+      : n <= 5
+      ? { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
+          titulo:'Algunas áreas de atención',
+          texto:'El perfil presenta ' + n + ' áreas de atención — dentro del rango estadísticamente esperado para el instrumento. Se recomienda explorar en entrevista.' }
+      : { dot:'pf-sem-rojo', wrap:'pf-sw-rojo', color:'var(--low)',
+          titulo:'Varias áreas de atención',
+          texto:'El perfil presenta ' + n + ' áreas de atención, por encima del promedio esperado. Se recomienda evaluación complementaria antes de tomar una decisión.' };
     document.getElementById("pf-semaforo").innerHTML =
       '<div class="pf-semaforo-wrap ' + sem.wrap + '">' +
       '<div class="pf-semaforo-dot ' + sem.dot + '"></div>' +
@@ -2741,7 +2752,7 @@ async function abrirInforme16PF(test, rut, nombre) {
 
     // Fortalezas — adaptar género, filtrar duplicados con alertas
     var alertasKeys = alertas.map(function(a){ return a.key; });
-    var fortsTexto = (fila[8]||"").split("|").map(function(f){return f.trim();}).filter(function(f){return f && f!=="No se identifican fortalezas destacadas";});
+    var fortsTexto = (fila[7]||"").split("|").map(function(f){return f.trim();}).filter(function(f){return f && f!=="No se identifican fortalezas destacadas";});
     var todasForts = fortsTexto.map(function(f){ return pf16AdaptarGenero(f, genero); });
     forts.forEach(function(f){
       var fa = pf16AdaptarGenero(f, genero);
@@ -2762,23 +2773,30 @@ async function abrirInforme16PF(test, rut, nombre) {
       secForts.style.display = "block";
     } else { secForts.style.display = "none"; }
 
-    // Alertas — adaptar género
-    var riesgosTexto = (fila[9]||"").split("|").map(function(r){return r.trim();}).filter(function(r){return r && r!=="No se identifican áreas de atención relevantes";});
-    var todasAlertas = riesgosTexto.map(function(r){return {texto: pf16AdaptarGenero(r, genero), escala:null};});
-    alertas.forEach(function(a){
-      var desc = pf16AdaptarGenero(PF_ALERTAS[a.key] || "", genero);
-      if (desc && !todasAlertas.some(function(t){return t.texto.substring(0,20)===desc.substring(0,20);}))
-        todasAlertas.push({texto:desc, escala:a.escala});
-    });
+    // Alertas — usar SOLO cálculo en tiempo real para evitar duplicados con Sheets
+    // Los textos de fila[9] (Sheets) y pf16GetAlertas() describen las mismas escalas
+    // con frases distintas → mezclarlos genera duplicados inevitables
+    var todasAlertas = [];
+    if (deVals.length >= 16) {
+      // Fuente de verdad: alertas calculadas desde los decatipos actuales
+      alertas.forEach(function(a){
+        var desc = pf16AdaptarGenero(PF_ALERTAS[a.key] || "", genero);
+        if (desc) todasAlertas.push({texto: desc, escala: a.escala});
+      });
+    } else {
+      // Fallback: usar textos de Sheets si no hay decatipos
+      var riesgosTexto = (fila[8]||"").split("|").map(function(r){return r.trim();}).filter(function(r){return r && r!=="No se identifican áreas de atención relevantes";});
+      todasAlertas = riesgosTexto.map(function(r){return {texto: pf16AdaptarGenero(r, genero), escala:null};});
+    }
     document.getElementById("pf-alertas").innerHTML = todasAlertas.length
-      ? todasAlertas.slice(0,6).map(function(a){
+      ? todasAlertas.slice(0,8).map(function(a){
           var prefix = a.escala ? "<strong>" + a.escala + ":</strong> " : "<strong>⚠</strong> ";
           return "<div class='pf-card-alerta'>" + prefix + a.texto + "</div>";
         }).join("")
       : "<div class='pf-sin-alertas'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
     // Interpretación — adaptar género
-    document.getElementById("pf-interp").textContent = pf16AdaptarGenero(fila[10] || "—", genero);
+    document.getElementById("pf-interp").textContent = pf16AdaptarGenero(fila[9] || "—", genero);
     document.getElementById("pf-fecha").textContent = fila[0] || "—";
 
     // Radar Chart.js
