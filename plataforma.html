@@ -705,10 +705,7 @@ tbody tr:hover td { background: #fdf9f6; }
   max-width: 860px !important;
   padding: 0 !important;
   border-radius: 12px !important;
-  overflow: visible !important;
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
+  overflow: hidden !important;
 }
 
 /* Header */
@@ -757,7 +754,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .ceal-ficha-val { color:#1a1917;font-weight:600; }
 
 /* Body */
-.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px;overflow-y:auto;flex:1; }
+.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px; }
 .ceal-section-label {
   font-size:10px;font-weight:800;letter-spacing:.12em;
   color:#1a3a5c;text-transform:uppercase;
@@ -845,8 +842,24 @@ tbody tr:hover td { background: #fdf9f6; }
 @media print {
   .ceal-header-actions, .nav-sidebar, .topbar { display:none !important; }
   #modal-ceal { position:static !important;background:none !important; }
-  .ceal-informe-box { box-shadow:none !important;max-width:100% !important; }
+  .ceal-informe-box { box-shadow:none !important;max-width:100% !important;max-height:none !important; }
   .modal-overlay { position:static !important;overflow:visible !important; }
+  .ceal-body-pro { overflow:visible !important;max-height:none !important; }
+  /* Forzar impresión de TODOS los colores de fondo del informe CEAL */
+  .ceal-header-pro, .ceal-logo-circle, .ceal-ficha-wrap, .ceal-btn-pdf,
+  .ceal-res-card, .ceal-cq, .ceal-cq.activo, .ceal-desc-body,
+  .ceal-impl-card, .ceal-et-cell, .ceal-section-label,
+  .ceal-informe-box, .ceal-efect-tabla {
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+}
+/* Forzar colores también fuera de print para consistencia */
+.ceal-header-pro, .ceal-logo-circle, .ceal-ficha-wrap,
+.ceal-res-card, .ceal-cq, .ceal-desc-body, .ceal-impl-card {
+  -webkit-print-color-adjust:exact;
+  print-color-adjust:exact;
 }
 
 .ceal-efect-tabla {
@@ -2405,6 +2418,7 @@ var CEAL_TEXTOS = {
   "Separado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad bajo. Este perfil combina baja orientación a las tareas y baja orientación a las relaciones, lo que dificulta significativamente la conducción efectiva de equipos. Se recomienda una intervención de desarrollo integral en liderazgo antes de asumir roles de conducción de mayor responsabilidad."
 };
 
+
 var CEAL_INTERP = {
   "Integrado|Líder muy efectivo": "Los resultados indican que el candidato posee un perfil de liderazgo altamente desarrollado. Su capacidad para integrar el foco en resultados con un genuino cuidado por las personas lo posiciona como un líder de alto impacto, capaz de sostener equipos comprometidos y productivos. Este perfil es especialmente valioso en roles de conducción que requieran gestión de equipos complejos, toma de decisiones participativa y generación de cultura organizacional. Se recomienda su incorporación a roles de liderazgo con responsabilidad directa sobre equipos.",
   "Integrado|Líder efectivo": "El candidato presenta un perfil de liderazgo equilibrado y funcional. Combina adecuadamente el cumplimiento de objetivos con el cuidado de las relaciones en el equipo. Se desenvuelve bien en roles de conducción de equipos medianos, proyectos colaborativos y contextos que valoran tanto los resultados como el clima organizacional. Con desarrollo continuo, tiene potencial para alcanzar niveles de liderazgo más exigentes.",
@@ -2509,13 +2523,13 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var cqActivo = cqMap[estilo];
     if(cqActivo) { var el = document.getElementById(cqActivo); if(el) el.classList.add("activo"); }
 
-    // Descripción
-    var textoFinal = CEAL_TEXTOS[estilo+"|"+efectividad] || descripcion;
-    document.getElementById("ceal-descripcion").textContent = textoFinal;
-
-    // Interpretación
-    var interpFinal = CEAL_INTERP[estilo+"|"+efectividad] || "";
-    document.getElementById("ceal-interpretacion").textContent = interpFinal;
+    // Descripción del estilo + interpretación combinadas
+    var textoDesc   = CEAL_TEXTOS[estilo+"|"+efectividad] || descripcion;
+    var textoInterp = CEAL_INTERP[estilo+"|"+efectividad] || "";
+    var textoFinal  = textoInterp ? (textoDesc + "\n\n" + textoInterp) : textoDesc;
+    var descEl = document.getElementById("ceal-descripcion");
+    descEl.textContent = textoFinal;
+    descEl.style.whiteSpace = "pre-line";
 
     // Fortalezas y áreas de desarrollo
     var CEAL_FORT = {
@@ -2544,7 +2558,15 @@ function cerrarModalCEAL() {
   document.getElementById("modal-ceal").classList.remove("activo");
   document.body.style.overflow="";
 }
-function imprimirInformeCEAL() { window.print(); }
+function imprimirInformeCEAL() {
+  // Aviso para que el usuario active "Gráficos de fondo" en el diálogo de impresión
+  var yaAviso = sessionStorage.getItem("ceal_aviso_pdf");
+  if (!yaAviso) {
+    alert("Para conservar los colores del informe:\n\nEn el diálogo de impresión que se abrirá, activa la opción \"Más ajustes\" → \"Gráficos de fondo\" (o \"Background graphics\").\n\nLuego selecciona \"Guardar como PDF\" en Destino.");
+    sessionStorage.setItem("ceal_aviso_pdf", "1");
+  }
+  window.print();
+}
 
 
 // ══════════ INFORME DISC ══════════
@@ -3603,12 +3625,6 @@ function imprimirModalWONDERLIC() { window.print(); }
       <div class="ceal-desc-section">
         <div class="ceal-section-label">DESCRIPCIÓN DEL ESTILO</div>
         <div class="ceal-desc-body" id="ceal-descripcion">—</div>
-      </div>
-
-      <!-- INTERPRETACIÓN DE RESULTADOS -->
-      <div class="ceal-desc-section">
-        <div class="ceal-section-label">INTERPRETACIÓN DE RESULTADOS</div>
-        <div class="ceal-desc-body" id="ceal-interpretacion">—</div>
       </div>
 
       <!-- IMPLICANCIAS PARA EL ROL -->
