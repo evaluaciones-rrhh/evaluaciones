@@ -432,21 +432,33 @@ function enviar(){
   }
   document.getElementById('err-incompleto').style.display='none';
 
-  // Calcular puntaje total y conteo por estilo
+  // Calcular puntaje total, conteo y puntaje acumulado por estilo
   let puntajeTotal = 0;
-  let conteoEstilo = [0,0,0,0]; // A, B, C, D
+  let conteoEstilo  = [0, 0, 0, 0]; // frecuencia A,B,C,D
+  let puntajeEstilo = [0, 0, 0, 0]; // puntaje acumulado A,B,C,D
 
   PREGUNTAS.forEach((_,i) => {
     let r = document.querySelector(`input[name="p${i}"]:checked`);
     let altIdx = parseInt(r.value);
-    puntajeTotal += PUNTAJES[i][altIdx];
+    let pts = PUNTAJES[i][altIdx];
+    puntajeTotal += pts;
     conteoEstilo[altIdx]++;
+    puntajeEstilo[altIdx] += pts;
   });
 
-  // Estilo predominante (el que más veces eligió)
+  // Estilo predominante — desempate por puntaje acumulado del estilo
   let maxConteo = Math.max(...conteoEstilo);
-  let estiloIdx = conteoEstilo.indexOf(maxConteo);
+  let candidatos = conteoEstilo.map((c,i) => c === maxConteo ? i : -1).filter(i => i >= 0);
+  let estiloIdx = candidatos.length === 1
+    ? candidatos[0]
+    : candidatos.reduce((a,b) => puntajeEstilo[a] >= puntajeEstilo[b] ? a : b);
   let estilo = ESTILOS[estiloIdx];
+
+  // Estilo secundario (segundo mayor conteo, excluyendo el predominante)
+  let conteoSinPred = conteoEstilo.map((c,i) => i === estiloIdx ? -1 : c);
+  let maxSecundario = Math.max(...conteoSinPred);
+  let estiloSecIdx = conteoSinPred.indexOf(maxSecundario);
+  let estiloSec = maxSecundario > 0 ? ESTILOS[estiloSecIdx] : '';
 
   // Efectividad
   let efectividad;
@@ -468,8 +480,12 @@ function enviar(){
     fecha: new Date().toLocaleString('es-CL'),
     nombre: document.getElementById('nombre').value.trim(),
     rut: document.getElementById('rut').value.trim(),
-    estilo, descripcion, efectividad,
-    puntaje: puntajeTotal
+    estilo,
+    estilo_secundario: estiloSec,
+    descripcion,
+    efectividad,
+    puntaje: puntajeTotal,
+    cambios_foco: cambiosFoco
   };
 
   payload.token = TOKEN_URL;
