@@ -590,14 +590,17 @@ tbody tr:hover td { background: #fdf9f6; }
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
-.ceal-est-integrado  { background:var(--high-bg);color:var(--high); }
-.ceal-est-relacionado{ background:var(--mid-bg);color:var(--mid); }
-.ceal-est-autoritario{ background:var(--mid-bg);color:var(--mid); }
-.ceal-est-separado   { background:var(--low-bg);color:var(--low); }
+/* Estilo badge — color neutro, sin juicio de valor por estilo */
+.ceal-est-integrado,
+.ceal-est-relacionado,
+.ceal-est-autoritario,
+.ceal-est-separado   { background:var(--surface-2,#f0eeea);color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
 .ceal-efect-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px; }
-.ceal-efect-alto  { background:var(--high-bg);color:var(--high); }
-.ceal-efect-medio { background:var(--mid-bg);color:var(--mid); }
-.ceal-efect-bajo  { background:var(--low-bg);color:var(--low); }
+.ceal-efect-muy-alto { background:#d1fae5;color:#065f46;font-weight:700; }
+.ceal-efect-alto     { background:var(--high-bg);color:var(--high); }
+.ceal-efect-medio    { background:var(--mid-bg);color:var(--mid); }
+.ceal-efect-bajo     { background:var(--low-bg);color:var(--low); }
+.ceal-est-neutro     { background:var(--surface-2,#f0eeea);color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
 .ceal-puntaje-wrap { display:flex;align-items:center;gap:12px;margin-bottom:20px; }
 .ceal-puntaje-num { font-family:"Sora",sans-serif;font-size:36px;font-weight:800;color:var(--ink); }
 .ceal-puntaje-lbl { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px; }
@@ -2245,22 +2248,40 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, normRut2(rutDec), normNom2(nomDec));
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    var estilo      = String(fila[3]||"—");
-    var estiloSec   = String(fila[4]||"");    // estilo_secundario
-    var descripcion = String(fila[5]||"—");   // antes fila[4]
-    var efectividad = String(fila[6]||"—");   // antes fila[5]
-    var puntaje     = fila[7]!==undefined?fila[7]:"—"; // antes fila[6]
-    var fecha       = String(fila[0]||"—");
+    var estilo = String(fila[3]||"—");
+
+    // Auto-detectar si la columna estilo_secundario ya existe en Sheets.
+    var ESTILOS_CEAL = ['Autoritario','Integrado','Relacionado','Separado',''];
+    var col4 = String(fila[4]||"");
+    var col5 = String(fila[5]||"");
+    var tieneColSec = ESTILOS_CEAL.indexOf(col4) >= 0 && col5.length > 30;
+    var estiloSec, descripcion, efectividad, puntaje;
+    if (tieneColSec) {
+      estiloSec   = col4;
+      descripcion = col5;
+      efectividad = String(fila[6]||"—");
+      puntaje     = fila[7]!==undefined ? fila[7] : "—";
+    } else {
+      estiloSec   = "";
+      descripcion = col4.length > 5 ? col4 : String(fila[4]||"—");
+      efectividad = col5.length > 2 ? col5 : String(fila[5]||"—");
+      puntaje     = fila[6]!==undefined ? fila[6] : "—";
+    }
+    var fecha = String(fila[0]||"—");
 
     document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
 
     var estiloClsMap={"Integrado":"ceal-est-integrado","Relacionado":"ceal-est-relacionado","Autoritario":"ceal-est-autoritario","Separado":"ceal-est-separado"};
     var estiloEmojiMap={"Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴"};
     var badge=document.getElementById("ceal-estilo-badge");
-    badge.className="ceal-estilo-badge "+(estiloClsMap[estilo]||"ceal-est-autoritario");
-    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
+    badge.className="ceal-estilo-badge ceal-est-neutro";
+    badge.textContent="🎯  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
 
-    var efectCls=efectividad.includes("muy")?"ceal-efect-alto":efectividad.includes("efectivo")&&!efectividad.includes("poco")?"ceal-efect-alto":efectividad==="Normal"?"ceal-efect-medio":"ceal-efect-bajo";
+    // El color de efectividad ES el semáforo principal del CEAL
+    var efectCls = efectividad.includes("muy efectivo") ? "ceal-efect-muy-alto"
+                 : efectividad.includes("efectivo") && !efectividad.includes("poco") ? "ceal-efect-alto"
+                 : efectividad === "Normal" ? "ceal-efect-medio"
+                 : "ceal-efect-bajo";
     var efBadge=document.getElementById("ceal-efect-badge");
     efBadge.className="ceal-efect-badge "+efectCls;
     efBadge.textContent="Efectividad: "+efectividad;
