@@ -705,7 +705,10 @@ tbody tr:hover td { background: #fdf9f6; }
   max-width: 860px !important;
   padding: 0 !important;
   border-radius: 12px !important;
-  overflow: hidden !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
 }
 
 /* Header */
@@ -754,7 +757,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .ceal-ficha-val { color:#1a1917;font-weight:600; }
 
 /* Body */
-.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px; }
+.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px;overflow-y:auto;flex:1; }
 .ceal-section-label {
   font-size:10px;font-weight:800;letter-spacing:.12em;
   color:#1a3a5c;text-transform:uppercase;
@@ -2402,6 +2405,25 @@ var CEAL_TEXTOS = {
   "Separado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad bajo. Este perfil combina baja orientación a las tareas y baja orientación a las relaciones, lo que dificulta significativamente la conducción efectiva de equipos. Se recomienda una intervención de desarrollo integral en liderazgo antes de asumir roles de conducción de mayor responsabilidad."
 };
 
+var CEAL_INTERP = {
+  "Integrado|Líder muy efectivo": "Los resultados indican que el candidato posee un perfil de liderazgo altamente desarrollado. Su capacidad para integrar el foco en resultados con un genuino cuidado por las personas lo posiciona como un líder de alto impacto, capaz de sostener equipos comprometidos y productivos. Este perfil es especialmente valioso en roles de conducción que requieran gestión de equipos complejos, toma de decisiones participativa y generación de cultura organizacional. Se recomienda su incorporación a roles de liderazgo con responsabilidad directa sobre equipos.",
+  "Integrado|Líder efectivo": "El candidato presenta un perfil de liderazgo equilibrado y funcional. Combina adecuadamente el cumplimiento de objetivos con el cuidado de las relaciones en el equipo. Se desenvuelve bien en roles de conducción de equipos medianos, proyectos colaborativos y contextos que valoran tanto los resultados como el clima organizacional. Con desarrollo continuo, tiene potencial para alcanzar niveles de liderazgo más exigentes.",
+  "Integrado|Normal": "El candidato muestra orientación al estilo Integrado, aunque con una efectividad que aún puede fortalecerse. Si bien tiene las bases conceptuales para un liderazgo equilibrado, existen áreas de mejora en la consistencia y el impacto de su conducción. Se recomienda explorar en la entrevista qué factores limitan su efectividad y si responden a experiencia, contexto o habilidades específicas a desarrollar.",
+  "Integrado|Líder poco efectivo": "A pesar de mostrar un estilo Integrado en sus preferencias conductuales, el candidato no logra traducir este perfil en resultados concretos de liderazgo. Esta brecha entre estilo e impacto puede responder a falta de experiencia, contextos organizacionales adversos o brechas en habilidades ejecutivas. Se recomienda evaluación complementaria antes de asignar roles de conducción de equipos.",
+  "Autoritario|Líder muy efectivo": "El candidato presenta un perfil de liderazgo directivo con alto nivel de efectividad. Su orientación al cumplimiento de tareas y resultados le permite generar impacto rápido en equipos que requieren estructura, dirección clara y supervisión activa. Es especialmente adecuado para contextos de alta exigencia operativa, equipos en formación o situaciones de crisis que demanden liderazgo firme. Se sugiere monitorear el impacto en el clima y la retención a largo plazo.",
+  "Autoritario|Líder efectivo": "El candidato conduce con claridad y disciplina, generando resultados en contextos estructurados. Su perfil es funcional para roles que requieran supervisión directa, gestión de procesos y cumplimiento de estándares. Para ampliar su impacto, se recomienda explorar el desarrollo de habilidades relacionales que complementen su orientación a la tarea.",
+  "Autoritario|Normal": "El candidato muestra un estilo directivo que genera resultados moderados. Si bien tiene capacidad para definir expectativas y supervisar el desempeño, su efectividad como líder se ve limitada, posiblemente por resistencia del equipo o dificultades relacionales. Se sugiere explorar en la entrevista cómo gestiona las relaciones con su equipo y cómo aborda situaciones de conflicto.",
+  "Autoritario|Líder poco efectivo": "El perfil muestra un estilo directivo que no está generando los resultados esperados. La combinación de alta orientación a la tarea con baja efectividad sugiere posibles dificultades en la gestión del equipo o en la generación de compromiso. Se recomienda no asignar roles de conducción sin antes realizar una entrevista profunda y, eventualmente, una intervención de desarrollo en liderazgo.",
+  "Relacionado|Líder muy efectivo": "El candidato destaca por su capacidad para construir equipos cohesionados, de alta confianza y con fuerte sentido de pertenencia. Su estilo Relacionado, combinado con un alto nivel de efectividad, lo posiciona como un líder clave para contextos que requieran gestión de equipos maduros, culturas colaborativas y entornos donde el bienestar de las personas sea estratégico. Se recomienda complementar con supervisión de resultados en roles de alta exigencia operativa.",
+  "Relacionado|Líder efectivo": "El candidato genera equipos comprometidos y climas de trabajo positivos. Su empatía y orientación a las personas son activos relevantes para roles de conducción en entornos colaborativos. Para maximizar su impacto, se recomienda desarrollar mayor asertividad en la gestión del desempeño y en la toma de decisiones que impliquen tensión interpersonal.",
+  "Relacionado|Normal": "El candidato muestra orientación a las relaciones, aunque con una efectividad que puede fortalecerse. Puede presentar dificultades para exigir resultados o tomar decisiones difíciles sin que ello afecte las relaciones. Se recomienda explorar en la entrevista cómo maneja situaciones de bajo desempeño en su equipo y cómo equilibra el cuidado de las personas con el logro de objetivos.",
+  "Relacionado|Líder poco efectivo": "La priorización de las relaciones sobre los resultados no está generando el impacto esperado. Este perfil puede asociarse a dificultades para establecer límites, exigir estándares o tomar decisiones impopulares. Se recomienda no asignar roles de conducción formal sin antes evaluar la capacidad del candidato para gestionar el desempeño de manera asertiva.",
+  "Separado|Líder muy efectivo": "El candidato presenta un perfil atípico: un estilo distante en lo relacional y operativo, pero con alta efectividad. Esto sugiere que opera bien en contextos con equipos muy autónomos, altamente calificados o con objetivos muy claros, donde la no-intervención es funcional. Se recomienda evaluar en detalle el tipo de equipo y contexto en que se desempeñaría, ya que este perfil tiene rangos de efectividad muy acotados.",
+  "Separado|Líder efectivo": "El candidato se desenvuelve con efectividad en contextos técnicos o con equipos autónomos, donde el liderazgo laissez-faire es apropiado. Para ampliar su impacto en roles de mayor responsabilidad, se recomienda desarrollar mayor presencia, conexión con el equipo y habilidades de conducción activa.",
+  "Separado|Normal": "El candidato presenta un estilo distante con efectividad moderada. Su baja orientación a tareas y relaciones puede generar desconexión en el equipo y falta de dirección. Se recomienda explorar en la entrevista experiencias de conducción previas y evaluar si el candidato tiene motivación para asumir un rol de liderazgo activo.",
+  "Separado|Líder poco efectivo": "Este perfil combina baja orientación a la tarea y a las relaciones con baja efectividad, lo que representa el mayor desafío para roles de conducción. Se recomienda no asignar responsabilidades de liderazgo directo en esta etapa, y considerar una intervención de desarrollo integral antes de avanzar en el proceso para cargos de jefatura o supervisión."
+};
+
 async function abrirInformeCEAL(test, rut, nombre) {
   var rutDec = decodeURIComponent(rut || "");
   var nomDec = decodeURIComponent(nombre || "");
@@ -2490,6 +2512,10 @@ async function abrirInformeCEAL(test, rut, nombre) {
     // Descripción
     var textoFinal = CEAL_TEXTOS[estilo+"|"+efectividad] || descripcion;
     document.getElementById("ceal-descripcion").textContent = textoFinal;
+
+    // Interpretación
+    var interpFinal = CEAL_INTERP[estilo+"|"+efectividad] || "";
+    document.getElementById("ceal-interpretacion").textContent = interpFinal;
 
     // Fortalezas y áreas de desarrollo
     var CEAL_FORT = {
@@ -3577,6 +3603,12 @@ function imprimirModalWONDERLIC() { window.print(); }
       <div class="ceal-desc-section">
         <div class="ceal-section-label">DESCRIPCIÓN DEL ESTILO</div>
         <div class="ceal-desc-body" id="ceal-descripcion">—</div>
+      </div>
+
+      <!-- INTERPRETACIÓN DE RESULTADOS -->
+      <div class="ceal-desc-section">
+        <div class="ceal-section-label">INTERPRETACIÓN DE RESULTADOS</div>
+        <div class="ceal-desc-body" id="ceal-interpretacion">—</div>
       </div>
 
       <!-- IMPLICANCIAS PARA EL ROL -->
