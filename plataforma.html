@@ -2245,8 +2245,12 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, normRut2(rutDec), normNom2(nomDec));
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    var estilo=String(fila[3]||"—"), descripcion=String(fila[4]||"—"), efectividad=String(fila[5]||"—");
-    var puntaje=fila[6]!==undefined?fila[6]:"—", fecha=String(fila[0]||"—");
+    var estilo      = String(fila[3]||"—");
+    var estiloSec   = String(fila[4]||"");    // estilo_secundario
+    var descripcion = String(fila[5]||"—");   // antes fila[4]
+    var efectividad = String(fila[6]||"—");   // antes fila[5]
+    var puntaje     = fila[7]!==undefined?fila[7]:"—"; // antes fila[6]
+    var fecha       = String(fila[0]||"—");
 
     document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
 
@@ -2254,7 +2258,7 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var estiloEmojiMap={"Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴"};
     var badge=document.getElementById("ceal-estilo-badge");
     badge.className="ceal-estilo-badge "+(estiloClsMap[estilo]||"ceal-est-autoritario");
-    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo;
+    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
 
     var efectCls=efectividad.includes("muy")?"ceal-efect-alto":efectividad.includes("efectivo")&&!efectividad.includes("poco")?"ceal-efect-alto":efectividad==="Normal"?"ceal-efect-medio":"ceal-efect-bajo";
     var efBadge=document.getElementById("ceal-efect-badge");
