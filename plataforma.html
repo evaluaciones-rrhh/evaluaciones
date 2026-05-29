@@ -590,17 +590,14 @@ tbody tr:hover td { background: #fdf9f6; }
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
-/* Estilo badge — color neutro, sin juicio de valor por estilo */
-.ceal-est-integrado,
-.ceal-est-relacionado,
-.ceal-est-autoritario,
-.ceal-est-separado   { background:var(--surface-2,#f0eeea);color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
+.ceal-est-integrado  { background:var(--high-bg);color:var(--high); }
+.ceal-est-relacionado{ background:var(--mid-bg);color:var(--mid); }
+.ceal-est-autoritario{ background:var(--mid-bg);color:var(--mid); }
+.ceal-est-separado   { background:var(--low-bg);color:var(--low); }
 .ceal-efect-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px; }
-.ceal-efect-muy-alto { background:#d1fae5;color:#065f46;font-weight:700; }
-.ceal-efect-alto     { background:var(--high-bg);color:var(--high); }
-.ceal-efect-medio    { background:var(--mid-bg);color:var(--mid); }
-.ceal-efect-bajo     { background:var(--low-bg);color:var(--low); }
-.ceal-est-neutro     { background:var(--surface-2,#f0eeea);color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
+.ceal-efect-alto  { background:var(--high-bg);color:var(--high); }
+.ceal-efect-medio { background:var(--mid-bg);color:var(--mid); }
+.ceal-efect-bajo  { background:var(--low-bg);color:var(--low); }
 .ceal-puntaje-wrap { display:flex;align-items:center;gap:12px;margin-bottom:20px; }
 .ceal-puntaje-num { font-family:"Sora",sans-serif;font-size:36px;font-weight:800;color:var(--ink); }
 .ceal-puntaje-lbl { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px; }
@@ -958,18 +955,17 @@ tbody tr:hover td { background: #fdf9f6; }
     <div class="page" id="page-candidatos">
       <div class="card">
         <div class="card-header">
-          <div class="card-title">Reporte Tests Psicolaborales</div>
           <span id="count-label" style="font-size:12px;color:var(--muted);"></span>
         </div>
         <div class="card-body" style="padding-bottom:0;">
           <div class="filtros-row">
             <select class="filtro-select" id="filtro-test" onchange="filtrar()">
               <option value="">Todos los tests</option>
-              <option value="IC">IC</option>
-              <option value="CEAL">CEAL</option>
-              <option value="16PF">16PF</option>
-              <option value="IPV">IPV</option>
-              <option value="WONDERLIC">Wonderlic</option>
+              <option value="IC">Instrucciones Complejas</option>
+              <option value="CEAL">Estilos de Liderazgo</option>
+              <option value="16PF">Evaluación de Personalidad</option>
+              <option value="IPV">Personalidad Vendedores</option>
+              <option value="WONDERLIC">Habilidad Cognitiva</option>
             </select>
             <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
           </div>
@@ -1680,10 +1676,16 @@ function renderTablaComun(datos, tbodyId, cols) {
     var btnVer = dashUrl
       ? "<button class='btn btn-ghost btn-sm' onclick=\"abrirDash('"+d.test+"','"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">Ver informe</button>"
       : "<span style='color:var(--muted);font-size:11px;'>—</span>";
+    var TEST_BADGE_NOMBRES = {
+      "IC":"Instrucciones Complejas","CEAL":"Estilos de Liderazgo",
+      "16PF":"Evaluación de Personalidad","IPV":"Personalidad Vendedores",
+      "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual"
+    };
+    var testLabel = TEST_BADGE_NOMBRES[d.test] || d.test || "—";
     if(cols===5) {
-      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     } else {
-      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+(d.test||"—")+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     }
   });
   tbody.innerHTML = html;
@@ -2248,40 +2250,22 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, normRut2(rutDec), normNom2(nomDec));
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    var estilo = String(fila[3]||"—");
-
-    // Auto-detectar si la columna estilo_secundario ya existe en Sheets.
-    var ESTILOS_CEAL = ['Autoritario','Integrado','Relacionado','Separado',''];
-    var col4 = String(fila[4]||"");
-    var col5 = String(fila[5]||"");
-    var tieneColSec = ESTILOS_CEAL.indexOf(col4) >= 0 && col5.length > 30;
-    var estiloSec, descripcion, efectividad, puntaje;
-    if (tieneColSec) {
-      estiloSec   = col4;
-      descripcion = col5;
-      efectividad = String(fila[6]||"—");
-      puntaje     = fila[7]!==undefined ? fila[7] : "—";
-    } else {
-      estiloSec   = "";
-      descripcion = col4.length > 5 ? col4 : String(fila[4]||"—");
-      efectividad = col5.length > 2 ? col5 : String(fila[5]||"—");
-      puntaje     = fila[6]!==undefined ? fila[6] : "—";
-    }
-    var fecha = String(fila[0]||"—");
+    var estilo      = String(fila[3]||"—");
+    var estiloSec   = String(fila[4]||"");    // estilo_secundario
+    var descripcion = String(fila[5]||"—");   // antes fila[4]
+    var efectividad = String(fila[6]||"—");   // antes fila[5]
+    var puntaje     = fila[7]!==undefined?fila[7]:"—"; // antes fila[6]
+    var fecha       = String(fila[0]||"—");
 
     document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
 
     var estiloClsMap={"Integrado":"ceal-est-integrado","Relacionado":"ceal-est-relacionado","Autoritario":"ceal-est-autoritario","Separado":"ceal-est-separado"};
     var estiloEmojiMap={"Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴"};
     var badge=document.getElementById("ceal-estilo-badge");
-    badge.className="ceal-estilo-badge ceal-est-neutro";
-    badge.textContent="🎯  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
+    badge.className="ceal-estilo-badge "+(estiloClsMap[estilo]||"ceal-est-autoritario");
+    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
 
-    // El color de efectividad ES el semáforo principal del CEAL
-    var efectCls = efectividad.includes("muy efectivo") ? "ceal-efect-muy-alto"
-                 : efectividad.includes("efectivo") && !efectividad.includes("poco") ? "ceal-efect-alto"
-                 : efectividad === "Normal" ? "ceal-efect-medio"
-                 : "ceal-efect-bajo";
+    var efectCls=efectividad.includes("muy")?"ceal-efect-alto":efectividad.includes("efectivo")&&!efectividad.includes("poco")?"ceal-efect-alto":efectividad==="Normal"?"ceal-efect-medio":"ceal-efect-bajo";
     var efBadge=document.getElementById("ceal-efect-badge");
     efBadge.className="ceal-efect-badge "+efectCls;
     efBadge.textContent="Efectividad: "+efectividad;
