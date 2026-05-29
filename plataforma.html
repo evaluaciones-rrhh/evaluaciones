@@ -590,14 +590,17 @@ tbody tr:hover td { background: #fdf9f6; }
 
 /* ══════════ MODAL INFORME CEAL ══════════ */
 .ceal-estilo-badge { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:12px; }
-.ceal-est-integrado  { background:var(--high-bg);color:var(--high); }
-.ceal-est-relacionado{ background:var(--mid-bg);color:var(--mid); }
-.ceal-est-autoritario{ background:var(--mid-bg);color:var(--mid); }
-.ceal-est-separado   { background:var(--low-bg);color:var(--low); }
+.ceal-est-integrado,
+.ceal-est-relacionado,
+.ceal-est-autoritario,
+.ceal-est-separado,
+.ceal-est-neutro     { background:#f0eeea;color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
 .ceal-efect-badge { display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px; }
-.ceal-efect-alto  { background:var(--high-bg);color:var(--high); }
-.ceal-efect-medio { background:var(--mid-bg);color:var(--mid); }
-.ceal-efect-bajo  { background:var(--low-bg);color:var(--low); }
+.ceal-efect-muy-alto { background:#d1fae5;color:#065f46;font-weight:700; }
+.ceal-efect-alto     { background:var(--high-bg);color:var(--high); }
+.ceal-efect-medio    { background:var(--mid-bg);color:var(--mid); }
+.ceal-efect-bajo     { background:var(--low-bg);color:var(--low); }
+.ceal-est-neutro     { background:#f0eeea;color:var(--ink,#1a1917);border:1px solid var(--border,#d8d6ce); }
 .ceal-puntaje-wrap { display:flex;align-items:center;gap:12px;margin-bottom:20px; }
 .ceal-puntaje-num { font-family:"Sora",sans-serif;font-size:36px;font-weight:800;color:var(--ink); }
 .ceal-puntaje-lbl { font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px; }
@@ -694,6 +697,167 @@ tbody tr:hover td { background: #fdf9f6; }
 .disc-pregunta-item { font-size:12px; color:var(--ink-soft); padding:6px 0; border-bottom:1px solid var(--border); display:flex; gap:10px; line-height:1.55; }
 .disc-pregunta-item:last-child { border-bottom:none; }
 .disc-pregunta-n { font-size:10px; font-weight:700; color:var(--muted); flex-shrink:0; padding-top:2px; min-width:14px; }
+
+/* ══════════════════════════════════════════
+   CEAL INFORME PROFESIONAL — Key Clouding style
+   ══════════════════════════════════════════ */
+.ceal-informe-box {
+  max-width: 860px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+/* Header */
+.ceal-header-pro {
+  background: #1a3a5c;
+  padding: 18px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ceal-header-logo { display:flex;align-items:center;gap:14px; }
+.ceal-logo-circle {
+  width:40px;height:40px;border-radius:50%;
+  background:#c4432a;color:#fff;
+  font-weight:800;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+}
+.ceal-org-name { color:#fff;font-weight:700;font-size:15px;letter-spacing:.02em; }
+.ceal-doc-type { color:rgba(255,255,255,.6);font-size:11px;margin-top:2px;letter-spacing:.05em; }
+.ceal-header-actions { display:flex;gap:10px;align-items:center; }
+.ceal-btn-pdf {
+  background:#c4432a;color:#fff;border:none;border-radius:6px;
+  padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;
+  transition:opacity .15s;
+}
+.ceal-btn-pdf:hover { opacity:.85; }
+
+/* Ficha candidato */
+.ceal-ficha-wrap {
+  background:#f7f5f0;
+  border-bottom:2px solid #e0dbd0;
+  padding:18px 28px;
+  display:flex;
+  gap:32px;
+  align-items:flex-start;
+}
+.ceal-ficha-titulo-area { flex:1; }
+.ceal-ficha-tag {
+  font-size:13px;font-weight:800;letter-spacing:.08em;
+  color:#1a3a5c;text-transform:uppercase;
+}
+.ceal-ficha-subtag { font-size:11px;color:#888;margin-top:3px; }
+.ceal-ficha-datos { flex:1.2; }
+.ceal-ficha-row { display:flex;gap:12px;margin-bottom:4px;font-size:12px; }
+.ceal-ficha-lbl { color:#888;min-width:110px;font-weight:500; }
+.ceal-ficha-val { color:#1a1917;font-weight:600; }
+
+/* Body */
+.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px; }
+.ceal-section-label {
+  font-size:10px;font-weight:800;letter-spacing:.12em;
+  color:#1a3a5c;text-transform:uppercase;
+  border-bottom:2px solid #1a3a5c;
+  padding-bottom:6px;margin-bottom:14px;
+}
+
+/* Resultado grid */
+.ceal-resultado-grid {
+  display:grid;grid-template-columns:1fr 1.6fr;gap:14px;
+}
+.ceal-res-card {
+  background:#fff;border:1px solid #e0dbd0;border-radius:8px;
+  padding:16px 18px;
+}
+.ceal-res-card-lbl { font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px; }
+.ceal-res-estilo-val {
+  font-size:22px;font-weight:800;color:#1a3a5c;line-height:1.2;
+}
+.ceal-res-estilo-sec { font-size:12px;color:#888;margin-top:4px; }
+.ceal-res-efect-val {
+  font-size:18px;font-weight:700;margin-bottom:10px;
+}
+
+.ceal-res-card-puntaje { text-align:center; }
+.ceal-puntaje-big {
+  font-size:48px;font-weight:900;color:#1a3a5c;line-height:1;margin:4px 0;
+}
+.ceal-puntaje-rango { font-size:10px;color:#aaa; }
+
+/* Cuadrante Reddin */
+.ceal-cuadrante-wrap { position:relative; }
+.ceal-cuadrante-grid {
+  display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+  gap:3px;border:2px solid #1a3a5c;border-radius:8px;overflow:hidden;
+  height:180px;
+}
+.ceal-cq {
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:12px;transition:all .3s;
+  background:#f5f3ee;
+}
+.ceal-cq.activo { background:#1a3a5c !important;color:#fff !important; }
+.ceal-cq.activo .ceal-cq-desc { color:rgba(255,255,255,.7) !important; }
+.ceal-cq-name { font-weight:700;font-size:13px;color:#1a3a5c; }
+.ceal-cq-desc { font-size:10px;color:#888;margin-top:3px; }
+.ceal-cq.activo .ceal-cq-name { color:#fff; }
+.ceal-cq-int { border-right:1px solid #ddd;border-bottom:1px solid #ddd; } /* col 2 row 1 → top right */
+.ceal-cq-rel { border-bottom:1px solid #ddd; }                              /* col 1 row 1 → top left */
+.ceal-cq-aut { border-right:1px solid #ddd; }                               /* col 2 row 2 → bottom right */
+.ceal-cq-sep { }                                                             /* col 1 row 2 → bottom left */
+.ceal-cq-ejes { display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#888;font-style:italic; }
+
+/* Descripción */
+.ceal-desc-body {
+  background:#fff;border:1px solid #e0dbd0;border-radius:8px;
+  padding:18px 20px;font-size:13.5px;line-height:1.75;color:#333;
+}
+
+/* Implicancias */
+.ceal-impl-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.ceal-impl-card {
+  background:#fff;border-radius:8px;padding:16px 18px;
+  border-left:4px solid #ccc;
+}
+.ceal-impl-fort { border-left-color:#1a7c4e; }
+.ceal-impl-des  { border-left-color:#c4432a; }
+.ceal-impl-card-title {
+  font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;
+}
+.ceal-impl-fort .ceal-impl-card-title { color:#1a7c4e; }
+.ceal-impl-des  .ceal-impl-card-title { color:#c4432a; }
+.ceal-impl-list { padding-left:16px;margin:0; }
+.ceal-impl-list li { font-size:12.5px;color:#444;line-height:1.6;margin-bottom:4px; }
+
+/* Footer */
+.ceal-footer-pro {
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:12px;border-top:1px solid #e0dbd0;
+  font-size:10px;color:#aaa;letter-spacing:.03em;
+}
+
+/* Print */
+@media print {
+  .ceal-header-actions, .nav-sidebar, .topbar { display:none !important; }
+  #modal-ceal { position:static !important;background:none !important; }
+  .ceal-informe-box { box-shadow:none !important;max-width:100% !important; }
+  .modal-overlay { position:static !important;overflow:visible !important; }
+}
+
+.ceal-efect-tabla {
+  width:100%;border-collapse:collapse;margin-top:10px;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.ceal-et-cell {
+  border:1px solid #d0ccc4;padding:7px 6px;
+  text-align:center;font-size:10.5px;color:#666;
+  background:#f5f3ee;border-radius:0;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.ceal-et-cell:first-child { border-radius:4px 0 0 4px; }
+.ceal-et-cell:last-child  { border-radius:0 4px 4px 0; }
 </style>
 </head>
 <body>
@@ -2250,30 +2414,101 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, normRut2(rutDec), normNom2(nomDec));
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    var estilo      = String(fila[3]||"—");
-    var estiloSec   = String(fila[4]||"");    // estilo_secundario
-    var descripcion = String(fila[5]||"—");   // antes fila[4]
-    var efectividad = String(fila[6]||"—");   // antes fila[5]
-    var puntaje     = fila[7]!==undefined?fila[7]:"—"; // antes fila[6]
-    var fecha       = String(fila[0]||"—");
+    var estilo = String(fila[3]||"—");
 
-    document.getElementById("ceal-modal-sub").textContent = String(fila[1]||nomDec) + (fila[2] ? "  ·  "+fila[2] : "");
+    // Auto-detectar estructura: con o sin columna estilo_secundario
+    // Si fila[4] es nombre de estilo conocido (o vacío) Y fila[5] tiene texto largo → estructura nueva
+    var ESTILOS_CEAL = ['Autoritario','Integrado','Relacionado','Separado',''];
+    var col4 = String(fila[4]||"");
+    var col5 = String(fila[5]||"");
+    var tieneColSec = ESTILOS_CEAL.indexOf(col4) >= 0 && col5.length > 30;
+    var estiloSec, descripcion, efectividad, puntaje;
+    if (tieneColSec) {
+      // Estructura nueva: estilo | estilo_secundario | descripcion | efectividad | puntaje
+      estiloSec   = col4;
+      descripcion = col5;
+      efectividad = String(fila[6]||"—");
+      puntaje     = fila[7]!==undefined ? fila[7] : "—";
+    } else {
+      // Estructura antigua: estilo | descripcion | efectividad | puntaje
+      estiloSec   = "";
+      descripcion = String(fila[4]||"—");
+      efectividad = String(fila[5]||"—");
+      puntaje     = fila[6]!==undefined ? fila[6] : "—";
+    }
+    var fecha = String(fila[0]||"—");
 
-    var estiloClsMap={"Integrado":"ceal-est-integrado","Relacionado":"ceal-est-relacionado","Autoritario":"ceal-est-autoritario","Separado":"ceal-est-separado"};
-    var estiloEmojiMap={"Integrado":"✅","Relacionado":"⚠️","Autoritario":"⚠️","Separado":"🔴"};
-    var badge=document.getElementById("ceal-estilo-badge");
-    badge.className="ceal-estilo-badge "+(estiloClsMap[estilo]||"ceal-est-autoritario");
-    badge.textContent=(estiloEmojiMap[estilo]||"📋")+"  Estilo "+estilo+(estiloSec?" / "+estiloSec:"");
+    // Poblar ficha candidato
+    document.getElementById("ceal-nombre-pro").textContent = String(fila[1]||nomDec);
+    document.getElementById("ceal-rut-pro").textContent    = String(fila[2]||rutDec);
+    document.getElementById("ceal-fecha").textContent      = fecha;
+    document.getElementById("ceal-modal-sub").textContent  = String(fila[1]||nomDec);
 
-    var efectCls=efectividad.includes("muy")?"ceal-efect-alto":efectividad.includes("efectivo")&&!efectividad.includes("poco")?"ceal-efect-alto":efectividad==="Normal"?"ceal-efect-medio":"ceal-efect-bajo";
-    var efBadge=document.getElementById("ceal-efect-badge");
-    efBadge.className="ceal-efect-badge "+efectCls;
-    efBadge.textContent="Efectividad: "+efectividad;
+    // Estilo predominante y secundario
+    document.getElementById("ceal-estilo-pro").textContent  = estilo;
+    document.getElementById("ceal-estilo-sec-pro").textContent = estiloSec ? "Estilo secundario: " + estiloSec : "";
 
-    document.getElementById("ceal-puntaje").textContent=puntaje;
-    var textoFinal=CEAL_TEXTOS[estilo+"|"+efectividad]||descripcion;
-    document.getElementById("ceal-descripcion").textContent=textoFinal;
-    document.getElementById("ceal-fecha").textContent=fecha;
+    // Efectividad con color
+    var efectColores = {
+      "Líder muy efectivo": {color:"#065f46", bg:"#d1fae5"},
+      "Líder efectivo":     {color:"#166534", bg:"#dcfce7"},
+      "Normal":             {color:"#92400e", bg:"#fef3c7"},
+      "Líder poco efectivo":{color:"#991b1b", bg:"#fee2e2"}
+    };
+    var ec = efectColores[efectividad] || {color:"#333", bg:"#f0eeea"};
+    var efEl = document.getElementById("ceal-efect-pro");
+    efEl.textContent  = efectividad;
+    efEl.style.color  = ec.color;
+
+    // Tabla de efectividad — highlight celda activa
+    var celdasEfect = ["ceal-et-poco","ceal-et-normal","ceal-et-efect","ceal-et-muy"];
+    celdasEfect.forEach(function(id){
+      var el = document.getElementById(id);
+      if(el){ el.style.background=""; el.style.color=""; el.style.fontWeight=""; }
+    });
+    var mapEfect = {
+      "Líder poco efectivo": {id:"ceal-et-poco",  bg:"#dc2626", color:"#fff"},
+      "Normal":              {id:"ceal-et-normal", bg:"#d97706", color:"#fff"},
+      "Líder efectivo":      {id:"ceal-et-efect",  bg:"#16a34a", color:"#fff"},
+      "Líder muy efectivo":  {id:"ceal-et-muy",    bg:"#059669", color:"#fff"}
+    };
+    var celActiva = mapEfect[efectividad];
+    if(celActiva){
+      var elA = document.getElementById(celActiva.id);
+      if(elA){ elA.style.background=celActiva.bg; elA.style.color=celActiva.color; elA.style.fontWeight="700"; }
+    }
+
+    // Cuadrante activo
+    var cqMap = {Integrado:"cq-integrado", Autoritario:"cq-autoritario", Relacionado:"cq-relacionado", Separado:"cq-separado"};
+    ["cq-integrado","cq-autoritario","cq-relacionado","cq-separado"].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.classList.remove("activo");
+    });
+    var cqActivo = cqMap[estilo];
+    if(cqActivo) { var el = document.getElementById(cqActivo); if(el) el.classList.add("activo"); }
+
+    // Descripción
+    var textoFinal = CEAL_TEXTOS[estilo+"|"+efectividad] || descripcion;
+    document.getElementById("ceal-descripcion").textContent = textoFinal;
+
+    // Fortalezas y áreas de desarrollo
+    var CEAL_FORT = {
+      "Integrado":   ["Equilibra resultados y personas eficazmente","Genera compromiso colectivo y trabajo en equipo","Toma decisiones participativas y consensuadas","Se adapta a distintos contextos de liderazgo","Promueve clima de confianza y colaboración"],
+      "Autoritario": ["Orientación clara al cumplimiento de metas","Define roles y expectativas con precisión","Respuesta rápida y eficiente ante urgencias","Estructura y disciplina en la gestión","Control efectivo del desempeño"],
+      "Relacionado": ["Alta empatía y escucha activa","Genera equipos cohesionados y motivados","Crea climas de confianza y bienestar","Fuerte orientación al apoyo de las personas","Fomenta la lealtad y el compromiso"],
+      "Separado":    ["Respeta la autonomía profesional del equipo","No interfiere en equipos altamente capacitados","Objetividad y neutralidad en sus juicios","Favorece el desarrollo de la autogestión","Bajo nivel de conflictos interpersonales"]
+    };
+    var CEAL_DES = {
+      "Integrado":   ["Puede ser percibido como indeciso en crisis","Requiere mayor tiempo para tomar decisiones","Puede generar frustración si se espera dirección clara","Necesita equilibrar participación con velocidad"],
+      "Autoritario": ["Dificultad para delegar y confiar en el equipo","Puede generar desmotivación a largo plazo","Resistencia ante decisiones unilaterales","Necesita desarrollar habilidades relacionales"],
+      "Relacionado": ["Dificultad para establecer límites y exigir resultados","Evita decisiones que generen conflicto","Puede generar ambigüedad de roles en el equipo","Necesita equilibrar bienestar con objetivos"],
+      "Separado":    ["Falta de dirección y orientación al equipo","Puede generar desorganización y falta de rumbo","Bajo involucramiento percibido como indiferencia","Necesita mayor presencia y conexión con el equipo"]
+    };
+    var forts = CEAL_FORT[estilo] || [];
+    var dess  = CEAL_DES[estilo]  || [];
+    document.getElementById("ceal-fortalezas-list").innerHTML = forts.map(function(f){return "<li>"+f+"</li>";}).join("");
+    document.getElementById("ceal-desarrollo-list").innerHTML = dess.map(function(d){return "<li>"+d+"</li>";}).join("");
+
     document.getElementById("modal-ceal").classList.add("activo");
     document.body.style.overflow="hidden";
   } catch(e) { alert("Error cargando datos CEAL: "+e.message); }
@@ -3245,33 +3480,126 @@ function imprimirModalWONDERLIC() { window.print(); }
 
 <!-- ══════════ MODAL INFORME CEAL ══════════ -->
 <div class="modal-overlay" id="modal-ceal" onclick="if(event.target===this)cerrarModalCEAL()">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">🎯 Informe — Test de Estilos de Liderazgo</div>
-        <div class="modal-header-sub" id="ceal-modal-sub">Candidato</div>
+  <div class="modal-box ceal-informe-box">
+
+    <!-- HEADER PROFESIONAL -->
+    <div class="ceal-header-pro">
+      <div class="ceal-header-logo">
+        <div class="ceal-logo-circle">GC</div>
+        <div>
+          <div class="ceal-org-name">Grupo Cygnus</div>
+          <div class="ceal-doc-type">Informe Psicolaboral — Confidencial</div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirInformeCEAL()">⬇ Descargar PDF</button>
+      <div class="ceal-header-actions">
+        <button class="ceal-btn-pdf" onclick="imprimirInformeCEAL()">⬇ Descargar PDF</button>
         <button class="modal-close" onclick="cerrarModalCEAL()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
-      <div id="ceal-estilo-badge" class="ceal-estilo-badge">—</div>
-      <div id="ceal-efect-badge" class="ceal-efect-badge">—</div>
-      <div class="ceal-puntaje-wrap">
-        <div>
-          <div class="ceal-puntaje-num" id="ceal-puntaje">—</div>
-          <div class="ceal-puntaje-lbl">Puntaje total</div>
+
+    <!-- FICHA DEL CANDIDATO -->
+    <div class="ceal-ficha-wrap">
+      <div class="ceal-ficha-titulo-area">
+        <div class="ceal-ficha-tag">TEST DE ESTILOS DE LIDERAZGO</div>
+        <div class="ceal-ficha-subtag">Modelo Reddin 3D — Liderazgo Situacional</div>
+      </div>
+      <div class="ceal-ficha-datos">
+        <div class="ceal-ficha-row"><span class="ceal-ficha-lbl">Candidato</span><span class="ceal-ficha-val" id="ceal-nombre-pro">—</span></div>
+        <div class="ceal-ficha-row"><span class="ceal-ficha-lbl">RUT</span><span class="ceal-ficha-val" id="ceal-rut-pro">—</span></div>
+        <div class="ceal-ficha-row"><span class="ceal-ficha-lbl">Fecha evaluación</span><span class="ceal-ficha-val" id="ceal-fecha">—</span></div>
+        <div class="ceal-ficha-row"><span class="ceal-ficha-lbl">Evaluador</span><span class="ceal-ficha-val">Grupo Cygnus</span></div>
+      </div>
+    </div>
+
+    <div class="ceal-body-pro">
+
+      <!-- RESULTADO PRINCIPAL -->
+      <div class="ceal-resultado-section">
+        <div class="ceal-section-label">RESULTADO</div>
+        <div class="ceal-resultado-grid">
+
+          <!-- Estilo -->
+          <div class="ceal-res-card">
+            <div class="ceal-res-card-lbl">Estilo de liderazgo predominante</div>
+            <div class="ceal-res-estilo-val" id="ceal-estilo-pro">—</div>
+            <div class="ceal-res-estilo-sec" id="ceal-estilo-sec-pro"></div>
+          </div>
+
+          <!-- Efectividad -->
+          <div class="ceal-res-card">
+            <div class="ceal-res-card-lbl">Nivel de efectividad</div>
+            <div class="ceal-res-efect-val" id="ceal-efect-pro">—</div>
+            <table class="ceal-efect-tabla" id="ceal-efect-tabla">
+              <tr>
+                <td class="ceal-et-cell" id="ceal-et-poco">Poco efectivo</td>
+                <td class="ceal-et-cell" id="ceal-et-normal">Normal</td>
+                <td class="ceal-et-cell" id="ceal-et-efect">Efectivo</td>
+                <td class="ceal-et-cell" id="ceal-et-muy">Muy efectivo</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Puntaje eliminado -->
+
         </div>
       </div>
-      <div class="ic-resumen">
-        <div class="ic-resumen-title">📋 Descripción del estilo</div>
-        <div class="ic-resumen-text" id="ceal-descripcion">—</div>
+
+      <!-- CUADRANTE REDDIN -->
+      <div class="ceal-cuadrante-section">
+        <div class="ceal-section-label">MODELO REDDIN — CUADRANTE DE LIDERAZGO</div>
+        <div class="ceal-cuadrante-wrap">
+          <div class="ceal-cuadrante-grid">
+            <div class="ceal-cq ceal-cq-int" id="cq-integrado">
+              <div class="ceal-cq-name">Integrado</div>
+              <div class="ceal-cq-desc">Alta Tarea / Alta Relación</div>
+            </div>
+            <div class="ceal-cq ceal-cq-rel" id="cq-relacionado">
+              <div class="ceal-cq-name">Relacionado</div>
+              <div class="ceal-cq-desc">Baja Tarea / Alta Relación</div>
+            </div>
+            <div class="ceal-cq ceal-cq-aut" id="cq-autoritario">
+              <div class="ceal-cq-name">Autoritario</div>
+              <div class="ceal-cq-desc">Alta Tarea / Baja Relación</div>
+            </div>
+            <div class="ceal-cq ceal-cq-sep" id="cq-separado">
+              <div class="ceal-cq-name">Separado</div>
+              <div class="ceal-cq-desc">Baja Tarea / Baja Relación</div>
+            </div>
+          </div>
+          <div class="ceal-cq-ejes">
+            <div class="ceal-eje-y">↑ Alta Relación</div>
+            <div class="ceal-eje-x">Alta Tarea →</div>
+          </div>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--muted);text-align:right;">
-        Evaluación realizada el <span id="ceal-fecha">—</span>
+
+      <!-- DESCRIPCIÓN DEL ESTILO -->
+      <div class="ceal-desc-section">
+        <div class="ceal-section-label">DESCRIPCIÓN DEL ESTILO</div>
+        <div class="ceal-desc-body" id="ceal-descripcion">—</div>
       </div>
+
+      <!-- IMPLICANCIAS PARA EL ROL -->
+      <div class="ceal-impl-section">
+        <div class="ceal-section-label">IMPLICANCIAS PARA EL ROL</div>
+        <div class="ceal-impl-grid">
+          <div class="ceal-impl-card ceal-impl-fort">
+            <div class="ceal-impl-card-title">✓ Fortalezas del estilo</div>
+            <ul class="ceal-impl-list" id="ceal-fortalezas-list"></ul>
+          </div>
+          <div class="ceal-impl-card ceal-impl-des">
+            <div class="ceal-impl-card-title">↗ Áreas de desarrollo</div>
+            <ul class="ceal-impl-list" id="ceal-desarrollo-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="ceal-footer-pro">
+        <div>Informe generado por PostulaAquí — Grupo Cygnus &nbsp;·&nbsp; Uso exclusivo del evaluador</div>
+        <div id="ceal-modal-sub" style="display:none"></div>
+      </div>
+
     </div>
   </div>
 </div>
