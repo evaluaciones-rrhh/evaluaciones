@@ -216,7 +216,24 @@ const PUNTAJES = [
 ];
 
 // Estilo predominante por columna: A=Autoritario, B=Integrado, C=Relacionado, D=Separado
+// IMPORTANTE: las letras A/B/C/D NO representan el mismo estilo en todas las preguntas.
+// Este mapa define el estilo REAL de cada alternativa en cada situación.
 const ESTILOS = ['Autoritario','Integrado','Relacionado','Separado'];
+
+const MAPA_ESTILOS = [
+  ['Autoritario','Separado',   'Integrado',  'Separado'   ], // P1
+  ['Integrado',  'Separado',   'Relacionado','Autoritario'], // P2
+  ['Integrado',  'Separado',   'Autoritario','Relacionado'], // P3
+  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P4
+  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P5
+  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P6
+  ['Autoritario','Integrado',  'Relacionado','Separado'   ], // P7
+  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P8
+  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P9
+  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P10
+  ['Autoritario','Integrado',  'Relacionado','Separado'   ], // P11
+  ['Integrado',  'Separado',   'Autoritario','Relacionado'], // P12
+];
 
 const PREGUNTAS = [
   {
@@ -433,17 +450,23 @@ function enviar(){
   document.getElementById('err-incompleto').style.display='none';
 
   // Calcular puntaje total, conteo y puntaje acumulado por estilo
+  // Usando MAPA_ESTILOS para asignar correctamente el estilo real de cada alternativa
   let puntajeTotal = 0;
-  let conteoEstilo  = [0, 0, 0, 0]; // frecuencia A,B,C,D
-  let puntajeEstilo = [0, 0, 0, 0]; // puntaje acumulado A,B,C,D
+  let conteoEstilo  = [0, 0, 0, 0]; // frecuencia Aut,Int,Rel,Sep
+  let puntajeEstilo = [0, 0, 0, 0]; // puntaje acumulado Aut,Int,Rel,Sep
 
   PREGUNTAS.forEach((_,i) => {
     let r = document.querySelector(`input[name="p${i}"]:checked`);
     let altIdx = parseInt(r.value);
     let pts = PUNTAJES[i][altIdx];
     puntajeTotal += pts;
-    conteoEstilo[altIdx]++;
-    puntajeEstilo[altIdx] += pts;
+    // Usar el mapa correcto para identificar el estilo real de la alternativa elegida
+    let estiloReal = MAPA_ESTILOS[i][altIdx];
+    let estiloRealIdx = ESTILOS.indexOf(estiloReal);
+    if (estiloRealIdx >= 0) {
+      conteoEstilo[estiloRealIdx]++;
+      puntajeEstilo[estiloRealIdx] += pts;
+    }
   });
 
   // Estilo predominante — desempate por puntaje acumulado del estilo
