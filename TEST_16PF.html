@@ -458,24 +458,14 @@ function calcular(resp){
   }
 
   // Ítems 171-185: escala B (razonamiento) + escalas normales que comparten ítems
+  // Ítems 171-185: escala B únicamente (razonamiento)
   for(var i=170;i<185;i++){
     var num=i+1;
     var r=parseInt(resp[i]);
     if(!r||r<1||r>3) continue;
     var item=CLAVE_REAL[num];
-    if(!item) continue;
-    // Escala B: respuesta exacta = 1 punto
-    if(item.B && r===item.B.val) pd['B']=(pd['B']||0)+1;
-    // Escalas normales que comparten este ítem
-    Object.keys(item).forEach(function(escala){
-      if(escala==='B') return;
-      var t=item[escala];
-      var pts=0;
-      if(t.tipo==='d')      pts = r-1;
-      else if(t.tipo==='i') pts = 3-r;
-      else if(t.tipo==='m') pts = (r===2)?1:0;
-      pd[escala]=(pd[escala]||0)+pts;
-    });
+    if(!item||!item.B) continue;
+    if(r===item.B.val) pd['B']=(pd['B']||0)+1;
   }
 
   // Decatipos según género
