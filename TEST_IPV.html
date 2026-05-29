@@ -842,7 +842,7 @@ const INTERP = {
   VI:{nombre:"Dominio",alto:"Alta capacidad de influencia y ascendencia natural. Persuade con convicción y lidera interacciones.",medio:"Capacidad de influencia dentro de lo esperado. Puede generar cierta ascendencia sobre el cliente.",bajo:"Menor tendencia al dominio interpersonal. Puede mostrarse deferente en situaciones que requieren conducción firme."},
   VII:{nombre:"Seguridad",alto:"Alta confianza en sí mismo. Enfrenta situaciones novedosas o de riesgo sin inhibición.",medio:"Nivel adecuado. Se desenvuelve bien en la mayoría de situaciones sin inseguridad marcada.",bajo:"Menor confianza personal. Puede dudar en situaciones de riesgo, afectando la proactividad."},
   VIII:{nombre:"Actividad",alto:"Persona dinámica y enérgica. Le resulta difícil la pasividad; busca acción constante.",medio:"Nivel adecuado. Mantiene un ritmo de trabajo estable sin tendencia a la pasividad.",bajo:"Menor orientación a la actividad dinámica. Puede limitar el desempeño en roles de alta actividad comercial."},
-  IX:{nombre:"Sociabilidad",alto:"Extravertida, con facilidad para crear vínculos y disfrutar del contacto social. Base esencial para roles comerciales.",medio:"Sociabilidad adecuada. Establece contactos sin dificultad y mantiene relaciones funcionales.",bajo:"Menor orientación al contacto social. Puede preferir trabajar de forma más independiente."}
+  IX:{nombre:"Sociabilidad",alto:"Persona extrovertida, con facilidad para crear vínculos y disfrutar del contacto social. Base esencial para roles comerciales.",medio:"Sociabilidad adecuada. Establece contactos sin dificultad y mantiene relaciones funcionales.",bajo:"Menor orientación al contacto social. Puede preferir trabajar de forma más independiente."}
 };
 
 // ════ ESTADO ════
@@ -1086,9 +1086,6 @@ function enviarSheets(PD,PT,dgvN,perfilRA,fort,des,interp){
     fecha: new Date().toLocaleDateString('es-CL'),
     nombre:  cand.nombre,
     rut:     cand.rut||'',
-    edad:    cand.edad||'',
-    sexo:    cand.sexo==='M'?'Masculino':cand.sexo==='F'?'Femenino':'',
-    cargo:   cand.cargo||'',
     pt_dgv:  PT.DGV,
     nivel_dgv: dgvN,
     perfil_ra: perfilRA,
