@@ -3105,18 +3105,31 @@ async function abrirInforme16PF(test, rut, nombre) {
       ? "<div class='pf-integridad-leve'><strong>⚠ Alerta leve — " + foco + " cambio(s) de ventana detectado(s)</strong><div style='font-size:12px;margin-top:4px;'>Puede ser accidental. Se recomienda considerar este antecedente al interpretar el resultado.</div></div>"
       : "<div class='pf-integridad-riesgo'><strong>⚠ ALERTA DE INTEGRIDAD — " + foco + " cambios de ventana detectados</strong><div style='font-size:12px;margin-top:4px;'>Existe riesgo de que el candidato haya consultado recursos externos. Se recomienda evaluar la validez del resultado.</div></div>";
 
-    // Fortalezas — adaptar género, filtrar duplicados con alertas
+    // Fortalezas — usar SOLO cálculo en tiempo real desde los decatipos (misma
+    // lógica que las alertas). NO se inyecta el texto crudo de Sheets (fila[7]),
+    // que contiene descripciones como "N escalas en zona de alejamiento: A(2)..."
+    // que no son fortalezas y producían incoherencias.
     var alertasKeys = alertas.map(function(a){ return a.key; });
-    var fortsTexto = (fila[7]||"").split("|").map(function(f){return f.trim();}).filter(function(f){return f && f!=="No se identifican fortalezas destacadas";});
-    var todasForts = fortsTexto.map(function(f){ return pf16AdaptarGenero(f, genero); });
-    forts.forEach(function(f){
-      var fa = pf16AdaptarGenero(f, genero);
-      if (!todasForts.some(function(t){return t.substring(0,20)===fa.substring(0,20);})) todasForts.push(fa);
-    });
-    // Filtrar fortalezas que contradigan alertas activas (ej: G_alto no debe ser fortaleza si ya es alerta)
+    var todasForts = [];
+    if (deVals.length >= 16) {
+      forts.forEach(function(f){
+        var fa = pf16AdaptarGenero(f, genero);
+        if (!todasForts.some(function(t){return t.substring(0,20)===fa.substring(0,20);})) todasForts.push(fa);
+      });
+    } else {
+      // Fallback (sin decatipos): recién ahí se usan los textos de Sheets, filtrando los descriptivos
+      var fortsTexto = (fila[7]||"").split("|").map(function(f){return f.trim();})
+        .filter(function(f){
+          if (!f || f==="No se identifican fortalezas destacadas") return false;
+          // descartar textos descriptivos de escalas, no son fortalezas
+          if (/zona de alejamiento|escala\(s\)|decatipo/i.test(f)) return false;
+          return true;
+        });
+      todasForts = fortsTexto.map(function(f){ return pf16AdaptarGenero(f, genero); });
+    }
+    // Coherencia: una escala que ya es ALERTA no puede listarse como fortaleza
     todasForts = todasForts.filter(function(f){
       var fLow = f.toLowerCase();
-      // Si G_alto está en alertas, no mostrar "respeto por normas" como fortaleza
       if (alertasKeys.indexOf('G_alto') !== -1 && fLow.indexOf('normas') !== -1 && fLow.indexOf('responsable') !== -1) return false;
       return true;
     });
@@ -3139,8 +3152,14 @@ async function abrirInforme16PF(test, rut, nombre) {
         if (desc) todasAlertas.push({texto: desc, escala: a.escala});
       });
     } else {
-      // Fallback: usar textos de Sheets si no hay decatipos
-      var riesgosTexto = (fila[8]||"").split("|").map(function(r){return r.trim();}).filter(function(r){return r && r!=="No se identifican áreas de atención relevantes";});
+      // Fallback: textos de Sheets si no hay decatipos. Se filtran los que son
+      // claramente positivos (mal etiquetados en datos antiguos) o descriptivos.
+      var riesgosTexto = (fila[8]||"").split("|").map(function(r){return r.trim();})
+        .filter(function(r){
+          if (!r || r==="No se identifican áreas de atención relevantes") return false;
+          if (/alta capacidad|aprende r[áa]pido|fortaleza|zona de alejamiento|escala\(s\)/i.test(r)) return false;
+          return true;
+        });
       todasAlertas = riesgosTexto.map(function(r){return {texto: pf16AdaptarGenero(r, genero), escala:null};});
     }
     document.getElementById("pf-alertas").innerHTML = todasAlertas.length
