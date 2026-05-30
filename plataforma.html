@@ -482,6 +482,59 @@ tbody tr:hover td { background: #fdf9f6; }
 .pf-radar-wrap { max-width:300px;margin:0 auto; }
 .pf-nota { font-size:11px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:8px;border-top:1px solid var(--border); }
 
+/* ══════════════════════════════════════════
+   16PF INFORME PROFESIONAL — Key Clouding style
+   ══════════════════════════════════════════ */
+.pfk-box {
+  max-width:680px !important; padding:0 !important; border-radius:12px !important;
+  display:flex !important; flex-direction:column !important; max-height:90vh !important; overflow:hidden !important;
+}
+.pfk-header { flex-shrink:0; background:#1a3a5c; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+.pfk-header-logo { display:flex; align-items:center; gap:12px; }
+.pfk-logo-circle { width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.pfk-org-name { color:#fff;font-weight:700;font-size:14px; }
+.pfk-doc-type { color:rgba(255,255,255,.6);font-size:10px;margin-top:2px;letter-spacing:.05em; }
+.pfk-btn-pdf { background:#c4432a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s; }
+.pfk-btn-pdf:hover { opacity:.85; }
+.pfk-close { background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;padding:4px 8px; }
+.pfk-close:hover { opacity:1; }
+.pfk-ficha { flex-shrink:0; background:#f7f5f0; border-bottom:2px solid #e0dbd0; padding:16px 24px; display:flex; gap:28px; align-items:flex-start; }
+.pfk-ficha-tag { font-size:12px;font-weight:800;letter-spacing:.08em;color:#1a3a5c;text-transform:uppercase; }
+.pfk-ficha-subtag { font-size:10px;color:#888;margin-top:3px; }
+.pfk-ficha-datos { flex:1.2; }
+.pfk-ficha-row { display:flex;gap:10px;margin-bottom:3px;font-size:11px; }
+.pfk-ficha-lbl { color:#888;min-width:90px;font-weight:500; }
+.pfk-ficha-val { color:#1a1917;font-weight:600; }
+.pfk-body { padding:22px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; flex:1 1 auto; min-height:0; }
+.pfk-label { font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid #1a3a5c;color:#1a3a5c;padding-bottom:6px;margin-bottom:12px; }
+.pfk-label-verde { border-bottom-color:#1a6a4a;color:#1a6a4a; }
+.pfk-label-roja  { border-bottom-color:#c4432a;color:#c4432a; }
+.pfk-dims-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+.pfk-card { background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:14px 16px; }
+.pfk-card-lbl { font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px; }
+.pfk-bars { display:flex;flex-direction:column;gap:9px;justify-content:center;height:100%; }
+.pfk-bar-row .pfk-bar-top { display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px; }
+.pfk-bar-name { color:#444; }
+.pfk-bar-val { font-weight:700; }
+.pfk-bar-track { height:6px;background:#eee;border-radius:3px;overflow:hidden; }
+.pfk-bar-fill { height:6px;border-radius:3px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.pfk-cols { display:grid;grid-template-columns:1fr 1fr;gap:16px; }
+.pfk-item-fort { background:#f4faf6;border-left:3px solid #1a6a4a;padding:9px 12px;border-radius:0 6px 6px 0;font-size:11px;color:#2a4a3a;line-height:1.5;margin-bottom:7px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.pfk-item-alerta { background:#fdf5ef;border-left:3px solid #c4432a;padding:9px 12px;border-radius:0 6px 6px 0;font-size:11px;color:#7a3a20;line-height:1.5;margin-bottom:7px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.pfk-item-vacio { background:#f4faf6;border-radius:6px;padding:9px 12px;font-size:11px;color:#2a4a3a; }
+.pfk-interp { background:#fafafa;border:1px solid #ececec;border-radius:8px;padding:14px 16px;font-size:12px;line-height:1.8;color:#444; }
+.pfk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:8px; }
+.pfk-radar-wrap { max-width:240px;margin:0 auto; }
+
+@media print {
+  .pfk-header-actions, .pfk-btn-pdf, .pfk-close, .nav-sidebar, .topbar { display:none !important; }
+  .pfk-header, .pfk-logo-circle, .pfk-ficha, .pfk-card, .pfk-item-fort, .pfk-item-alerta, .pfk-bar-fill {
+    -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important;
+  }
+  .pfk-box { max-height:none !important; overflow:visible !important; }
+  .pfk-body { overflow:visible !important; }
+}
+
 /* ══════════ MODAL INFORME IPV ══════════ */
 .ipv-hero { background:var(--azul);color:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px; }
 .ipv-hero-nombre { font-size:20px;font-weight:700;margin-bottom:4px; }
@@ -3088,6 +3141,7 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
 }
 
 
+async function abrirInforme16PF(test, rut, nombre) {
   var rutDec = decodeURIComponent(rut || "");
   var nomDec = decodeURIComponent(nombre || "");
   try {
@@ -3112,8 +3166,11 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
     var foco    = parseInt(fila[10]) || 0;  // cambios_foco
     var genero  = String(fila[3] || "");    // sexo/género
 
-    // Header
-    document.getElementById("pf-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  " + fila[2] : "") + (fila[3] ? "  ·  " + fila[3] : "");
+    // Ficha candidato (Key Clouding)
+    document.getElementById("pf-ficha-nombre").textContent = fila[1] || "—";
+    document.getElementById("pf-ficha-rut").textContent = fila[2] || "—";
+    var subEl = document.getElementById("pf-modal-sub");
+    if (subEl) subEl.textContent = (fila[1]||"—") + (fila[2] ? "  ·  " + fila[2] : "") + (fila[3] ? "  ·  " + fila[3] : "");
 
     // Semáforo
     // Semáforo calibrado: con 16 escalas se esperan 5-8 alertas por candidato
@@ -3176,7 +3233,7 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
     var secForts = document.getElementById("pf-sec-forts");
     if (todasForts.length) {
       document.getElementById("pf-forts").innerHTML = todasForts.slice(0,4).map(function(f){
-        return "<div class='pf-card-fort'><strong>✓ Fortaleza</strong>" + f + "</div>";
+        return "<div class='pfk-item-fort'>" + f + "</div>";
       }).join("");
       secForts.style.display = "block";
     } else { secForts.style.display = "none"; }
@@ -3204,10 +3261,10 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
     }
     document.getElementById("pf-alertas").innerHTML = todasAlertas.length
       ? todasAlertas.slice(0,8).map(function(a){
-          var prefix = a.escala ? "<strong>" + a.escala + ":</strong> " : "<strong>⚠</strong> ";
-          return "<div class='pf-card-alerta'>" + prefix + a.texto + "</div>";
+          var prefix = a.escala ? "<strong>" + a.escala + ":</strong> " : "";
+          return "<div class='pfk-item-alerta'>" + prefix + a.texto + "</div>";
         }).join("")
-      : "<div class='pf-sin-alertas'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
+      : "<div class='pfk-item-vacio'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
     // Interpretación — usar el texto de Sheets solo si es un párrafo completo (largo).
     // Si falta o es solo un fragmento corto (dato viejo), se genera desde las dimensiones.
@@ -3240,6 +3297,23 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
 
     document.getElementById("modal-16pf").classList.add("activo");
     document.body.style.overflow = "hidden";
+
+    // Barras de dimensiones (Key Clouding) — imprimen bien en PDF
+    var DIM_NOMBRES = ["Extraversión","Ansiedad","Dureza","Independencia","Autocontrol"];
+    function colorDim(v){ return v<=3 ? "#c0392b" : v>=8 ? "#1a3a5c" : "#1a6a4a"; }
+    var barsEl = document.getElementById("pf-dims-bars");
+    if (barsEl) {
+      barsEl.innerHTML = DIM_NOMBRES.map(function(nom, i){
+        var v = dimVals[i] || 5;
+        var pct = Math.round(v/10*100);
+        var col = colorDim(v);
+        return "<div class='pfk-bar-row'>" +
+          "<div class='pfk-bar-top'><span class='pfk-bar-name'>" + nom + "</span>" +
+          "<span class='pfk-bar-val' style='color:" + col + "'>" + v + "</span></div>" +
+          "<div class='pfk-bar-track'><div class='pfk-bar-fill' style='width:" + pct + "%;background:" + col + ";'></div></div>" +
+          "</div>";
+      }).join("");
+    }
   } catch(e) {
     alert("Error cargando datos 16PF: " + e.message);
   }
@@ -3893,18 +3967,37 @@ function imprimirModalWONDERLIC() { window.print(); }
 </div>
 <!-- ══════════ MODAL INFORME 16PF ══════════ -->
 <div class="modal-overlay" id="modal-16pf" onclick="if(event.target===this)cerrarModal16PF()">
-  <div class="modal-box" style="max-width:760px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">🧠 Informe — Evaluación de Personalidad 16PF-5</div>
-        <div class="modal-header-sub" id="pf-modal-sub">Candidato</div>
+  <div class="modal-box pfk-box">
+
+    <div class="pfk-header">
+      <div class="pfk-header-logo">
+        <div class="pfk-logo-circle">GC</div>
+        <div>
+          <div class="pfk-org-name">Grupo Cygnus</div>
+          <div class="pfk-doc-type">INFORME PSICOLABORAL</div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirModal16PF()">⬇ Descargar PDF</button>
-        <button class="modal-close" onclick="cerrarModal16PF()">✕</button>
+      <div class="pfk-header-actions" style="display:flex;gap:8px;align-items:center;">
+        <button class="pfk-btn-pdf" onclick="imprimirModal16PF()">⬇ Descargar PDF</button>
+        <button class="pfk-close" onclick="cerrarModal16PF()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
+
+    <div class="pfk-ficha">
+      <div style="flex:1;">
+        <div class="pfk-ficha-tag">Evaluación de Personalidad</div>
+        <div class="pfk-ficha-subtag">Análisis de factores de personalidad</div>
+      </div>
+      <div class="pfk-ficha-datos">
+        <div class="pfk-ficha-row"><span class="pfk-ficha-lbl">Candidato</span><span class="pfk-ficha-val" id="pf-ficha-nombre">—</span></div>
+        <div class="pfk-ficha-row"><span class="pfk-ficha-lbl">RUT</span><span class="pfk-ficha-val" id="pf-ficha-rut">—</span></div>
+        <div class="pfk-ficha-row"><span class="pfk-ficha-lbl">Fecha evaluación</span><span class="pfk-ficha-val" id="pf-fecha">—</span></div>
+        <div class="pfk-ficha-row"><span class="pfk-ficha-lbl">Evaluador</span><span class="pfk-ficha-val">Grupo Cygnus</span></div>
+      </div>
+      <div id="pf-modal-sub" style="display:none;"></div>
+    </div>
+
+    <div class="pfk-body">
 
       <!-- Semáforo -->
       <div id="pf-semaforo"></div>
@@ -3912,37 +4005,40 @@ function imprimirModalWONDERLIC() { window.print(); }
       <!-- Integridad -->
       <div id="pf-integridad"></div>
 
-      <!-- Fortalezas -->
-      <div class="pf-seccion" id="pf-sec-forts" style="display:none;">
-        <div class="pf-seccion-title">✅ Fortalezas identificadas</div>
-        <div class="pf-cards-grid" id="pf-forts"></div>
+      <!-- Dimensiones globales: radar + barras -->
+      <div>
+        <div class="pfk-label">Dimensiones globales</div>
+        <div class="pfk-dims-grid">
+          <div class="pfk-card">
+            <div class="pfk-card-lbl">Radar de perfil</div>
+            <div class="pfk-radar-wrap"><canvas id="pf-chart-radar" height="240"></canvas></div>
+          </div>
+          <div class="pfk-card">
+            <div class="pfk-card-lbl">Puntajes por dimensión</div>
+            <div class="pfk-bars" id="pf-dims-bars"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Alertas -->
-      <div class="pf-seccion" id="pf-sec-alertas">
-        <div class="pf-seccion-title">⚠️ Áreas de atención</div>
-        <div id="pf-alertas"></div>
-      </div>
-
-      <!-- Radar dimensiones globales -->
-      <div class="pf-seccion">
-        <div class="pf-seccion-title">📊 Perfil de dimensiones globales</div>
-        <div class="pf-radar-wrap">
-          <canvas id="pf-chart-radar" height="280"></canvas>
+      <!-- Fortalezas + Áreas de atención -->
+      <div class="pfk-cols">
+        <div id="pf-sec-forts" style="display:none;">
+          <div class="pfk-label pfk-label-verde">Fortalezas</div>
+          <div id="pf-forts"></div>
+        </div>
+        <div id="pf-sec-alertas">
+          <div class="pfk-label pfk-label-roja">Áreas de atención</div>
+          <div id="pf-alertas"></div>
         </div>
       </div>
 
       <!-- Interpretación -->
-      <div class="pf-seccion">
-        <div class="pf-seccion-title">📋 Interpretación del perfil</div>
-        <div class="pf-interp" id="pf-interp">—</div>
-        <div class="pf-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
+      <div>
+        <div class="pfk-label">Interpretación del perfil</div>
+        <div class="pfk-interp" id="pf-interp">—</div>
+        <div class="pfk-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
       </div>
 
-      <!-- Fecha -->
-      <div style="font-size:11px;color:var(--muted);text-align:right;margin-top:8px;">
-        Evaluación realizada el <span id="pf-fecha">—</span>
-      </div>
     </div>
   </div>
 </div>
