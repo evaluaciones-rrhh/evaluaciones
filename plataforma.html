@@ -3047,7 +3047,47 @@ function pf16AdaptarGenero(texto, genero) {
   return texto;
 }
 
-async function abrirInforme16PF(test, rut, nombre) {
+// Genera un párrafo interpretativo del perfil a partir de las 5 dimensiones globales
+// (Extraversión, Ansiedad, Dureza, Independencia, Autocontrol) en escala 1-10.
+// Se usa cuando el texto guardado en Sheets falta o es solo un fragmento corto.
+function pf16GenerarInterpretacion(dimVals, nombre) {
+  var n = (nombre || "El candidato").split(" ")[0];
+  var DIMS = [
+    { nom:"extraversión",
+      alto:"se orienta hacia las personas y los contextos sociales, mostrando facilidad para relacionarse",
+      bajo:"tiende a la introversión y al trabajo más reservado o individual",
+      medio:"presenta un nivel equilibrado de sociabilidad" },
+    { nom:"ansiedad",
+      alto:"puede experimentar tensión o preocupación con cierta frecuencia, lo que conviene considerar en contextos de presión",
+      bajo:"muestra estabilidad emocional y buen manejo de la presión",
+      medio:"mantiene un nivel de ansiedad dentro de lo esperable" },
+    { nom:"dureza",
+      alto:"aborda las situaciones de manera práctica, objetiva y orientada a los hechos",
+      bajo:"se inclina por la sensibilidad, la empatía y la consideración de las personas",
+      medio:"combina criterio práctico con sensibilidad interpersonal" },
+    { nom:"independencia",
+      alto:"tiende a la autonomía, la iniciativa propia y la firmeza en sus posturas",
+      bajo:"valora el acuerdo, la colaboración y el apoyo del grupo",
+      medio:"equilibra la iniciativa propia con la apertura a los demás" },
+    { nom:"autocontrol",
+      alto:"muestra disciplina, organización y apego a normas y objetivos",
+      bajo:"se maneja de forma flexible y espontánea, con menor estructura",
+      medio:"presenta un autocontrol adecuado y flexible" }
+  ];
+  var frases = [];
+  dimVals.slice(0,5).forEach(function(v, i){
+    var d = DIMS[i];
+    if (!d) return;
+    var t = v <= 3 ? d.bajo : v >= 8 ? d.alto : d.medio;
+    frases.push(t);
+  });
+  if (!frases.length) return "—";
+  var cuerpo = frases.slice(0,2).join("; ") + ". Asimismo, " + frases.slice(2).join("; ") + ".";
+  return n + " " + cuerpo.charAt(0).toLowerCase() + cuerpo.slice(1) +
+    " En conjunto, el perfil ofrece una visión orientativa que se recomienda complementar con la entrevista y los demás antecedentes del proceso.";
+}
+
+
   var rutDec = decodeURIComponent(rut || "");
   var nomDec = decodeURIComponent(nombre || "");
   try {
@@ -3169,8 +3209,13 @@ async function abrirInforme16PF(test, rut, nombre) {
         }).join("")
       : "<div class='pf-sin-alertas'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
-    // Interpretación — adaptar género
-    document.getElementById("pf-interp").textContent = pf16AdaptarGenero(fila[9] || "—", genero);
+    // Interpretación — usar el texto de Sheets solo si es un párrafo completo (largo).
+    // Si falta o es solo un fragmento corto (dato viejo), se genera desde las dimensiones.
+    var interpSheets = String(fila[9] || "").trim();
+    var interpFinal = (interpSheets.length >= 80)
+      ? pf16AdaptarGenero(interpSheets, genero)
+      : pf16AdaptarGenero(pf16GenerarInterpretacion(dimVals, fila[1]), genero);
+    document.getElementById("pf-interp").textContent = interpFinal;
     document.getElementById("pf-fecha").textContent = fila[0] || "—";
 
     // Radar Chart.js
