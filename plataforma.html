@@ -3113,7 +3113,7 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
     { nom:"ansiedad",
       alto:"puede experimentar tensión o preocupación con cierta frecuencia, lo que conviene considerar en contextos de presión",
       bajo:"muestra estabilidad emocional y buen manejo de la presión",
-      medio:"mantiene un nivel de ansiedad dentro de lo esperable" },
+      medio:"presenta un manejo emocional dentro de lo esperable" },
     { nom:"dureza",
       alto:"aborda las situaciones de manera práctica, objetiva y orientada a los hechos",
       bajo:"se inclina por la sensibilidad, la empatía y la consideración de las personas",
@@ -3141,6 +3141,18 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
 }
 
 
+// Áreas de atención derivadas de las DIMENSIONES GLOBALES, para que coincidan
+// con la interpretación. Orden de dimVals: [Extraversión, Ansiedad, Dureza, Independencia, Autocontrol]
+// Criterio acordado: Ansiedad alta (≥8), Introversión marcada (Extrav ≤3), Autocontrol bajo (≤3).
+function pf16GetAlertasDim(dimVals) {
+  var out = [];
+  var extrav = dimVals[0], ansiedad = dimVals[1], autocontrol = dimVals[4];
+  if (ansiedad >= 8) out.push({ dim:"Ansiedad", texto:"Nivel de ansiedad elevado. Puede tener dificultades para sobrellevar la presión, el estrés o los conflictos. Conviene explorar estrategias de afrontamiento en entrevista." });
+  if (extrav <= 3) out.push({ dim:"Extraversión", texto:"Introversión marcada. Tiende al trabajo reservado e individual; puede presentar dificultades en roles con alto contacto interpersonal o exposición social." });
+  if (autocontrol <= 3) out.push({ dim:"Autocontrol", texto:"Bajo autocontrol. Tendencia a la espontaneidad y menor estructura; puede descuidar la organización, las normas o el seguimiento de procedimientos." });
+  return out;
+}
+
 async function abrirInforme16PF(test, rut, nombre) {
   var rutDec = decodeURIComponent(rut || "");
   var nomDec = decodeURIComponent(nombre || "");
@@ -3163,6 +3175,7 @@ async function abrirInforme16PF(test, rut, nombre) {
 
     var alertas = pf16GetAlertas(deVals);
     var forts   = pf16GetFortalezas(deVals);
+    var alertasDim = pf16GetAlertasDim(dimVals);   // áreas derivadas de dimensiones globales
     var foco    = parseInt(fila[10]) || 0;  // cambios_foco
     var genero  = String(fila[3] || "");    // sexo/género
 
@@ -3175,7 +3188,8 @@ async function abrirInforme16PF(test, rut, nombre) {
     // Semáforo
     // Semáforo calibrado: con 16 escalas se esperan 5-8 alertas por candidato
     // Verde: ≤2 (bajo la media), Amarillo: 3-5 (normal), Rojo: ≥6 (sobre la media)
-    var n = alertas.length;
+    // Cuenta áreas de escalas + áreas de dimensiones globales (coherencia total)
+    var n = alertas.length + alertasDim.length;
     var sem = n <= 2
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
           titulo: n === 0 ? 'Sin áreas de atención' : 'Perfil favorable',
@@ -3259,6 +3273,10 @@ async function abrirInforme16PF(test, rut, nombre) {
         });
       todasAlertas = riesgosTexto.map(function(r){return {texto: pf16AdaptarGenero(r, genero), escala:null};});
     }
+    // Agregar las áreas derivadas de dimensiones globales (coinciden con la interpretación)
+    alertasDim.forEach(function(a){
+      todasAlertas.push({ texto: pf16AdaptarGenero(a.texto, genero), escala: a.dim });
+    });
     document.getElementById("pf-alertas").innerHTML = todasAlertas.length
       ? todasAlertas.slice(0,8).map(function(a){
           var prefix = a.escala ? "<strong>" + a.escala + ":</strong> " : "";
