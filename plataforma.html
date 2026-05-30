@@ -3733,11 +3733,7 @@ async function abrirInformeIPV(test, rut, nombre) {
         }).join('')+'</div>'
       : '<div class="ipvk-sin-alertas">✓ No se identifican áreas de atención relevantes en este perfil.</div>';
 
-    // Síntesis
-    var lineas = interp.split('|').map(function(l){return l.trim();}).filter(Boolean);
-    document.getElementById("ipv-sintesis-texto").textContent = lineas.slice(0,4).join(' — ') || interp;
-
-    // Resumen ejecutivo
+    // Resumen ejecutivo (única sección de resultado)
     document.getElementById("ipv-resumen-texto").textContent =
       ipvGenerarResumen(fila[1]||'El candidato', dgvN, perfilRA, escPT, fortalezas, areas);
 
@@ -4361,15 +4357,9 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div id="ipv-alertas"></div>
       </div>
 
-      <!-- Síntesis -->
-      <div>
-        <div class="ipvk-label">Síntesis interpretativa</div>
-        <div class="ipvk-interp" id="ipv-sintesis-texto">—</div>
-      </div>
-
       <!-- Resumen ejecutivo -->
       <div>
-        <div class="ipvk-label">Resumen ejecutivo</div>
+        <div class="ipvk-label">Resultado</div>
         <div class="ipvk-resumen"><div class="ipvk-resumen-texto" id="ipv-resumen-texto">—</div></div>
       </div>
 
