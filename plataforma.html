@@ -588,6 +588,60 @@ tbody tr:hover td { background: #fdf9f6; }
 .ipv-seccion { margin-bottom:16px; }
 .ipv-seccion-title { font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border); }
 
+/* ══════════════════════════════════════════
+   WONDERLIC INFORME — Key Clouding style
+   ══════════════════════════════════════════ */
+.wlk-box { max-width:680px !important; padding:0 !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; max-height:90vh !important; overflow:hidden !important; }
+.wlk-header { flex-shrink:0; background:#1a3a5c; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+.wlk-header-logo { display:flex; align-items:center; gap:12px; }
+.wlk-logo-circle { width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.wlk-org-name { color:#fff;font-weight:700;font-size:14px; }
+.wlk-doc-type { color:rgba(255,255,255,.6);font-size:10px;margin-top:2px;letter-spacing:.05em; }
+.wlk-btn-pdf { background:#c4432a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer; }
+.wlk-btn-pdf:hover { opacity:.85; }
+.wlk-close { background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;padding:4px 8px; }
+.wlk-close:hover { opacity:1; }
+.wlk-ficha { flex-shrink:0; background:#f7f5f0; border-bottom:2px solid #e0dbd0; padding:16px 24px; display:flex; gap:28px; align-items:flex-start; }
+.wlk-ficha-tag { font-size:12px;font-weight:800;letter-spacing:.08em;color:#1a3a5c;text-transform:uppercase; }
+.wlk-ficha-subtag { font-size:10px;color:#888;margin-top:3px; }
+.wlk-ficha-datos { flex:1.2; }
+.wlk-ficha-row { display:flex;gap:10px;margin-bottom:3px;font-size:11px; }
+.wlk-ficha-lbl { color:#888;min-width:90px;font-weight:500; }
+.wlk-ficha-val { color:#1a1917;font-weight:600; }
+.wlk-body { padding:22px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; flex:1 1 auto; min-height:0; }
+.wlk-label { font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid #1a3a5c;color:#1a3a5c;padding-bottom:6px;margin-bottom:12px; }
+.wlk-hero { display:flex;align-items:center;gap:24px;background:#1a3a5c;border-radius:10px;padding:22px 26px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.wlk-gauge { width:96px;height:96px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.wlk-gauge-inner { width:78px;height:78px;border-radius:50%;background:#1a3a5c;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.wlk-gauge-val { color:#fff;font-size:28px;font-weight:800;line-height:1; }
+.wlk-gauge-lbl { color:rgba(255,255,255,.6);font-size:8px;letter-spacing:.1em;text-transform:uppercase;margin-top:3px; }
+.wlk-hero-info { flex:1; }
+.wlk-hero-nivel { color:#fff;font-size:20px;font-weight:800;margin-bottom:4px; }
+.wlk-hero-desc { color:rgba(255,255,255,.7);font-size:12px;line-height:1.5; }
+.wlk-scores { display:grid;grid-template-columns:repeat(3,1fr);gap:12px; }
+.wlk-score-card { background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:14px;text-align:center; }
+.wlk-score-lbl { font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px; }
+.wlk-score-val { font-size:26px;font-weight:800;color:#1a3a5c;line-height:1; }
+.wlk-score-sub { font-size:9px;color:#aaa;margin-top:5px; }
+.wlk-rec { border-radius:8px;padding:14px 16px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.wlk-rec-ok { background:#eaf6f0;border:1px solid #b8e0cc; }
+.wlk-rec-cautela { background:#fdf6e8;border:1px solid #f0d8a8; }
+.wlk-rec-titulo { font-weight:700;font-size:14px;margin-bottom:4px; }
+.wlk-rec-ok .wlk-rec-titulo { color:#1a6a4a; }
+.wlk-rec-cautela .wlk-rec-titulo { color:#9a6a18; }
+.wlk-rec-texto { color:#555;font-size:12px;line-height:1.6; }
+.wlk-interp { background:#fafafa;border:1px solid #ececec;border-radius:8px;padding:14px 16px;font-size:12px;line-height:1.8;color:#444; }
+.wlk-resumen { background:#f7f5f0;border-radius:8px;padding:14px 16px; }
+.wlk-resumen-tit { font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1a3a5c;margin-bottom:6px; }
+.wlk-resumen-texto { font-size:12px;line-height:1.7;color:#444; }
+.wlk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
+@media print {
+  .wlk-btn-pdf, .wlk-close, .nav-sidebar, .topbar { display:none !important; }
+  .wlk-header, .wlk-logo-circle, .wlk-ficha, .wlk-hero, .wlk-gauge, .wlk-score-card, .wlk-rec { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  .wlk-box { max-height:none !important; overflow:visible !important; }
+  .wlk-body { overflow:visible !important; }
+}
+
 /* ══════════ MODAL INFORME WONDERLIC ══════════ */
 .wl-banner{display:flex;align-items:center;gap:16px;background:var(--azul);color:#fff;border-radius:10px;padding:16px 20px;margin-bottom:14px;}
 .wl-circle{width:70px;height:70px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;}
@@ -3582,6 +3636,15 @@ function wlGetNivelBadge(nivel){
   return "wl-nb-bajo";
 }
 
+// Color del gauge de percentil según nivel cognitivo
+function wlNivelColor(nivel){
+  if(nivel==="Superior") return "#2ecc71";
+  if(nivel==="Promedio alto") return "#5dade2";
+  if(nivel==="Promedio") return "#3498db";
+  if(nivel==="Bajo promedio") return "#e67e22";
+  return "#e74c3c";
+}
+
 function wlGetRecomendacion(nivel, foco){
   if((nivel==="Superior"||nivel==="Promedio alto") && foco<=3)
     return {cls:"wl-rec-continuar",titulo:"Continuar proceso",texto:nivel==="Superior"
@@ -3634,19 +3697,25 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     var interp   = fila[12]||"-";
     var foco     = parseInt(fila[13])||0;
 
-    document.getElementById("wl-modal-sub").textContent = (fila[1]||"—")+(fila[2]?"  ·  "+fila[2]:"")+(fila[0]?"  ·  "+fila[0]:"");
+    document.getElementById("wl-ficha-nombre").textContent = fila[1]||"—";
+    document.getElementById("wl-ficha-rut").textContent = fila[2]||"—";
+    document.getElementById("wl-ficha-fecha").textContent = fila[0]||"—";
+    document.getElementById("wl-ficha-tiempo").textContent = tiempo||"—";
 
-    // Banner
-    document.getElementById("wl-banner").innerHTML =
-      "<div class='wl-circle'><div class='wl-circle-val'>"+percentil+"</div><div class='wl-circle-lbl'>Percentil</div></div>"+
-      "<div class='wl-info'><h3>"+nivel+"</h3><p>Test de Habilidad Cognitiva General — Wonderlic.</p></div>"+
-      "<div class='wl-nivel-badge "+wlGetNivelBadge(nivel)+"'>"+nivel+"</div>";
+    // Hero: gauge de percentil (anillo conic-gradient) + nivel
+    var gaugeCol = wlNivelColor(nivel);
+    document.getElementById("wl-hero").innerHTML =
+      "<div class='wlk-gauge' style='background:conic-gradient("+gaugeCol+" "+(percentil*3.6)+"deg, rgba(255,255,255,0.18) 0deg);'>"+
+        "<div class='wlk-gauge-inner'><div class='wlk-gauge-val'>"+percentil+"</div><div class='wlk-gauge-lbl'>Percentil</div></div>"+
+      "</div>"+
+      "<div class='wlk-hero-info'><div class='wlk-hero-nivel'>"+nivel+"</div>"+
+      "<div class='wlk-hero-desc'>El candidato supera al "+percentil+"% de la población de referencia en capacidad cognitiva general.</div></div>";
 
     // Scores
     document.getElementById("wl-scores").innerHTML =
-      "<div class='wl-score-card'><div class='wl-score-lbl'>Puntaje Bruto</div><div class='wl-score-val'>"+pb+"</div><div class='wl-score-sub'>de 50 preguntas</div></div>"+
-      "<div class='wl-score-card'><div class='wl-score-lbl'>Ajuste por Edad</div><div class='wl-score-val'>"+(ajuste>0?"+"+ajuste:"0")+"</div><div class='wl-score-sub'>puntos extra</div></div>"+
-      "<div class='wl-score-card'><div class='wl-score-lbl'>Puntaje Ajustado</div><div class='wl-score-val'>"+pa+"</div><div class='wl-score-sub'>puntaje final</div></div>";
+      "<div class='wlk-score-card'><div class='wlk-score-lbl'>Puntaje Bruto</div><div class='wlk-score-val'>"+pb+"</div><div class='wlk-score-sub'>de 50 preguntas</div></div>"+
+      "<div class='wlk-score-card'><div class='wlk-score-lbl'>Ajuste por Edad</div><div class='wlk-score-val'>"+(ajuste>0?"+"+ajuste:"0")+"</div><div class='wlk-score-sub'>puntos</div></div>"+
+      "<div class='wlk-score-card'><div class='wlk-score-lbl'>Puntaje Ajustado</div><div class='wlk-score-val'>"+pa+"</div><div class='wlk-score-sub'>puntaje final</div></div>";
 
     // Integridad
     document.getElementById("wl-integridad").innerHTML = foco===0
@@ -3655,22 +3724,23 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
       ? "<div class='wl-integ-leve'><span style='font-size:18px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente al interpretar el resultado.</div></div></div>"
       : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Se recomienda evaluar la validez del resultado antes de tomar una decisión.</div></div></div>";
 
-    // Recomendación
+    // Recomendación (clases Key Clouding)
     var rec = wlGetRecomendacion(nivel, foco);
+    var recCls = /cautela/.test(rec.cls) ? "wlk-rec-cautela" : "wlk-rec-ok";
     document.getElementById("wl-recomendacion").innerHTML =
-      "<div class='"+rec.cls+"'><div class='wl-rec-titulo'>"+rec.titulo+"</div><div class='wl-rec-texto'>"+rec.texto+"</div></div>";
+      "<div class='wlk-rec "+recCls+"'><div class='wlk-rec-titulo'>"+rec.titulo+"</div><div class='wlk-rec-texto'>"+rec.texto+"</div></div>";
 
     // Interpretación
     document.getElementById("wl-interp").textContent = interp;
 
-    // Resumen
+    // Resumen (cargo ya no se captura → se pasa vacío y el generador lo omite)
     document.getElementById("wl-resumen-texto").textContent =
-      wlGenerarResumen(fila[1]||"El candidato", nivel, percentil, fila[5]||"", pb, pa, tiempo);
+      wlGenerarResumen(fila[1]||"El candidato", nivel, percentil, "", pb, pa, tiempo);
 
     document.getElementById("modal-wonderlic").classList.add("activo");
     document.body.style.overflow = "hidden";
   } catch(e) {
-    alert("Error cargando datos Wonderlic: " + e.message);
+    alert("Error cargando datos del informe: " + e.message);
   }
 }
 
@@ -4129,49 +4199,69 @@ function imprimirModalWONDERLIC() { window.print(); }
 </div>
 <!-- ══════════ MODAL INFORME WONDERLIC ══════════ -->
 <div class="modal-overlay" id="modal-wonderlic" onclick="if(event.target===this)cerrarModalWONDERLIC()">
-  <div class="modal-box" style="max-width:720px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">🧠 Informe — Test de Habilidad Cognitiva General</div>
-        <div class="modal-header-sub" id="wl-modal-sub">Candidato</div>
+  <div class="modal-box wlk-box">
+
+    <div class="wlk-header">
+      <div class="wlk-header-logo">
+        <div class="wlk-logo-circle">GC</div>
+        <div>
+          <div class="wlk-org-name">Grupo Cygnus</div>
+          <div class="wlk-doc-type">INFORME PSICOLABORAL</div>
+        </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirModalWONDERLIC()">⬇ Descargar PDF</button>
-        <button class="modal-close" onclick="cerrarModalWONDERLIC()">✕</button>
+        <button class="wlk-btn-pdf" onclick="imprimirModalWONDERLIC()">⬇ Descargar PDF</button>
+        <button class="wlk-close" onclick="cerrarModalWONDERLIC()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
 
-      <!-- Banner percentil -->
-      <div class="wl-banner" id="wl-banner"></div>
+    <div class="wlk-ficha">
+      <div style="flex:1;">
+        <div class="wlk-ficha-tag">Habilidad Cognitiva General</div>
+        <div class="wlk-ficha-subtag">Evaluación de capacidad de aprendizaje y resolución de problemas</div>
+      </div>
+      <div class="wlk-ficha-datos">
+        <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Candidato</span><span class="wlk-ficha-val" id="wl-ficha-nombre">—</span></div>
+        <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">RUT</span><span class="wlk-ficha-val" id="wl-ficha-rut">—</span></div>
+        <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Fecha evaluación</span><span class="wlk-ficha-val" id="wl-ficha-fecha">—</span></div>
+        <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Tiempo utilizado</span><span class="wlk-ficha-val" id="wl-ficha-tiempo">—</span></div>
+      </div>
+      <div id="wl-modal-sub" style="display:none;"></div>
+    </div>
+
+    <div class="wlk-body">
+
+      <!-- Hero percentil + nivel -->
+      <div class="wlk-hero" id="wl-hero"></div>
 
       <!-- Scores -->
-      <div class="wl-scores" id="wl-scores"></div>
+      <div>
+        <div class="wlk-label">Puntajes</div>
+        <div class="wlk-scores" id="wl-scores"></div>
+      </div>
 
       <!-- Integridad -->
       <div id="wl-integridad"></div>
 
       <!-- Recomendación -->
-      <div class="wl-seccion">
-        <div class="wl-seccion-title">✅ Recomendación para el proceso</div>
+      <div>
+        <div class="wlk-label">Recomendación para el proceso</div>
         <div id="wl-recomendacion"></div>
       </div>
 
       <!-- Interpretación -->
-      <div class="wl-seccion">
-        <div class="wl-seccion-title">📋 Interpretación del resultado</div>
-        <div class="wl-interp" id="wl-interp"></div>
+      <div>
+        <div class="wlk-label">Interpretación del resultado</div>
+        <div class="wlk-interp" id="wl-interp"></div>
       </div>
 
       <!-- Resumen ejecutivo -->
-      <div class="wl-resumen">
-        <div class="wl-resumen-tit">Resumen ejecutivo</div>
-        <div class="wl-resumen-texto" id="wl-resumen-texto"></div>
+      <div class="wlk-resumen">
+        <div class="wlk-resumen-tit">Resumen ejecutivo</div>
+        <div class="wlk-resumen-texto" id="wl-resumen-texto"></div>
       </div>
 
-      <div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
-        Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.
-      </div>
+      <div class="wlk-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
 
     </div>
   </div>
