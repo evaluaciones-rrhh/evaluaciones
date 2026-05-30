@@ -2503,24 +2503,15 @@ async function abrirInformeCEAL(test, rut, nombre) {
       if(n >= -14)return "Baja";
       return "Muy Baja";
     }
-    var nivel = nivelDesdePuntaje(puntaje);
-    if(!nivel && NIVELES_EFECT.indexOf(efectividad) >= 0) nivel = efectividad;
+    // El nivel se calcula en el test (misma matriz oficial) y se guarda en la
+    // columna de efectividad. Se confía en ese valor como fuente única; el puntaje
+    // queda solo como respaldo para registros antiguos que guardaban un descriptor.
+    var nivel = (NIVELES_EFECT.indexOf(efectividad) >= 0) ? efectividad : nivelDesdePuntaje(puntaje);
 
-    // Descriptor = texto guardado en la hoja (ej. "Líder poco efectivo"),
-    // salvo que ese texto ya sea un nombre de nivel o esté vacío.
-    var descriptorTxt   = efectividad;
-    var descriptorEsNiv = NIVELES_EFECT.indexOf(descriptorTxt) >= 0;
-    var sinDescriptor   = !descriptorTxt || descriptorTxt === "—" || descriptorEsNiv || descriptorTxt === nivel;
-
-    // Color del chip según el nivel
-    var nivelColor = nivel || (descriptorEsNiv ? descriptorTxt : null);
-    var ec = efectColores[nivelColor] || {color:"#555", bg:"#9ca3af"};
-
-    // Etiqueta: "Nivel — descriptor"
-    var chipTexto;
-    if(nivel && !sinDescriptor) chipTexto = nivel + " — " + descriptorTxt;
-    else if(nivel)              chipTexto = nivel;
-    else                        chipTexto = descriptorTxt;
+    // Chip: solo el nivel oficial (como en el manual CEEL: Muy Alta … Muy Baja).
+    // Si no se puede determinar el nivel, se muestra el texto guardado como respaldo.
+    var chipTexto = nivel || efectividad || "—";
+    var ec = efectColores[nivel] || {color:"#555", bg:"#9ca3af"};
 
     var efEl = document.getElementById("ceal-efect-pro");
     efEl.innerHTML = "";
@@ -2547,21 +2538,81 @@ async function abrirInformeCEAL(test, rut, nombre) {
     descEl.textContent = textoFinal;
     descEl.style.whiteSpace = "pre-line";
 
-    // Fortalezas y áreas de desarrollo
-    var CEAL_FORT = {
-      "Integrado":   ["Equilibra resultados y personas eficazmente","Genera compromiso colectivo y trabajo en equipo","Toma decisiones participativas y consensuadas","Se adapta a distintos contextos de liderazgo","Promueve clima de confianza y colaboración"],
-      "Autoritario": ["Orientación clara al cumplimiento de metas","Define roles y expectativas con precisión","Respuesta rápida y eficiente ante urgencias","Estructura y disciplina en la gestión","Control efectivo del desempeño"],
-      "Relacionado": ["Alta empatía y escucha activa","Genera equipos cohesionados y motivados","Crea climas de confianza y bienestar","Fuerte orientación al apoyo de las personas","Fomenta la lealtad y el compromiso"],
-      "Separado":    ["Respeta la autonomía profesional del equipo","No interfiere en equipos altamente capacitados","Objetividad y neutralidad en sus juicios","Favorece el desarrollo de la autogestión","Bajo nivel de conflictos interpersonales"]
+    // Fortalezas y áreas de desarrollo — dependen del ESTILO y de la BANDA de efectividad.
+    // Fundamento: Manual CEEL (Reddin 3D). Cada estilo tiene versión eficaz e ineficaz:
+    //   Autoritario: eficaz "Autócrata Benévolo" / ineficaz "Autoritario"
+    //   Integrado:   eficaz "Ejecutivo"          / ineficaz "Componedor"
+    //   Relacionado: eficaz "Promotor"           / ineficaz "Misionero"
+    //   Separado:    eficaz "Burócrata"          / ineficaz "Desertor"
+    var CEAL_PERFIL = {
+      "Autoritario": {
+        efectivo: {
+          f: ["Dirección clara y firme orientada a resultados","Define con precisión qué, cómo y cuándo se hace el trabajo","Toma decisiones con seguridad y rapidez","Logra el cumplimiento sin generar resentimiento (autócrata benévolo)","Aporta estructura y control donde el contexto lo requiere"],
+          d: ["Cuidar la apertura a la comunicación bilateral","Evitar el control excesivo a medida que el equipo madura"]
+        },
+        promedio: {
+          f: ["Orientación a metas y resultados","Define roles y expectativas con claridad","Aporta estructura en contextos que lo requieren"],
+          d: ["Tiende a la comunicación unilateral","Puede costarle delegar y confiar en la iniciativa del equipo","Necesita desarrollar habilidades relacionales"]
+        },
+        inefectivo: {
+          f: ["Puede ser útil en urgencias o con equipos de baja madurez que requieren dirección externa"],
+          d: ["Impone sus puntos de vista sin generar adhesión; percibido como rígido","Baja confianza en las personas y en su iniciativa","Foco en la producción de corto plazo a costa del clima","Comunicación unilateral que limita el aporte del equipo","Riesgo de desmotivación y deterioro de las relaciones"]
+        }
+      },
+      "Integrado": {
+        efectivo: {
+          f: ["Equilibra el logro de resultados con el interés por las personas","Buen motivador: fija normas elevadas y da trato diferenciado","Decisiones participativas y trabajo en equipo","Promueve el compromiso con metas comunes","Se adapta con facilidad a contextos complejos (ejecutivo)"],
+          d: ["Cuidar la velocidad de decisión en situaciones de urgencia"]
+        },
+        promedio: {
+          f: ["Combina foco en la tarea con interés por las personas","Favorece la participación y el trabajo en equipo"],
+          d: ["Puede tardar más en decidir","Riesgo de buscar agradar y postergar definiciones"]
+        },
+        inefectivo: {
+          f: ["Busca el consenso y evita rupturas abiertas en el equipo"],
+          d: ["Trata de agradar a todos y vacila ante decisiones difíciles (componedor)","Evita tensiones aun cuando son necesarias","Genera ambigüedad por falta de definición","Le cuesta sostener estándares cuando incomodan"]
+        }
+      },
+      "Relacionado": {
+        efectivo: {
+          f: ["Confianza genuina en las personas y en su potencial","Desarrolla las aptitudes del equipo (promotor)","Alta empatía y escucha activa","Genera clima de apoyo, confianza y cohesión","Fomenta el compromiso por la vía del vínculo"],
+          d: ["Cuidar que el foco en las personas no posterge los resultados"]
+        },
+        promedio: {
+          f: ["Orientación al apoyo y al bienestar del equipo","Buena disposición a la escucha"],
+          d: ["Puede evitar el conflicto y postergar decisiones difíciles","Necesita equilibrar bienestar con exigencia de resultados"]
+        },
+        inefectivo: {
+          f: ["Prioriza la armonía y el buen clima del grupo"],
+          d: ["Prioriza ser bien visto por sobre la tarea (misionero)","Reticente a arriesgar una relación aunque la tarea lo exija","Evita el conflicto y posterga decisiones difíciles","Dificultad para exigir resultados y poner límites"]
+        }
+      },
+      "Separado": {
+        efectivo: {
+          f: ["Respeta la autonomía de equipos maduros y competentes","No interfiere donde el equipo se autogestiona (burócrata)","Aporta objetividad, lógica y orden a los procesos","Favorece el desarrollo de la autogestión","Bajo nivel de conflictos interpersonales"],
+          d: ["Cuidar la presencia y disponibilidad cuando el equipo la necesita"]
+        },
+        promedio: {
+          f: ["Respeta la autonomía del equipo","Objetividad y bajo nivel de conflicto"],
+          d: ["Bajo involucramiento, puede percibirse como distancia","Necesita mayor presencia y conexión con el equipo"]
+        },
+        inefectivo: {
+          f: ["En equipos muy autónomos y maduros, su baja intervención podría no ser un problema"],
+          d: ["Bajo compromiso y participación, percibidos como indiferencia (desertor)","Pasividad frente a la tarea y a las personas","Falta de dirección y rumbo para el equipo","Comunicación escasa y mayormente formal o escrita","Riesgo de desorganización por ausencia de conducción"]
+        }
+      }
     };
-    var CEAL_DES = {
-      "Integrado":   ["Puede ser percibido como indeciso en crisis","Requiere mayor tiempo para tomar decisiones","Puede generar frustración si se espera dirección clara","Necesita equilibrar participación con velocidad"],
-      "Autoritario": ["Dificultad para delegar y confiar en el equipo","Puede generar desmotivación a largo plazo","Resistencia ante decisiones unilaterales","Necesita desarrollar habilidades relacionales"],
-      "Relacionado": ["Dificultad para establecer límites y exigir resultados","Evita decisiones que generen conflicto","Puede generar ambigüedad de roles en el equipo","Necesita equilibrar bienestar con objetivos"],
-      "Separado":    ["Falta de dirección y orientación al equipo","Puede generar desorganización y falta de rumbo","Bajo involucramiento percibido como indiferencia","Necesita mayor presencia y conexión con el equipo"]
-    };
-    var forts = CEAL_FORT[estilo] || [];
-    var dess  = CEAL_DES[estilo]  || [];
+
+    function bandaEfectividad(niv){
+      if(["Muy Alta","Alta","Media Alta","Promedio Positivo"].indexOf(niv) >= 0) return "efectivo";
+      if(["Promedio Negativo","Media Baja","Baja","Muy Baja"].indexOf(niv) >= 0) return "inefectivo";
+      return "promedio"; // "Promedio" o nivel no determinado
+    }
+
+    var perfilEstilo = CEAL_PERFIL[estilo] || CEAL_PERFIL["Integrado"];
+    var perfilBanda  = perfilEstilo[bandaEfectividad(nivel)] || perfilEstilo.promedio;
+    var forts = perfilBanda.f || [];
+    var dess  = perfilBanda.d || [];
     document.getElementById("ceal-fortalezas-list").innerHTML = forts.map(function(f){return "<li>"+f+"</li>";}).join("");
     document.getElementById("ceal-desarrollo-list").innerHTML = dess.map(function(d){return "<li>"+d+"</li>";}).join("");
 
