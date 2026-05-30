@@ -705,11 +705,14 @@ tbody tr:hover td { background: #fdf9f6; }
   max-width: 860px !important;
   padding: 0 !important;
   border-radius: 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 90vh !important;
   overflow: hidden !important;
 }
 
 /* Header */
-.ceal-header-pro {
+.ceal-header-pro { flex-shrink:0;
   background: #1a3a5c;
   padding: 18px 28px;
   display: flex;
@@ -734,7 +737,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .ceal-btn-pdf:hover { opacity:.85; }
 
 /* Ficha candidato */
-.ceal-ficha-wrap {
+.ceal-ficha-wrap { flex-shrink:0;
   background:#f7f5f0;
   border-bottom:2px solid #e0dbd0;
   padding:18px 28px;
@@ -754,7 +757,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .ceal-ficha-val { color:#1a1917;font-weight:600; }
 
 /* Body */
-.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px; }
+.ceal-body-pro { padding:24px 28px;display:flex;flex-direction:column;gap:24px;overflow-y:auto;flex:1 1 auto;min-height:0; }
 .ceal-section-label {
   font-size:10px;font-weight:800;letter-spacing:.12em;
   color:#1a3a5c;text-transform:uppercase;
@@ -2400,42 +2403,23 @@ function cerrarModalIC() {
 
 // ══════════ INFORME CEAL ══════════
 var CEAL_TEXTOS = {
-  "Integrado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad muy alto. Combina de manera sobresaliente el enfoque en resultados y tareas con una genuina preocupación por las personas y el equipo. Fija estándares elevados, motiva activamente a sus colaboradores y toma decisiones de manera participativa. Su capacidad para adaptarse a distintos contextos y generar compromiso colectivo lo posiciona como un líder altamente efectivo, capaz de sostener resultados de excelencia sin sacrificar el clima organizacional.",
-  "Integrado|Líder efectivo": "El candidato presenta un estilo de liderazgo Integrado con un buen nivel de efectividad. Equilibra adecuadamente el enfoque en tareas y resultados con el cuidado de las relaciones interpersonales. Promueve la participación, establece metas claras y genera un ambiente de trabajo colaborativo. Con un desarrollo sostenido de sus habilidades de liderazgo, tiene potencial para alcanzar niveles de desempeño aún más altos en roles de conducción.",
-  "Integrado|Normal": "El candidato presenta un estilo de liderazgo Integrado con un nivel de efectividad promedio. Si bien muestra capacidad para equilibrar el foco en tareas y relaciones, aún existen áreas de mejora en la consistencia de su liderazgo. Puede desempeñarse bien en contextos estructurados, aunque podría beneficiarse de mayor desarrollo en habilidades de conducción para maximizar su impacto en el equipo.",
-  "Integrado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Integrado, sin embargo su nivel de efectividad actual es bajo. A pesar de contar con las bases conceptuales de un liderazgo equilibrado, no logra trasladar este estilo a resultados concretos. Se recomienda explorar las causas de esta brecha, ya que podrían estar asociadas a falta de experiencia, contexto organizacional adverso o necesidades de desarrollo específicas en habilidades de conducción.",
-  "Autoritario|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad muy alto. Se orienta fuertemente al cumplimiento de metas y resultados, ejerciendo una conducción directiva y estructurada. En contextos que requieren rapidez de respuesta, dirección clara y control de procesos, logra resultados sobresalientes. Se sugiere monitorear el impacto de este estilo en el clima y la motivación del equipo a largo plazo.",
-  "Autoritario|Líder efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un buen nivel de efectividad. Conduce con claridad, define roles y supervisa el cumplimiento de tareas de manera efectiva. Es especialmente útil en contextos de alta exigencia o con equipos que requieren dirección y estructura. Se recomienda desarrollar habilidades relacionales para complementar su perfil directivo y ampliar su impacto en diferentes tipos de equipos.",
-  "Autoritario|Normal": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad promedio. Si bien muestra una orientación clara hacia las tareas y el control, sus resultados de liderazgo son moderados. Podría estar generando resistencia en el equipo o no aprovechando plenamente el potencial de sus colaboradores. Se sugiere trabajar en el desarrollo de habilidades de comunicación y gestión de personas para mejorar su efectividad.",
-  "Autoritario|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Autoritario con un nivel de efectividad bajo. Su orientación al control y las tareas no está generando los resultados esperados, lo que podría estar asociado a dificultades en la gestión del equipo, clima organizacional deteriorado o resistencia de los colaboradores. Se recomienda una intervención de desarrollo en liderazgo que contemple el fortalecimiento de habilidades relacionales y de motivación.",
-  "Relacionado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad muy alto. Prioriza el bienestar del equipo, la armonía grupal y las relaciones interpersonales, logrando un clima de alta confianza y colaboración. En equipos maduros y automotivados, este estilo genera resultados excelentes. Se sugiere complementar con mayor foco en la definición de metas y seguimiento de resultados para maximizar el rendimiento del equipo.",
-  "Relacionado|Líder efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un buen nivel de efectividad. Muestra empatía, escucha activa y una genuina preocupación por las personas, generando equipos cohesionados y comprometidos. Para potenciar aún más su efectividad, se recomienda desarrollar mayor asertividad en la gestión del desempeño y la toma de decisiones difíciles.",
-  "Relacionado|Normal": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad promedio. Si bien genera buenas relaciones interpersonales, puede presentar dificultades para establecer límites claros, exigir resultados o tomar decisiones que impliquen tensión en el equipo. Se sugiere trabajar en el equilibrio entre el cuidado de las personas y el cumplimiento de objetivos organizacionales.",
-  "Relacionado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Relacionado con un nivel de efectividad bajo. La priorización de las relaciones por sobre los resultados no está generando el impacto esperado en el desempeño del equipo. Puede estar generando ambigüedad de roles o bajo rendimiento. Se recomienda desarrollar habilidades de conducción orientadas al logro y la gestión del desempeño.",
-  "Separado|Líder muy efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad sorprendentemente alto. Aunque mantiene distancia tanto en lo relacional como en lo operativo, logra resultados positivos, posiblemente a través de una gestión técnica sólida o en contextos que valoran la autonomía. Se sugiere explorar en qué tipo de entornos específicos este estilo genera mayor impacto y si es sostenible a largo plazo.",
-  "Separado|Líder efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad aceptable. Tiende a mantener una postura distante en lo relacional y operativo, lo que puede funcionar en contextos técnicos o con equipos muy autónomos. Para ampliar su efectividad, se recomienda desarrollar mayor presencia y conexión con el equipo.",
-  "Separado|Normal": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad promedio. Su distancia tanto en tareas como en relaciones puede generar falta de dirección y desconexión en el equipo. Se recomienda trabajar activamente en el desarrollo de habilidades de liderazgo, tanto en la orientación a resultados como en la gestión de personas.",
-  "Separado|Líder poco efectivo": "El candidato presenta un estilo de liderazgo Separado con un nivel de efectividad bajo. Este perfil combina baja orientación a las tareas y baja orientación a las relaciones, lo que dificulta significativamente la conducción efectiva de equipos. Se recomienda una intervención de desarrollo integral en liderazgo antes de asumir roles de conducción de mayor responsabilidad."
+  "Autoritario": "Estilo Autocrático (Alta Tarea / Baja Relación): Líder centrado en la tarea más que en los sentimientos y satisfacciones de los subordinados. Enfatiza la productividad, tiende a imponer sus puntos de vista y se identifica con sus superiores y el sistema técnico de la organización. Es activo: dirige, organiza, evalúa y controla. Necesita y utiliza el poder, privilegiando la comunicación unilateral hacia sus subordinados. Evalúa a las personas según el logro de objetivos y la realización de tareas específicas.",
+  "Integrado": "Estilo Integrado (Alta Tarea / Alta Relación): Líder que enfatiza la realización del trabajo pero también se interesa y acepta la individualidad de sus colaboradores, sus necesidades personales e ideas. Le gusta comunicarse con sus subordinados de manera bilateral y utiliza el trabajo en equipo más que las actividades individuales. Es participativo, juzga a las personas por su capacidad de comprometerse con el equipo y controla a través del cumplimiento de metas comunes.",
+  "Relacionado": "Estilo Relacionado (Baja Tarea / Alta Relación): Líder que se interesa más en las necesidades de sus colaboradores que en la tarea a realizar. Enfatiza el apoyo y el progreso de sus subordinados por sobre la productividad. Se comunica a nivel personal y tiende a rehuir el conflicto. Evalúa a las personas en base a sus características personales y utiliza como forma de sanción el dejar de preocuparse del otro.",
+  "Separado": "Estilo Separado (Baja Tarea / Baja Relación): Líder que permite que los subordinados dirijan sus propias actividades y no invierte mucho tiempo en desarrollar relaciones personales con ellos. Tiende más a la comunicación formal y escrita que a la verbal. Valora la seguridad, la estabilidad, la lógica y la racionalidad. Se desempeña mejor en contextos con equipos autónomos y maduros que requieren poca supervisión directa."
 };
 
 
-var CEAL_INTERP = {
-  "Integrado|Líder muy efectivo": "Los resultados indican que el candidato posee un perfil de liderazgo altamente desarrollado. Su capacidad para integrar el foco en resultados con un genuino cuidado por las personas lo posiciona como un líder de alto impacto, capaz de sostener equipos comprometidos y productivos. Este perfil es especialmente valioso en roles de conducción que requieran gestión de equipos complejos, toma de decisiones participativa y generación de cultura organizacional. Se recomienda su incorporación a roles de liderazgo con responsabilidad directa sobre equipos.",
-  "Integrado|Líder efectivo": "El candidato presenta un perfil de liderazgo equilibrado y funcional. Combina adecuadamente el cumplimiento de objetivos con el cuidado de las relaciones en el equipo. Se desenvuelve bien en roles de conducción de equipos medianos, proyectos colaborativos y contextos que valoran tanto los resultados como el clima organizacional. Con desarrollo continuo, tiene potencial para alcanzar niveles de liderazgo más exigentes.",
-  "Integrado|Normal": "El candidato muestra orientación al estilo Integrado, aunque con una efectividad que aún puede fortalecerse. Si bien tiene las bases conceptuales para un liderazgo equilibrado, existen áreas de mejora en la consistencia y el impacto de su conducción. Se recomienda explorar en la entrevista qué factores limitan su efectividad y si responden a experiencia, contexto o habilidades específicas a desarrollar.",
-  "Integrado|Líder poco efectivo": "A pesar de mostrar un estilo Integrado en sus preferencias conductuales, el candidato no logra traducir este perfil en resultados concretos de liderazgo. Esta brecha entre estilo e impacto puede responder a falta de experiencia, contextos organizacionales adversos o brechas en habilidades ejecutivas. Se recomienda evaluación complementaria antes de asignar roles de conducción de equipos.",
-  "Autoritario|Líder muy efectivo": "El candidato presenta un perfil de liderazgo directivo con alto nivel de efectividad. Su orientación al cumplimiento de tareas y resultados le permite generar impacto rápido en equipos que requieren estructura, dirección clara y supervisión activa. Es especialmente adecuado para contextos de alta exigencia operativa, equipos en formación o situaciones de crisis que demanden liderazgo firme. Se sugiere monitorear el impacto en el clima y la retención a largo plazo.",
-  "Autoritario|Líder efectivo": "El candidato conduce con claridad y disciplina, generando resultados en contextos estructurados. Su perfil es funcional para roles que requieran supervisión directa, gestión de procesos y cumplimiento de estándares. Para ampliar su impacto, se recomienda explorar el desarrollo de habilidades relacionales que complementen su orientación a la tarea.",
-  "Autoritario|Normal": "El candidato muestra un estilo directivo que genera resultados moderados. Si bien tiene capacidad para definir expectativas y supervisar el desempeño, su efectividad como líder se ve limitada, posiblemente por resistencia del equipo o dificultades relacionales. Se sugiere explorar en la entrevista cómo gestiona las relaciones con su equipo y cómo aborda situaciones de conflicto.",
-  "Autoritario|Líder poco efectivo": "El perfil muestra un estilo directivo que no está generando los resultados esperados. La combinación de alta orientación a la tarea con baja efectividad sugiere posibles dificultades en la gestión del equipo o en la generación de compromiso. Se recomienda no asignar roles de conducción sin antes realizar una entrevista profunda y, eventualmente, una intervención de desarrollo en liderazgo.",
-  "Relacionado|Líder muy efectivo": "El candidato destaca por su capacidad para construir equipos cohesionados, de alta confianza y con fuerte sentido de pertenencia. Su estilo Relacionado, combinado con un alto nivel de efectividad, lo posiciona como un líder clave para contextos que requieran gestión de equipos maduros, culturas colaborativas y entornos donde el bienestar de las personas sea estratégico. Se recomienda complementar con supervisión de resultados en roles de alta exigencia operativa.",
-  "Relacionado|Líder efectivo": "El candidato genera equipos comprometidos y climas de trabajo positivos. Su empatía y orientación a las personas son activos relevantes para roles de conducción en entornos colaborativos. Para maximizar su impacto, se recomienda desarrollar mayor asertividad en la gestión del desempeño y en la toma de decisiones que impliquen tensión interpersonal.",
-  "Relacionado|Normal": "El candidato muestra orientación a las relaciones, aunque con una efectividad que puede fortalecerse. Puede presentar dificultades para exigir resultados o tomar decisiones difíciles sin que ello afecte las relaciones. Se recomienda explorar en la entrevista cómo maneja situaciones de bajo desempeño en su equipo y cómo equilibra el cuidado de las personas con el logro de objetivos.",
-  "Relacionado|Líder poco efectivo": "La priorización de las relaciones sobre los resultados no está generando el impacto esperado. Este perfil puede asociarse a dificultades para establecer límites, exigir estándares o tomar decisiones impopulares. Se recomienda no asignar roles de conducción formal sin antes evaluar la capacidad del candidato para gestionar el desempeño de manera asertiva.",
-  "Separado|Líder muy efectivo": "El candidato presenta un perfil atípico: un estilo distante en lo relacional y operativo, pero con alta efectividad. Esto sugiere que opera bien en contextos con equipos muy autónomos, altamente calificados o con objetivos muy claros, donde la no-intervención es funcional. Se recomienda evaluar en detalle el tipo de equipo y contexto en que se desempeñaría, ya que este perfil tiene rangos de efectividad muy acotados.",
-  "Separado|Líder efectivo": "El candidato se desenvuelve con efectividad en contextos técnicos o con equipos autónomos, donde el liderazgo laissez-faire es apropiado. Para ampliar su impacto en roles de mayor responsabilidad, se recomienda desarrollar mayor presencia, conexión con el equipo y habilidades de conducción activa.",
-  "Separado|Normal": "El candidato presenta un estilo distante con efectividad moderada. Su baja orientación a tareas y relaciones puede generar desconexión en el equipo y falta de dirección. Se recomienda explorar en la entrevista experiencias de conducción previas y evaluar si el candidato tiene motivación para asumir un rol de liderazgo activo.",
-  "Separado|Líder poco efectivo": "Este perfil combina baja orientación a la tarea y a las relaciones con baja efectividad, lo que representa el mayor desafío para roles de conducción. Se recomienda no asignar responsabilidades de liderazgo directo en esta etapa, y considerar una intervención de desarrollo integral antes de avanzar en el proceso para cargos de jefatura o supervisión."
+var CEAL_EFECT_INTERP = {
+  "Muy Alta": "El candidato demuestra una capacidad sobresaliente para adaptar su estilo de liderazgo a las distintas situaciones y niveles de madurez del equipo. Sus respuestas reflejan una lectura muy precisa de cuándo dirigir, persuadir, participar o delegar. Este nivel de efectividad situacional es un fuerte predictor de desempeño en roles de conducción de equipos.",
+  "Alta": "El candidato muestra una alta capacidad para ajustar su estilo de liderazgo según el contexto y la madurez de sus colaboradores. En la mayoría de las situaciones identifica la respuesta más apropiada, lo que lo posiciona favorablemente para roles de jefatura o supervisión.",
+  "Media Alta": "El candidato presenta una buena capacidad de adaptación de su estilo de liderazgo. En general identifica respuestas apropiadas para cada situación, aunque puede mejorar la lectura de algunos contextos específicos. Perfil adecuado para roles de conducción con apoyo y desarrollo continuo.",
+  "Promedio Positivo": "El candidato muestra una capacidad de adaptación situacional levemente por sobre el promedio. Reconoce algunas situaciones correctamente pero su flexibilidad de estilo es aún limitada. Se recomienda explorar en entrevista su experiencia previa en conducción de equipos.",
+  "Promedio": "El candidato presenta una capacidad de adaptación situacional dentro del promedio. Tiende a aplicar su estilo preferido sin ajustarlo plenamente a la madurez del equipo o al contexto. Para roles de liderazgo se recomienda acompañamiento y desarrollo de habilidades de liderazgo situacional.",
+  "Promedio Negativo": "El candidato muestra una capacidad de adaptación situacional levemente bajo el promedio. Tiende a responder de forma rígida, aplicando un mismo estilo independiente del contexto. Se recomienda evaluación complementaria antes de asignar responsabilidades de conducción.",
+  "Media Baja": "El candidato presenta dificultades para adaptar su estilo de liderazgo a las distintas situaciones. Sus elecciones tienden a no responder a la madurez del equipo ni al contexto, lo que puede generar resultados subóptimos en la conducción. Se recomienda no asignar roles de liderazgo sin un plan de desarrollo previo.",
+  "Baja": "El candidato muestra una baja capacidad de adaptación situacional. Sus respuestas reflejan poca lectura del contexto y de las necesidades del equipo, lo que representa un riesgo importante para roles de conducción. Se recomienda evaluación profunda y, eventualmente, una intervención de desarrollo en liderazgo.",
+  "Muy Baja": "El candidato presenta una capacidad de adaptación situacional muy baja. Sus elecciones se alejan consistentemente de las respuestas más efectivas para cada situación, lo que constituye una contraindicación para roles de conducción de equipos en esta etapa."
 };
 
 async function abrirInformeCEAL(test, rut, nombre) {
@@ -2485,33 +2469,34 @@ async function abrirInformeCEAL(test, rut, nombre) {
     document.getElementById("ceal-estilo-sec-pro").textContent = estiloSec ? "Estilo secundario: " + estiloSec : "";
 
     // Efectividad con color
+    // Color del nivel de efectividad (9 niveles oficiales)
     var efectColores = {
-      "Líder muy efectivo": {color:"#065f46", bg:"#d1fae5"},
-      "Líder efectivo":     {color:"#166534", bg:"#dcfce7"},
-      "Normal":             {color:"#92400e", bg:"#fef3c7"},
-      "Líder poco efectivo":{color:"#991b1b", bg:"#fee2e2"}
+      "Muy Alta":           {color:"#065f46", bg:"#059669"},
+      "Alta":               {color:"#166534", bg:"#16a34a"},
+      "Media Alta":         {color:"#3f6212", bg:"#65a30d"},
+      "Promedio Positivo":  {color:"#3f6212", bg:"#84cc16"},
+      "Promedio":           {color:"#92400e", bg:"#d97706"},
+      "Promedio Negativo":  {color:"#9a3412", bg:"#ea580c"},
+      "Media Baja":         {color:"#991b1b", bg:"#dc2626"},
+      "Baja":               {color:"#991b1b", bg:"#b91c1c"},
+      "Muy Baja":           {color:"#7f1d1d", bg:"#991b1b"}
     };
-    var ec = efectColores[efectividad] || {color:"#333", bg:"#f0eeea"};
+    var ec = efectColores[efectividad] || {color:"#333", bg:"#9ca3af"};
     var efEl = document.getElementById("ceal-efect-pro");
-    efEl.textContent  = efectividad;
+    efEl.textContent  = "Efectividad " + efectividad;
     efEl.style.color  = ec.color;
 
-    // Tabla de efectividad — highlight celda activa
-    var celdasEfect = ["ceal-et-poco","ceal-et-normal","ceal-et-efect","ceal-et-muy"];
-    celdasEfect.forEach(function(id){
-      var el = document.getElementById(id);
-      if(el){ el.style.background=""; el.style.color=""; el.style.fontWeight=""; }
-    });
-    var mapEfect = {
-      "Líder poco efectivo": {id:"ceal-et-poco",  bg:"#dc2626", color:"#fff"},
-      "Normal":              {id:"ceal-et-normal", bg:"#d97706", color:"#fff"},
-      "Líder efectivo":      {id:"ceal-et-efect",  bg:"#16a34a", color:"#fff"},
-      "Líder muy efectivo":  {id:"ceal-et-muy",    bg:"#059669", color:"#fff"}
-    };
-    var celActiva = mapEfect[efectividad];
-    if(celActiva){
-      var elA = document.getElementById(celActiva.id);
-      if(elA){ elA.style.background=celActiva.bg; elA.style.color=celActiva.color; elA.style.fontWeight="700"; }
+    // Tabla de efectividad — 9 niveles, resaltar el nivel activo
+    var NIVELES_EFECT = ["Muy Baja","Baja","Media Baja","Promedio Negativo","Promedio","Promedio Positivo","Media Alta","Alta","Muy Alta"];
+    var tablaEfect = document.getElementById("ceal-efect-tabla-row");
+    if(tablaEfect){
+      tablaEfect.innerHTML = NIVELES_EFECT.map(function(niv){
+        var activo = (niv === efectividad);
+        var bg = activo ? ec.bg : "#f5f3ee";
+        var col = activo ? "#fff" : "#999";
+        var fw = activo ? "700" : "400";
+        return "<td class='ceal-et-cell' style='background:"+bg+";color:"+col+";font-weight:"+fw+";'>"+niv+"</td>";
+      }).join("");
     }
 
     // Cuadrante activo
@@ -2523,9 +2508,9 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var cqActivo = cqMap[estilo];
     if(cqActivo) { var el = document.getElementById(cqActivo); if(el) el.classList.add("activo"); }
 
-    // Descripción del estilo + interpretación combinadas
-    var textoDesc   = CEAL_TEXTOS[estilo+"|"+efectividad] || descripcion;
-    var textoInterp = CEAL_INTERP[estilo+"|"+efectividad] || "";
+    // Descripción del estilo + interpretación de efectividad combinadas
+    var textoDesc   = CEAL_TEXTOS[estilo] || descripcion;
+    var textoInterp = CEAL_EFECT_INTERP[efectividad] || "";
     var textoFinal  = textoInterp ? (textoDesc + "\n\n" + textoInterp) : textoDesc;
     var descEl = document.getElementById("ceal-descripcion");
     descEl.textContent = textoFinal;
@@ -3578,13 +3563,11 @@ function imprimirModalWONDERLIC() { window.print(); }
             <div class="ceal-res-card-lbl">Nivel de efectividad</div>
             <div class="ceal-res-efect-val" id="ceal-efect-pro">—</div>
             <table class="ceal-efect-tabla" id="ceal-efect-tabla">
-              <tr>
-                <td class="ceal-et-cell" id="ceal-et-poco">Poco efectivo</td>
-                <td class="ceal-et-cell" id="ceal-et-normal">Normal</td>
-                <td class="ceal-et-cell" id="ceal-et-efect">Efectivo</td>
-                <td class="ceal-et-cell" id="ceal-et-muy">Muy efectivo</td>
+              <tr id="ceal-efect-tabla-row">
+                <td class="ceal-et-cell">—</td>
               </tr>
             </table>
+            <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:center;">Escala de efectividad situacional (Muy Baja → Muy Alta)</div>
           </div>
 
           <!-- Puntaje eliminado -->
