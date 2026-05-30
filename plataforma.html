@@ -781,6 +781,11 @@ tbody tr:hover td { background: #fdf9f6; }
 .ceal-res-efect-val {
   font-size:18px;font-weight:700;margin-bottom:10px;
 }
+.ceal-efect-chip {
+  display:inline-block;padding:7px 15px;border-radius:20px;
+  font-size:14px;font-weight:700;color:#fff;line-height:1.35;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact;
+}
 
 .ceal-res-card-puntaje { text-align:center; }
 .ceal-puntaje-big {
@@ -2481,23 +2486,49 @@ async function abrirInformeCEAL(test, rut, nombre) {
       "Baja":               {color:"#991b1b", bg:"#b91c1c"},
       "Muy Baja":           {color:"#7f1d1d", bg:"#991b1b"}
     };
-    var ec = efectColores[efectividad] || {color:"#333", bg:"#9ca3af"};
-    var efEl = document.getElementById("ceal-efect-pro");
-    efEl.textContent  = "Efectividad " + efectividad;
-    efEl.style.color  = ec.color;
-
-    // Tabla de efectividad — 9 niveles, resaltar el nivel activo
     var NIVELES_EFECT = ["Muy Baja","Baja","Media Baja","Promedio Negativo","Promedio","Promedio Positivo","Media Alta","Alta","Muy Alta"];
-    var tablaEfect = document.getElementById("ceal-efect-tabla-row");
-    if(tablaEfect){
-      tablaEfect.innerHTML = NIVELES_EFECT.map(function(niv){
-        var activo = (niv === efectividad);
-        var bg = activo ? ec.bg : "#f5f3ee";
-        var col = activo ? "#fff" : "#999";
-        var fw = activo ? "700" : "400";
-        return "<td class='ceal-et-cell' style='background:"+bg+";color:"+col+";font-weight:"+fw+";'>"+niv+"</td>";
-      }).join("");
+
+    // Nivel oficial derivado del puntaje (matriz oficial del manual CEEL).
+    // Si el puntaje no es numérico, se usa el texto de efectividad si ya es un nivel.
+    function nivelDesdePuntaje(p){
+      var n = Number(p);
+      if(!isFinite(n)) return null;
+      if(n >= 15) return "Muy Alta";
+      if(n >= 8)  return "Alta";
+      if(n >= 4)  return "Media Alta";
+      if(n >= 2)  return "Promedio Positivo";
+      if(n >= -1) return "Promedio";
+      if(n >= -3) return "Promedio Negativo";
+      if(n >= -7) return "Media Baja";
+      if(n >= -14)return "Baja";
+      return "Muy Baja";
     }
+    var nivel = nivelDesdePuntaje(puntaje);
+    if(!nivel && NIVELES_EFECT.indexOf(efectividad) >= 0) nivel = efectividad;
+
+    // Descriptor = texto guardado en la hoja (ej. "Líder poco efectivo"),
+    // salvo que ese texto ya sea un nombre de nivel o esté vacío.
+    var descriptorTxt   = efectividad;
+    var descriptorEsNiv = NIVELES_EFECT.indexOf(descriptorTxt) >= 0;
+    var sinDescriptor   = !descriptorTxt || descriptorTxt === "—" || descriptorEsNiv || descriptorTxt === nivel;
+
+    // Color del chip según el nivel
+    var nivelColor = nivel || (descriptorEsNiv ? descriptorTxt : null);
+    var ec = efectColores[nivelColor] || {color:"#555", bg:"#9ca3af"};
+
+    // Etiqueta: "Nivel — descriptor"
+    var chipTexto;
+    if(nivel && !sinDescriptor) chipTexto = nivel + " — " + descriptorTxt;
+    else if(nivel)              chipTexto = nivel;
+    else                        chipTexto = descriptorTxt;
+
+    var efEl = document.getElementById("ceal-efect-pro");
+    efEl.innerHTML = "";
+    var chip = document.createElement("span");
+    chip.className = "ceal-efect-chip";
+    chip.textContent = chipTexto;
+    chip.style.background = ec.bg;
+    efEl.appendChild(chip);
 
     // Cuadrante activo
     var cqMap = {Integrado:"cq-integrado", Autoritario:"cq-autoritario", Relacionado:"cq-relacionado", Separado:"cq-separado"};
@@ -2510,7 +2541,7 @@ async function abrirInformeCEAL(test, rut, nombre) {
 
     // Descripción del estilo + interpretación de efectividad combinadas
     var textoDesc   = CEAL_TEXTOS[estilo] || descripcion;
-    var textoInterp = CEAL_EFECT_INTERP[efectividad] || "";
+    var textoInterp = CEAL_EFECT_INTERP[nivel] || CEAL_EFECT_INTERP[efectividad] || "";
     var textoFinal  = textoInterp ? (textoDesc + "\n\n" + textoInterp) : textoDesc;
     var descEl = document.getElementById("ceal-descripcion");
     descEl.textContent = textoFinal;
@@ -3561,13 +3592,7 @@ function imprimirModalWONDERLIC() { window.print(); }
           <!-- Efectividad -->
           <div class="ceal-res-card">
             <div class="ceal-res-card-lbl">Nivel de efectividad</div>
-            <div class="ceal-res-efect-val" id="ceal-efect-pro">—</div>
-            <table class="ceal-efect-tabla" id="ceal-efect-tabla">
-              <tr id="ceal-efect-tabla-row">
-                <td class="ceal-et-cell">—</td>
-              </tr>
-            </table>
-            <div style="font-size:9px;color:#aaa;margin-top:4px;text-align:center;">Escala de efectividad situacional (Muy Baja → Muy Alta)</div>
+            <div id="ceal-efect-pro">—</div>
           </div>
 
           <!-- Puntaje eliminado -->
