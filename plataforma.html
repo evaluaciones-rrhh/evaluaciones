@@ -402,6 +402,50 @@ tbody tr:hover td { background: #fdf9f6; }
 .tasa-bar-wrap { height:8px; background:var(--border); border-radius:4px; margin-top:8px; }
 .tasa-bar { height:100%; border-radius:4px; background:var(--naranja); transition:width 0.5s; }
 
+/* ══════════════════════════════════════════
+   IC INFORME — Key Clouding style
+   ══════════════════════════════════════════ */
+.ick-box { max-width:680px !important; padding:0 !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; max-height:90vh !important; overflow:hidden !important; }
+.ick-header { flex-shrink:0; background:#1a3a5c; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+.ick-header-logo { display:flex; align-items:center; gap:12px; }
+.ick-logo-circle { width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.ick-org-name { color:#fff;font-weight:700;font-size:14px; }
+.ick-doc-type { color:rgba(255,255,255,.6);font-size:10px;margin-top:2px;letter-spacing:.05em; }
+.ick-btn-pdf { background:#c4432a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer; }
+.ick-btn-pdf:hover { opacity:.85; }
+.ick-close { background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;padding:4px 8px; }
+.ick-close:hover { opacity:1; }
+.ick-ficha { flex-shrink:0; background:#f7f5f0; border-bottom:2px solid #e0dbd0; padding:16px 24px; display:flex; gap:28px; align-items:flex-start; }
+.ick-ficha-tag { font-size:12px;font-weight:800;letter-spacing:.08em;color:#1a3a5c;text-transform:uppercase; }
+.ick-ficha-subtag { font-size:10px;color:#888;margin-top:3px; }
+.ick-ficha-datos { flex:1.2; }
+.ick-ficha-row { display:flex;gap:10px;margin-bottom:3px;font-size:11px; }
+.ick-ficha-lbl { color:#888;min-width:90px;font-weight:500; }
+.ick-ficha-val { color:#1a1917;font-weight:600; }
+.ick-body { padding:22px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; flex:1 1 auto; min-height:0; }
+.ick-label { font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid #1a3a5c;color:#1a3a5c;padding-bottom:6px;margin-bottom:12px; }
+.ick-cat-badge { display:inline-block;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:700;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ick-cat-adecuado { background:#1a6a4a; }
+.ick-cat-regular  { background:#c99a2e; }
+.ick-cat-inferior { background:#c0392b; }
+.ick-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:12px; }
+.ick-stat { background:#fff;border:1px solid #e0dbd0;border-radius:8px;padding:14px 10px;text-align:center; }
+.ick-stat-num { font-size:24px;font-weight:800;color:#1a3a5c;line-height:1; }
+.ick-stat-lbl { font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-top:6px; }
+.ick-bar-wrap { }
+.ick-bar-label { display:flex;justify-content:space-between;font-size:11px;color:#666;margin-bottom:6px; }
+.ick-bar-bg { height:10px;background:#eee;border-radius:5px;overflow:hidden; }
+.ick-bar-fill { height:10px;border-radius:5px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ick-resumen { background:#f7f5f0;border-radius:8px;padding:14px 16px; }
+.ick-resumen-texto { font-size:12px;line-height:1.7;color:#444; }
+.ick-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
+@media print {
+  .ick-btn-pdf, .ick-close, .nav-sidebar, .topbar { display:none !important; }
+  .ick-header, .ick-logo-circle, .ick-ficha, .ick-cat-badge, .ick-stat, .ick-bar-fill { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  .ick-box { max-height:none !important; overflow:visible !important; }
+  .ick-body { overflow:visible !important; }
+}
+
 /* ══════════ MODAL INFORME IC ══════════ */
 .modal-overlay {
   display: none; position: fixed; inset: 0; z-index: 1000;
@@ -2473,13 +2517,20 @@ var IC_RESUMENES = {
 
 function abrirInformeIC(d) {
   var cat = d.nivel || d.categoria || "";
-  var info = IC_RESUMENES[cat] || { cls: "ic-cat-regular", emoji: "📋", texto: "No se encontró interpretación para la categoría: " + cat };
+  var info = IC_RESUMENES[cat] || { cls: "ick-cat-regular", emoji: "", texto: "No se encontró interpretación para la categoría: " + cat };
 
-  document.getElementById("ic-modal-sub").textContent = (d.nombre || "—") + (d.rut ? "  ·  " + d.rut : "");
+  // Ficha candidato
+  document.getElementById("ic-ficha-nombre").textContent = d.nombre || "—";
+  document.getElementById("ic-ficha-rut").textContent = d.rut || "—";
+  var icSub = document.getElementById("ic-modal-sub");
+  if (icSub) icSub.textContent = (d.nombre || "—") + (d.rut ? "  ·  " + d.rut : "");
 
+  // Categoría — mapear clase legacy (ic-cat-*) a Key Clouding (ick-cat-*)
+  var clsKey = (info.cls||"").replace("ic-cat-","ick-cat-");
+  if (clsKey.indexOf("ick-cat-")===-1) clsKey = "ick-cat-regular";
   var badge = document.getElementById("ic-categoria-badge");
-  badge.className = "ic-categoria-badge " + info.cls;
-  badge.textContent = info.emoji + "  " + cat;
+  badge.className = "ick-cat-badge " + clsKey;
+  badge.textContent = cat;
 
   document.getElementById("ic-pb").textContent        = d.pb !== undefined ? d.pb : (d.correctas || "—");
   // percentil en Sheets guarda el índice de precisión (campo legacy)
@@ -2490,10 +2541,10 @@ function abrirInformeIC(d) {
 
   // Índice de precisión como barra visual
   var pct = parseInt(String(precisionVal).replace(/[^0-9]/g, "")) || 0;
-  document.getElementById("ic-percentil-pct").textContent = "Índice de precisión " + pct + "%";
+  document.getElementById("ic-percentil-pct").textContent = pct + "%";
   document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 100) + "%";
 
-  var barColor = info.cls === "ic-cat-adecuado" ? "var(--high)" : info.cls === "ic-cat-inferior" ? "var(--low)" : "var(--mid)";
+  var barColor = clsKey === "ick-cat-adecuado" ? "#1a6a4a" : clsKey === "ick-cat-inferior" ? "#c0392b" : "#c99a2e";
   document.getElementById("ic-barra-percentil").style.background = barColor;
 
   document.getElementById("ic-resumen-texto").textContent = info.texto;
@@ -3792,64 +3843,69 @@ function imprimirModalWONDERLIC() { window.print(); }
 
 <!-- ══════════ MODAL INFORME IC ══════════ -->
 <div class="modal-overlay" id="modal-ic" onclick="if(event.target===this)cerrarModalIC()">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">⚡ Informe — Test de Instrucciones Complejas</div>
-        <div class="modal-header-sub" id="ic-modal-sub">Candidato</div>
+  <div class="modal-box ick-box">
+
+    <div class="ick-header">
+      <div class="ick-header-logo">
+        <div class="ick-logo-circle">GC</div>
+        <div>
+          <div class="ick-org-name">Grupo Cygnus</div>
+          <div class="ick-doc-type">INFORME PSICOLABORAL</div>
+        </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirInformeIC()" style="gap:6px;">
-          ⬇ Descargar PDF
-        </button>
-        <button class="modal-close" onclick="cerrarModalIC()">✕</button>
+        <button class="ick-btn-pdf" onclick="imprimirInformeIC()">⬇ Descargar PDF</button>
+        <button class="ick-close" onclick="cerrarModalIC()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
+
+    <div class="ick-ficha">
+      <div style="flex:1;">
+        <div class="ick-ficha-tag">Instrucciones Complejas</div>
+        <div class="ick-ficha-subtag">Capacidad de seguir y ejecutar instrucciones complejas</div>
+      </div>
+      <div class="ick-ficha-datos">
+        <div class="ick-ficha-row"><span class="ick-ficha-lbl">Candidato</span><span class="ick-ficha-val" id="ic-ficha-nombre">—</span></div>
+        <div class="ick-ficha-row"><span class="ick-ficha-lbl">RUT</span><span class="ick-ficha-val" id="ic-ficha-rut">—</span></div>
+        <div class="ick-ficha-row"><span class="ick-ficha-lbl">Fecha evaluación</span><span class="ick-ficha-val" id="ic-fecha">—</span></div>
+        <div class="ick-ficha-row"><span class="ick-ficha-lbl">Evaluador</span><span class="ick-ficha-val">Grupo Cygnus</span></div>
+      </div>
+      <div id="ic-modal-sub" style="display:none;"></div>
+    </div>
+
+    <div class="ick-body">
+
       <!-- Categoría -->
-      <div id="ic-categoria-badge" class="ic-categoria-badge">—</div>
+      <div>
+        <div class="ick-label">Resultado</div>
+        <div id="ic-categoria-badge" class="ick-cat-badge">—</div>
+      </div>
 
       <!-- Stats -->
-      <div class="ic-stats-grid">
-        <div class="ic-stat">
-          <div class="ic-stat-num" id="ic-pb">—</div>
-          <div class="ic-stat-lbl">Puntaje bruto</div>
-        </div>
-        <div class="ic-stat">
-          <div class="ic-stat-num" id="ic-percentil">—</div>
-          <div class="ic-stat-lbl">Precisión</div>
-        </div>
-        <div class="ic-stat">
-          <div class="ic-stat-num" id="ic-errores" style="color:var(--low);">—</div>
-          <div class="ic-stat-lbl">Errores</div>
-        </div>
-        <div class="ic-stat">
-          <div class="ic-stat-num" id="ic-omisiones" style="color:var(--mid);">—</div>
-          <div class="ic-stat-lbl">Omisiones</div>
+      <div>
+        <div class="ick-label">Desglose</div>
+        <div class="ick-stats">
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-pb">—</div><div class="ick-stat-lbl">Puntaje bruto</div></div>
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-percentil">—</div><div class="ick-stat-lbl">Precisión</div></div>
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-errores" style="color:#c0392b;">—</div><div class="ick-stat-lbl">Errores</div></div>
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-omisiones" style="color:#c99a2e;">—</div><div class="ick-stat-lbl">Omisiones</div></div>
         </div>
       </div>
 
-      <!-- Barra percentil -->
-      <div class="ic-barra-wrap">
-        <div class="ic-barra-label">
-          <span>Índice de precisión</span>
-          <span id="ic-percentil-pct">—</span>
-        </div>
-        <div class="ic-barra-bg">
-          <div class="ic-barra-fill" id="ic-barra-percentil" style="width:0%"></div>
-        </div>
+      <!-- Barra índice de precisión -->
+      <div class="ick-bar-wrap">
+        <div class="ick-bar-label"><span>Índice de precisión</span><span id="ic-percentil-pct">—</span></div>
+        <div class="ick-bar-bg"><div class="ick-bar-fill" id="ic-barra-percentil" style="width:0%"></div></div>
       </div>
 
       <!-- Resumen ejecutivo -->
-      <div class="ic-resumen">
-        <div class="ic-resumen-title">📋 Resumen ejecutivo</div>
-        <div class="ic-resumen-text" id="ic-resumen-texto">—</div>
+      <div>
+        <div class="ick-label">Interpretación</div>
+        <div class="ick-resumen"><div class="ick-resumen-texto" id="ic-resumen-texto">—</div></div>
       </div>
 
-      <!-- Fecha -->
-      <div style="font-size:11px;color:var(--muted);text-align:right;">
-        Evaluación realizada el <span id="ic-fecha">—</span>
-      </div>
+      <div class="ick-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
+
     </div>
   </div>
 </div>
