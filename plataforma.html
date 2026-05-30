@@ -2304,19 +2304,6 @@ async function abrirDash(test, rut, nombre) {
   }
 }
 
-function actualizarPreview() {
-  var test = document.getElementById("env-test").value;
-  var prev = document.getElementById("link-preview");
-  var cargoWrap = document.getElementById("env-cargo-wrap");
-
-  if (test && TESTS_LINKS[test]) {
-    document.getElementById("link-url").textContent = TESTS_LINKS[test];
-    prev.style.display = "none"; // oculto
-  } else {
-    prev.style.display = "none";
-  }
-}
-
 function toggleMultiSelect() {
   var dd = document.getElementById("multi-dropdown");
   dd.classList.toggle("open");
