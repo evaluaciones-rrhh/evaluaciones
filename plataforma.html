@@ -3645,6 +3645,44 @@ function wlNivelColor(nivel){
   return "#e74c3c";
 }
 
+// Formatea una fecha que puede venir como ISO de Sheets (2026-05-19T04:00:00.000Z)
+// o como texto ya formateado. Devuelve "DD-MM-YYYY".
+function wlFmtFecha(v){
+  var s = String(v||"").trim();
+  if(!s) return "—";
+  // ISO con T → extraer la parte de fecha y reordenar
+  if(/^\d{4}-\d{2}-\d{2}T/.test(s)){
+    var p = s.split("T")[0].split("-");
+    return p[2]+"-"+p[1]+"-"+p[0];
+  }
+  // ya viene como dd-mm-yyyy o similar → dejar tal cual
+  return s;
+}
+
+// Formatea el tiempo utilizado. El test lo guarda como "MM:SS" (ej. "09:45" = 9 min 45 s),
+// pero Google Sheets reinterpreta ese texto como hora del día y lo devuelve como
+// serial 1899-12-30THH:MM:SS, donde HH:MM corresponde en realidad a los MM:SS originales.
+// También soporta "mm:ss" directo o número de segundos.
+function wlFmtTiempo(v){
+  var s = String(v||"").trim();
+  if(!s || s==="-") return "—";
+  // Caso Sheets: 1899-12-30THH:MM:SS → el HH:MM era el MM:SS original del test
+  var mIso = s.match(/T(\d{2}):(\d{2}):(\d{2})/);
+  if(mIso){
+    var min = parseInt(mIso[1]);   // "HH" de Sheets = minutos reales
+    var seg = parseInt(mIso[2]);   // "MM" de Sheets = segundos reales
+    return min + " min " + (seg<10?"0":"") + seg + " s";
+  }
+  // Caso "mm:ss" directo
+  var mClock = s.match(/^(\d{1,3}):(\d{2})$/);
+  if(mClock){ return parseInt(mClock[1]) + " min " + mClock[2] + " s"; }
+  // Caso número puro = segundos
+  if(/^\d+$/.test(s)){
+    var tot=parseInt(s); return Math.floor(tot/60)+" min "+(tot%60<10?"0":"")+(tot%60)+" s";
+  }
+  return s;
+}
+
 function wlGetRecomendacion(nivel, foco){
   if((nivel==="Superior"||nivel==="Promedio alto") && foco<=3)
     return {cls:"wl-rec-continuar",titulo:"Continuar proceso",texto:nivel==="Superior"
@@ -3670,7 +3708,7 @@ function wlGenerarResumen(nombre, nivel, percentil, cargo, pb, pa, tiempo){
   else if(nivel==="Bajo promedio") txt = n+" obtiene un resultado por debajo del promedio, lo que puede implicar mayor dificultad para aprender procedimientos nuevos con rapidez. ";
   else txt = n+" obtiene un resultado en el rango bajo, lo que sugiere dificultades en el procesamiento de información y la resolución de problemas. ";
   if(cargo){ txt += "Para el cargo de "+cargo+", "; if(nivel==="Superior"||nivel==="Promedio alto") txt+="el perfil cognitivo es adecuado. "; else if(nivel==="Promedio") txt+="el nivel cognitivo es compatible si el cargo no requiere alta complejidad analítica. "; else txt+="se recomienda evaluar si las exigencias cognitivas del cargo son acordes al perfil. "; }
-  txt += "Completó la prueba en "+tiempo+" minutos. ";
+  txt += "Completó la prueba en "+tiempo+". ";
   if(pa!=pb) txt += "Se aplicó un ajuste por edad que modifica el puntaje bruto ("+pb+") al ajustado ("+pa+"), reflejado en el percentil reportado.";
   return txt;
 }
@@ -3697,10 +3735,11 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     var interp   = fila[12]||"-";
     var foco     = parseInt(fila[13])||0;
 
+    var tiempoFmt = wlFmtTiempo(tiempo);
     document.getElementById("wl-ficha-nombre").textContent = fila[1]||"—";
     document.getElementById("wl-ficha-rut").textContent = fila[2]||"—";
-    document.getElementById("wl-ficha-fecha").textContent = fila[0]||"—";
-    document.getElementById("wl-ficha-tiempo").textContent = tiempo||"—";
+    document.getElementById("wl-ficha-fecha").textContent = wlFmtFecha(fila[0]);
+    document.getElementById("wl-ficha-tiempo").textContent = tiempoFmt;
 
     // Hero: gauge de percentil (anillo conic-gradient) + nivel
     var gaugeCol = wlNivelColor(nivel);
@@ -3730,12 +3769,9 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     document.getElementById("wl-recomendacion").innerHTML =
       "<div class='wlk-rec "+recCls+"'><div class='wlk-rec-titulo'>"+rec.titulo+"</div><div class='wlk-rec-texto'>"+rec.texto+"</div></div>";
 
-    // Interpretación
-    document.getElementById("wl-interp").textContent = interp;
-
-    // Resumen (cargo ya no se captura → se pasa vacío y el generador lo omite)
+    // Resumen ejecutivo (única sección de resultado). Cargo ya no se captura → vacío.
     document.getElementById("wl-resumen-texto").textContent =
-      wlGenerarResumen(fila[1]||"El candidato", nivel, percentil, "", pb, pa, tiempo);
+      wlGenerarResumen(fila[1]||"El candidato", nivel, percentil, "", pb, pa, tiempoFmt);
 
     document.getElementById("modal-wonderlic").classList.add("activo");
     document.body.style.overflow = "hidden";
@@ -4249,16 +4285,12 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div id="wl-recomendacion"></div>
       </div>
 
-      <!-- Interpretación -->
+      <!-- Resultado (resumen ejecutivo) -->
       <div>
-        <div class="wlk-label">Interpretación del resultado</div>
-        <div class="wlk-interp" id="wl-interp"></div>
-      </div>
-
-      <!-- Resumen ejecutivo -->
-      <div class="wlk-resumen">
-        <div class="wlk-resumen-tit">Resumen ejecutivo</div>
-        <div class="wlk-resumen-texto" id="wl-resumen-texto"></div>
+        <div class="wlk-label">Resultado</div>
+        <div class="wlk-resumen">
+          <div class="wlk-resumen-texto" id="wl-resumen-texto"></div>
+        </div>
       </div>
 
       <div class="wlk-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
