@@ -22,7 +22,6 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);font
 .card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:28px 32px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
 .card-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:20px;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;}
 .form-group{display:flex;flex-direction:column;gap:7px;}
 .form-group label{font-size:13px;color:var(--muted);}
 .form-group input,.form-group select{border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:"DM Sans",sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;}
@@ -91,12 +90,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--ink);font
           <div class="form-group"><label>Nombre completo</label><input type="text" id="i-nom" placeholder="Apellido Nombre"></div>
           <div class="form-group"><label>RUT</label><input type="text" id="i-rut" placeholder="Ej: 12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
         </div>
-        <div class="form-row-3">
+        <div class="form-row">
           <div class="form-group"><label>Edad</label><input type="number" id="i-edad" placeholder="Ej: 32" min="15" max="99"></div>
-          <div class="form-group"><label>Sexo</label>
-            <select id="i-sexo"><option value="">Seleccionar</option><option value="M">Masculino</option><option value="F">Femenino</option></select>
-          </div>
-          <div class="form-group"><label>Cargo postulado</label><input type="text" id="i-cargo" placeholder="Ej: Analista"></div>
+          <div class="form-group"></div>
         </div>
       </div>
     </div>
@@ -263,7 +259,7 @@ var IT=[
 {n:46,t:"o",q:"Dos proverbios tienen sentidos opuestos. Cuales son?\n1. POR LA CASA SE CONOCE AL DUENIO\n2. NUNCA DIGAS DE ESTA AGUA NO BEBERE\n3. MAS VALE SOLO QUE MAL ACOMPANIADO\n4. AGUA QUE NO HAS DE BEBER DEJALA CORRER\n5. AUNQUE LA MONA SE VISTA DE SEDA, MONA QUEDA",o:["1 y 2","1 y 5","2 y 4","3 y 4","4 y 5"]},
 {n:47,t:"n",q:"Un bodeguero compra 14 docenas de fruta por $4.50. Sabe que 4 docenas se arruinaran. A que precio debe vender cada docena en buen estado para ganar 1/3 del costo total?",h:"Escriba el precio en centavos"},
 {n:48,t:"o",q:"Las dos primeras oraciones son ciertas. Que se puede decir de la tercera?\nLAS SENIORAS USAN FALDA LARGA\nYO USO FALDA LARGA\nYO SOY UNA SENIORA",o:["Es cierta","Es falsa","No se puede decir nada"]},
-{n:49,t:"n",q:"Cual es el siguiente numero en la serie: 2, 1, 0.5, 0.125?",h:"Escriba solo el numero"},
+{n:49,t:"n",q:"Cual es el siguiente numero en la serie: 2, 1, 0.5, 0.25?",h:"Escriba solo el numero"},
 {n:50,t:"n",q:"Tres hombres forman una sociedad. X invierte $4500, Y invierte $4500, Z invierte $1000. Ganancias: $1500 divididas en partes iguales. Cuanto de menos recibe X que si se dividiera en proporcion a lo invertido?",h:"Escriba solo el numero"}
 ];
 
@@ -346,8 +342,6 @@ function iniciar(){
     nombre:nom,
     rut:document.getElementById("i-rut").value.trim(),
     edad:parseInt(document.getElementById("i-edad").value)||0,
-    sexo:document.getElementById("i-sexo").value,
-    cargo:document.getElementById("i-cargo").value.trim(),
     fecha:new Date().toLocaleDateString("es-CL")
   };
   document.getElementById("vp").style.display="none";
@@ -356,14 +350,18 @@ function iniciar(){
 }
 
 function startTimer(){
-  timer=setInterval(function(){
-    seg--;
+  var DURACION=720;                 // 12 minutos
+  var tFin=Date.now()+DURACION*1000; // instante de término real
+  function tick(){
+    seg=Math.max(0, Math.round((tFin-Date.now())/1000));
     var m=Math.floor(seg/60), s=seg%60;
     var el=document.getElementById("cron");
     el.textContent=(m<10?"0":"")+m+":"+(s<10?"0":"")+s;
     if(seg<=60) el.classList.add("urgente");
     if(seg<=0){clearInterval(timer);finalizar();}
-  },1000);
+  }
+  tick();
+  timer=setInterval(tick,1000);
 }
 
 function renderTest(){
@@ -448,19 +446,43 @@ function nav(d){
   renderTest();
 }
 
+// Normaliza una respuesta de texto/número para compararla de forma tolerante:
+// - quita espacios, símbolos de moneda y separadores de miles
+// - convierte la coma decimal chilena (0,8) a punto (0.8)
+// - mantiene mayúsculas para letras (V/F/H)
+function normResp(x){
+  var s=String(x==null?"":x).trim().toUpperCase();
+  s=s.replace(/\$/g,"").replace(/\s+/g,"");          // sin $ ni espacios
+  // separador de miles SOLO si hay coma decimal después (formato es-CL: 2.100,5)
+  // o si el grupo de 3 va seguido de otro separador de miles. Nunca toca un decimal simple.
+  s=s.replace(/(\d)\.(\d{3})(?=[.,]\d)/g,"$1$2");     // "2.100,5" / "1.234.567" -> junta miles
+  s=s.replace(/(\d),(\d+)$/,"$1.$2");                  // coma decimal final -> punto
+  s=s.replace(/(\d),(\d)/g,"$1.$2");                   // coma decimal intermedia -> punto
+  return s;
+}
+// Devuelve el valor numérico de una respuesta, soportando fracciones "a/b".
+// Si no es numérica, devuelve null.
+function valorNumerico(s){
+  if(/^-?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  if(m){ var d=parseFloat(m[2]); if(d!==0) return parseFloat(m[1])/d; }
+  return null;
+}
+// ¿La respuesta del candidato coincide con la clave?
+function coincideResp(resp, clave){
+  var r=normResp(resp), c=normResp(clave);
+  if(r==="") return false;
+  if(r===c) return true;                              // match textual directo
+  var vr=valorNumerico(r), vc=valorNumerico(c);       // o equivalencia numérica
+  if(vr!==null && vc!==null) return Math.abs(vr-vc) < 1e-9;
+  return false;
+}
+
 function finalizar(){
   clearInterval(timer);
   var correctas=0;
   IT.forEach(function(it){
-    var r=(resp[it.n]||"").toString().trim().toUpperCase();
-    var c=CLAVE[it.n].toString().trim().toUpperCase();
-    if(c.indexOf("-")>-1){
-      var pc=c.split("-").map(function(x){return x.trim();});
-      var pr=r.replace(/\s/g,"").split(/[-,]/g).map(function(x){return x.trim();});
-      if(pc.every(function(p){return pr.some(function(q){return q===p||q.indexOf(p)>=0||p.indexOf(q)>=0;});})) correctas++;
-    } else {
-      if(r===c) correctas++;
-    }
+    if(coincideResp(resp[it.n], CLAVE[it.n])) correctas++;
   });
   var aj=ajuste(cand.edad);
   var pa=correctas+aj;
@@ -489,8 +511,7 @@ function enviar(pb,aj,pa,p,nivel,tiempo,interp){
   var payload={
     test:"WONDERLIC",
     fecha:cand.fecha,nombre:cand.nombre,rut:cand.rut||"",
-    edad:cand.edad||"",sexo:cand.sexo==="M"?"Masculino":cand.sexo==="F"?"Femenino":"",
-    cargo:cand.cargo||"",
+    edad:cand.edad||"",
     pb:pb,ajuste:aj,pa:pa,percentil:p,nivel:nivel,
     tiempo_usado:tiempo,interpretacion:interp,cambios_foco:cambiosFoco
   };
