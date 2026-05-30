@@ -579,6 +579,56 @@ tbody tr:hover td { background: #fdf9f6; }
   .pfk-body { overflow:visible !important; }
 }
 
+/* ══════════════════════════════════════════
+   IPV INFORME — Key Clouding style
+   ══════════════════════════════════════════ */
+.ipvk-box { max-width:720px !important; padding:0 !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; max-height:90vh !important; overflow:hidden !important; }
+.ipvk-header { flex-shrink:0; background:#1a3a5c; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+.ipvk-header-logo { display:flex; align-items:center; gap:12px; }
+.ipvk-logo-circle { width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.ipvk-org-name { color:#fff;font-weight:700;font-size:14px; }
+.ipvk-doc-type { color:rgba(255,255,255,.6);font-size:10px;margin-top:2px;letter-spacing:.05em; }
+.ipvk-btn-pdf { background:#c4432a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer; }
+.ipvk-btn-pdf:hover { opacity:.85; }
+.ipvk-close { background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;padding:4px 8px; }
+.ipvk-close:hover { opacity:1; }
+.ipvk-ficha { flex-shrink:0; background:#f7f5f0; border-bottom:2px solid #e0dbd0; padding:16px 24px; display:flex; gap:28px; align-items:flex-start; }
+.ipvk-ficha-tag { font-size:12px;font-weight:800;letter-spacing:.08em;color:#1a3a5c;text-transform:uppercase; }
+.ipvk-ficha-subtag { font-size:10px;color:#888;margin-top:3px; }
+.ipvk-ficha-datos { flex:1.2; }
+.ipvk-ficha-row { display:flex;gap:10px;margin-bottom:3px;font-size:11px; }
+.ipvk-ficha-lbl { color:#888;min-width:90px;font-weight:500; }
+.ipvk-ficha-val { color:#1a1917;font-weight:600; }
+.ipvk-body { padding:22px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; flex:1 1 auto; min-height:0; }
+.ipvk-label { font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid #1a3a5c;color:#1a3a5c;padding-bottom:6px;margin-bottom:12px; }
+.ipvk-label-verde { border-bottom-color:#1a6a4a;color:#1a6a4a; }
+.ipvk-label-roja { border-bottom-color:#c4432a;color:#c4432a; }
+.ipvk-dgv { display:flex;align-items:center;gap:20px;background:#1a3a5c;border-radius:10px;padding:20px 24px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ipvk-dgv-circle { width:84px;height:84px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ipvk-dgv-inner { width:68px;height:68px;border-radius:50%;background:#1a3a5c;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.ipvk-dgv-pt { color:#fff;font-size:26px;font-weight:800;line-height:1; }
+.ipvk-dgv-ptlbl { color:rgba(255,255,255,.6);font-size:8px;letter-spacing:.1em;text-transform:uppercase;margin-top:2px; }
+.ipvk-dgv-info { flex:1; }
+.ipvk-dgv-nivel { color:#fff;font-size:18px;font-weight:800;margin-bottom:4px; }
+.ipvk-dgv-desc { color:rgba(255,255,255,.7);font-size:11px;line-height:1.5; }
+.ipvk-fort-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.ipvk-fort-card { background:#f4faf6;border-left:3px solid #1a6a4a;padding:9px 12px;border-radius:0 6px 6px 0;font-size:11px;color:#2a4a3a;line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ipvk-alerta-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.ipvk-alerta-card { background:#fdf5ef;border-left:3px solid #c4432a;padding:9px 12px;border-radius:0 6px 6px 0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.ipvk-alerta-titulo { font-size:11px;font-weight:700;color:#c4432a;margin-bottom:3px; }
+.ipvk-alerta-desc { font-size:10px;color:#7a3a20;line-height:1.45; }
+.ipvk-sin-alertas { background:#f4faf6;border-radius:6px;padding:9px 12px;font-size:11px;color:#2a4a3a; }
+.ipvk-resumen { background:#f7f5f0;border-radius:8px;padding:14px 16px; }
+.ipvk-resumen-texto { font-size:12px;line-height:1.7;color:#444; }
+.ipvk-interp { background:#fafafa;border:1px solid #ececec;border-radius:8px;padding:14px 16px;font-size:12px;line-height:1.7;color:#444; }
+.ipvk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
+@media print {
+  .ipvk-btn-pdf, .ipvk-close, .nav-sidebar, .topbar { display:none !important; }
+  .ipvk-header, .ipvk-logo-circle, .ipvk-ficha, .ipvk-dgv, .ipvk-dgv-circle, .ipvk-fort-card, .ipvk-alerta-card, .ipv-esc-card, .ipv-punto-alto, .ipv-punto-promedio, .ipv-punto-bajo { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  .ipvk-box { max-height:none !important; overflow:visible !important; }
+  .ipvk-body { overflow:visible !important; }
+}
+
 /* ══════════ MODAL INFORME IPV ══════════ */
 .ipv-hero { background:var(--azul);color:#fff;border-radius:10px;padding:18px 20px;margin-bottom:14px; }
 .ipv-hero-nombre { font-size:20px;font-weight:700;margin-bottom:4px; }
@@ -2517,6 +2567,28 @@ var IC_RESUMENES = {
 
 function abrirInformeIC(d) {
   var cat = d.nivel || d.categoria || "";
+
+  // Regla de cobertura: la categoría por precisión engaña si hubo muchas omisiones.
+  // El IC tiene 25 ítems. Si respondió pocas, se topa la categoría hacia abajo.
+  // (Corrige también registros antiguos cuya categoría guardada no consideró omisiones.)
+  var ORDEN_CAT = ["Deficiente","Bajo","Medio","Alto","Muy alto"];
+  var omis = parseInt(d.omisiones) || 0;
+  var errs = parseInt(d.errores) || 0;
+  var correctas = parseInt(d.pb !== undefined ? d.pb : d.correctas) || 0;
+  var respondidas = correctas + errs;          // ítems que efectivamente contestó
+  var totalItems = respondidas + omis;          // debería ser ~25
+  var coberturaBaja = false, topeCat = null;
+  if (totalItems > 0) {
+    if (respondidas < 13) { topeCat = "Deficiente"; coberturaBaja = true; }   // <~50% respondido
+    else if (respondidas < 20) { topeCat = "Bajo"; coberturaBaja = true; }    // <80% respondido
+    else if (respondidas < 23) { topeCat = "Medio"; coberturaBaja = true; }   // dejó 3+ sin responder
+  }
+  if (topeCat) {
+    var idxActual = ORDEN_CAT.indexOf(cat);
+    var idxTope   = ORDEN_CAT.indexOf(topeCat);
+    if (idxActual === -1 || idxActual > idxTope) cat = topeCat;  // bajar si está por encima del tope
+  }
+
   var info = IC_RESUMENES[cat] || { cls: "ick-cat-regular", emoji: "", texto: "No se encontró interpretación para la categoría: " + cat };
 
   // Ficha candidato
@@ -2547,7 +2619,12 @@ function abrirInformeIC(d) {
   var barColor = clsKey === "ick-cat-adecuado" ? "#1a6a4a" : clsKey === "ick-cat-inferior" ? "#c0392b" : "#c99a2e";
   document.getElementById("ic-barra-percentil").style.background = barColor;
 
-  document.getElementById("ic-resumen-texto").textContent = info.texto;
+  var resumenTxt = info.texto;
+  if (coberturaBaja) {
+    resumenTxt = "⚠ Cobertura baja: el candidato respondió solo " + respondidas + " de " + totalItems +
+      " ítems (" + omis + " omisiones). La precisión se calcula sobre lo respondido, por lo que un índice alto no refleja un buen desempeño global. La categoría se ajustó considerando la baja cantidad de respuestas. " + info.texto;
+  }
+  document.getElementById("ic-resumen-texto").textContent = resumenTxt;
   document.getElementById("ic-fecha").textContent = d.fecha || "—";
 
   document.getElementById("modal-ic").classList.add("activo");
@@ -3568,16 +3645,14 @@ async function abrirInformeIPV(test, rut, nombre) {
     var ptA  = parseInt(fila[14])||0;
     var foco = parseInt(fila[15])||0;
 
-    // Header
-    document.getElementById("ipv-modal-sub").textContent = (fila[1]||"—") + (fila[2] ? "  ·  "+fila[2] : "");
-
-    // Hero
-    document.getElementById("ipv-hero-nombre").textContent = fila[1]||"—";
-    document.getElementById("ipv-hero-meta").textContent =
-      "RUT: "+(fila[2]||"—") +
-      (fila[3] ? "  ·  Edad: "+fila[3] : "") +
-      (fila[4] ? "  ·  "+fila[4] : "") +
-      "  ·  Fecha: "+(fila[0]||"—");
+    // Ficha candidato (Key Clouding)
+    document.getElementById("ipv-ficha-nombre").textContent = fila[1]||"—";
+    document.getElementById("ipv-ficha-rut").textContent = fila[2]||"—";
+    document.getElementById("ipv-ficha-fecha").textContent = fila[0]||"—";
+    // Refs legacy ocultos (no se muestran, pero se mantienen por compatibilidad)
+    var _hn=document.getElementById("ipv-hero-nombre"); if(_hn) _hn.textContent = fila[1]||"—";
+    var _hm=document.getElementById("ipv-hero-meta"); if(_hm) _hm.textContent = "";
+    var _ms=document.getElementById("ipv-modal-sub"); if(_ms) _ms.textContent = (fila[1]||"—");
 
     // Semáforo
     var sem = ipvGetSemaforo(dgvN, areas);
@@ -3587,13 +3662,15 @@ async function abrirInformeIPV(test, rut, nombre) {
       '<div><div class="pf-sem-titulo" style="color:'+sem.color+'">'+sem.titulo+'</div>' +
       '<div style="color:var(--muted);font-size:12px;margin-top:3px;">'+sem.texto+'</div></div></div>';
 
-    // DGV
+    // DGV (Key Clouding)
+    var dgvKey = ipvNvl(dgvPT);
+    var dgvColor = dgvKey==="alto" ? "#2ecc71" : dgvKey==="bajo" ? "#e74c3c" : "#f0a830";
     document.getElementById("ipv-dgv").innerHTML =
-      '<div class="ipv-dgv-banner">' +
-      '<div class="ipv-dgv-circle"><div class="ipv-dgv-pt">'+dgvPT+'</div><div class="ipv-dgv-lbl">PT</div></div>' +
-      '<div class="ipv-dgv-info"><h4>DGV — Disposición General para la Venta</h4>' +
-      '<p>'+IPV_INTERP_DGV[ipvNvl(dgvPT)]+'</p></div>' +
-      '<div class="ipv-dgv-nivel ipv-nvl-'+ipvNvl(dgvPT)+'">'+dgvN+'</div></div>';
+      '<div class="ipvk-dgv">' +
+      '<div class="ipvk-dgv-circle" style="background:conic-gradient('+dgvColor+' '+(dgvPT*36)+'deg, rgba(255,255,255,0.18) 0deg);">' +
+        '<div class="ipvk-dgv-inner"><div class="ipvk-dgv-pt">'+dgvPT+'</div><div class="ipvk-dgv-ptlbl">PT</div></div></div>' +
+      '<div class="ipvk-dgv-info"><div class="ipvk-dgv-nivel">Disposición para la Venta: '+dgvN+'</div>' +
+      '<div class="ipvk-dgv-desc">'+IPV_INTERP_DGV[ipvNvl(dgvPT)]+'</div></div></div>';
 
     // Integridad
     document.getElementById("ipv-integridad").innerHTML = foco === 0
@@ -3643,18 +3720,18 @@ async function abrirInformeIPV(test, rut, nombre) {
     var secForts = document.getElementById("ipv-sec-forts");
     if (fortalezas.length) {
       document.getElementById("ipv-forts").innerHTML = fortalezas.slice(0,6).map(function(f){
-        return '<div class="ipv-fort-card"><strong>✓ Fortaleza</strong>'+f+'</div>';
+        return '<div class="ipvk-fort-card">✓ '+f+'</div>';
       }).join('');
       secForts.style.display = 'block';
     } else { secForts.style.display = 'none'; }
 
     // Áreas
     document.getElementById("ipv-alertas").innerHTML = areas.length
-      ? '<div class="ipv-alerta-grid">'+areas.map(function(a){
+      ? '<div class="ipvk-alerta-grid">'+areas.map(function(a){
           var desc = IPV_DESC_AREAS[a] || 'Aspecto a explorar en entrevista.';
-          return '<div class="ipv-alerta-card"><div class="ipv-alerta-titulo">⚠ '+a+'</div><div class="ipv-alerta-desc">'+desc+'</div></div>';
+          return '<div class="ipvk-alerta-card"><div class="ipvk-alerta-titulo">⚠ '+a+'</div><div class="ipvk-alerta-desc">'+desc+'</div></div>';
         }).join('')+'</div>'
-      : '<div class="ipv-sin-alertas">✓ No se identifican áreas de atención relevantes en este perfil.</div>';
+      : '<div class="ipvk-sin-alertas">✓ No se identifican áreas de atención relevantes en este perfil.</div>';
 
     // Síntesis
     var lineas = interp.split('|').map(function(l){return l.trim();}).filter(Boolean);
@@ -4224,24 +4301,39 @@ function imprimirModalWONDERLIC() { window.print(); }
 </div>
 <!-- ══════════ MODAL INFORME IPV ══════════ -->
 <div class="modal-overlay" id="modal-ipv" onclick="if(event.target===this)cerrarModalIPV()">
-  <div class="modal-box" style="max-width:800px;">
-    <div class="modal-header">
-      <div>
-        <div class="modal-header-title">💼 Informe — Perfil de Personalidad Comercial IPV</div>
-        <div class="modal-header-sub" id="ipv-modal-sub">Candidato</div>
+  <div class="modal-box ipvk-box">
+
+    <div class="ipvk-header">
+      <div class="ipvk-header-logo">
+        <div class="ipvk-logo-circle">GC</div>
+        <div>
+          <div class="ipvk-org-name">Grupo Cygnus</div>
+          <div class="ipvk-doc-type">INFORME PSICOLABORAL</div>
+        </div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn btn-primary btn-sm" onclick="imprimirModalIPV()">⬇ Descargar PDF</button>
-        <button class="modal-close" onclick="cerrarModalIPV()">✕</button>
+        <button class="ipvk-btn-pdf" onclick="imprimirModalIPV()">⬇ Descargar PDF</button>
+        <button class="ipvk-close" onclick="cerrarModalIPV()">✕</button>
       </div>
     </div>
-    <div class="modal-body">
 
-      <!-- Hero -->
-      <div class="ipv-hero">
-        <div class="ipv-hero-nombre" id="ipv-hero-nombre">—</div>
-        <div class="ipv-hero-meta" id="ipv-hero-meta">—</div>
+    <div class="ipvk-ficha">
+      <div style="flex:1;">
+        <div class="ipvk-ficha-tag">Personalidad Comercial</div>
+        <div class="ipvk-ficha-subtag">Perfil de disposición y aptitudes para la venta</div>
       </div>
+      <div class="ipvk-ficha-datos">
+        <div class="ipvk-ficha-row"><span class="ipvk-ficha-lbl">Candidato</span><span class="ipvk-ficha-val" id="ipv-ficha-nombre">—</span></div>
+        <div class="ipvk-ficha-row"><span class="ipvk-ficha-lbl">RUT</span><span class="ipvk-ficha-val" id="ipv-ficha-rut">—</span></div>
+        <div class="ipvk-ficha-row"><span class="ipvk-ficha-lbl">Fecha evaluación</span><span class="ipvk-ficha-val" id="ipv-ficha-fecha">—</span></div>
+        <div class="ipvk-ficha-row"><span class="ipvk-ficha-lbl">Evaluador</span><span class="ipvk-ficha-val">Grupo Cygnus</span></div>
+      </div>
+      <div id="ipv-modal-sub" style="display:none;"></div>
+      <div id="ipv-hero-nombre" style="display:none;"></div>
+      <div id="ipv-hero-meta" style="display:none;"></div>
+    </div>
+
+    <div class="ipvk-body">
 
       <!-- Semáforo -->
       <div id="ipv-semaforo"></div>
@@ -4253,38 +4345,35 @@ function imprimirModalWONDERLIC() { window.print(); }
       <div id="ipv-integridad"></div>
 
       <!-- Dimensiones y escalas -->
-      <div class="ipv-seccion">
-        <div class="ipv-seccion-title">📊 Escalas por dimensión</div>
+      <div>
+        <div class="ipvk-label">Escalas por dimensión</div>
         <div id="ipv-dims"></div>
       </div>
 
-      <!-- Fortalezas -->
-      <div class="ipv-seccion" id="ipv-sec-forts" style="display:none;">
-        <div class="ipv-seccion-title">✅ Fortalezas identificadas</div>
-        <div class="ipv-fort-grid" id="ipv-forts"></div>
+      <!-- Fortalezas + Áreas -->
+      <div id="ipv-sec-forts" style="display:none;">
+        <div class="ipvk-label ipvk-label-verde">Fortalezas identificadas</div>
+        <div class="ipvk-fort-grid" id="ipv-forts"></div>
       </div>
 
-      <!-- Áreas de atención -->
-      <div class="ipv-seccion">
-        <div class="ipv-seccion-title">⚠️ Áreas de atención</div>
+      <div>
+        <div class="ipvk-label ipvk-label-roja">Áreas de atención</div>
         <div id="ipv-alertas"></div>
       </div>
 
       <!-- Síntesis -->
-      <div class="ipv-sintesis">
-        <div class="ipv-sec-tit">Síntesis interpretativa</div>
-        <div class="ipv-sintesis-texto" id="ipv-sintesis-texto">—</div>
+      <div>
+        <div class="ipvk-label">Síntesis interpretativa</div>
+        <div class="ipvk-interp" id="ipv-sintesis-texto">—</div>
       </div>
 
       <!-- Resumen ejecutivo -->
-      <div class="ipv-resumen">
-        <div class="ipv-seccion-title">📋 Resumen ejecutivo</div>
-        <div class="ipv-resumen-texto" id="ipv-resumen-texto">—</div>
+      <div>
+        <div class="ipvk-label">Resumen ejecutivo</div>
+        <div class="ipvk-resumen"><div class="ipvk-resumen-texto" id="ipv-resumen-texto">—</div></div>
       </div>
 
-      <div style="font-size:10px;color:var(--muted);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
-        Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.
-      </div>
+      <div class="ipvk-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
 
     </div>
   </div>
