@@ -200,19 +200,20 @@ document.addEventListener("DOMContentLoaded", validarAcceso);
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 
 // Puntajes por pregunta y alternativa: [A, B, C, D]
+// Pauta de corrección OFICIAL — Manual CEEL (Ossandón RR.HH. / Hersey-Blanchard)
 const PUNTAJES = [
-  [+2, -1, +1, -2], // 1
-  [+2, -2, +1, -1], // 2
-  [+1, -1, -2, +2], // 3
-  [+1, -2, +2, -1], // 4
-  [-2, +1, +2, -1], // 5
-  [-1, +1, -2, +2], // 6
-  [-2, +2, -1, +1], // 7
-  [+2, -1, -2, +1], // 8
-  [-2, +1, +2, -1], // 9
-  [+1, -2, -1, +2], // 10
-  [-2, +2, -1, +1], // 11
-  [-1, +2, -2, +1], // 12
+  [+2, +1, -1, -2], // 1
+  [-1, +2, +1, -2], // 2
+  [-2, +1, +2, -1], // 3
+  [-2, -1, +1, +2], // 4
+  [+2, +1, -1, -2], // 5
+  [+1, +2, -1, -2], // 6
+  [-2, -1, +2, +1], // 7
+  [-2, -1, +1, +2], // 8
+  [+2, +1, -1, -2], // 9
+  [-2, +2, +1, -1], // 10
+  [-2, -1, +2, +1], // 11
+  [-2, -1, +1, +2], // 12
 ];
 
 // Estilo predominante por columna: A=Autoritario, B=Integrado, C=Relacionado, D=Separado
@@ -220,19 +221,20 @@ const PUNTAJES = [
 // Este mapa define el estilo REAL de cada alternativa en cada situación.
 const ESTILOS = ['Autoritario','Integrado','Relacionado','Separado'];
 
+// Mapa estilo↔alternativa según pauta oficial del manual
 const MAPA_ESTILOS = [
-  ['Autoritario','Separado',   'Integrado',  'Separado'   ], // P1
-  ['Integrado',  'Separado',   'Relacionado','Autoritario'], // P2
-  ['Integrado',  'Separado',   'Autoritario','Relacionado'], // P3
-  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P4
-  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P5
-  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P6
-  ['Autoritario','Integrado',  'Relacionado','Separado'   ], // P7
-  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P8
-  ['Separado',   'Integrado',  'Autoritario','Relacionado'], // P9
-  ['Relacionado','Autoritario','Separado',   'Integrado'  ], // P10
-  ['Autoritario','Integrado',  'Relacionado','Separado'   ], // P11
-  ['Integrado',  'Separado',   'Autoritario','Relacionado'], // P12
+  ['Autoritario','Relacionado','Integrado','Separado'], // P1
+  ['Separado','Autoritario','Relacionado','Integrado'], // P2
+  ['Relacionado','Autoritario','Separado','Integrado'], // P3
+  ['Integrado','Separado','Autoritario','Relacionado'], // P4
+  ['Relacionado','Integrado','Separado','Autoritario'], // P5
+  ['Integrado','Separado','Autoritario','Relacionado'], // P6
+  ['Autoritario','Relacionado','Integrado','Separado'], // P7
+  ['Relacionado','Integrado','Separado','Autoritario'], // P8
+  ['Relacionado','Integrado','Separado','Autoritario'], // P9
+  ['Integrado','Separado','Autoritario','Relacionado'], // P10
+  ['Autoritario','Relacionado','Integrado','Separado'], // P11
+  ['Relacionado','Autoritario','Separado','Integrado'], // P12
 ];
 
 const PREGUNTAS = [
@@ -485,10 +487,16 @@ function enviar(){
 
   // Efectividad
   let efectividad;
-  if(puntajeTotal > 10) efectividad = 'Líder muy efectivo';
-  else if(puntajeTotal >= 3) efectividad = 'Líder efectivo';
-  else if(puntajeTotal >= -3) efectividad = 'Normal';
-  else efectividad = 'Líder poco efectivo';
+  // Indicadores de efectividad oficiales (Manual CEEL, pág 4)
+  if(puntajeTotal >= 15) efectividad = 'Muy Alta';
+  else if(puntajeTotal >= 8) efectividad = 'Alta';
+  else if(puntajeTotal >= 4) efectividad = 'Media Alta';
+  else if(puntajeTotal >= 2) efectividad = 'Promedio Positivo';
+  else if(puntajeTotal >= -1) efectividad = 'Promedio';
+  else if(puntajeTotal >= -3) efectividad = 'Promedio Negativo';
+  else if(puntajeTotal >= -7) efectividad = 'Media Baja';
+  else if(puntajeTotal >= -14) efectividad = 'Baja';
+  else efectividad = 'Muy Baja';
 
   const DESCRIPCIONES = {
     'Autoritario': 'Estilo Autoritario (Alta Tarea / Baja Relación): Este líder se orienta principalmente al cumplimiento de tareas, metas y resultados, con escasa atención a las relaciones interpersonales. Tiende a tomar decisiones de manera unilateral, define claramente los roles y supervisa de cerca el desempeño. No suele confiar en la iniciativa de sus subordinados y puede ser percibido como rígido o controlador. En contextos donde se requiere dirección clara y rapidez de respuesta, puede ser efectivo; sin embargo, a largo plazo puede generar desmotivación y clima laboral deteriorado si no equilibra su estilo.',
