@@ -515,12 +515,13 @@ function calcular(resp){
     de[e]=b[v]||5;
   });
 
-  // Dimensiones globales
-  var ext_de=Math.min(10,Math.max(1,Math.round((de.A+de.F+de.H+(11-de.N)+(11-de.Q2)-5)/45*9+1)));
-  var ans_de=Math.min(10,Math.max(1,Math.round(((11-de.C)+de.L+de.O+de.Q4-4)/36*9+1)));
-  var dur_de=Math.min(10,Math.max(1,Math.round(((11-de.A)+(11-de.I)+(11-de.M)+(11-de.Q1)-4)/36*9+1)));
-  var ind_de=Math.min(10,Math.max(1,Math.round((de.E+de.L+de.Q1-3)/27*9+1)));
-  var auc_de=Math.min(10,Math.max(1,Math.round(((11-de.F)+de.G+(11-de.M)+de.Q3-4)/36*9+1)));
+  // Dimensiones globales — fórmulas oficiales del corrector 16PF-5 (pesos por escala + constante)
+  // Validadas contra BASE16PF-5: decatipo = ABS((Σ lado+ − Σ lado−)/10)
+  var ext_de=Math.min(10,Math.max(1,Math.round(Math.abs(((16+5*de.A+1*de.B+3*de.F+1*de.G+1*de.H+2*de.I+2*de.O+1*de.Q3+1*de.Q4)-(1*de.C+3*de.N+2*de.Q1+4*de.Q2))/10))));
+  var ans_de=Math.min(10,Math.max(1,Math.round(Math.abs(((2*de.A+2*de.B+1*de.E+1*de.F+1*de.G+1*de.I+3*de.L+1*de.N+5*de.O+3*de.Q3+4*de.Q4)-(16+3*de.C+2*de.H+4*de.Q1+2*de.Q2))/10))));
+  var dur_de=Math.min(10,Math.max(1,Math.round(Math.abs(((138+3*de.F+2*de.L+1*de.N+1*de.O+3*de.Q4)-(2*de.A+1*de.B+1*de.C+1*de.E+2*de.H+3*de.I+3*de.M+8*de.Q1+3*de.Q2+1*de.Q3))/10))));
+  var ind_de=Math.min(10,Math.max(1,Math.round(Math.abs(((1*de.B+1*de.C+7*de.E+3*de.F+2*de.H+3*de.L+2*de.N+1*de.Q1+1*de.Q3+2*de.Q4)-(50+1*de.A+1*de.G+2*de.I))/10))));
+  var auc_de=Math.min(10,Math.max(1,Math.round(Math.abs(((3*de.A+1*de.E+5*de.G+1*de.I+3*de.O+7*de.Q3)-(22+1*de.C+3*de.F+1*de.H+1*de.M))/10))));
 
   // Contar escalas en zona de alerta
   var alertas=[];
