@@ -446,6 +446,57 @@ tbody tr:hover td { background: #fdf9f6; }
   .ick-body { overflow:visible !important; }
 }
 
+/* ══════════ MODAL INFORME OPERA ══════════ */
+.opk-box { max-width:700px !important; padding:0 !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; max-height:90vh !important; overflow:hidden !important; }
+.opk-header { flex-shrink:0; background:#1a3a5c; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+.opk-header-logo { display:flex; align-items:center; gap:12px; }
+.opk-logo-circle { width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center; }
+.opk-org-name { color:#fff;font-weight:700;font-size:14px; }
+.opk-doc-type { color:rgba(255,255,255,.6);font-size:10px;margin-top:2px;letter-spacing:.05em; }
+.opk-btn-pdf { background:#c4432a;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer; }
+.opk-btn-pdf:hover { opacity:.85; }
+.opk-close { background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.7;padding:4px 8px; }
+.opk-close:hover { opacity:1; }
+.opk-ficha { flex-shrink:0; background:#f7f5f0; border-bottom:2px solid #e0dbd0; padding:16px 24px; display:flex; gap:28px; align-items:flex-start; }
+.opk-ficha-tag { font-size:12px;font-weight:800;letter-spacing:.08em;color:#1a3a5c;text-transform:uppercase; }
+.opk-ficha-subtag { font-size:10px;color:#888;margin-top:3px; }
+.opk-ficha-datos { flex:1.2; }
+.opk-ficha-row { display:flex;gap:10px;margin-bottom:3px;font-size:11px; }
+.opk-ficha-lbl { color:#888;min-width:110px;font-weight:500; }
+.opk-ficha-val { color:#1a1917;font-weight:600; }
+.opk-body { padding:22px 24px; display:flex; flex-direction:column; gap:22px; overflow-y:auto; flex:1 1 auto; min-height:0; }
+.opk-label { font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-bottom:2px solid #1a3a5c;color:#1a3a5c;padding-bottom:6px;margin-bottom:12px; }
+.opk-global-badge { display:inline-block;padding:8px 18px;border-radius:20px;font-size:15px;font-weight:700;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.opk-bar-label { display:flex;justify-content:space-between;font-size:11px;color:#666;margin:10px 0 6px; }
+.opk-bar-bg { height:12px;background:#eee;border-radius:6px;overflow:hidden; }
+.opk-bar-fill { height:12px;border-radius:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.opk-comp { background:#fff;border:1px solid #e0dbd0;border-radius:10px;padding:14px 16px;margin-bottom:12px; }
+.opk-comp-top { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+.opk-comp-ico { font-size:18px; }
+.opk-comp-nom { font-size:13px;font-weight:700;color:#1a1917;flex:1; }
+.opk-comp-badge { font-size:11px;font-weight:700;color:#fff;padding:3px 12px;border-radius:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.opk-comp-bar-bg { height:8px;background:#eee;border-radius:4px;overflow:hidden;margin-bottom:10px; }
+.opk-comp-bar-fill { height:8px;border-radius:4px;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact; }
+.opk-comp-interp { font-size:11px;line-height:1.6;color:#555; }
+.opk-chip { display:inline-block;font-size:11px;font-weight:600;padding:5px 12px;border-radius:14px;margin:0 6px 6px 0; }
+.opk-chip-ok { background:#e8f5ee;color:#1a6a4a; }
+.opk-chip-low { background:#fbeae8;color:#c0392b; }
+.opk-chip-empty { font-size:11px;color:#999;font-style:italic; }
+.opk-alerta { background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;padding:10px 14px;font-size:11px;line-height:1.6;color:#7a5c10;margin-bottom:8px; }
+.opk-alerta-ok { background:#e8f5ee;border-left:3px solid #1a6a4a;border-radius:0 6px 6px 0;padding:10px 14px;font-size:11px;color:#1a6a4a;font-weight:600; }
+.opk-resumen { background:#f7f5f0;border-radius:8px;padding:14px 16px; }
+.opk-resumen-texto { font-size:12px;line-height:1.7;color:#444; }
+.opk-integridad-ok { background:#e8f5ee;color:#1a6a4a;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
+.opk-integridad-leve { background:#fdf5e0;color:#7a5c10;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
+.opk-integridad-riesgo { background:#fbeae8;color:#c0392b;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
+.opk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
+@media print {
+  .opk-btn-pdf, .opk-close { display:none !important; }
+  .opk-header, .opk-logo-circle, .opk-ficha, .opk-global-badge, .opk-comp-badge, .opk-bar-fill, .opk-comp-bar-fill { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+  .opk-box { max-height:none !important; overflow:visible !important; }
+  .opk-body { overflow:visible !important; }
+}
+
 /* ══════════ MODAL INFORME IC ══════════ */
 .modal-overlay {
   display: none; position: fixed; inset: 0; z-index: 1000;
@@ -495,11 +546,13 @@ tbody tr:hover td { background: #fdf9f6; }
   #modal-16pf.activo { display: block !important; }
   #modal-ipv.activo { display: block !important; }
   #modal-wonderlic.activo { display: block !important; }
+  #modal-opera.activo { display: block !important; }
   #modal-ic:not(.activo) { display: none !important; }
   #modal-ceal:not(.activo) { display: none !important; }
   #modal-16pf:not(.activo) { display: none !important; }
   #modal-ipv:not(.activo) { display: none !important; }
   #modal-wonderlic:not(.activo) { display: none !important; }
+  #modal-opera:not(.activo) { display: none !important; }
   .modal-overlay.activo { display: block !important; position: static !important; background: none !important; padding: 0 !important; }
   .modal-box { box-shadow: none !important; max-height: none !important; width: 100% !important; }
   .modal-close, .btn-primary { display: none !important; }
@@ -2278,6 +2331,9 @@ async function abrirDash(test, rut, nombre) {
   // WONDERLIC — modal inline
   if (test === "WONDERLIC") { abrirInformeWONDERLIC(test, rut, nombre); return; }
 
+  // OPERA — modal inline
+  if (test === "OPERA") { abrirInformeOPERA(test, rut, nombre); return; }
+
   var endpointMap = {
     "16PF": "getDatos16PF",
     IPV: "getDatosIPV",
@@ -3057,6 +3113,168 @@ function renderDiscList(containerId, items) {
     return '<li>' + item + '</li>';
   }).join('');
 }
+
+// ════════════ DATOS OPERA (del manual técnico V1.0) ════════════
+var OPERA_COMP = {
+  responsabilidad: { nombre:"Responsabilidad", icono:"📋",
+    desc:"Cumplimiento de tareas, comunicación de desviaciones y cuidado de la continuidad operacional." },
+  compromiso: { nombre:"Compromiso laboral", icono:"🤝",
+    desc:"Disposición a involucrarse, adaptarse a cambios y sostener el estándar de desempeño." },
+  seguridad: { nombre:"Orientación a la seguridad", icono:"🛡️",
+    desc:"Priorización de conductas seguras, respeto por procedimientos y prevención de riesgos." },
+  integridad: { nombre:"Integridad y honestidad", icono:"⚖️",
+    desc:"Transparencia, manejo responsable de errores y apego a normas internas." }
+};
+// Textos interpretativos por nivel y competencia (verbatim del manual)
+var OPERA_INTERP = {
+  responsabilidad: {
+    Alto:"Muestra tendencia a hacerse cargo de tareas, comunicar desviaciones y cuidar la continuidad del trabajo. Suele anticipar impactos y actuar de manera ordenada frente a pendientes o errores.",
+    Medio:"Presenta conductas generalmente responsables, aunque puede requerir supervisión o estructura en situaciones ambiguas, cambios de prioridad o presión de tiempo.",
+    Bajo:"Puede presentar menor anticipación, tendencia a resolver sin informar oportunamente o dificultad para hacerse cargo de desviaciones. Requiere profundización en entrevista.",
+    "Crítico":"Riesgo conductual relevante en el cumplimiento y la comunicación de pendientes. Usar con cautela y confirmar con otras fuentes."
+  },
+  compromiso: {
+    Alto:"Evidencia disposición a colaborar, aprender y sostener su desempeño frente a demandas del equipo o cambios operacionales.",
+    Medio:"Muestra compromiso funcional con sus tareas, aunque su involucramiento adicional puede depender de instrucciones, claridad de beneficios o condiciones del contexto.",
+    Bajo:"Podría mostrar menor flexibilidad o menor disposición a asumir apoyos adicionales. Conviene explorar motivación, estabilidad laboral y sentido de pertenencia.",
+    "Crítico":"Riesgo conductual relevante en disposición y adaptación. Usar con cautela y confirmar con otras fuentes."
+  },
+  seguridad: {
+    Alto:"Prioriza conductas preventivas, respeta procedimientos y tiende a actuar frente a riesgos antes de continuar la operación.",
+    Medio:"Reconoce la importancia de la seguridad, aunque puede equilibrarla con continuidad operacional o requerir orientación ante situaciones ambiguas.",
+    Bajo:"Podría subestimar riesgos, demorar reportes o priorizar productividad por sobre prevención. Requiere revisión cuidadosa para cargos críticos.",
+    "Crítico":"Riesgo conductual relevante en prevención y manejo de riesgos. Usar con cautela, especialmente en cargos críticos de seguridad."
+  },
+  integridad: {
+    Alto:"Tiende a actuar con transparencia, reportar errores y cuidar la calidad de información y cumplimiento normativo.",
+    Medio:"Presenta criterio generalmente adecuado, aunque puede requerir claridad procedimental o validación ante situaciones sensibles.",
+    Bajo:"Podría mostrar manejo ambiguo de información, postergación de reportes o priorización de soluciones prácticas por sobre transparencia. Profundizar en entrevista.",
+    "Crítico":"Riesgo conductual relevante en transparencia y manejo de información. Usar con cautela y confirmar con otras fuentes."
+  }
+};
+// Alertas sugeridas del manual
+var OPERA_ALERTAS_TXT = {
+  seguridad:"Profundizar orientación a la seguridad, manejo de riesgos y apego a procedimientos.",
+  integridad:"Profundizar transparencia, manejo de errores y criterio frente a normas internas.",
+  responsabilidad:"Explorar cumplimiento, comunicación de pendientes y capacidad de hacerse cargo.",
+  compromiso:"Revisar motivación, disposición a colaborar y adaptación a cambios."
+};
+// Nivel por competencia (0-15) y global (0-60) según rangos del manual
+function operaNivelComp(p){ if(p>=13)return"Alto"; if(p>=9)return"Medio"; if(p>=5)return"Bajo"; return"Crítico"; }
+function operaNivelGlobal(g){ if(g>=49)return"Alto"; if(g>=37)return"Medio alto"; if(g>=25)return"Medio bajo"; return"Bajo"; }
+function operaColorNivel(n){
+  if(n==="Alto")return"#1a6a4a";
+  if(n==="Medio"||n==="Medio alto")return"#c99a2e";
+  if(n==="Bajo"||n==="Medio bajo")return"#d4830a";
+  return"#c0392b"; // Crítico / Bajo global
+}
+
+
+// ════════════ INFORME OPERA — Evaluación de Conducta Operacional ════════════
+async function abrirInformeOPERA(test, rut, nombre) {
+  var rutDec = decodeURIComponent(rut || "");
+  var nomDec = decodeURIComponent(nombre || "");
+  try {
+    var dataOP = await fetchJSON(APPS_URL + "?action=getDatosOPERA&t=" + Date.now());
+    var filas = Array.isArray(dataOP) ? dataOP : [];
+    console.log("getDatosOPERA filas:", filas.length);
+
+    function normStr(s){ return String(s||"").replace(/[.\s]/g,"").toLowerCase(); }
+    var fila = encontrarFilaMasReciente(filas, normStr(rutDec), normStr(nomDec));
+    if (!fila) { alert("No se encontraron datos del candidato."); return; }
+
+    // Estructura hoja OPERA:
+    // [0]fecha [1]nombre [2]rut [3]responsabilidad [4]compromiso [5]seguridad [6]integridad
+    // [7]global [8]nivel_global [9]respondidas [10]tiempo [11]cambios_foco [12]respuestas
+    var sc = {
+      responsabilidad: parseInt(fila[3])||0,
+      compromiso:      parseInt(fila[4])||0,
+      seguridad:       parseInt(fila[5])||0,
+      integridad:      parseInt(fila[6])||0
+    };
+    var global = parseInt(fila[7]) || (sc.responsabilidad+sc.compromiso+sc.seguridad+sc.integridad);
+    var nivelG = String(fila[8]||"") || operaNivelGlobal(global);
+    var foco   = parseInt(fila[11])||0;
+
+    // Ficha
+    document.getElementById("opk-ficha-nombre").textContent = String(fila[1]||nomDec);
+    document.getElementById("opk-ficha-rut").textContent = String(fila[2]||rutDec||"—");
+    document.getElementById("opk-fecha").textContent = String(fila[0]||"—");
+
+    // Índice global badge + barra
+    var badge = document.getElementById("opk-global-badge");
+    badge.textContent = nivelG + " · " + global + "/60";
+    badge.style.background = operaColorNivel(nivelG);
+    document.getElementById("opk-global-pct").textContent = Math.round(global/60*100) + "%";
+    document.getElementById("opk-barra-global").style.width = (global/60*100) + "%";
+    document.getElementById("opk-barra-global").style.background = operaColorNivel(nivelG);
+
+    // Competencias (orden fijo)
+    var orden = ["responsabilidad","compromiso","seguridad","integridad"];
+    var compHtml = orden.map(function(k){
+      var p = sc[k];
+      var nivel = operaNivelComp(p);
+      var color = operaColorNivel(nivel);
+      var pct = (p/15*100);
+      return '<div class="opk-comp">'
+        + '<div class="opk-comp-top">'
+        +   '<span class="opk-comp-ico">'+OPERA_COMP[k].icono+'</span>'
+        +   '<span class="opk-comp-nom">'+OPERA_COMP[k].nombre+'</span>'
+        +   '<span class="opk-comp-badge" style="background:'+color+';">'+nivel+' · '+p+'/15</span>'
+        + '</div>'
+        + '<div class="opk-comp-bar-bg"><div class="opk-comp-bar-fill" style="width:'+pct+'%;background:'+color+';"></div></div>'
+        + '<div class="opk-comp-interp">'+OPERA_INTERP[k][nivel]+'</div>'
+        + '</div>';
+    }).join("");
+    document.getElementById("opk-competencias").innerHTML = compHtml;
+
+    // Fortalezas (Alto) y áreas a profundizar (Bajo/Crítico)
+    var fort = orden.filter(function(k){ return operaNivelComp(sc[k])==="Alto"; });
+    var areas = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Bajo"||n==="Crítico"; });
+    document.getElementById("opk-fortalezas").innerHTML = fort.length
+      ? fort.map(function(k){ return '<span class="opk-chip opk-chip-ok">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
+      : '<span class="opk-chip-empty">Sin competencias en nivel Alto.</span>';
+    document.getElementById("opk-areas").innerHTML = areas.length
+      ? areas.map(function(k){ return '<span class="opk-chip opk-chip-low">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
+      : '<span class="opk-chip-empty">Sin áreas en nivel Bajo o Crítico.</span>';
+
+    // Alertas conductuales del manual
+    var alertas = [];
+    orden.forEach(function(k){ if(sc[k]<=8) alertas.push(OPERA_ALERTAS_TXT[k]); });
+    var vals = orden.map(function(k){ return sc[k]; });
+    var difMax = Math.max.apply(null,vals) - Math.min.apply(null,vals);
+    if (difMax>=7) alertas.push("Perfil con alta variabilidad entre competencias ("+difMax+" puntos de diferencia); interpretar por dimensión y no solo por puntaje global.");
+    if (global<=36) alertas.push("Índice global en zona que requiere entrevista focalizada antes de tomar decisiones.");
+    document.getElementById("opk-alertas").innerHTML = alertas.length
+      ? alertas.map(function(a){ return '<div class="opk-alerta">⚠ '+a+'</div>'; }).join("")
+      : '<div class="opk-alerta-ok">✓ Sin alertas conductuales. Todas las competencias sobre el umbral mínimo.</div>';
+
+    // Resumen ejecutivo (plantilla del manual)
+    var tendencia = (nivelG==="Alto")?"favorable":(nivelG==="Medio alto")?"funcional":"variable";
+    var fortNom = fort.map(function(k){return OPERA_COMP[k].nombre;});
+    var areaNom = areas.map(function(k){return OPERA_COMP[k].nombre;});
+    var resumen = "El perfil evaluado presenta un nivel "+nivelG+" en el Índice Global ("+global+"/60). "
+      + "Sus resultados sugieren una tendencia "+tendencia+" frente a situaciones operacionales asociadas a responsabilidad, compromiso, seguridad e integridad. ";
+    if (fortNom.length) resumen += "Se observan fortalezas relativas en "+fortNom.join(", ")+". ";
+    if (areaNom.length) resumen += "Se recomienda profundizar en "+areaNom.join(", ")+" mediante entrevista focalizada y revisión de antecedentes laborales.";
+    else resumen += "No se identifican áreas críticas; se sugiere igualmente complementar con entrevista y antecedentes del proceso.";
+    document.getElementById("opk-resumen-texto").textContent = resumen;
+
+    // Integridad
+    document.getElementById("opk-integridad").innerHTML = foco===0
+      ? "<div class='opk-integridad-ok'>✓ Sin alertas de integridad — el candidato no cambió de ventana durante la prueba.</div>"
+      : foco<=3
+      ? "<div class='opk-integridad-leve'>⚠ Alerta leve — "+foco+" cambio(s) de ventana detectado(s). Puede ser accidental.</div>"
+      : "<div class='opk-integridad-riesgo'>⚠ Alerta — "+foco+" cambios de ventana. Posible consulta externa; evaluar validez.</div>";
+
+    document.getElementById("modal-opera").classList.add("activo");
+  } catch(e) {
+    alert("Error cargando datos OPERA: " + e.message);
+  }
+}
+function cerrarModalOPERA(){ document.getElementById("modal-opera").classList.remove("activo"); }
+function imprimirInformeOPERA(){ window.print(); }
+
 
 async function abrirInformeDISC(test, rut, nombre) {
   var rutDec = decodeURIComponent(rut || "");
@@ -3965,6 +4183,90 @@ function imprimirModalWONDERLIC() { window.print(); }
       </div>
 
       <div class="ick-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════ MODAL INFORME OPERA ══════════ -->
+<div class="modal-overlay" id="modal-opera" onclick="if(event.target===this)cerrarModalOPERA()">
+  <div class="modal-box opk-box">
+
+    <div class="opk-header">
+      <div class="opk-header-logo">
+        <div class="opk-logo-circle">GC</div>
+        <div>
+          <div class="opk-org-name">Grupo Cygnus</div>
+          <div class="opk-doc-type">INFORME PSICOLABORAL — CONFIDENCIAL</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="opk-btn-pdf" onclick="imprimirInformeOPERA()">⬇ Descargar PDF</button>
+        <button class="opk-close" onclick="cerrarModalOPERA()">✕</button>
+      </div>
+    </div>
+
+    <div class="opk-ficha">
+      <div style="flex:1;">
+        <div class="opk-ficha-tag">Evaluación de Conducta Operacional</div>
+        <div class="opk-ficha-subtag">Evaluación situacional para cargos operativos</div>
+      </div>
+      <div class="opk-ficha-datos">
+        <div class="opk-ficha-row"><span class="opk-ficha-lbl">Candidato</span><span class="opk-ficha-val" id="opk-ficha-nombre">—</span></div>
+        <div class="opk-ficha-row"><span class="opk-ficha-lbl">RUT</span><span class="opk-ficha-val" id="opk-ficha-rut">—</span></div>
+        <div class="opk-ficha-row"><span class="opk-ficha-lbl">Fecha evaluación</span><span class="opk-ficha-val" id="opk-fecha">—</span></div>
+        <div class="opk-ficha-row"><span class="opk-ficha-lbl">Evaluador</span><span class="opk-ficha-val">Grupo Cygnus</span></div>
+      </div>
+    </div>
+
+    <div class="opk-body">
+
+      <!-- Índice global -->
+      <div>
+        <div class="opk-label">Índice Global</div>
+        <div id="opk-global-badge" class="opk-global-badge">—</div>
+        <div class="opk-bar-label"><span>Puntaje global</span><span id="opk-global-pct">—</span></div>
+        <div class="opk-bar-bg"><div class="opk-bar-fill" id="opk-barra-global" style="width:0%"></div></div>
+      </div>
+
+      <!-- Competencias -->
+      <div>
+        <div class="opk-label">Competencias evaluadas</div>
+        <div id="opk-competencias"></div>
+      </div>
+
+      <!-- Fortalezas -->
+      <div>
+        <div class="opk-label">Fortalezas conductuales</div>
+        <div id="opk-fortalezas"></div>
+      </div>
+
+      <!-- Áreas a profundizar -->
+      <div>
+        <div class="opk-label">Áreas a profundizar</div>
+        <div id="opk-areas"></div>
+      </div>
+
+      <!-- Alertas -->
+      <div>
+        <div class="opk-label">Alertas conductuales</div>
+        <div id="opk-alertas"></div>
+      </div>
+
+      <!-- Resumen ejecutivo -->
+      <div>
+        <div class="opk-label">Resumen ejecutivo</div>
+        <div class="opk-resumen"><div class="opk-resumen-texto" id="opk-resumen-texto">—</div></div>
+      </div>
+
+      <!-- Integridad -->
+      <div>
+        <div class="opk-label">Integridad de la aplicación</div>
+        <div id="opk-integridad"></div>
+      </div>
+
+      <div class="opk-nota">Los resultados de esta evaluación describen tendencias conductuales autoinformadas frente a microescenarios laborales. No constituyen diagnóstico psicológico, no predicen por sí solos el desempeño futuro y deben interpretarse junto con entrevista, experiencia, referencias y otros antecedentes del proceso.</div>
 
     </div>
   </div>
