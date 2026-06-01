@@ -411,7 +411,7 @@ function calcularYEnviar(porTiempo){
     : 0;
 
   // Velocidad = respuestas realizadas / minutos usados
-  let tiempoUsado = typeof tiempoTotal !== 'undefined' ? (tiempoTotal - (parseInt(document.getElementById('timer')?.textContent)||0)) : 0;
+  let tiempoUsado = TOTAL_SECS - remaining;  // segundos efectivamente usados
   let minutosUsados = tiempoUsado > 0 ? tiempoUsado / 60 : 1;
   let respuestasRealizadas = correctas + incorrectas;
   let velocidad = Math.round((respuestasRealizadas / minutosUsados) * 10) / 10;
@@ -441,8 +441,8 @@ function calcularYEnviar(porTiempo){
   let nombre = document.getElementById('nombre').value.trim();
   let rut = document.getElementById('rut').value.trim();
 
-  // NOTA: "percentil" renombrado a "indice_precision" — no es un percentil normativo
-  // Se guardan también velocidad y estilo_conductual en Sheets
+  // NOTA: "percentil" renombrado a "indice_precision" — no es un percentil normativo.
+  // cambios_foco registra cuántas veces el candidato salió de la ventana (medida de integridad).
   let payload = {
     fecha, nombre, rut,
     correctas, errores: incorrectas,
@@ -452,7 +452,8 @@ function calcularYEnviar(porTiempo){
     velocidad,
     estilo_conductual: estiloConductual,
     percentil: precision + '%',   // campo legacy para compatibilidad con Sheets existente
-    categoria
+    categoria,
+    cambios_foco: cambiosFoco
   };
 
   payload.token = TOKEN_URL;
