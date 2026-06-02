@@ -507,6 +507,9 @@ tbody tr:hover td { background: #fdf9f6; }
 .opk-resumen { background:#f7f5f0;border-radius:8px;padding:14px 16px; }
 .opk-resumen-texto { font-size:12px;line-height:1.7;color:#444; }
 .opk-integridad-ok { background:#e8f5ee;color:#1a6a4a;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
+.opk-cons-box { display:flex;align-items:center;gap:12px;background:#f6f7f8;border-radius:8px;padding:12px 14px;flex-wrap:wrap; }
+.opk-cons-badge { display:inline-block;font-size:11px;font-weight:700;color:#fff;padding:4px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.04em; }
+.opk-cons-txt { font-size:11.5px;color:#555;line-height:1.5;flex:1;min-width:200px; }
 .opk-integridad-leve { background:#fdf5e0;color:#7a5c10;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
 .opk-integridad-riesgo { background:#fbeae8;color:#c0392b;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
 .opk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
@@ -3293,52 +3296,43 @@ var OPERA_COMP = {
   compromiso: { nombre:"Compromiso laboral", icono:"🤝",
     desc:"Disposición a involucrarse, adaptarse a cambios y sostener el estándar de desempeño." },
   seguridad: { nombre:"Orientación a la seguridad", icono:"🛡️",
-    desc:"Priorización de conductas seguras, respeto por procedimientos y prevención de riesgos." },
-  integridad: { nombre:"Integridad y honestidad", icono:"⚖️",
-    desc:"Transparencia, manejo responsable de errores y apego a normas internas." }
+    desc:"Priorización de conductas seguras, respeto por procedimientos y prevención de riesgos." }
 };
-// Textos interpretativos por nivel y competencia (verbatim del manual)
+// Textos interpretativos por nivel y competencia (escala 0-32, niveles v2)
 var OPERA_INTERP = {
   responsabilidad: {
-    Alto:"Muestra tendencia a hacerse cargo de tareas, comunicar desviaciones y cuidar la continuidad del trabajo. Suele anticipar impactos y actuar de manera ordenada frente a pendientes o errores.",
-    Medio:"Presenta conductas generalmente responsables, aunque puede requerir supervisión o estructura en situaciones ambiguas, cambios de prioridad o presión de tiempo.",
-    Bajo:"Puede presentar menor anticipación, tendencia a resolver sin informar oportunamente o dificultad para hacerse cargo de desviaciones. Requiere profundización en entrevista.",
-    "Crítico":"Riesgo conductual relevante en el cumplimiento y la comunicación de pendientes. Usar con cautela y confirmar con otras fuentes."
+    Favorable:"Muestra conductas consistentemente alineadas con hacerse cargo de tareas, comunicar desviaciones y cuidar la continuidad del trabajo. Tiende a anticipar impactos y actuar de manera ordenada frente a pendientes o errores.",
+    Adecuado:"Presenta conductas generalmente responsables, con algunas oportunidades de mejora. Puede requerir estructura o supervisión en situaciones ambiguas, cambios de prioridad o presión de tiempo.",
+    "Observación":"Presenta conductas parcialmente alineadas o inconsistentes en responsabilidad. Conviene profundizar en entrevista la anticipación, la comunicación oportuna y la capacidad de hacerse cargo de desviaciones.",
+    Riesgo:"Frecuencia elevada de conductas poco efectivas en responsabilidad. Usar con cautela y confirmar con otras fuentes antes de tomar decisiones."
   },
   compromiso: {
-    Alto:"Evidencia disposición a colaborar, aprender y sostener su desempeño frente a demandas del equipo o cambios operacionales.",
-    Medio:"Muestra compromiso funcional con sus tareas, aunque su involucramiento adicional puede depender de instrucciones, claridad de beneficios o condiciones del contexto.",
-    Bajo:"Podría mostrar menor flexibilidad o menor disposición a asumir apoyos adicionales. Conviene explorar motivación, estabilidad laboral y sentido de pertenencia.",
-    "Crítico":"Riesgo conductual relevante en disposición y adaptación. Usar con cautela y confirmar con otras fuentes."
+    Favorable:"Evidencia disposición consistente a colaborar, aprender y sostener su desempeño frente a demandas del equipo o cambios operacionales.",
+    Adecuado:"Muestra compromiso funcional con sus tareas, con oportunidades de mejora. Su involucramiento adicional puede depender de instrucciones o condiciones del contexto.",
+    "Observación":"Conductas parcialmente alineadas en compromiso. Conviene explorar motivación, disposición a colaborar y adaptación a los cambios.",
+    Riesgo:"Frecuencia elevada de conductas poco efectivas en compromiso y adaptación. Usar con cautela y confirmar con otras fuentes."
   },
   seguridad: {
-    Alto:"Prioriza conductas preventivas, respeta procedimientos y tiende a actuar frente a riesgos antes de continuar la operación.",
-    Medio:"Reconoce la importancia de la seguridad, aunque puede equilibrarla con continuidad operacional o requerir orientación ante situaciones ambiguas.",
-    Bajo:"Podría subestimar riesgos, demorar reportes o priorizar productividad por sobre prevención. Requiere revisión cuidadosa para cargos críticos.",
-    "Crítico":"Riesgo conductual relevante en prevención y manejo de riesgos. Usar con cautela, especialmente en cargos críticos de seguridad."
-  },
-  integridad: {
-    Alto:"Tiende a actuar con transparencia, reportar errores y cuidar la calidad de información y cumplimiento normativo.",
-    Medio:"Presenta criterio generalmente adecuado, aunque puede requerir claridad procedimental o validación ante situaciones sensibles.",
-    Bajo:"Podría mostrar manejo ambiguo de información, postergación de reportes o priorización de soluciones prácticas por sobre transparencia. Profundizar en entrevista.",
-    "Crítico":"Riesgo conductual relevante en transparencia y manejo de información. Usar con cautela y confirmar con otras fuentes."
+    Favorable:"Prioriza de forma consistente conductas preventivas, respeta procedimientos y tiende a actuar frente a riesgos antes de continuar la operación.",
+    Adecuado:"Reconoce la importancia de la seguridad, con oportunidades de mejora. Puede equilibrarla con la continuidad operacional o requerir orientación en situaciones ambiguas.",
+    "Observación":"Conductas parcialmente alineadas en seguridad. Conviene revisar el manejo de riesgos, el reporte de condiciones inseguras y el apego a procedimientos.",
+    Riesgo:"Frecuencia elevada de conductas poco efectivas en seguridad. Revisar con especial cuidado, sobre todo para cargos críticos de seguridad."
   }
 };
-// Alertas sugeridas del manual
+// Alertas sugeridas por competencia baja
 var OPERA_ALERTAS_TXT = {
   seguridad:"Profundizar orientación a la seguridad, manejo de riesgos y apego a procedimientos.",
-  integridad:"Profundizar transparencia, manejo de errores y criterio frente a normas internas.",
   responsabilidad:"Explorar cumplimiento, comunicación de pendientes y capacidad de hacerse cargo.",
   compromiso:"Revisar motivación, disposición a colaborar y adaptación a cambios."
 };
-// Nivel por competencia (0-15) y global (0-60) según rangos del manual
-function operaNivelComp(p){ if(p>=13)return"Alto"; if(p>=9)return"Medio"; if(p>=5)return"Bajo"; return"Crítico"; }
-function operaNivelGlobal(g){ if(g>=49)return"Alto"; if(g>=37)return"Medio alto"; if(g>=25)return"Medio bajo"; return"Bajo"; }
+// Nivel por competencia (0-32) y global (0-96) — rangos v2
+function operaNivelComp(p){ if(p>=27)return"Favorable"; if(p>=20)return"Adecuado"; if(p>=14)return"Observación"; return"Riesgo"; }
+function operaNivelGlobal(g){ if(g>=80)return"Favorable"; if(g>=60)return"Adecuado"; if(g>=40)return"Observación"; return"Riesgo"; }
 function operaColorNivel(n){
-  if(n==="Alto")return"#1a6a4a";
-  if(n==="Medio"||n==="Medio alto")return"#c99a2e";
-  if(n==="Bajo"||n==="Medio bajo")return"#d4830a";
-  return"#c0392b"; // Crítico / Bajo global
+  if(n==="Favorable")return"#1a6a4a";
+  if(n==="Adecuado")return"#c99a2e";
+  if(n==="Observación")return"#d4830a";
+  return"#c0392b"; // Riesgo
 }
 
 
@@ -3355,17 +3349,17 @@ async function abrirInformeOPERA(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, normStr(rutDec), normStr(nomDec));
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    // Estructura hoja OPERA:
-    // [0]fecha [1]nombre [2]rut [3]responsabilidad [4]compromiso [5]seguridad [6]integridad
-    // [7]global [8]nivel_global [9]respondidas [10]tiempo [11]cambios_foco [12]respuestas
+    // Estructura hoja OPERA v2:
+    // [0]fecha [1]nombre [2]rut [3]responsabilidad [4]compromiso [5]seguridad
+    // [6]global [7]nivel_global [8]consistencia [9]respondidas [10]tiempo [11]cambios_foco [12]respuestas
     var sc = {
       responsabilidad: parseInt(fila[3])||0,
       compromiso:      parseInt(fila[4])||0,
-      seguridad:       parseInt(fila[5])||0,
-      integridad:      parseInt(fila[6])||0
+      seguridad:       parseInt(fila[5])||0
     };
-    var global = parseInt(fila[7]) || (sc.responsabilidad+sc.compromiso+sc.seguridad+sc.integridad);
-    var nivelG = String(fila[8]||"") || operaNivelGlobal(global);
+    var global = parseInt(fila[6]) || (sc.responsabilidad+sc.compromiso+sc.seguridad);
+    var nivelG = String(fila[7]||"") || operaNivelGlobal(global);
+    var consistencia = String(fila[8]||"Alta");
     var foco   = parseInt(fila[11])||0;
 
     // Ficha
@@ -3373,26 +3367,26 @@ async function abrirInformeOPERA(test, rut, nombre) {
     document.getElementById("opk-ficha-rut").textContent = String(fila[2]||rutDec||"—");
     document.getElementById("opk-fecha").textContent = String(fila[0]||"—");
 
-    // Índice global badge + barra
+    // Índice global badge + barra (/96)
     var badge = document.getElementById("opk-global-badge");
-    badge.textContent = nivelG + " · " + global + "/60";
+    badge.textContent = nivelG + " · " + global + "/96";
     badge.style.background = operaColorNivel(nivelG);
-    document.getElementById("opk-global-pct").textContent = Math.round(global/60*100) + "%";
-    document.getElementById("opk-barra-global").style.width = (global/60*100) + "%";
+    document.getElementById("opk-global-pct").textContent = Math.round(global/96*100) + "%";
+    document.getElementById("opk-barra-global").style.width = (global/96*100) + "%";
     document.getElementById("opk-barra-global").style.background = operaColorNivel(nivelG);
 
-    // Competencias (orden fijo)
-    var orden = ["responsabilidad","compromiso","seguridad","integridad"];
+    // Competencias (3, escala /32)
+    var orden = ["responsabilidad","compromiso","seguridad"];
     var compHtml = orden.map(function(k){
       var p = sc[k];
       var nivel = operaNivelComp(p);
       var color = operaColorNivel(nivel);
-      var pct = (p/15*100);
+      var pct = (p/32*100);
       return '<div class="opk-comp">'
         + '<div class="opk-comp-top">'
         +   '<span class="opk-comp-ico">'+OPERA_COMP[k].icono+'</span>'
         +   '<span class="opk-comp-nom">'+OPERA_COMP[k].nombre+'</span>'
-        +   '<span class="opk-comp-badge" style="background:'+color+';">'+nivel+' · '+p+'/15</span>'
+        +   '<span class="opk-comp-badge" style="background:'+color+';">'+nivel+' · '+p+'/32</span>'
         + '</div>'
         + '<div class="opk-comp-bar-bg"><div class="opk-comp-bar-fill" style="width:'+pct+'%;background:'+color+';"></div></div>'
         + '<div class="opk-comp-interp">'+OPERA_INTERP[k][nivel]+'</div>'
@@ -3400,39 +3394,54 @@ async function abrirInformeOPERA(test, rut, nombre) {
     }).join("");
     document.getElementById("opk-competencias").innerHTML = compHtml;
 
-    // Fortalezas (Alto) y áreas a profundizar (Bajo/Crítico)
-    var fort = orden.filter(function(k){ return operaNivelComp(sc[k])==="Alto"; });
-    var areas = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Bajo"||n==="Crítico"; });
+    // Fortalezas (Favorable) y áreas a profundizar (Observación/Riesgo)
+    var fort = orden.filter(function(k){ return operaNivelComp(sc[k])==="Favorable"; });
+    var areas = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Observación"||n==="Riesgo"; });
     document.getElementById("opk-fortalezas").innerHTML = fort.length
       ? fort.map(function(k){ return '<span class="opk-chip opk-chip-ok">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
-      : '<span class="opk-chip-empty">Sin competencias en nivel Alto.</span>';
+      : '<span class="opk-chip-empty">Sin competencias en nivel Favorable.</span>';
     document.getElementById("opk-areas").innerHTML = areas.length
       ? areas.map(function(k){ return '<span class="opk-chip opk-chip-low">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
-      : '<span class="opk-chip-empty">Sin áreas en nivel Bajo o Crítico.</span>';
+      : '<span class="opk-chip-empty">Sin áreas en nivel Observación o Riesgo.</span>';
 
-    // Alertas conductuales del manual
+    // Alertas conductuales
     var alertas = [];
-    orden.forEach(function(k){ if(sc[k]<=8) alertas.push(OPERA_ALERTAS_TXT[k]); });
+    orden.forEach(function(k){ if(operaNivelComp(sc[k])==="Riesgo") alertas.push(OPERA_ALERTAS_TXT[k]); });
     var vals = orden.map(function(k){ return sc[k]; });
     var difMax = Math.max.apply(null,vals) - Math.min.apply(null,vals);
-    if (difMax>=7) alertas.push("Perfil con alta variabilidad entre competencias ("+difMax+" puntos de diferencia); interpretar por dimensión y no solo por puntaje global.");
-    if (global<=36) alertas.push("Índice global en zona que requiere entrevista focalizada antes de tomar decisiones.");
+    if (difMax>=14) alertas.push("Perfil con alta variabilidad entre competencias ("+difMax+" puntos de diferencia); interpretar por dimensión y no solo por puntaje global.");
+    if (global<40) alertas.push("Índice global en zona de Riesgo; requiere entrevista focalizada antes de tomar decisiones.");
+    if (consistencia==="Baja") alertas.push("Índice de consistencia BAJO: el patrón de respuestas presenta contradicciones. Interpretar los resultados con cautela y confirmar en entrevista.");
     document.getElementById("opk-alertas").innerHTML = alertas.length
       ? alertas.map(function(a){ return '<div class="opk-alerta">⚠ '+a+'</div>'; }).join("")
-      : '<div class="opk-alerta-ok">✓ Sin alertas conductuales. Todas las competencias sobre el umbral mínimo.</div>';
+      : '<div class="opk-alerta-ok">✓ Sin alertas conductuales relevantes.</div>';
 
-    // Resumen ejecutivo (plantilla del manual)
-    var tendencia = (nivelG==="Alto")?"favorable":(nivelG==="Medio alto")?"funcional":"variable";
+    // Resumen ejecutivo
+    var tendencia = (nivelG==="Favorable")?"favorable":(nivelG==="Adecuado")?"generalmente alineada":(nivelG==="Observación")?"parcialmente alineada":"de riesgo";
     var fortNom = fort.map(function(k){return OPERA_COMP[k].nombre;});
     var areaNom = areas.map(function(k){return OPERA_COMP[k].nombre;});
-    var resumen = "El perfil evaluado presenta un nivel "+nivelG+" en el Índice Global ("+global+"/60). "
-      + "Sus resultados sugieren una tendencia "+tendencia+" frente a situaciones operacionales asociadas a responsabilidad, compromiso, seguridad e integridad. ";
+    var resumen = "El perfil evaluado presenta un nivel "+nivelG+" en el Índice Global ("+global+"/96). "
+      + "Sus resultados sugieren una tendencia "+tendencia+" frente a situaciones operacionales asociadas a responsabilidad, compromiso y seguridad. ";
     if (fortNom.length) resumen += "Se observan fortalezas relativas en "+fortNom.join(", ")+". ";
-    if (areaNom.length) resumen += "Se recomienda profundizar en "+areaNom.join(", ")+" mediante entrevista focalizada y revisión de antecedentes laborales.";
-    else resumen += "No se identifican áreas críticas; se sugiere igualmente complementar con entrevista y antecedentes del proceso.";
+    if (areaNom.length) resumen += "Se recomienda profundizar en "+areaNom.join(", ")+" mediante entrevista focalizada y revisión de antecedentes laborales. ";
+    else resumen += "No se identifican áreas en zona crítica; se sugiere igualmente complementar con entrevista y antecedentes del proceso. ";
+    if (consistencia!=="Alta") resumen += "El índice de consistencia es "+consistencia+", por lo que conviene contrastar estos resultados con otras fuentes.";
     document.getElementById("opk-resumen-texto").textContent = resumen;
 
-    // Integridad
+    // Índice de consistencia (sección propia)
+    var consElem = document.getElementById("opk-consistencia");
+    if (consElem) {
+      var consColor = consistencia==="Alta"?"#1a6a4a":consistencia==="Media"?"#c99a2e":"#c0392b";
+      var consTxt = consistencia==="Alta"
+        ? "Las respuestas son coherentes entre sí. El perfil puede interpretarse con confianza."
+        : consistencia==="Media"
+        ? "Se detectaron algunas respuestas poco coherentes. Interpretar con precaución moderada."
+        : "Se detectaron varias respuestas contradictorias (ej. marcar como 'más probable' una conducta de riesgo). Interpretar los resultados con cautela.";
+      consElem.innerHTML = '<span class="opk-cons-badge" style="background:'+consColor+';">Consistencia '+consistencia+'</span>'
+        + '<span class="opk-cons-txt">'+consTxt+'</span>';
+    }
+
+    // Integridad (cambios de ventana)
     document.getElementById("opk-integridad").innerHTML = foco===0
       ? "<div class='opk-integridad-ok'>✓ Sin alertas de integridad — el candidato no cambió de ventana durante la prueba.</div>"
       : foco<=3
@@ -4430,6 +4439,12 @@ function imprimirModalWONDERLIC() { window.print(); }
       <div>
         <div class="opk-label">Resumen ejecutivo</div>
         <div class="opk-resumen"><div class="opk-resumen-texto" id="opk-resumen-texto">—</div></div>
+      </div>
+
+      <!-- Índice de consistencia -->
+      <div>
+        <div class="opk-label">Índice de consistencia</div>
+        <div id="opk-consistencia" class="opk-cons-box"></div>
       </div>
 
       <!-- Integridad -->
