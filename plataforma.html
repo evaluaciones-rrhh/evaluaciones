@@ -1207,15 +1207,15 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="login-card-title">Bienvenido/a</div>
       <div class="login-card-sub">Ingresa tus credenciales para acceder a la plataforma de evaluaciones.</div>
       <div class="field">
-        <label>Usuario</label>
-        <input type="text" id="inp-user" placeholder="Ingresa tu usuario" autocomplete="username" onkeydown="if(event.key==='Enter')login()">
+        <label>Correo</label>
+        <input type="text" id="inp-user" placeholder="tucorreo@ejemplo.cl" autocomplete="username" onkeydown="if(event.key==='Enter')login()">
       </div>
       <div class="field">
         <label>Contraseña</label>
         <input type="password" id="inp-pass" placeholder="••••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
       </div>
       <button class="btn-login" onclick="login()">Ingresar →</button>
-      <div class="login-error" id="login-error">Usuario o contraseña incorrectos. Verifica tus credenciales.</div>
+      <div class="login-error" id="login-error">Correo o contraseña incorrectos. Verifica tus credenciales.</div>
       <div class="login-security">🔒 Acceso seguro · Solo personal autorizado</div>
     </div>
   </div>
@@ -1760,14 +1760,13 @@ tbody tr:hover td { background: #fdf9f6; }
           <div class="card-header"><div class="card-title">👤 Crear / editar usuario</div></div>
           <div style="padding:18px 20px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Usuario (para ingresar)</label><input type="text" id="nu-user" placeholder="ej: jperez" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
-              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Contraseña</label><input type="text" id="nu-pass" placeholder="contraseña inicial" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
-              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Nombre completo</label><input type="text" id="nu-nombre" placeholder="ej: Juan Pérez" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
-              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Correo (recibe los avisos)</label><input type="text" id="nu-correo" placeholder="ej: jperez@correo.cl" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Correo (con esto ingresa y recibe avisos)</label><input type="text" id="nu-user" placeholder="ej: jperez@correo.cl" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Contraseña inicial</label><input type="text" id="nu-pass" placeholder="contraseña" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div style="grid-column:1 / -1;"><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Nombre completo</label><input type="text" id="nu-nombre" placeholder="ej: Juan Pérez" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
             </div>
             <button class="btn btn-primary" onclick="crearUsuario()">Guardar usuario</button>
             <span id="nu-msg" style="font-size:13px;margin-left:12px;"></span>
-            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:14px 0 0;">Si el usuario ya existe, se actualizan sus datos. El usuario verá únicamente los candidatos a los que él envió tests, y recibirá en su correo el aviso cuando los completen.</p>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:14px 0 0;">El correo es el identificador para ingresar y también donde llegan los avisos. Si el correo ya existe, se actualizan sus datos. Cada persona verá únicamente los candidatos a los que envió tests.</p>
           </div>
         </div>
         <div class="card">
@@ -1814,7 +1813,7 @@ var todosEnvios = [];
 async function login() {
   var u = document.getElementById("inp-user").value.trim().toLowerCase();
   var p = document.getElementById("inp-pass").value;
-  var u2 = u.replace(/@.*/,"");
+  var u2 = u;   // el identificador ES el correo completo
   if (!u2 || !p) return;
 
   var btn = document.querySelector(".btn-login");
@@ -1834,10 +1833,11 @@ async function login() {
       esAdminActual = (data.esAdmin === true);
       sessionStorage.setItem("cygnus_user", u2);
       sessionStorage.setItem("cygnus_admin", esAdminActual ? "1" : "0");
+      sessionStorage.setItem("cygnus_nombre", data.nombre || u2);
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app-screen").style.display = "block";
       document.getElementById("user-name").textContent = data.nombre || u2;
-      document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
+      document.getElementById("user-avatar").textContent = (data.nombre || u2)[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
       aplicarVistaRol();
       cargarDatos();
@@ -1855,6 +1855,8 @@ async function login() {
 }
 function logout() {
   sessionStorage.removeItem("cygnus_user");
+  sessionStorage.removeItem("cygnus_nombre");
+  sessionStorage.removeItem("cygnus_admin");
   usuarioActual = "";
   document.getElementById("app-screen").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
@@ -1897,21 +1899,20 @@ async function cargarUsuarios() {
 }
 
 async function crearUsuario() {
-  var u = document.getElementById("nu-user").value.trim().toLowerCase();
+  var u = document.getElementById("nu-user").value.trim().toLowerCase();   // correo
   var p = document.getElementById("nu-pass").value;
   var n = document.getElementById("nu-nombre").value.trim();
-  var c = document.getElementById("nu-correo").value.trim();
   var msg = document.getElementById("nu-msg");
-  if (!u || !p) { msg.textContent = "Usuario y contraseña son obligatorios."; msg.style.color = "var(--low)"; return; }
+  if (!u || !p) { msg.textContent = "Correo y contraseña son obligatorios."; msg.style.color = "var(--low)"; return; }
+  if (u.indexOf("@") === -1) { msg.textContent = "Ingresa un correo válido."; msg.style.color = "var(--low)"; return; }
   msg.textContent = "Guardando…"; msg.style.color = "var(--muted)";
   try {
     await fetch(APPS_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ action:"crearUsuario", solicitante:usuarioActual, user:u, pass:p, nombre:n, correo:c }) });
+      body: JSON.stringify({ action:"crearUsuario", solicitante:usuarioActual, user:u, pass:p, nombre:n }) });
     msg.textContent = "Usuario guardado ✓"; msg.style.color = "var(--high)";
     document.getElementById("nu-user").value = "";
     document.getElementById("nu-pass").value = "";
     document.getElementById("nu-nombre").value = "";
-    document.getElementById("nu-correo").value = "";
     setTimeout(cargarUsuarios, 800);
   } catch(e) { msg.textContent = "Error: " + e.message; msg.style.color = "var(--low)"; }
 }
@@ -1967,10 +1968,11 @@ async function cambiarMiPass() {
   if (savedUser) {
     usuarioActual = savedUser;
     esAdminActual = (sessionStorage.getItem("cygnus_admin") === "1");
+    var savedNombre = sessionStorage.getItem("cygnus_nombre") || savedUser;
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app-screen").style.display = "block";
-    document.getElementById("user-name").textContent = savedUser;
-    document.getElementById("user-avatar").textContent = savedUser[0].toUpperCase();
+    document.getElementById("user-name").textContent = savedNombre;
+    document.getElementById("user-avatar").textContent = savedNombre[0].toUpperCase();
     aplicarVistaRol();
     cargarDatos();
     cargarEntrevistas();
