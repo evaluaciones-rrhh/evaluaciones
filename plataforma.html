@@ -1857,6 +1857,11 @@ function logout() {
   sessionStorage.removeItem("cygnus_user");
   sessionStorage.removeItem("cygnus_nombre");
   sessionStorage.removeItem("cygnus_admin");
+  try { localStorage.removeItem("cygnus_cache"); } catch(x) {}   // limpiar caché genérico antiguo
+  // limpiar datos en memoria para no mostrar nada del perfil anterior
+  todosLosDatos = [];
+  todosEnvios = [];
+  esAdminActual = false;
   usuarioActual = "";
   document.getElementById("app-screen").style.display = "none";
   document.getElementById("login-screen").style.display = "flex";
@@ -2130,14 +2135,18 @@ async function fetchJSON(url) {
 }
 
 async function cargarDatos() {
-  // ── 1. Mostrar caché al instante ──
+  // ── 1. Mostrar caché al instante (caché POR USUARIO, nunca el de otro) ──
   try {
-    var cache = localStorage.getItem("cygnus_cache");
+    var cache = localStorage.getItem("cygnus_cache_" + usuarioActual);
     if (cache) {
       var cached = JSON.parse(cache);
       todosLosDatos = cached.results || [];
       todosEnvios   = cached.envios  || [];
       pintarTodo();
+    } else {
+      // sin caché propio: arrancar vacío para no mostrar datos de otro perfil
+      todosLosDatos = [];
+      todosEnvios = [];
     }
   } catch(x) {}
 
@@ -2165,8 +2174,8 @@ async function cargarDatos() {
     var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
     if (enviosR.length >= 0) todosEnvios = enviosR; // siempre tomar datos frescos
 
-    // Guardar caché
-    try { localStorage.setItem("cygnus_cache", JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
+    // Guardar caché (por usuario)
+    try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
 
     pintarTodo();
 
