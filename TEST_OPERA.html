@@ -37,7 +37,6 @@
   .timer-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1.25rem;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;}
   .timer-candidate{font-size:14px;}
   .timer-candidate strong{display:block;font-weight:500;font-size:16px;}
-  .timer-num{font-family:var(--mono);font-size:34px;font-weight:500;letter-spacing:.04em;color:var(--green);transition:color .5s;line-height:1;}
   .timer-label{font-size:11px;color:var(--text-hint);text-align:right;letter-spacing:.05em;text-transform:uppercase;}
   .pbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:1.25rem;}
   .pfill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;}
@@ -95,7 +94,7 @@
     <div class="card" style="background:#fafaf8;border-style:dashed;">
       <div class="card-label">Instrucciones</div>
       <div style="font-size:14px;color:#1a1917;line-height:1.8;border-left:3px solid #d8d6ce;padding-left:1rem;">
-        A continuación encontrarás situaciones laborales breves. Lee cada situación y selecciona la alternativa que más se parece a la forma en que actuarías habitualmente. No existen respuestas perfectas; responde de la manera más honesta y natural posible. Son <strong>20 situaciones</strong> y dispones de <strong>8 minutos</strong> para completarlas.
+        A continuación encontrarás situaciones laborales breves. Lee cada situación y selecciona la alternativa que más se parece a la forma en que actuarías habitualmente. No existen respuestas perfectas; responde de la manera más honesta y natural posible. Son <strong>20 situaciones</strong> y no hay límite de tiempo: tómate los minutos que necesites para responder con calma.
       </div>
       <div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;line-height:1.65;"><strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluación. Se recomienda mantener esta ventana en primer plano durante todo el test. El uso de buscadores, inteligencia artificial u otros recursos externos queda registrado y puede afectar la validez del resultado.</div>
     </div>
@@ -111,10 +110,7 @@
         <span style="font-size:11px;color:#a09d96;text-transform:uppercase;letter-spacing:.06em;">Candidato</span>
         <strong id="disp-nombre"></strong>
       </div>
-      <div style="text-align:right;">
-        <div class="timer-num" id="timer">08:00</div>
-        <div class="timer-label">Tiempo restante</div>
-      </div>
+      <div class="timer-label">Tómate el tiempo que necesites</div>
     </div>
     <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
 
@@ -142,7 +138,7 @@
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
-const TOTAL_SECS = 480; // 8 minutos
+var tiempoInicio = null; // se fija al iniciar; sirve para medir cuánto tardó (sin límite)
 
 // ── Bloqueo si ya completado ──
 function validarAcceso() {
@@ -269,12 +265,34 @@ const ITEMS = [
 var idx = 0;
 var respuestas = {};      // idx -> letra elegida
 var nombre = "", rut = "";
-var remaining = TOTAL_SECS, timerInterval = null, ended = false;
+var ended = false;
 var cambiosFoco = 0;
+var alertaFoco = false;
 
-// ── Integridad: cambios de ventana ──
+// ── Medidas antitrampas (mismo set que los otros tests) ──
+document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
+document.addEventListener("dragstart", function(e) { e.preventDefault(); });
+document.addEventListener("keydown", function(e) {
+  if(e.ctrlKey && ["c","a","u","s","p","x","v"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if(e.key === "F12") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+});
+document.addEventListener("copy", function(e){ e.preventDefault(); });
+document.addEventListener("cut", function(e){ e.preventDefault(); });
+document.addEventListener("paste", function(e){ e.preventDefault(); });
+
+// ── Integridad: cambios de ventana (con aviso al candidato) ──
 document.addEventListener("visibilitychange", function() {
-  if (document.hidden && !ended) cambiosFoco++;
+  if (document.hidden && !ended) {
+    cambiosFoco++;
+    if(!alertaFoco) {
+      alertaFoco = true;
+      setTimeout(function() {
+        alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada.");
+        alertaFoco = false;
+      }, 300);
+    }
+  }
 });
 window.addEventListener("blur", function() { if (!ended) cambiosFoco++; });
 
@@ -312,17 +330,8 @@ function iniciar(){
   document.getElementById('disp-nombre').textContent = nombre;
   document.getElementById('screen-inicio').classList.add('hidden');
   document.getElementById('screen-prueba').classList.remove('hidden');
+  tiempoInicio = Date.now();
   renderPregunta();
-  timerInterval = setInterval(tick, 1000);
-}
-
-function fmt(s){ var m=Math.floor(s/60), ss=s%60; return (m<10?"0":"")+m+":"+(ss<10?"0":"")+ss; }
-
-function tick(){
-  remaining--;
-  document.getElementById('timer').textContent = fmt(remaining);
-  if (remaining<=60) document.getElementById('timer').style.color = "#c0392b";
-  if (remaining<=0){ clearInterval(timerInterval); calcularYEnviar(true); }
 }
 
 // ── Render de pregunta ──
@@ -362,10 +371,9 @@ function navegar(dir){
 }
 
 // ── Corrección y envío ──
-function calcularYEnviar(porTiempo){
+function calcularYEnviar(){
   if (ended) return;
   ended = true;
-  clearInterval(timerInterval);
 
   var scores = {responsabilidad:0, compromiso:0, seguridad:0, integridad:0};
   var respondidas = 0;
@@ -379,7 +387,7 @@ function calcularYEnviar(porTiempo){
   var global = scores.responsabilidad + scores.compromiso + scores.seguridad + scores.integridad;
 
   var fecha = new Date().toLocaleString('es-CL');
-  var tiempoUsado = TOTAL_SECS - remaining; // segundos
+  var tiempoUsado = tiempoInicio ? Math.round((Date.now() - tiempoInicio)/1000) : 0; // segundos transcurridos
 
   var payload = {
     test: 'OPERA',
