@@ -2144,7 +2144,7 @@ async function cargarDatos() {
   // ── 2. Lanzar ambos fetch en paralelo ──
   try {
     var promAll  = fetchJSON(APPS_URL + "?action=getAllResults&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
-    var promHist = fetchJSON(APPS_URL + "?action=getHistorial&t="  + Date.now());
+    var promHist = fetchJSON(APPS_URL + "?action=getHistorial&solicitante=" + encodeURIComponent(usuarioActual) + "&t="  + Date.now());
 
     // getHistorial (1 hoja) llega primero → pintar envíos rápido
     promHist.then(function(dataH) {
