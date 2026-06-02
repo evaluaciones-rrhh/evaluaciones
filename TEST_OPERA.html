@@ -407,11 +407,17 @@ function calcularYEnviar(){
     token: TOKEN_URL
   };
 
-  fetch(SCRIPT_URL, {
-    method:'POST', mode:'no-cors',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(payload)
-  }).catch(function(){});
+  // Envío con reintento (más robusto ante fallos momentáneos de red/caché)
+  function enviarPayload(intento) {
+    fetch(SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    }).catch(function(){
+      if (intento < 3) { setTimeout(function(){ enviarPayload(intento+1); }, 1500); }
+    });
+  }
+  enviarPayload(1);
 
   if (TOKEN_URL) localStorage.setItem('test_completado_' + TOKEN_URL, 'completado');
   document.getElementById('screen-prueba').classList.add('hidden');
