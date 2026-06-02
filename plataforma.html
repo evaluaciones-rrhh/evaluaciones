@@ -1408,6 +1408,8 @@ tbody tr:hover td { background: #fdf9f6; }
               <option value="16PF">Evaluación de Personalidad</option>
               <option value="IPV">Personalidad Vendedores</option>
               <option value="WONDERLIC">Habilidad Cognitiva</option>
+              <option value="DISC">Estilo Conductual</option>
+              <option value="OPERA">Conducta Operacional</option>
             </select>
             <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
           </div>
@@ -1492,6 +1494,9 @@ tbody tr:hover td { background: #fdf9f6; }
                   </div>
                   <div class="multi-select-option" onclick="toggleTest(this)">
                     <input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual
+                  </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional
                   </div>
                 </div>
               </div>
@@ -1737,7 +1742,8 @@ const TESTS_LINKS = {
   IPV: BASE+"TEST_IPV.html",
   WONDERLIC: BASE+"TEST_WONDERLIC.html",
   ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
-  DISC:       BASE+"TEST_DISC.html"
+  DISC:       BASE+"TEST_DISC.html",
+  OPERA:      BASE+"TEST_OPERA.html"
 };
 const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
 const DASH_HTML = {
@@ -1746,7 +1752,8 @@ const DASH_HTML = {
   WONDERLIC: BASE+"dashboard_wonderlic.html",
   IC:        "inline",
   CEAL:      "inline",
-  DISC:      "inline"
+  DISC:      "inline",
+  OPERA:     "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -2083,9 +2090,10 @@ function actualizarStats() {
     "16PF":"Personalidad",
     "IPV":"Personalidad Comercial",
     "WONDERLIC":"Habilidad Cognitiva",
-    "DISC":"Análisis Conductual"
+    "DISC":"Análisis Conductual",
+    "OPERA":"Conducta Operacional"
   };
-  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC"];
+  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA"];
   var conteos = {};
   tests.forEach(function(t){ conteos[t] = todosLosDatos.filter(function(d){ return d.test===t; }).length; });
   var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
@@ -2121,7 +2129,7 @@ function renderTablaComun(datos, tbodyId, cols) {
     var TEST_BADGE_NOMBRES = {
       "IC":"Instrucciones Complejas","CEAL":"Estilos de Liderazgo",
       "16PF":"Evaluación de Personalidad","IPV":"Personalidad Vendedores",
-      "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual"
+      "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual","OPERA":"Conducta Operacional"
     };
     var testLabel = TEST_BADGE_NOMBRES[d.test] || d.test || "—";
     if(cols===5) {
@@ -2175,11 +2183,11 @@ function renderRecientes() {
     return;
   }
 
-  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC"];
+  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC","OPERA"];
   var html = "";
   recientes.forEach(function(d) {
     var dotCls = "tl-dot-" + (d.test||"default").replace(/[^a-zA-Z0-9]/g,"");
-    if (!["IC","CEAL","16PF","IPV","WONDERLIC","DISC"].includes(d.test)) dotCls = "tl-dot-default";
+    if (!["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA"].includes(d.test)) dotCls = "tl-dot-default";
     var testNombre = TEST_NOMBRES_TL[d.test] || d.test || "Test";
     var nombre = d.nombre || "—";
     var tiempo = tiempoRelativo(d.fecha);
@@ -2224,6 +2232,7 @@ var TEST_NOMBRES_HTML = {
   "16PF": "Evaluación de Personalidad",
   IPV: "Perfil de Personalidad Comercial",
   WONDERLIC: "Test de Habilidad Cognitiva General",
+  OPERA: "Evaluación de Conducta Operacional",
   DISC: "Análisis de Estilo Conductual"
 };
 
@@ -2383,7 +2392,7 @@ function toggleTest(el) {
   el.classList.toggle("checked", cb.checked);
   var sel = Array.from(document.querySelectorAll(".check-test:checked"));
   var label = document.getElementById("multi-label");
-  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General",DISC:"Análisis de Estilo Conductual"};
+  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General",DISC:"Análisis de Estilo Conductual",OPERA:"Evaluación de Conducta Operacional"};
   if (sel.length === 0) label.textContent = "Seleccionar tests...";
   else if (sel.length === 1) label.textContent = nombres[sel[0].value] || sel[0].value;
   else label.textContent = sel.length + " tests seleccionados";
@@ -2664,8 +2673,8 @@ function abrirInformeIC(d) {
 
   var resumenTxt = info.texto;
   if (coberturaBaja) {
-    resumenTxt = "⚠ Cobertura baja: el candidato respondió solo " + respondidas + " de " + totalItems +
-      " ítems (" + omis + " omisiones). La precisión se calcula sobre lo respondido, por lo que un índice alto no refleja un buen desempeño global. La categoría se ajustó considerando la baja cantidad de respuestas. " + info.texto;
+    resumenTxt = "⚠ Cobertura insuficiente: el candidato respondió solo " + respondidas + " de " + totalItems +
+      " ítems (" + omis + " sin responder). Por esta razón, el resultado no puede interpretarse como una medida confiable de su capacidad atencional: la precisión se calcula únicamente sobre lo que alcanzó a contestar, de modo que un índice alto sobre pocas respuestas no equivale a un buen desempeño global, y un índice bajo puede deberse a la falta de tiempo o a que no completó la prueba, más que a dificultades reales de concentración. La categoría \"" + cat + "\" refleja esta baja cobertura, no necesariamente un déficit. Se recomienda repetir la evaluación asegurando que el candidato disponga del tiempo y las condiciones para responder la totalidad de los ítems antes de extraer conclusiones.";
   }
   document.getElementById("ic-resumen-texto").textContent = resumenTxt;
   document.getElementById("ic-fecha").textContent = d.fecha || "—";
