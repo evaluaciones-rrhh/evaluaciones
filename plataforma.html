@@ -213,6 +213,18 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
 .nav-item.activo { background: var(--naranja); color: var(--lima-ink); font-weight: 700; }
 .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.usuario-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+.usuario-row:last-child { border-bottom:none; }
+.usuario-avatar { width:38px; height:38px; border-radius:50%; background:var(--coral-soft); color:var(--coral-dark); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; }
+.usuario-nom { font-size:14px; font-weight:600; color:var(--ink); }
+.usuario-tag { font-size:10px; font-weight:700; background:var(--azul); color:#fff; padding:2px 8px; border-radius:10px; margin-left:6px; text-transform:uppercase; letter-spacing:.04em; }
+.usuario-meta { font-size:12px; color:var(--muted); margin-top:1px; }
+.usuario-del { font-size:12px; font-weight:600; color:var(--low); background:var(--low-bg); border:none; padding:7px 14px; border-radius:7px; cursor:pointer; }
+.usuario-del:hover { background:#f8d7d4; }
+.usuario-key { font-size:12px; font-weight:600; color:var(--coral-dark); background:var(--coral-soft); border:none; padding:7px 14px; border-radius:7px; cursor:pointer; margin-right:8px; }
+.usuario-key:hover { background:#f5d9d0; }
+.btn-mipass { width:100%; margin-top:10px; font-size:12px; font-weight:500; color:rgba(255,255,255,0.75); background:rgba(255,255,255,0.08); border:none; padding:9px; border-radius:7px; cursor:pointer; }
+.btn-mipass:hover { background:rgba(255,255,255,0.15); color:#fff; }
 .sidebar-footer {
   padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06);
 }
@@ -1244,6 +1256,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('competencias')">
         <span class="nav-icon">📐</span> Marco de competencias
       </div>
+      <div class="nav-item" id="nav-usuarios" onclick="irA('usuarios')" style="display:none;">
+        <span class="nav-icon">👥</span> Usuarios
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-user">
@@ -1251,6 +1266,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div class="user-name" id="user-name">admin</div>
         <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
       </div>
+      <button class="btn-mipass" onclick="cambiarMiPass()">🔑 Cambiar mi contraseña</button>
     </div>
   </div>
 
@@ -1736,7 +1752,31 @@ tbody tr:hover td { background: #fdf9f6; }
 <div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f0fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔧</div><div><div style="font-size:16px;font-weight:700;color:#1a4a9a;margin-bottom:2px;">Operativo</div><div style="font-size:11px;color:#1a4a9a;opacity:0.6;">Operador, auxiliar, bodeguero, conductor</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a4a9a;">4 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de tareas, manejo de errores y aprendizaje.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a la seguridad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación y prevención de riesgos en el trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Coordinación y colaboración con pares en terreno.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f0fa;color:#1a4a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión y prolijidad en la ejecución de tareas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#f0e8fa;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📄</div><div><div style="font-size:16px;font-weight:700;color:#5a1a9a;margin-bottom:2px;">Administrativo</div><div style="font-size:11px;color:#5a1a9a;opacity:0.6;">Secretaria, recepcionista, asistente, digitador</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#5a1a9a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo efectivo de información y relaciones interpersonales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento y manejo de errores con integridad.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orden y calidad del trabajo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Precisión en tareas administrativas y documentación.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración interdepartamental y apoyo a otros.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#f0e8fa;color:#5a1a9a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Flexibilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Adaptación a cambios de prioridades y situaciones nuevas.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fce8e8;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💼</div><div><div style="font-size:16px;font-weight:700;color:#8a1a1a;margin-bottom:2px;">Comercial</div><div style="font-size:11px;color:#8a1a1a;opacity:0.6;">Vendedor, ejecutivo comercial, promotor, KAM</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a1a1a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación al cliente</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Comprensión y satisfacción de necesidades del cliente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de metas y cuotas comerciales.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Persuasión e influencia</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Capacidad de convencer y negociar efectivamente.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Prospección autónoma e identificación de oportunidades.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fce8e8;color:#8a1a1a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo bajo presión</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de cuotas, rechazos y plazos ajustados.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#e8f5ee;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔬</div><div><div style="font-size:16px;font-weight:700;color:#1a6a4a;margin-bottom:2px;">Profesional / Especialista</div><div style="font-size:11px;color:#1a6a4a;opacity:0.6;">Analista financiero, analista de selección, técnico especialista</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#1a6a4a;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Cumplimiento de objetivos técnicos y entregables.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Iniciativa</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Identificación proactiva de mejoras y problemas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Presentación clara de análisis, reportes e informes.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Responsabilidad</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Manejo de errores, autonomía y aprendizaje continuo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#e8f5ee;color:#1a6a4a;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión eficiente de múltiples tareas y plazos.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#fef3e2;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">👥</div><div><div style="font-size:16px;font-weight:700;color:#8a4a00;margin-bottom:2px;">Mando Medio</div><div style="font-size:11px;color:#8a4a00;opacity:0.6;">Encargado, coordinador, supervisor, jefe de área</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#8a4a00;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción y motivación de equipos de trabajo.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Trabajo en equipo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Colaboración y articulación entre áreas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Planificación y organización</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Gestión operativa, plazos y recursos.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Comunicación</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Transmisión efectiva de información en todos los niveles.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#fef3e2;color:#8a4a00;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Toma de decisiones</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Resolución en situaciones complejas con información incompleta.</div></div></div></div></div><div class="card" style="margin-bottom:1.25rem;"><div style="background:#1e2d3d;padding:1.25rem 1.5rem;border-radius:var(--radius) var(--radius) 0 0;display:flex;align-items:center;gap:1rem;"><div style="width:44px;height:44px;border-radius:10px;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏢</div><div><div style="font-size:16px;font-weight:700;color:#ffffff;margin-bottom:2px;">Gerencia</div><div style="font-size:11px;color:#ffffff;opacity:0.6;">Gerente, subgerente, director, VP</div></div><div style="margin-left:auto;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:rgba(0,0,0,0.08);color:#ffffff;">5 competencias</div></div><div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:.6rem;"><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Visión de negocio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Lectura del entorno, oportunidades y amenazas estratégicas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Liderazgo</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Conducción estratégica de equipos y organizaciones.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Pensamiento estratégico</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Planificación a largo plazo y decisiones complejas.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Orientación a resultados</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">KPIs, metas organizacionales e impacto en el negocio.</div></div></div><div style="display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;background:var(--bg);border-radius:8px;border:1px solid var(--border);"><div style="width:22px;height:22px;border-radius:5px;background:#1e2d3d;color:#ffffff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div><div><div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px;">Gestión del cambio</div><div style="font-size:12px;color:var(--muted);line-height:1.5;">Liderazgo de transformaciones e innovación organizacional.</div></div></div></div></div>
       </div>
     </div>
-    
+
+    <!-- ════ PÁGINA GESTIÓN DE USUARIOS (solo admin) ════ -->
+    <div class="page" id="page-usuarios">
+      <div style="max-width:760px;">
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><div class="card-title">👤 Crear / editar usuario</div></div>
+          <div style="padding:18px 20px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Usuario (para ingresar)</label><input type="text" id="nu-user" placeholder="ej: jperez" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Contraseña</label><input type="text" id="nu-pass" placeholder="contraseña inicial" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Nombre completo</label><input type="text" id="nu-nombre" placeholder="ej: Juan Pérez" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+              <div><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-soft);margin-bottom:6px;">Correo (recibe los avisos)</label><input type="text" id="nu-correo" placeholder="ej: jperez@correo.cl" style="width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;outline:none;"></div>
+            </div>
+            <button class="btn btn-primary" onclick="crearUsuario()">Guardar usuario</button>
+            <span id="nu-msg" style="font-size:13px;margin-left:12px;"></span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:14px 0 0;">Si el usuario ya existe, se actualizan sus datos. El usuario verá únicamente los candidatos a los que él envió tests, y recibirá en su correo el aviso cuando los completen.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">👥 Usuarios del equipo</div></div>
+          <div id="usuarios-lista" style="padding:8px 20px 16px;"></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1766,6 +1806,7 @@ const DASH_HTML = {
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
 var usuarioActual = "";
+var esAdminActual = false;
 var todosLosDatos = [];
 var todosEnvios = [];
 
@@ -1790,12 +1831,15 @@ async function login() {
 
     if (data.ok === true) {
       usuarioActual = u2;
+      esAdminActual = (data.esAdmin === true);
       sessionStorage.setItem("cygnus_user", u2);
+      sessionStorage.setItem("cygnus_admin", esAdminActual ? "1" : "0");
       document.getElementById("login-screen").style.display = "none";
       document.getElementById("app-screen").style.display = "block";
-      document.getElementById("user-name").textContent = u2;
+      document.getElementById("user-name").textContent = data.nombre || u2;
       document.getElementById("user-avatar").textContent = u2[0].toUpperCase();
       document.getElementById("login-error").style.display = "none";
+      aplicarVistaRol();
       cargarDatos();
       cargarEntrevistas();
     } else {
@@ -1822,15 +1866,112 @@ function logout() {
 }
 document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
 
+// ════ GESTIÓN DE ROL Y USUARIOS (solo admin) ════
+function aplicarVistaRol() {
+  // Muestra el ítem de navegación "Usuarios" solo al admin
+  var navUsuarios = document.getElementById("nav-usuarios");
+  if (navUsuarios) navUsuarios.style.display = esAdminActual ? "" : "none";
+}
+
+async function cargarUsuarios() {
+  if (!esAdminActual) return;
+  var cont = document.getElementById("usuarios-lista");
+  if (cont) cont.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:16px;">Cargando usuarios…</div>';
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getUsuarios&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
+    if (!data.ok) { cont.innerHTML = '<div style="color:var(--low);padding:16px;">No autorizado.</div>'; return; }
+    var html = data.usuarios.map(function(u){
+      var esAdm = u.esAdmin;
+      return '<div class="usuario-row">'
+        + '<div class="usuario-avatar">' + (u.user[0]||"?").toUpperCase() + '</div>'
+        + '<div style="flex:1;"><div class="usuario-nom">' + (u.nombre||u.user) + (esAdm?' <span class="usuario-tag">admin</span>':'') + '</div>'
+        + '<div class="usuario-meta">' + u.user + (u.correo?' · '+u.correo:'') + '</div></div>'
+        + '<button class="usuario-key" onclick="cambiarPass(\'' + u.user + '\')">🔑 Contraseña</button>'
+        + (esAdm ? '' : '<button class="usuario-del" onclick="eliminarUsuario(\'' + u.user + '\')">Eliminar</button>')
+        + '</div>';
+    }).join("");
+    cont.innerHTML = html || '<div style="color:var(--muted);padding:16px;">Sin usuarios.</div>';
+  } catch(e) {
+    cont.innerHTML = '<div style="color:var(--low);padding:16px;">Error: ' + e.message + '</div>';
+  }
+}
+
+async function crearUsuario() {
+  var u = document.getElementById("nu-user").value.trim().toLowerCase();
+  var p = document.getElementById("nu-pass").value;
+  var n = document.getElementById("nu-nombre").value.trim();
+  var c = document.getElementById("nu-correo").value.trim();
+  var msg = document.getElementById("nu-msg");
+  if (!u || !p) { msg.textContent = "Usuario y contraseña son obligatorios."; msg.style.color = "var(--low)"; return; }
+  msg.textContent = "Guardando…"; msg.style.color = "var(--muted)";
+  try {
+    await fetch(APPS_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"crearUsuario", solicitante:usuarioActual, user:u, pass:p, nombre:n, correo:c }) });
+    msg.textContent = "Usuario guardado ✓"; msg.style.color = "var(--high)";
+    document.getElementById("nu-user").value = "";
+    document.getElementById("nu-pass").value = "";
+    document.getElementById("nu-nombre").value = "";
+    document.getElementById("nu-correo").value = "";
+    setTimeout(cargarUsuarios, 800);
+  } catch(e) { msg.textContent = "Error: " + e.message; msg.style.color = "var(--low)"; }
+}
+
+async function eliminarUsuario(user) {
+  if (!confirm("¿Eliminar al usuario \"" + user + "\"? Esta acción no se puede deshacer.")) return;
+  try {
+    await fetch(APPS_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"eliminarUsuario", solicitante:usuarioActual, user:user }) });
+    setTimeout(cargarUsuarios, 800);
+  } catch(e) { alert("Error: " + e.message); }
+}
+
+async function cambiarPass(user) {
+  var nueva = prompt("Nueva contraseña para \"" + user + "\":");
+  if (nueva === null) return;                 // canceló
+  nueva = nueva.trim();
+  if (!nueva) { alert("La contraseña no puede quedar vacía."); return; }
+  try {
+    await fetch(APPS_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ action:"cambiarPass", solicitante:usuarioActual, user:user, pass:nueva }) });
+    alert("Contraseña actualizada para \"" + user + "\".");
+  } catch(e) { alert("Error: " + e.message); }
+}
+
+// Cambiar la PROPIA contraseña (cualquier usuario; valida la clave actual)
+async function cambiarMiPass() {
+  var actual = prompt("Ingresa tu contraseña ACTUAL:");
+  if (actual === null) return;
+  actual = actual.trim();
+  if (!actual) { alert("Debes ingresar tu contraseña actual."); return; }
+  var nueva = prompt("Ingresa tu NUEVA contraseña:");
+  if (nueva === null) return;
+  nueva = nueva.trim();
+  if (!nueva) { alert("La nueva contraseña no puede quedar vacía."); return; }
+  if (nueva.length < 4) { alert("La nueva contraseña debe tener al menos 4 caracteres."); return; }
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=cambiarMiPass&user=" + encodeURIComponent(usuarioActual)
+      + "&passActual=" + encodeURIComponent(actual) + "&passNueva=" + encodeURIComponent(nueva) + "&t=" + Date.now());
+    if (data.ok) {
+      alert("✓ Tu contraseña fue actualizada. Úsala la próxima vez que ingreses.");
+    } else if (data.error === "clave-actual-incorrecta") {
+      alert("La contraseña actual que ingresaste no es correcta. Inténtalo de nuevo.");
+    } else {
+      alert("No se pudo cambiar la contraseña: " + (data.error || "error desconocido"));
+    }
+  } catch(e) { alert("Error de conexión: " + e.message); }
+}
+
 // AUTO-RESTORE: si hay sesión activa en esta pestaña, no pedir login de nuevo
 (function() {
   var savedUser = sessionStorage.getItem("cygnus_user");
   if (savedUser) {
     usuarioActual = savedUser;
+    esAdminActual = (sessionStorage.getItem("cygnus_admin") === "1");
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app-screen").style.display = "block";
     document.getElementById("user-name").textContent = savedUser;
     document.getElementById("user-avatar").textContent = savedUser[0].toUpperCase();
+    aplicarVistaRol();
     cargarDatos();
     cargarEntrevistas();
   }
@@ -1838,16 +1979,19 @@ document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", "enviar-entrevista":"Enviar entrevista", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", entrevistas:"Reporte Entrevistas", enviar:"Enviar evaluación", "enviar-entrevista":"Enviar entrevista", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  document.querySelectorAll(".nav-item")[["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias"].indexOf(pag)].classList.add("activo");
-  document.getElementById("topbar-title").textContent = titulos[pag];
+  var ordenNav = ["panel","candidatos","entrevistas","enviar","enviar-entrevista","historial","tests","competencias","usuarios"];
+  var navIdx = ordenNav.indexOf(pag);
+  var navEls = document.querySelectorAll(".nav-item");
+  if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
+  document.getElementById("topbar-title").textContent = titulos[pag] || "";
   paginaActual = pag;
   if (pag === "historial") renderHistorial();
-  // Forzar scroll al top y repaint
+  if (pag === "usuarios") cargarUsuarios();
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
@@ -1997,7 +2141,7 @@ async function cargarDatos() {
 
   // ── 2. Lanzar ambos fetch en paralelo ──
   try {
-    var promAll  = fetchJSON(APPS_URL + "?action=getAllResults&t=" + Date.now());
+    var promAll  = fetchJSON(APPS_URL + "?action=getAllResults&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
     var promHist = fetchJSON(APPS_URL + "?action=getHistorial&t="  + Date.now());
 
     // getHistorial (1 hoja) llega primero → pintar envíos rápido
@@ -2438,14 +2582,14 @@ async function enviarEvaluacion() {
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:"", link:TESTS_LINKS[test]})
+        body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:"", link:TESTS_LINKS[test], solicitante:usuarioActual})
       });
     } else {
       // Múltiples tests → un solo correo con todos los botones
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, tests:testsSeleccionados})
+        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, tests:testsSeleccionados, solicitante:usuarioActual})
       });
     }
 
