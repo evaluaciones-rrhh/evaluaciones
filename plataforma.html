@@ -3,31 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cygnus — Plataforma de Evaluaciones</title>
+<title>Deneb — Plataforma de Evaluaciones</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <style>
 :root {
-  --naranja: #c4432a;
-  --naranja-dark: #a3371f;
-  --naranja-light: #f5ede9;
-  --ink: #1a1410;
-  --ink-soft: #4a3f35;
-  --muted: #9a8a7a;
-  --border: #e8ddd4;
-  --bg: #faf7f4;
+  /* Deneb — acento principal LIMA (sobre lima el texto va oscuro) */
+  --naranja: #d4f33a;          /* lima (acento principal) */
+  --naranja-dark: #b5d420;     /* lima oscuro (hover) */
+  --naranja-light: #f3fbd0;    /* lima muy suave (fondos) */
+  --lima-ink: #2b3a47;         /* texto/íconos que van SOBRE lima */
+  --coral: #e57a5f;            /* coral — estrella del logo y detalles de marca */
+  --coral-soft: #fbe9e3;
+  --coral-dark: #c95d43;
+  --ink: #1f2a33;
+  --ink-soft: #45525d;
+  --muted: #7a828c;
+  --border: #e3e6e2;
+  --bg: #faf9f5;
   --white: #ffffff;
-  --azul: #1e2d3d;
-  --azul-soft: #e8ecf0;
-  --high: #2a6e47;
-  --high-bg: #e8f4ee;
+  --azul: #2b3a47;             /* azul pizarra Deneb */
+  --azul-soft: #e8ecef;
+  --high: #5f7a00;             /* nivel alto = verde lima oscuro (legible) */
+  --high-bg: #f0f7d2;
   --mid: #c07a00;
   --mid-bg: #fef3e0;
   --low: #c0392b;
   --low-bg: #fdecea;
-  --shadow-sm: 0 1px 3px rgba(26,20,16,0.06);
-  --shadow: 0 2px 8px rgba(26,20,16,0.10);
-  --shadow-lg: 0 8px 32px rgba(26,20,16,0.14);
+  --shadow-sm: 0 1px 3px rgba(31,42,51,0.06);
+  --shadow: 0 2px 8px rgba(31,42,51,0.10);
+  --shadow-lg: 0 8px 32px rgba(31,42,51,0.14);
   --radius: 10px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,7 +89,10 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
   font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 700;
   color: #fff; line-height: 1.1; margin-bottom: 20px; position: relative; z-index: 2;
 }
-.login-headline em { color: var(--naranja); font-style: italic; font-weight: 400; }
+.login-headline em { color: var(--naranja); font-style: normal; font-weight: 700; }
+.deneb-logo-text { display:inline-flex; align-items:flex-start; font-weight:800; font-size:34px; letter-spacing:-.02em; line-height:1; color:#fff; }
+.deneb-star { width:15px; height:15px; margin-left:3px; margin-top:-2px; }
+.deneb-logo-sub { font-size:10px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.5); margin:6px 0 0 2px; }
 .login-desc {
   font-size: 14px; color: rgba(255,255,255,0.4); line-height: 1.8;
   max-width: 380px; position: relative; z-index: 2;
@@ -139,7 +147,7 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 }
 .login-card-eyebrow {
   font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--naranja); margin-bottom: 12px;
+  color: var(--coral); margin-bottom: 12px;
 }
 .login-card-title {
   font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700;
@@ -159,7 +167,7 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 }
 .field input:focus { border-color: var(--naranja); box-shadow: 0 0 0 3px rgba(196,67,42,0.08); }
 .btn-login {
-  width: 100%; padding: 14px; background: var(--naranja); color: #fff;
+  width: 100%; padding: 14px; background: var(--naranja); color: var(--lima-ink);
   border: none; border-radius: 8px; font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
   transition: all 0.15s; letter-spacing: 0.5px;
@@ -203,7 +211,7 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
   font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
 }
 .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
-.nav-item.activo { background: var(--naranja); color: #fff; }
+.nav-item.activo { background: var(--naranja); color: var(--lima-ink); font-weight: 700; }
 .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 .sidebar-footer {
   padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.06);
@@ -215,7 +223,7 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 .user-avatar {
   width: 32px; height: 32px; border-radius: 50%;
   background: var(--naranja); display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0;
+  font-weight: 700; font-size: 13px; color: var(--lima-ink); flex-shrink: 0;
 }
 .user-name { font-size: 12px; color: rgba(255,255,255,0.7); font-weight: 500; flex: 1; }
 .btn-logout-sidebar {
@@ -304,7 +312,7 @@ tbody tr:hover td { background: #fdf9f6; }
 
 /* BOTONES */
 .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
-.btn-primary { background: var(--naranja); color: #fff; }
+.btn-primary { background: var(--naranja); color: var(--lima-ink); font-weight: 700; }
 .btn-primary:hover { background: var(--naranja-dark); }
 .btn-secondary { background: var(--white); color: var(--ink); border: 1px solid var(--border); }
 .btn-secondary:hover { background: var(--bg); }
@@ -397,7 +405,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .pendiente-dias.urgente { background:var(--low-bg); color:var(--low); }
 
 .tasa-wrap { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
-.tasa-num { font-family:'Sora',sans-serif; font-size:48px; font-weight:700; color:var(--naranja); line-height:1; }
+.tasa-num { font-family:'Sora',sans-serif; font-size:48px; font-weight:700; color:var(--coral); line-height:1; }
 .tasa-desc { font-size:13px; color:var(--muted); line-height:1.5; }
 .tasa-bar-wrap { height:8px; background:var(--border); border-radius:4px; margin-top:8px; }
 .tasa-bar { height:100%; border-radius:4px; background:var(--naranja); transition:width 0.5s; }
@@ -532,7 +540,7 @@ tbody tr:hover td { background: #fdf9f6; }
   background: var(--bg); border-radius: 8px; padding: 16px 18px;
   border-left: 4px solid var(--naranja); margin-bottom: 20px;
 }
-.ic-resumen-title { font-size: 11px; font-weight: 700; color: var(--naranja); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+.ic-resumen-title { font-size: 11px; font-weight: 700; color: var(--coral); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
 .ic-resumen-text { font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
 .ic-barra-wrap { margin-bottom: 16px; }
 .ic-barra-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
@@ -870,7 +878,7 @@ tbody tr:hover td { background: #fdf9f6; }
 }
 .check-test-label:hover { border-color: var(--naranja); }
 .check-test-label input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; }
-.check-test-label:has(input:checked) { border-color: var(--naranja); background: #fdf3f1; color: var(--naranja); }
+.check-test-label:has(input:checked) { border-color: var(--coral); background: var(--coral-soft); color: var(--coral-dark); }
 
 /* ══ DROPDOWN MULTI-TEST ══ */
 .multi-select-wrap { position: relative; }
@@ -895,7 +903,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .multi-select-option:last-child { border-bottom: none; }
 .multi-select-option:hover { background: var(--bg); }
 .multi-select-option input[type="checkbox"] { accent-color: var(--naranja); width: 15px; height: 15px; flex-shrink: 0; pointer-events: none; }
-.multi-select-option.checked { background: #fdf3f1; color: var(--naranja); font-weight: 600; }
+.multi-select-option.checked { background: var(--coral-soft); color: var(--coral-dark); font-weight: 600; }
 
 /* ══ FIX VISIBILIDAD PÁGINAS ══ */
 #page-historial.activo,
@@ -1143,13 +1151,13 @@ tbody tr:hover td { background: #fdf9f6; }
 <!-- ══════════ LOGIN ══════════ -->
 <div id="login-screen">
 
-  <!-- LADO IZQUIERDO — Branding Cygnus -->
+  <!-- LADO IZQUIERDO — Branding Deneb -->
   <div class="login-left">
     <div class="login-logo-area">
-      <!-- Barra de logos superior -->
+      <!-- Logo Deneb -->
       <div class="login-logos-bar">
-        <img src="data:image/jpeg;base64,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" alt="Grupo Cygnus" class="login-logo-img login-logo-cygnus">
-        
+        <div class="deneb-logo-text">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+        <div class="deneb-logo-sub">consultores · evaluaciones</div>
       </div>
       <h1 class="login-headline">Plataforma de<br><em>Evaluaciones</em><br>Psicolaborales</h1>
       <p class="login-desc">Gestiona, envía y analiza evaluaciones psicolaborales de tus candidatos desde un solo lugar.</p>
@@ -1177,7 +1185,7 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
       </div>
     </div>
-    <div class="login-footer-left">© 2026 Grupo Cygnus · PostulaAquí · Evaluaciones Psicolaborales</div>
+    <div class="login-footer-left">© 2026 Deneb Evaluaciones · Grupo Cygnus</div>
   </div>
 
   <!-- LADO DERECHO — Formulario -->
@@ -1208,8 +1216,8 @@ tbody tr:hover td { background: #fdf9f6; }
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-brand">
-      <div class="sidebar-brand-name">PostulaAquí</div>
-      <div class="sidebar-brand-sub">Evaluaciones · Cygnus</div>
+      <div class="sidebar-brand-name">deneb<svg style="width:11px;height:11px;margin-left:2px;vertical-align:top;" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+      <div class="sidebar-brand-sub">Evaluaciones Psicolaborales</div>
     </div>
     <nav class="sidebar-nav">
       <div class="nav-item activo" onclick="irA('panel')">
@@ -1504,7 +1512,7 @@ tbody tr:hover td { background: #fdf9f6; }
 
 
           <div id="link-preview" style="margin-top:14px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--muted);display:none;">
-            🔗 Link a enviar: <span id="link-url" style="color:var(--naranja);font-weight:500;"></span>
+            🔗 Link a enviar: <span id="link-url" style="color:var(--coral-dark);font-weight:500;"></span>
           </div>
           <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
             <button class="btn btn-primary" onclick="enviarEvaluacion()" id="btn-env">📧 Enviar invitación</button>
@@ -1614,9 +1622,9 @@ tbody tr:hover td { background: #fdf9f6; }
               </div>
               <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:.75rem;">Evalúa la <strong>capacidad de comprensión y ejecución de instrucciones complejas</strong> bajo presión de tiempo. Mide atención al detalle, velocidad de procesamiento y seguimiento de reglas múltiples simultáneas.</p>
               <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Atención</span>
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Velocidad de procesamiento</span>
-                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--naranja-light);color:var(--naranja);">Comprensión lectora</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--coral-soft);color:var(--coral-dark);">Atención</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--coral-soft);color:var(--coral-dark);">Velocidad de procesamiento</span>
+                <span style="font-size:11px;padding:2px 8px;border-radius:12px;background:var(--coral-soft);color:var(--coral-dark);">Comprensión lectora</span>
               </div>
               <p style="font-size:12px;color:var(--muted);margin-top:.75rem;">📌 Recomendado para: cargos administrativos, analistas, operadores, cualquier rol que requiera seguir procedimientos precisos.</p>
             </div>
@@ -2579,7 +2587,7 @@ function renderTablaEntrevistas(lista) {
     return '<tr>'
       + '<td><strong>' + (ent.nombre||'—') + '</strong></td>'
       + '<td style="color:var(--muted);font-size:12px;">' + (ent.rut||'—') + '</td>'
-      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(196,67,42,0.1);color:var(--naranja);">' + (ent.cargo||'—') + '</span></td>'
+      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--coral-soft);color:var(--coral-dark);">' + (ent.cargo||'—') + '</span></td>'
       + '<td style="color:var(--muted);font-size:12px;">' + (ent.fecha||'—') + '</td>'
       + '<td><span style="font-size:12px;font-weight:600;color:' + recColor + ';">' + recEmoji + ' ' + rec + '</span></td>'
       + '<td><button class="btn btn-ghost btn-sm" onclick="verInformeEntrevista(' + JSON.stringify(ent).replace(/"/g,"&quot;") + ')">Ver informe</button></td>'
