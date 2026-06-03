@@ -2889,6 +2889,44 @@ var CEAL_EFECT_INTERP = {
 };
 
 async function abrirInformeCEAL(test, rut, nombre) {
+  // Conclusión integrada estilo+efectividad (autónoma, sin dependencias externas)
+  function construirConclusionCEAL(estilo, nivel){
+    function banda(niv){
+      if(["Muy Alta","Alta","Media Alta","Promedio Positivo"].indexOf(niv) >= 0) return "efectivo";
+      if(["Promedio Negativo","Media Baja","Baja","Muy Baja"].indexOf(niv) >= 0) return "inefectivo";
+      return "promedio";
+    }
+    var ROLES = {
+      "Autoritario": { efectivo:"Autócrata Benévolo", promedio:"Autoritario", inefectivo:"Autócrata" },
+      "Integrado":   { efectivo:"Ejecutivo",          promedio:"Integrado",   inefectivo:"Componedor" },
+      "Relacionado": { efectivo:"Promotor",           promedio:"Relacionado", inefectivo:"Misionero" },
+      "Separado":    { efectivo:"Burócrata",          promedio:"Separado",    inefectivo:"Desertor" }
+    };
+    var tendNat = {
+      "Separado":"delegar y dar autonomía",
+      "Autoritario":"dirigir y estructurar el trabajo",
+      "Relacionado":"priorizar las relaciones y el clima",
+      "Integrado":"equilibrar resultados y personas"
+    };
+    var b = banda(nivel);
+    var rol = (ROLES[estilo]||{})[b] || estilo;
+    var nat = tendNat[estilo] || "liderar según su estilo";
+    var intro = "Este candidato presenta un estilo de liderazgo predominante <b>"+estilo+"</b> con un nivel de efectividad <b>"+nivel+"</b>. ";
+    var medio;
+    if(b==="efectivo"){
+      medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: aplica su estilo de forma <b>adecuada a la situación</b>. "
+        + "Aunque su tendencia natural es "+nat+", sabe leer el contexto y usar ese enfoque cuando realmente conviene. El estilo en sí no es bueno ni malo; lo relevante es que lo aplica con buen criterio situacional, lo que es un indicador favorable para roles de conducción.";
+    } else if(b==="inefectivo"){
+      medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: tiende a aplicar su estilo de forma <b>poco ajustada a la situación</b>. "
+        + "Su enfoque natural ("+nat+") se manifiesta en contextos donde no es el más adecuado, lo que reduce su efectividad. Conviene profundizar en entrevista cómo adapta su estilo según la madurez y necesidades del equipo.";
+    } else {
+      medio = "Su nivel de efectividad es intermedio: aplica su estilo con resultados variables según la situación. "
+        + "Muestra criterio situacional en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo si trabaja la lectura del contexto y la flexibilidad de estilo.";
+    }
+    var cierre = " <b>Importante:</b> el estilo describe <i>cómo</i> tiende a liderar; la efectividad mide <i>qué tan bien</i> ajusta ese estilo a cada situación. Son dimensiones independientes: un mismo estilo puede ser efectivo o inefectivo según el criterio con que se aplique.";
+    return intro + medio + cierre;
+  }
+
   var rutDec = decodeURIComponent(rut || "");
   var nomDec = decodeURIComponent(nombre || "");
   try {
@@ -2993,7 +3031,7 @@ async function abrirInformeCEAL(test, rut, nombre) {
 
     // Descripción del estilo + CONCLUSIÓN INTEGRADA (estilo+efectividad coherentes)
     var textoDesc   = CEAL_TEXTOS[estilo] || descripcion;
-    var conclusion  = cealConclusionIntegrada(estilo, nivel);
+    var conclusion  = construirConclusionCEAL(estilo, nivel);
     var descEl = document.getElementById("ceal-descripcion");
     descEl.innerHTML = '<div style="margin-bottom:14px;">'+textoDesc+'</div>'
       + '<div style="background:#f6f7f8;border-left:3px solid var(--azul,#2b3a47);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;line-height:1.7;">'
@@ -3069,35 +3107,6 @@ async function abrirInformeCEAL(test, rut, nombre) {
       if(["Muy Alta","Alta","Media Alta","Promedio Positivo"].indexOf(niv) >= 0) return "efectivo";
       if(["Promedio Negativo","Media Baja","Baja","Muy Baja"].indexOf(niv) >= 0) return "inefectivo";
       return "promedio"; // "Promedio" o nivel no determinado
-    }
-
-    // Nombres de rol Reddin 3D según estilo + banda de efectividad
-    var CEAL_ROL_REDDIN = {
-      "Autoritario": { efectivo:"Autócrata Benévolo", promedio:"Autoritario", inefectivo:"Autócrata" },
-      "Integrado":   { efectivo:"Ejecutivo",          promedio:"Integrado",   inefectivo:"Componedor" },
-      "Relacionado": { efectivo:"Promotor",           promedio:"Relacionado", inefectivo:"Misionero" },
-      "Separado":    { efectivo:"Burócrata",          promedio:"Separado",    inefectivo:"Desertor" }
-    };
-
-    // Conclusión integrada: une estilo + efectividad en una sola lectura coherente
-    function cealConclusionIntegrada(estilo, nivel){
-      var banda = bandaEfectividad(nivel);
-      var rol = (CEAL_ROL_REDDIN[estilo]||{})[banda] || estilo;
-      var intro = "Este candidato presenta un estilo de liderazgo predominante <b>"+estilo+"</b> con un nivel de efectividad <b>"+nivel+"</b>. ";
-      var medio = "";
-      if(banda==="efectivo"){
-        medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: aplica su estilo "+estilo.toLowerCase()+" de forma <b>adecuada a la situación</b>. "
-          + "Es decir, aunque su tendencia natural sea "+(estilo==="Separado"?"delegar y dar autonomía":estilo==="Autoritario"?"dirigir y estructurar":estilo==="Relacionado"?"priorizar las relaciones":"equilibrar tarea y personas")
-          + ", sabe leer el contexto y usar ese enfoque cuando realmente conviene. El estilo por sí solo no es bueno ni malo: lo relevante es que lo aplica con buen criterio situacional, lo que es un indicador favorable para roles de conducción.";
-      } else if(banda==="inefectivo"){
-        medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: tiende a aplicar su estilo "+estilo.toLowerCase()+" de forma <b>poco ajustada a la situación</b>. "
-          + "Esto sugiere que su enfoque natural se manifiesta en contextos donde no es el más adecuado, lo que reduce su efectividad como líder. Conviene profundizar en entrevista cómo adapta su estilo según la madurez y necesidades del equipo.";
-      } else {
-        medio = "Su nivel de efectividad es intermedio: aplica su estilo "+estilo.toLowerCase()+" con resultados variables según la situación. "
-          + "Muestra criterio situacional en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo si trabaja la lectura del contexto y la flexibilidad de estilo.";
-      }
-      var cierre = " <b>Importante:</b> el estilo describe <i>cómo</i> tiende a liderar; la efectividad mide <i>qué tan bien</i> ajusta ese estilo a cada situación. Son dimensiones independientes, por lo que un mismo estilo puede ser efectivo o inefectivo según el criterio con que se aplique.";
-      return intro + medio + cierre;
     }
 
 
