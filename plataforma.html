@@ -510,6 +510,14 @@ tbody tr:hover td { background: #fdf9f6; }
 .opk-cons-box { display:flex;align-items:center;gap:12px;background:#f6f7f8;border-radius:8px;padding:12px 14px;flex-wrap:wrap; }
 .opk-cons-badge { display:inline-block;font-size:11px;font-weight:700;color:#fff;padding:4px 12px;border-radius:12px;text-transform:uppercase;letter-spacing:.04em; }
 .opk-cons-txt { font-size:11.5px;color:#555;line-height:1.5;flex:1;min-width:200px; }
+.opk-reco { border:2px solid #ccc;border-radius:10px;padding:14px 16px;margin-bottom:4px; }
+.opk-reco-badge { display:inline-block;font-size:13px;font-weight:800;color:#fff;padding:6px 16px;border-radius:8px;margin-bottom:8px;letter-spacing:.02em; }
+.opk-reco-txt { font-size:12.5px;line-height:1.65;color:#333; }
+.opk-aten-item { border-left:3px solid #d4830a;background:#fdf8f0;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:8px; }
+.opk-aten-comp { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c99a2e;margin-bottom:3px; }
+.opk-aten-sit { font-size:12px;font-style:italic;color:#555;margin-bottom:5px;line-height:1.5; }
+.opk-aten-motivo { font-size:12px;color:#1a1917;line-height:1.55; }
+.opk-aten-ok { background:#e8f5ee;color:#1a6a4a;border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.55; }
 .opk-integridad-leve { background:#fdf5e0;color:#7a5c10;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
 .opk-integridad-riesgo { background:#fbeae8;color:#c0392b;border-radius:8px;padding:10px 14px;font-size:11px;font-weight:600; }
 .opk-nota { font-size:10px;color:#aaa;font-style:italic;margin-top:4px; }
@@ -3290,6 +3298,48 @@ function renderDiscList(containerId, items) {
 }
 
 // ════════════ DATOS OPERA (del manual técnico V1.0) ════════════
+// Banco de situaciones OPERA (para reconstruir respuestas que requieren atención)
+var OPERA_BANCO = [{"comp":"responsabilidad","s":"Al finalizar tu turno observas que una actividad quedó incompleta y podría afectar el trabajo del siguiente equipo.","mejor":"Informas la situación y dejas registro.","peor":"Consideras que el siguiente equipo podrá resolverlo."},{"comp":"responsabilidad","s":"Durante una tarea detectas que interpretaste incorrectamente una instrucción.","mejor":"Informas la situación y propones una solución.","peor":"Consultas con un compañero qué haría."},{"comp":"responsabilidad","s":"Recibes una indicación importante y posteriormente te quedan dudas.","mejor":"Solicitas aclaración.","peor":"Avanzas y corriges después si surge algún problema."},{"comp":"responsabilidad","s":"Una tarea asignada presenta retraso.","mejor":"Informas oportunamente.","peor":"Esperas para evaluar si realmente habrá retraso."},{"comp":"compromiso","s":"Tu equipo enfrenta una semana con alta carga laboral.","mejor":"Ofreces apoyo cuando terminas tus tareas.","peor":"Mantienes tu ritmo habitual."},{"comp":"compromiso","s":"La empresa implementa una nueva forma de trabajo.","mejor":"Intentas aprenderla rápidamente.","peor":"Continúas utilizando tu forma habitual."},{"comp":"compromiso","s":"Surge una capacitación relacionada con tu trabajo.","mejor":"Participas porque puede aportar a tu desarrollo.","peor":"Prefieres enfocarte en tu experiencia actual."},{"comp":"compromiso","s":"Un problema operativo afecta al equipo.","mejor":"Buscas aportar a la solución.","peor":"Esperas que otros definan cómo abordarlo."},{"comp":"seguridad","s":"Observas una condición que podría generar un riesgo.","mejor":"Informas la situación antes de continuar.","peor":"Continúas trabajando mientras observas."},{"comp":"seguridad","s":"Un procedimiento de seguridad genera retraso.","mejor":"Mantienes el procedimiento completo.","peor":"Priorizas terminar la tarea."},{"comp":"seguridad","s":"Observas a un compañero realizando una maniobra riesgosa.","mejor":"Le comentas la situación de inmediato.","peor":"Asumes que conoce los riesgos."},{"comp":"seguridad","s":"Antes de comenzar una actividad detectas que falta un EPP requerido.","mejor":"Gestionas el elemento antes de iniciar.","peor":"Comienzas mientras consigues el elemento."}];
+
+// Recomendación tipo semáforo según nivel global + consistencia
+function operaRecomendacion(nivelG, consistencia){
+  if (consistencia === "Baja") {
+    return { etiqueta:"Revisar con cautela", color:"#c0392b", icono:"⚠",
+      texto:"El patrón de respuestas presenta contradicciones que restan confiabilidad al resultado. Se sugiere no tomar decisiones solo con esta prueba y profundizar en entrevista." };
+  }
+  if (nivelG === "Favorable") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
+    texto:"El candidato muestra conductas consistentemente alineadas con las competencias evaluadas. Perfil favorable para cargos operativos." };
+  if (nivelG === "Adecuado") return { etiqueta:"Recomendable con reservas", color:"#c99a2e", icono:"≈",
+    texto:"El candidato muestra conductas generalmente alineadas, con algunas oportunidades de mejora. Recomendable, validando en entrevista las áreas más débiles." };
+  if (nivelG === "Observación") return { etiqueta:"Recomendable con reservas", color:"#d4830a", icono:"≈",
+    texto:"El candidato presenta conductas parcialmente alineadas o inconsistentes. Conviene profundizar en entrevista antes de decidir, especialmente en las áreas señaladas." };
+  return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
+    texto:"El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas. Se sugiere descartar o evaluar con mucha cautela para cargos críticos." };
+}
+
+// Reconstruye las respuestas que requieren atención a partir del CSV guardado (formato M{valor}m{valor})
+function operaRespuestasAtencion(respCSV){
+  if(!respCSV) return [];
+  var partes = String(respCSV).split(",");
+  var atencion = [];
+  partes.forEach(function(p, i){
+    if(!OPERA_BANCO[i]) return;
+    var m = p.match(/M(\d+)m(\d+)/);
+    if(!m) return;
+    var vMas = parseInt(m[1]), vMenos = parseInt(m[2]);
+    // requiere atención si: marcó como MÁS una conducta floja/riesgo (valor 0 o 1), o como MENOS una buena (valor 4 o 3)
+    if(vMas<=1 || vMenos>=3){
+      var motivo = "";
+      if(vMas===0) motivo = "Eligió como su acción MÁS probable una conducta de riesgo: «"+OPERA_BANCO[i].peor+"»";
+      else if(vMas===1) motivo = "Su acción MÁS probable fue una conducta poco efectiva en esta situación.";
+      if(vMenos===4) motivo += (motivo?" Además, ":"")+"descartó la mejor conducta posible: «"+OPERA_BANCO[i].mejor+"»";
+      else if(vMenos===3 && !motivo) motivo = "Descartó una conducta efectiva en esta situación.";
+      atencion.push({ situacion: OPERA_BANCO[i].s, comp: OPERA_BANCO[i].comp, motivo: motivo });
+    }
+  });
+  return atencion;
+}
+
 var OPERA_COMP = {
   responsabilidad: { nombre:"Responsabilidad", icono:"📋",
     desc:"Cumplimiento de tareas, comunicación de desviaciones y cuidado de la continuidad operacional." },
@@ -3427,6 +3477,32 @@ async function abrirInformeOPERA(test, rut, nombre) {
     else resumen += "No se identifican áreas en zona crítica; se sugiere igualmente complementar con entrevista y antecedentes del proceso. ";
     if (consistencia!=="Alta") resumen += "El índice de consistencia es "+consistencia+", por lo que conviene contrastar estos resultados con otras fuentes.";
     document.getElementById("opk-resumen-texto").textContent = resumen;
+
+    // Recomendación tipo semáforo (arriba del informe)
+    var reco = operaRecomendacion(nivelG, consistencia);
+    var recoElem = document.getElementById("opk-recomendacion");
+    if (recoElem) {
+      recoElem.innerHTML = '<div class="opk-reco" style="border-color:'+reco.color+';">'
+        + '<div class="opk-reco-badge" style="background:'+reco.color+';">'+reco.icono+' '+reco.etiqueta+'</div>'
+        + '<div class="opk-reco-txt">'+reco.texto+'</div></div>';
+    }
+
+    // Respuestas que requieren atención
+    var atencionElem = document.getElementById("opk-atencion");
+    if (atencionElem) {
+      var resp = String(fila[12]||"");
+      var atencion = operaRespuestasAtencion(resp);
+      if (atencion.length) {
+        atencionElem.innerHTML = atencion.map(function(a){
+          return '<div class="opk-aten-item">'
+            + '<div class="opk-aten-comp">'+(OPERA_COMP[a.comp]?OPERA_COMP[a.comp].nombre:a.comp)+'</div>'
+            + '<div class="opk-aten-sit">"'+a.situacion+'"</div>'
+            + '<div class="opk-aten-motivo">'+a.motivo+'</div></div>';
+        }).join("");
+      } else {
+        atencionElem.innerHTML = '<div class="opk-aten-ok">✓ No se detectaron respuestas que requieran atención especial. El candidato eligió conductas adecuadas en las situaciones presentadas.</div>';
+      }
+    }
 
     // Índice de consistencia (sección propia)
     var consElem = document.getElementById("opk-consistencia");
@@ -4403,6 +4479,9 @@ function imprimirModalWONDERLIC() { window.print(); }
 
     <div class="opk-body">
 
+      <!-- Recomendación (semáforo) -->
+      <div id="opk-recomendacion"></div>
+
       <!-- Índice global -->
       <div>
         <div class="opk-label">Índice Global</div>
@@ -4415,6 +4494,12 @@ function imprimirModalWONDERLIC() { window.print(); }
       <div>
         <div class="opk-label">Competencias evaluadas</div>
         <div id="opk-competencias"></div>
+      </div>
+
+      <!-- Respuestas que requieren atención -->
+      <div>
+        <div class="opk-label">Respuestas que requieren atención</div>
+        <div id="opk-atencion"></div>
       </div>
 
       <!-- Fortalezas -->
