@@ -56,15 +56,31 @@
   .btn-sec:hover{border-color:var(--accent);color:var(--accent);}
   .btn-sec:disabled{opacity:.3;cursor:default;}
 </style>
-</head>
+<style>
+  .mm-opt{display:flex;align-items:center;gap:.6rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;margin-bottom:.6rem;transition:border-color .15s,background .15s;}
+  .mm-opt-txt{flex:1;font-size:14.5px;line-height:1.45;}
+  .mm-btns{display:flex;gap:.4rem;flex-shrink:0;}
+  .mm-btn{border:1.5px solid var(--border);background:#fff;border-radius:6px;padding:.3rem .6rem;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);color:var(--text-muted);transition:all .12s;white-space:nowrap;}
+  .mm-btn.mas.sel{background:var(--green-light);border-color:var(--green);color:var(--green);}
+  .mm-btn.menos.sel{background:var(--red-light);border-color:var(--red);color:var(--red);}
+  .mm-opt.is-mas{border-color:var(--green);background:var(--green-light);}
+  .mm-opt.is-menos{border-color:var(--red);background:var(--red-light);}
+  .mm-hint{font-size:12.5px;color:var(--text-hint);margin-bottom:1rem;display:flex;gap:1.2rem;flex-wrap:wrap;}
+  .mm-hint span{display:flex;align-items:center;gap:.3rem;}
+  .mm-status{font-size:12px;text-align:center;margin-top:.4rem;min-height:1.2em;}
+  .mm-status.ok{color:var(--green);}
+  .mm-status.pend{color:var(--text-hint);}
+  .nivel-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:10px;background:var(--accent-light);color:var(--accent);margin-left:.5rem;}
+</style>
+
 <body>
 <div class="page">
   <div class="header">
     <div style="display:flex;align-items:center;gap:1rem;">
       <img src="data:image/png;base64,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" alt="Logo empresa" style="width:48px;height:48px;border-radius:50%;object-fit:cover;">
       <div>
-        <div class="header-sub">Grupo Cygnus</div>
-        <div class="header-title">Evaluación de Conducta Operacional</div>
+        <div class="header-sub">Deneb Evaluaciones</div>
+        <div class="header-title">OPERA</div>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:1rem;">
@@ -78,27 +94,21 @@
     <div class="card">
       <div class="card-label">Datos del candidato</div>
       <div class="field-grid" style="margin-bottom:1rem;">
-        <div>
-          <label for="nombre">Nombre completo</label>
-          <input type="text" id="nombre" placeholder="Apellido Nombre">
-        </div>
-        <div>
-          <label for="rut">RUT</label>
-          <input type="text" id="rut" placeholder="Ej: 12.345.678-9">
-          <div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div>
-        </div>
+        <div><label for="nombre">Nombre completo</label><input type="text" id="nombre" placeholder="Apellido Nombre"></div>
+        <div><label for="rut">RUT</label><input type="text" id="rut" placeholder="Ej: 12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
       </div>
       <div id="err-nombre" class="err-msg">Por favor ingresa el nombre del candidato.</div>
     </div>
-
     <div class="card" style="background:#fafaf8;border-style:dashed;">
       <div class="card-label">Instrucciones</div>
       <div style="font-size:14px;color:#1a1917;line-height:1.8;border-left:3px solid #d8d6ce;padding-left:1rem;">
-        A continuación encontrarás situaciones laborales breves. Lee cada situación y selecciona la alternativa que más se parece a la forma en que actuarías habitualmente. No existen respuestas perfectas; responde de la manera más honesta y natural posible. Son <strong>20 situaciones</strong> y no hay límite de tiempo: tómate los minutos que necesites para responder con calma.
+        A continuación encontrarás situaciones laborales breves. En cada una, deberás marcar <strong>dos</strong> alternativas:
+        <br>• La que <strong>MÁS</strong> representa lo que probablemente harías (⭐).
+        <br>• La que <strong>MENOS</strong> representa lo que harías (🚫).
+        <br><br>No puedes marcar la misma alternativa como Más y Menos. No hay respuestas perfectas; responde con honestidad. Son <strong>12 situaciones</strong> y no hay límite de tiempo.
       </div>
-      <div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;line-height:1.65;"><strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluación. Se recomienda mantener esta ventana en primer plano durante todo el test. El uso de buscadores, inteligencia artificial u otros recursos externos queda registrado y puede afectar la validez del resultado.</div>
+      <div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;line-height:1.65;"><strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluación. Se recomienda mantener esta ventana en primer plano durante todo el test.</div>
     </div>
-
     <button class="btn-primary" onclick="iniciar()">Iniciar prueba</button>
     <p class="note">Una vez iniciada la prueba, no puede pausarse ni reiniciarse</p>
   </div>
@@ -106,18 +116,16 @@
   <!-- PANTALLA 2: PRUEBA -->
   <div id="screen-prueba" class="hidden">
     <div class="timer-row">
-      <div class="timer-candidate">
-        <span style="font-size:11px;color:#a09d96;text-transform:uppercase;letter-spacing:.06em;">Candidato</span>
-        <strong id="disp-nombre"></strong>
-      </div>
+      <div class="timer-candidate"><span style="font-size:11px;color:#a09d96;text-transform:uppercase;letter-spacing:.06em;">Candidato</span><strong id="disp-nombre"></strong></div>
       <div class="timer-label">Tómate el tiempo que necesites</div>
     </div>
     <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
-
     <div class="card">
-      <div class="q-counter" id="q-counter">Situación 1 de 20</div>
+      <div class="q-counter" id="q-counter">Situación 1 de 12</div>
       <div class="scenario-box" id="scenario">—</div>
+      <div class="mm-hint"><span>⭐ <b>Más</b>: lo que más harías</span><span>🚫 <b>Menos</b>: lo que menos harías</span></div>
       <div id="opts"></div>
+      <div class="mm-status pend" id="mm-status">Marca una opción como Más y otra como Menos</div>
       <div class="nav-row">
         <button class="btn-sec" id="btn-prev" onclick="navegar(-1)">← Anterior</button>
         <button class="btn-primary" style="width:auto;padding:11px 28px;" id="btn-next" onclick="navegar(1)">Siguiente →</button>
@@ -127,310 +135,449 @@
 
   <!-- PANTALLA 3: GRACIAS -->
   <div id="screen-gracias" class="hidden">
-    <div class="gracias">
-      <div class="gracias-ico">&#10003;</div>
-      <h2>Evaluación completada</h2>
-      <p>Gracias por tu tiempo. Tus respuestas fueron registradas correctamente. Puedes cerrar esta ventana.</p>
-    </div>
+    <div class="gracias"><div class="gracias-ico">&#10003;</div><h2>Evaluación completada</h2><p>Gracias por tu tiempo. Tus respuestas fueron registradas correctamente. Puedes cerrar esta ventana.</p></div>
   </div>
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
 const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
-var tiempoInicio = null; // se fija al iniciar; sirve para medir cuánto tardó (sin límite)
+var tiempoInicio = null;
 
-// ── Bloqueo si ya completado ──
-function validarAcceso() {
-  if (!TOKEN_URL) return;
-  if (localStorage.getItem('test_completado_' + TOKEN_URL) === 'completado') {
-    document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:IBM Plex Sans,sans-serif;">'
-      + '<div style="max-width:480px;text-align:center;padding:2rem;">'
-      + '<div style="font-size:56px;margin-bottom:1rem;">&#128274;</div>'
-      + '<h2 style="font-size:22px;font-weight:300;margin-bottom:.75rem;color:#1a1917;">Este test ya fue completado</h2>'
-      + '<p style="font-size:14px;color:#6b6860;line-height:1.7;">Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>'
-      + '</div></div>';
+function validarAcceso(){
+  if(!TOKEN_URL) return;
+  if(localStorage.getItem('test_completado_'+TOKEN_URL)==='completado'){
+    document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f5f4f0;font-family:IBM Plex Sans,sans-serif;"><div style="max-width:480px;text-align:center;padding:2rem;"><div style="font-size:56px;margin-bottom:1rem;">&#128274;</div><h2 style="font-size:22px;font-weight:300;margin-bottom:.75rem;color:#1a1917;">Este test ya fue completado</h2><p style="font-size:14px;color:#6b6860;line-height:1.7;">Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p></div></div>';
   }
 }
-document.addEventListener("DOMContentLoaded", function(){
-  validarAcceso();
-  document.getElementById('fecha-hdr').textContent = new Date().toLocaleDateString('es-CL');
-});
+document.addEventListener("DOMContentLoaded",function(){ validarAcceso(); document.getElementById('fecha-hdr').textContent=new Date().toLocaleDateString('es-CL'); });
 
-// ── Banco de ítems OPERA V1 ──
+// ── Banco de ítems OPERA v2 (alternativas ya barajadas; v = valor oculto) ──
 const ITEMS = [
-  {id:1,comp:"responsabilidad",s:"Al finalizar tu turno notas que una actividad quedó pendiente y podría afectar al siguiente equipo.",o:[
-    {k:"A",t:"Informas la situación y dejas registro para asegurar continuidad.",p:3},
-    {k:"B",t:"Intentas avanzar lo máximo posible antes de retirarte.",p:2},
-    {k:"C",t:"Conversas con quien recibirá el turno para explicarle el estado de la tarea.",p:2},
-    {k:"D",t:"Priorizas terminar tus actividades programadas y dejas la tarea para revisión posterior.",p:1}]},
-  {id:2,comp:"responsabilidad",s:"Recibes una instrucción importante, pero posteriormente dudas de algunos detalles.",o:[
-    {k:"A",t:"Solicitas nuevamente la información para asegurar que esté correcta.",p:3},
-    {k:"B",t:"Te apoyas en tu experiencia para completar la tarea.",p:1},
-    {k:"C",t:"Consultas con compañeros que conocen el proceso.",p:2},
-    {k:"D",t:"Avanzas y ajustas si surge algún problema.",p:1}]},
-  {id:3,comp:"responsabilidad",s:"Durante una tarea detectas que podrías no alcanzar el plazo comprometido.",o:[
-    {k:"A",t:"Informas la situación oportunamente.",p:3},
-    {k:"B",t:"Buscas reorganizar tu trabajo para recuperar tiempo.",p:2},
-    {k:"C",t:"Solicitas apoyo para cumplir el objetivo.",p:2},
-    {k:"D",t:"Continúas trabajando para evaluar primero la magnitud del retraso.",p:1}]},
-  {id:4,comp:"responsabilidad",s:"Cometes un error que afecta parte del trabajo realizado.",o:[
-    {k:"A",t:"Informas lo ocurrido y propones una solución.",p:3},
-    {k:"B",t:"Intentas corregirlo antes de reportarlo.",p:2},
-    {k:"C",t:"Analizas primero el impacto real del error.",p:2},
-    {k:"D",t:"Consultas con alguien de experiencia antes de actuar.",p:2}]},
-  {id:5,comp:"responsabilidad",s:"Debes realizar una tarea rutinaria que requiere atención constante.",o:[
-    {k:"A",t:"Mantienes el mismo nivel de cuidado durante toda la actividad.",p:3},
-    {k:"B",t:"Buscas formas de optimizar el proceso.",p:2},
-    {k:"C",t:"Te apoyas en controles periódicos para verificar avances.",p:3},
-    {k:"D",t:"Alternas tareas para mantener concentración.",p:1}]},
-  {id:6,comp:"compromiso",s:"Tu equipo enfrenta una semana con alta carga de trabajo.",o:[
-    {k:"A",t:"Ofreces apoyo cuando terminas tus responsabilidades.",p:3},
-    {k:"B",t:"Te concentras en cumplir eficientemente tus tareas.",p:2},
-    {k:"C",t:"Ayudas cuando la supervisión lo solicita.",p:2},
-    {k:"D",t:"Priorizas mantener tu ritmo habitual de trabajo.",p:1}]},
-  {id:7,comp:"compromiso",s:"La empresa implementa una nueva forma de trabajo.",o:[
-    {k:"A",t:"Intentas aprenderla rápidamente.",p:3},
-    {k:"B",t:"Observas primero cómo funciona en la práctica.",p:2},
-    {k:"C",t:"Consultas dudas para comprenderla mejor.",p:3},
-    {k:"D",t:"La incorporas gradualmente a tu trabajo.",p:2}]},
-  {id:8,comp:"compromiso",s:"Debes realizar una tarea que no forma parte habitual de tus funciones.",o:[
-    {k:"A",t:"Colaboras si puedes aportar al resultado.",p:3},
-    {k:"B",t:"Solicitas orientación antes de asumirla.",p:2},
-    {k:"C",t:"Evalúas cómo afecta tus tareas principales.",p:2},
-    {k:"D",t:"Apoyas siempre que no comprometa tus responsabilidades.",p:2}]},
-  {id:9,comp:"compromiso",s:"Se presenta una oportunidad de capacitarse fuera del horario habitual.",o:[
-    {k:"A",t:"Participas porque puede aportar a tu desarrollo.",p:3},
-    {k:"B",t:"Evalúas la utilidad práctica antes de decidir.",p:2},
-    {k:"C",t:"Participas si la capacitación se relaciona con tu cargo.",p:2},
-    {k:"D",t:"Consultas detalles antes de comprometerte.",p:2}]},
-  {id:10,comp:"compromiso",s:"Surge un problema que afecta al equipo.",o:[
-    {k:"A",t:"Buscas aportar a la solución.",p:3},
-    {k:"B",t:"Cumples tu rol mientras se resuelve la situación.",p:2},
-    {k:"C",t:"Colaboras si se requiere apoyo adicional.",p:2},
-    {k:"D",t:"Intentas identificar cómo evitar que vuelva a ocurrir.",p:3}]},
-  {id:11,comp:"seguridad",s:"Detectas una condición que podría generar un accidente.",o:[
-    {k:"A",t:"Informas la situación antes de continuar.",p:3},
-    {k:"B",t:"Buscas una solución temporal segura.",p:2},
-    {k:"C",t:"Comentas el hallazgo con el equipo.",p:2},
-    {k:"D",t:"Evalúas el impacto antes de actuar.",p:1}]},
-  {id:12,comp:"seguridad",s:"Un procedimiento de seguridad retrasa una tarea urgente.",o:[
-    {k:"A",t:"Mantienes el procedimiento completo.",p:3},
-    {k:"B",t:"Buscas alternativas seguras para optimizar el tiempo.",p:3},
-    {k:"C",t:"Solicitas orientación a la supervisión.",p:2},
-    {k:"D",t:"Reorganizas otras actividades mientras esperas.",p:2}]},
-  {id:13,comp:"seguridad",s:"Observas a un compañero trabajando de forma insegura.",o:[
-    {k:"A",t:"Le comentas la situación directamente.",p:3},
-    {k:"B",t:"Informas la situación según el procedimiento.",p:3},
-    {k:"C",t:"Buscas comprender por qué está actuando así.",p:2},
-    {k:"D",t:"Aprovechas una instancia posterior para conversar el tema.",p:1}]},
-  {id:14,comp:"seguridad",s:"Debes utilizar un equipo con el que tienes poca experiencia.",o:[
-    {k:"A",t:"Solicitas orientación antes de utilizarlo.",p:3},
-    {k:"B",t:"Revisas instrucciones y procedimientos.",p:3},
-    {k:"C",t:"Observas cómo lo utilizan otros trabajadores.",p:2},
-    {k:"D",t:"Realizas una prueba controlada antes de comenzar.",p:2}]},
-  {id:15,comp:"seguridad",s:"Una tarea parece sencilla y de bajo riesgo.",o:[
-    {k:"A",t:"Mantienes los procedimientos habituales igualmente.",p:3},
-    {k:"B",t:"Ajustas el nivel de control al riesgo observado.",p:2},
-    {k:"C",t:"Verificas las condiciones antes de comenzar.",p:3},
-    {k:"D",t:"Consultas experiencias previas similares.",p:2}]},
-  {id:16,comp:"integridad",s:"Detectas un error que cometiste días atrás y que nadie ha observado.",o:[
-    {k:"A",t:"Informas la situación y propones una solución.",p:3},
-    {k:"B",t:"Corriges el error y luego informas.",p:3},
-    {k:"C",t:"Evalúas el impacto antes de actuar.",p:2},
-    {k:"D",t:"Consultas con alguien de confianza.",p:2}]},
-  {id:17,comp:"integridad",s:"Un compañero te solicita apoyo para justificar una situación que no ocurrió exactamente como fue informada.",o:[
-    {k:"A",t:"Sugieres aclarar los hechos de forma transparente.",p:3},
-    {k:"B",t:"Escuchas todos los antecedentes antes de opinar.",p:2},
-    {k:"C",t:"Buscas una alternativa que ayude a resolver la situación.",p:1},
-    {k:"D",t:"Recomiendas conversar el tema con la supervisión.",p:3}]},
-  {id:18,comp:"integridad",s:"Recibes un beneficio por error que aparentemente no te corresponde.",o:[
-    {k:"A",t:"Informas la situación.",p:3},
-    {k:"B",t:"Verificas primero si efectivamente existe un error.",p:3},
-    {k:"C",t:"Consultas cómo se manejan estos casos.",p:2},
-    {k:"D",t:"Esperas la confirmación oficial.",p:1}]},
-  {id:19,comp:"integridad",s:"Durante una revisión detectas información incompleta en un registro.",o:[
-    {k:"A",t:"Actualizas la información y reportas la situación.",p:3},
-    {k:"B",t:"Verificas primero los antecedentes.",p:3},
-    {k:"C",t:"Consultas con quienes participaron del proceso.",p:2},
-    {k:"D",t:"Evalúas el impacto antes de corregir.",p:2}]},
-  {id:20,comp:"integridad",s:"Observas una situación que podría afectar el cumplimiento de una norma interna.",o:[
-    {k:"A",t:"Informas oportunamente para prevenir consecuencias.",p:3},
-    {k:"B",t:"Buscas entender completamente el contexto.",p:2},
-    {k:"C",t:"Conversas con los involucrados antes de actuar.",p:2},
-    {k:"D",t:"Analizas alternativas para resolver la situación.",p:2}]}
+ {
+  "n": 1,
+  "comp": "responsabilidad",
+  "nivel": "facil",
+  "s": "Al finalizar tu turno observas que una actividad quedó incompleta y podría afectar el trabajo del siguiente equipo.",
+  "o": [
+   {
+    "t": "Consideras que el siguiente equipo podrá resolverlo.",
+    "v": 0
+   },
+   {
+    "t": "Intentas avanzar lo máximo posible antes de retirarte.",
+    "v": 3
+   },
+   {
+    "t": "Informas la situación y dejas registro.",
+    "v": 4
+   },
+   {
+    "t": "Conversas con quien recibe el turno.",
+    "v": 1
+   }
+  ]
+ },
+ {
+  "n": 2,
+  "comp": "responsabilidad",
+  "nivel": "facil",
+  "s": "Durante una tarea detectas que interpretaste incorrectamente una instrucción.",
+  "o": [
+   {
+    "t": "Informas la situación y propones una solución.",
+    "v": 4
+   },
+   {
+    "t": "Corriges el problema antes de comentarlo.",
+    "v": 3
+   },
+   {
+    "t": "Evalúas primero cuánto impacta el error.",
+    "v": 1
+   },
+   {
+    "t": "Consultas con un compañero qué haría.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 3,
+  "comp": "responsabilidad",
+  "nivel": "medio",
+  "s": "Recibes una indicación importante y posteriormente te quedan dudas.",
+  "o": [
+   {
+    "t": "Avanzas y corriges después si surge algún problema.",
+    "v": 0
+   },
+   {
+    "t": "Te apoyas en tu experiencia.",
+    "v": 3
+   },
+   {
+    "t": "Consultas con compañeros.",
+    "v": 1
+   },
+   {
+    "t": "Solicitas aclaración.",
+    "v": 4
+   }
+  ]
+ },
+ {
+  "n": 4,
+  "comp": "responsabilidad",
+  "nivel": "medio",
+  "s": "Una tarea asignada presenta retraso.",
+  "o": [
+   {
+    "t": "Reorganizas tus actividades.",
+    "v": 3
+   },
+   {
+    "t": "Informas oportunamente.",
+    "v": 4
+   },
+   {
+    "t": "Solicitas apoyo.",
+    "v": 1
+   },
+   {
+    "t": "Esperas para evaluar si realmente habrá retraso.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 5,
+  "comp": "compromiso",
+  "nivel": "facil",
+  "s": "Tu equipo enfrenta una semana con alta carga laboral.",
+  "o": [
+   {
+    "t": "Colaboras cuando te lo solicitan.",
+    "v": 1
+   },
+   {
+    "t": "Te enfocas en cumplir eficientemente tus responsabilidades.",
+    "v": 3
+   },
+   {
+    "t": "Ofreces apoyo cuando terminas tus tareas.",
+    "v": 4
+   },
+   {
+    "t": "Mantienes tu ritmo habitual.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 6,
+  "comp": "compromiso",
+  "nivel": "medio",
+  "s": "La empresa implementa una nueva forma de trabajo.",
+  "o": [
+   {
+    "t": "Solicitas orientación.",
+    "v": 1
+   },
+   {
+    "t": "Observas primero cómo funciona.",
+    "v": 3
+   },
+   {
+    "t": "Continúas utilizando tu forma habitual.",
+    "v": 0
+   },
+   {
+    "t": "Intentas aprenderla rápidamente.",
+    "v": 4
+   }
+  ]
+ },
+ {
+  "n": 7,
+  "comp": "compromiso",
+  "nivel": "medio",
+  "s": "Surge una capacitación relacionada con tu trabajo.",
+  "o": [
+   {
+    "t": "Evalúas primero la utilidad práctica.",
+    "v": 3
+   },
+   {
+    "t": "Participas porque puede aportar a tu desarrollo.",
+    "v": 4
+   },
+   {
+    "t": "Participas si la supervisión lo recomienda.",
+    "v": 1
+   },
+   {
+    "t": "Prefieres enfocarte en tu experiencia actual.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 8,
+  "comp": "compromiso",
+  "nivel": "dificil",
+  "s": "Un problema operativo afecta al equipo.",
+  "o": [
+   {
+    "t": "Esperas que otros definan cómo abordarlo.",
+    "v": 0
+   },
+   {
+    "t": "Buscas aportar a la solución.",
+    "v": 4
+   },
+   {
+    "t": "Colaboras cuando exista una necesidad específica.",
+    "v": 1
+   },
+   {
+    "t": "Cumples tu rol mientras se resuelve.",
+    "v": 3
+   }
+  ]
+ },
+ {
+  "n": 9,
+  "comp": "seguridad",
+  "nivel": "facil",
+  "s": "Observas una condición que podría generar un riesgo.",
+  "o": [
+   {
+    "t": "Informas la situación antes de continuar.",
+    "v": 4
+   },
+   {
+    "t": "Lo comentas con el equipo.",
+    "v": 1
+   },
+   {
+    "t": "Continúas trabajando mientras observas.",
+    "v": 0
+   },
+   {
+    "t": "Buscas una solución temporal segura.",
+    "v": 3
+   }
+  ]
+ },
+ {
+  "n": 10,
+  "comp": "seguridad",
+  "nivel": "dificil",
+  "s": "Un procedimiento de seguridad genera retraso.",
+  "o": [
+   {
+    "t": "Solicitas orientación.",
+    "v": 1
+   },
+   {
+    "t": "Mantienes el procedimiento completo.",
+    "v": 4
+   },
+   {
+    "t": "Buscas una alternativa segura.",
+    "v": 3
+   },
+   {
+    "t": "Priorizas terminar la tarea.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 11,
+  "comp": "seguridad",
+  "nivel": "dificil",
+  "s": "Observas a un compañero realizando una maniobra riesgosa.",
+  "o": [
+   {
+    "t": "Informas según el procedimiento.",
+    "v": 3
+   },
+   {
+    "t": "Conversas posteriormente con él.",
+    "v": 1
+   },
+   {
+    "t": "Le comentas la situación de inmediato.",
+    "v": 4
+   },
+   {
+    "t": "Asumes que conoce los riesgos.",
+    "v": 0
+   }
+  ]
+ },
+ {
+  "n": 12,
+  "comp": "seguridad",
+  "nivel": "dificil",
+  "s": "Antes de comenzar una actividad detectas que falta un EPP requerido.",
+  "o": [
+   {
+    "t": "Gestionas el elemento antes de iniciar.",
+    "v": 4
+   },
+   {
+    "t": "Consultas cómo proceder.",
+    "v": 3
+   },
+   {
+    "t": "Comienzas mientras consigues el elemento.",
+    "v": 0
+   },
+   {
+    "t": "Evalúas si realmente es necesario.",
+    "v": 1
+   }
+  ]
+ }
 ];
 
 // ── Estado ──
-var idx = 0;
-var respuestas = {};      // idx -> letra elegida
-var nombre = "", rut = "";
-var ended = false;
-var cambiosFoco = 0;
-var alertaFoco = false;
+var idx=0, respuestas={}, nombre="", rut="", ended=false, cambiosFoco=0, alertaFoco=false;
+// respuestas[idx] = {mas: indiceOpcion, menos: indiceOpcion}
 
-// ── Medidas antitrampas (mismo set que los otros tests) ──
-document.addEventListener("contextmenu", function(e) { e.preventDefault(); });
-document.addEventListener("dragstart", function(e) { e.preventDefault(); });
-document.addEventListener("keydown", function(e) {
-  if(e.ctrlKey && ["c","a","u","s","p","x","v"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
-  if(e.key === "F12") e.preventDefault();
-  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+// ── Antitrampas ──
+document.addEventListener("contextmenu",function(e){e.preventDefault();});
+document.addEventListener("dragstart",function(e){e.preventDefault();});
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey && ["c","a","u","s","p","x","v"].indexOf(e.key.toLowerCase())>-1) e.preventDefault();
+  if(e.key==="F12") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["i","j","c"].indexOf(e.key.toLowerCase())>-1) e.preventDefault();
 });
-document.addEventListener("copy", function(e){ e.preventDefault(); });
-document.addEventListener("cut", function(e){ e.preventDefault(); });
-document.addEventListener("paste", function(e){ e.preventDefault(); });
+document.addEventListener("copy",function(e){e.preventDefault();});
+document.addEventListener("cut",function(e){e.preventDefault();});
+document.addEventListener("paste",function(e){e.preventDefault();});
+document.addEventListener("visibilitychange",function(){ if(document.hidden && !ended){ cambiosFoco++; if(!alertaFoco){ alertaFoco=true; setTimeout(function(){ alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada."); alertaFoco=false; },300);} } });
+window.addEventListener("blur",function(){ if(!ended) cambiosFoco++; });
 
-// ── Integridad: cambios de ventana (con aviso al candidato) ──
-document.addEventListener("visibilitychange", function() {
-  if (document.hidden && !ended) {
-    cambiosFoco++;
-    if(!alertaFoco) {
-      alertaFoco = true;
-      setTimeout(function() {
-        alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada.");
-        alertaFoco = false;
-      }, 300);
-    }
-  }
-});
-window.addEventListener("blur", function() { if (!ended) cambiosFoco++; });
-
-// ── Validación RUT chileno ──
+// ── Validación RUT ──
 function limpiarRut(r){ return (r||"").replace(/[^0-9kK]/g,"").toUpperCase(); }
-function validarRut(r){
-  r = limpiarRut(r);
-  if (r.length < 2) return false;
-  var cuerpo = r.slice(0,-1), dv = r.slice(-1);
-  if (!/^\d+$/.test(cuerpo)) return false;
-  var suma=0, mul=2;
-  for (var i=cuerpo.length-1;i>=0;i--){ suma+=parseInt(cuerpo[i])*mul; mul=mul===7?2:mul+1; }
-  var res=11-(suma%11);
-  var dvCalc = res===11?"0":res===10?"K":String(res);
-  return dv===dvCalc;
-}
-function formatearRut(r){
-  r = limpiarRut(r);
-  if (r.length<2) return r;
-  var cuerpo=r.slice(0,-1), dv=r.slice(-1);
-  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv;
-}
+function validarRut(r){ r=limpiarRut(r); if(r.length<2)return false; var c=r.slice(0,-1),dv=r.slice(-1); if(!/^\d+$/.test(c))return false; var s=0,m=2; for(var i=c.length-1;i>=0;i--){s+=parseInt(c[i])*m;m=m===7?2:m+1;} var res=11-(s%11); var dvc=res===11?"0":res===10?"K":String(res); return dv===dvc; }
+function formatearRut(r){ r=limpiarRut(r); if(r.length<2)return r; var c=r.slice(0,-1),dv=r.slice(-1); return c.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv; }
 
-// ── Iniciar ──
 function iniciar(){
-  nombre = document.getElementById('nombre').value.trim();
-  rut = document.getElementById('rut').value.trim();
-  var errN = document.getElementById('err-nombre');
-  var errR = document.getElementById('err-rut');
-  errN.style.display = "none"; errR.style.display = "none";
-  if (!nombre){ errN.style.display="block"; return; }
-  if (!validarRut(rut)){ errR.style.display="block"; errR.textContent="RUT inválido. Verifica el número y el dígito verificador."; return; }
-  rut = formatearRut(rut);
-
-  document.getElementById('disp-nombre').textContent = nombre;
+  nombre=document.getElementById('nombre').value.trim();
+  rut=document.getElementById('rut').value.trim();
+  var eN=document.getElementById('err-nombre'), eR=document.getElementById('err-rut');
+  eN.style.display="none"; eR.style.display="none";
+  if(!nombre){ eN.style.display="block"; return; }
+  if(!validarRut(rut)){ eR.style.display="block"; eR.textContent="RUT inválido. Verifica el número y el dígito verificador."; return; }
+  rut=formatearRut(rut);
+  document.getElementById('disp-nombre').textContent=nombre;
   document.getElementById('screen-inicio').classList.add('hidden');
   document.getElementById('screen-prueba').classList.remove('hidden');
-  tiempoInicio = Date.now();
+  tiempoInicio=Date.now();
   renderPregunta();
 }
 
-// ── Render de pregunta ──
 function renderPregunta(){
-  var it = ITEMS[idx];
-  document.getElementById('q-counter').textContent = "Situación "+(idx+1)+" de "+ITEMS.length;
-  document.getElementById('scenario').textContent = it.s;
-  var cont = document.getElementById('opts');
-  cont.innerHTML = "";
-  it.o.forEach(function(op){
-    var b = document.createElement('button');
-    b.className = "opt" + (respuestas[idx]===op.k ? " sel" : "");
-    b.innerHTML = '<span class="opt-k">'+op.k+'</span>'+op.t;
-    b.onclick = function(){ respuestas[idx]=op.k; renderPregunta(); };
-    cont.appendChild(b);
+  var it=ITEMS[idx];
+  document.getElementById('q-counter').textContent="Situación "+(idx+1)+" de "+ITEMS.length;
+  document.getElementById('scenario').textContent=it.s;
+  var cont=document.getElementById('opts'); cont.innerHTML="";
+  var r=respuestas[idx]||{mas:null,menos:null};
+  it.o.forEach(function(op,i){
+    var div=document.createElement('div'); div.className="mm-opt";
+    if(r.mas===i) div.className+=" is-mas";
+    if(r.menos===i) div.className+=" is-menos";
+    var masSel=(r.mas===i)?" sel":"", menosSel=(r.menos===i)?" sel":"";
+    div.innerHTML='<div class="mm-opt-txt">'+op.t+'</div><div class="mm-btns">'
+      +'<button class="mm-btn mas'+masSel+'" onclick="marcar('+i+',\'mas\')">⭐ Más</button>'
+      +'<button class="mm-btn menos'+menosSel+'" onclick="marcar('+i+',\'menos\')">🚫 Menos</button></div>';
+    cont.appendChild(div);
   });
-  // progreso y navegación
-  document.getElementById('pfill').style.width = ((idx)/(ITEMS.length-1)*100)+"%";
-  document.getElementById('btn-prev').disabled = (idx===0);
-  var btnNext = document.getElementById('btn-next');
-  btnNext.textContent = (idx===ITEMS.length-1) ? "Finalizar ✓" : "Siguiente →";
+  actualizarStatus();
+  document.getElementById('pfill').style.width=((idx)/(ITEMS.length-1)*100)+"%";
+  document.getElementById('btn-prev').disabled=(idx===0);
+  document.getElementById('btn-next').textContent=(idx===ITEMS.length-1)?"Finalizar ✓":"Siguiente →";
+}
+
+function marcar(i,tipo){
+  if(!respuestas[idx]) respuestas[idx]={mas:null,menos:null};
+  var r=respuestas[idx];
+  if(tipo==='mas'){
+    if(r.menos===i) r.menos=null;      // no puede ser ambas
+    r.mas=(r.mas===i)?null:i;          // toggle
+  }else{
+    if(r.mas===i) r.mas=null;
+    r.menos=(r.menos===i)?null:i;
+  }
+  renderPregunta();
+}
+
+function actualizarStatus(){
+  var r=respuestas[idx]||{mas:null,menos:null};
+  var st=document.getElementById('mm-status');
+  if(r.mas!==null && r.menos!==null){ st.className="mm-status ok"; st.textContent="✓ Respuesta completa"; }
+  else { st.className="mm-status pend"; st.textContent="Marca una opción como Más y otra como Menos"; }
 }
 
 function navegar(dir){
-  // exige respuesta antes de avanzar
-  if (dir>0 && !respuestas[idx]){
-    var c=document.getElementById('opts');
-    c.style.animation="none"; void c.offsetWidth; c.style.animation="";
-    // marcar visualmente: borde temporal
-    return;
+  var r=respuestas[idx];
+  if(dir>0){
+    if(!r || r.mas===null || r.menos===null){
+      var st=document.getElementById('mm-status'); st.className="mm-status"; st.style.color="#c0392b"; st.textContent="⚠ Debes marcar una opción como Más y otra como Menos antes de continuar.";
+      return;
+    }
+    if(idx===ITEMS.length-1){ calcularYEnviar(); return; }
   }
-  if (dir>0 && idx===ITEMS.length-1){ calcularYEnviar(false); return; }
-  idx += dir;
-  if (idx<0) idx=0;
-  if (idx>ITEMS.length-1) idx=ITEMS.length-1;
+  idx+=dir; if(idx<0)idx=0; if(idx>ITEMS.length-1)idx=ITEMS.length-1;
   renderPregunta();
 }
 
-// ── Corrección y envío ──
+function invertir(v){ return v===4?0 : v===3?1 : v===1?3 : 4; }
+
 function calcularYEnviar(){
-  if (ended) return;
-  ended = true;
-
-  var scores = {responsabilidad:0, compromiso:0, seguridad:0, integridad:0};
-  var respondidas = 0;
-  ITEMS.forEach(function(it, i){
-    var letra = respuestas[i];
-    if (!letra) return;
-    respondidas++;
-    var op = it.o.find(function(x){ return x.k===letra; });
-    if (op) scores[it.comp] += op.p;
+  if(ended) return; ended=true;
+  var sc={responsabilidad:0,compromiso:0,seguridad:0};
+  var inconsist={responsabilidad:0,compromiso:0,seguridad:0};
+  ITEMS.forEach(function(it,i){
+    var r=respuestas[i]; if(!r) return;
+    var vMas=it.o[r.mas].v;
+    var vMenos=it.o[r.menos].v;
+    var pts=vMas + invertir(vMenos);
+    sc[it.comp]+=pts;
+    // inconsistencia: marcar como MÁS una conducta de riesgo (0) o como MENOS una altamente efectiva (4)
+    if(vMas===0 || vMenos===4) inconsist[it.comp]++;
   });
-  var global = scores.responsabilidad + scores.compromiso + scores.seguridad + scores.integridad;
+  var global=sc.responsabilidad+sc.compromiso+sc.seguridad;
+  var totalInconsist=inconsist.responsabilidad+inconsist.compromiso+inconsist.seguridad;
+  var consistencia = totalInconsist>2 ? "Baja" : totalInconsist>0 ? "Media" : "Alta";
 
-  var fecha = new Date().toLocaleString('es-CL');
-  var tiempoUsado = tiempoInicio ? Math.round((Date.now() - tiempoInicio)/1000) : 0; // segundos transcurridos
+  var fecha=new Date().toLocaleString('es-CL');
+  var tiempoUsado=tiempoInicio?Math.round((Date.now()-tiempoInicio)/1000):0;
+  var respCSV=ITEMS.map(function(it,i){ var r=respuestas[i]; return r?("M"+it.o[r.mas].v+"m"+it.o[r.menos].v):"-"; }).join(',');
 
-  var payload = {
-    test: 'OPERA',
-    fecha: fecha,
-    nombre: nombre,
-    rut: rut,
-    resp: ITEMS.map(function(it,i){ return respuestas[i]||"-"; }).join(','),
-    responsabilidad: scores.responsabilidad,
-    compromiso: scores.compromiso,
-    seguridad: scores.seguridad,
-    integridad: scores.integridad,
-    global: global,
-    nivel_global: nivelGlobal(global),
-    respondidas: respondidas,
-    tiempo_usado: tiempoUsado,
-    cambios_foco: cambiosFoco,
-    token: TOKEN_URL
+  var payload={
+    test:'OPERA', fecha:fecha, nombre:nombre, rut:rut,
+    responsabilidad:sc.responsabilidad, compromiso:sc.compromiso, seguridad:sc.seguridad,
+    global:global, nivel_global:nivelGlobal(global),
+    consistencia:consistencia, respondidas:Object.keys(respuestas).length,
+    tiempo_usado:tiempoUsado, cambios_foco:cambiosFoco, resp:respCSV, token:TOKEN_URL
   };
-
-  // Envío con reintento (más robusto ante fallos momentáneos de red/caché)
-  function enviarPayload(intento) {
-    fetch(SCRIPT_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    }).catch(function(){
-      if (intento < 3) { setTimeout(function(){ enviarPayload(intento+1); }, 1500); }
-    });
+  function enviarPayload(intento){
+    fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .catch(function(){ if(intento<3) setTimeout(function(){enviarPayload(intento+1);},1500); });
   }
   enviarPayload(1);
-
-  if (TOKEN_URL) localStorage.setItem('test_completado_' + TOKEN_URL, 'completado');
+  if(TOKEN_URL) localStorage.setItem('test_completado_'+TOKEN_URL,'completado');
   document.getElementById('screen-prueba').classList.add('hidden');
   document.getElementById('screen-gracias').classList.remove('hidden');
 }
 
-// Nivel global según rangos del manual (referencia interna; el evaluador lo ve en plataforma)
-function nivelGlobal(g){
-  if (g>=49) return "Alto";
-  if (g>=37) return "Medio alto";
-  if (g>=25) return "Medio bajo";
-  return "Bajo";
-}
+function nivelGlobal(g){ if(g>=80)return"Favorable"; if(g>=60)return"Adecuado"; if(g>=40)return"Observación"; return"Riesgo"; }
 </script>
 </body>
 </html>
