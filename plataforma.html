@@ -2889,8 +2889,8 @@ var CEAL_EFECT_INTERP = {
 };
 
 async function abrirInformeCEAL(test, rut, nombre) {
-  // Conclusión integrada estilo+efectividad (autónoma, sin dependencias externas)
-  function construirConclusionCEAL(estilo, nivel){
+  // Conclusión integrada estilo+efectividad+secundario (autónoma, sin dependencias externas)
+  function construirConclusionCEAL(estilo, nivel, estiloSec, descBase){
     function banda(niv){
       if(["Muy Alta","Alta","Media Alta","Promedio Positivo"].indexOf(niv) >= 0) return "efectivo";
       if(["Promedio Negativo","Media Baja","Baja","Muy Baja"].indexOf(niv) >= 0) return "inefectivo";
@@ -2908,23 +2908,34 @@ async function abrirInformeCEAL(test, rut, nombre) {
       "Relacionado":"priorizar las relaciones y el clima",
       "Integrado":"equilibrar resultados y personas"
     };
+    var aporteSec = {
+      "Separado":"un componente de objetividad y respeto por la autonomía",
+      "Autoritario":"una orientación adicional a la estructura y los resultados",
+      "Relacionado":"un refuerzo en la cercanía y el cuidado de las relaciones",
+      "Integrado":"una mayor capacidad de equilibrar tarea y personas"
+    };
     var b = banda(nivel);
     var rol = (ROLES[estilo]||{})[b] || estilo;
     var nat = tendNat[estilo] || "liderar según su estilo";
-    var intro = "Este candidato presenta un estilo de liderazgo predominante <b>"+estilo+"</b> con un nivel de efectividad <b>"+nivel+"</b>. ";
-    var medio;
+
+    // Bloque 1: descripción base del estilo (sin recuadro aparte, todo corrido)
+    var texto = (descBase ? descBase + " " : "");
+
+    // Bloque 2: lectura integrada estilo + efectividad
+    texto += "<br><br>En conjunto, este candidato presenta un estilo predominante <b>"+estilo+"</b> con un nivel de efectividad <b>"+nivel+"</b> ";
     if(b==="efectivo"){
-      medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: aplica su estilo de forma <b>adecuada a la situación</b>. "
-        + "Aunque su tendencia natural es "+nat+", sabe leer el contexto y usar ese enfoque cuando realmente conviene. El estilo en sí no es bueno ni malo; lo relevante es que lo aplica con buen criterio situacional, lo que es un indicador favorable para roles de conducción.";
+      texto += "(en el modelo Reddin, rol de <b>«"+rol+"»</b>). Esto significa que, aunque su tendencia natural es "+nat+", sabe leer el contexto y aplicar ese enfoque cuando realmente conviene. El estilo en sí no es mejor ni peor que otro; lo favorable es que lo usa con buen criterio según la situación.";
     } else if(b==="inefectivo"){
-      medio = "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>: tiende a aplicar su estilo de forma <b>poco ajustada a la situación</b>. "
-        + "Su enfoque natural ("+nat+") se manifiesta en contextos donde no es el más adecuado, lo que reduce su efectividad. Conviene profundizar en entrevista cómo adapta su estilo según la madurez y necesidades del equipo.";
+      texto += "(en el modelo Reddin, rol de <b>«"+rol+"»</b>). Esto significa que su tendencia natural ("+nat+") se manifiesta en contextos donde no siempre es lo más adecuado, lo que reduce su efectividad. Conviene revisar en entrevista cómo ajusta su estilo a la madurez y necesidades del equipo.";
     } else {
-      medio = "Su nivel de efectividad es intermedio: aplica su estilo con resultados variables según la situación. "
-        + "Muestra criterio situacional en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo si trabaja la lectura del contexto y la flexibilidad de estilo.";
+      texto += ". Aplica su estilo con resultados variables según la situación: muestra criterio en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo si trabaja la lectura del contexto y la flexibilidad de estilo.";
     }
-    var cierre = " <b>Importante:</b> el estilo describe <i>cómo</i> tiende a liderar; la efectividad mide <i>qué tan bien</i> ajusta ese estilo a cada situación. Son dimensiones independientes: un mismo estilo puede ser efectivo o inefectivo según el criterio con que se aplique.";
-    return intro + medio + cierre;
+
+    // Bloque 3: aporte del estilo secundario (si existe)
+    if(estiloSec && aporteSec[estiloSec]){
+      texto += " Su estilo secundario <b>"+estiloSec+"</b> aporta "+aporteSec[estiloSec]+", matizando su forma principal de liderar.";
+    }
+    return texto;
   }
 
   var rutDec = decodeURIComponent(rut || "");
@@ -3019,6 +3030,22 @@ async function abrirInformeCEAL(test, rut, nombre) {
     chip.textContent = chipTexto;
     chip.style.background = ec.bg;
     efEl.appendChild(chip);
+    // Línea explicativa en lenguaje llano (la efectividad confunde si va sola)
+    var explicEfect = {
+      "Muy Alta":"Adapta su estilo a la situación de forma muy acertada.",
+      "Alta":"Suele adaptar bien su estilo según la situación.",
+      "Media Alta":"Adapta su estilo de forma adecuada en la mayoría de los casos.",
+      "Promedio Positivo":"Adapta su estilo de forma aceptable, con margen de mejora.",
+      "Promedio":"Adapta su estilo de forma variable según la situación.",
+      "Promedio Negativo":"Le cuesta ajustar su estilo a lo que pide cada situación.",
+      "Media Baja":"Con frecuencia aplica su estilo en contextos poco adecuados.",
+      "Baja":"Tiende a aplicar su estilo sin ajustarlo a la situación.",
+      "Muy Baja":"Aplica su estilo de forma rígida, sin leer el contexto."
+    };
+    var explEl = document.createElement("div");
+    explEl.style.cssText = "font-size:11.5px;color:#666;line-height:1.5;margin-top:6px;";
+    explEl.textContent = explicEfect[nivel] || "Mide qué tan bien ajusta su estilo de liderazgo a cada situación.";
+    efEl.appendChild(explEl);
 
     // Cuadrante activo
     var cqMap = {Integrado:"cq-integrado", Autoritario:"cq-autoritario", Relacionado:"cq-relacionado", Separado:"cq-separado"};
@@ -3029,14 +3056,11 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var cqActivo = cqMap[estilo];
     if(cqActivo) { var el = document.getElementById(cqActivo); if(el) el.classList.add("activo"); }
 
-    // Descripción del estilo + CONCLUSIÓN INTEGRADA (estilo+efectividad coherentes)
+    // Descripción del estilo + lectura integrada, TODO en un solo párrafo corrido
     var textoDesc   = CEAL_TEXTOS[estilo] || descripcion;
-    var conclusion  = construirConclusionCEAL(estilo, nivel);
+    var textoFinal  = construirConclusionCEAL(estilo, nivel, estiloSec, textoDesc);
     var descEl = document.getElementById("ceal-descripcion");
-    descEl.innerHTML = '<div style="margin-bottom:14px;">'+textoDesc+'</div>'
-      + '<div style="background:#f6f7f8;border-left:3px solid var(--azul,#2b3a47);border-radius:0 8px 8px 0;padding:12px 16px;font-size:13px;line-height:1.7;">'
-      + '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--azul,#2b3a47);margin-bottom:6px;">Lectura integrada</div>'
-      + conclusion + '</div>';
+    descEl.innerHTML = textoFinal;
 
     // Fortalezas y áreas de desarrollo — dependen del ESTILO y de la BANDA de efectividad.
     // Fundamento: Manual CEEL (Reddin 3D). Cada estilo tiene versión eficaz e ineficaz:
