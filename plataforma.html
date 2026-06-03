@@ -513,6 +513,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .opk-reco { border:2px solid #ccc;border-radius:10px;padding:14px 16px;margin-bottom:4px; }
 .opk-reco-badge { display:inline-block;font-size:13px;font-weight:800;color:#fff;padding:6px 16px;border-radius:8px;margin-bottom:8px;letter-spacing:.02em; }
 .opk-reco-txt { font-size:12.5px;line-height:1.65;color:#333; }
+.opk-reco-nivel { font-size:11.5px;color:#666;margin-bottom:8px; }
 .opk-aten-item { border-left:3px solid #d4830a;background:#fdf8f0;border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:8px; }
 .opk-aten-comp { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#c99a2e;margin-bottom:3px; }
 .opk-aten-sit { font-size:12px;font-style:italic;color:#555;margin-bottom:5px;line-height:1.5; }
@@ -2896,44 +2897,96 @@ async function abrirInformeCEAL(test, rut, nombre) {
       if(["Promedio Negativo","Media Baja","Baja","Muy Baja"].indexOf(niv) >= 0) return "inefectivo";
       return "promedio";
     }
-    var ROLES = {
-      "Autoritario": { efectivo:"Autócrata Benévolo", promedio:"Autoritario", inefectivo:"Autócrata" },
-      "Integrado":   { efectivo:"Ejecutivo",          promedio:"Integrado",   inefectivo:"Componedor" },
-      "Relacionado": { efectivo:"Promotor",           promedio:"Relacionado", inefectivo:"Misionero" },
-      "Separado":    { efectivo:"Burócrata",          promedio:"Separado",    inefectivo:"Desertor" }
-    };
-    var tendNat = {
-      "Separado":"delegar y dar autonomía",
-      "Autoritario":"dirigir y estructurar el trabajo",
-      "Relacionado":"priorizar las relaciones y el clima",
-      "Integrado":"equilibrar resultados y personas"
-    };
-    var aporteSec = {
-      "Separado":"un componente de objetividad y respeto por la autonomía",
-      "Autoritario":"una orientación adicional a la estructura y los resultados",
-      "Relacionado":"un refuerzo en la cercanía y el cuidado de las relaciones",
-      "Integrado":"una mayor capacidad de equilibrar tarea y personas"
+    // Para cada estilo y banda: rol Reddin + cómo se manifiesta + conductas + contexto/cargo
+    var DETALLE = {
+      "Autoritario": {
+        efectivo: { rol:"Autócrata Benévolo",
+          manif:"dirige y toma decisiones con firmeza, pero logrando que el equipo lo siga sin resentimiento",
+          conductas:"fija metas y plazos con claridad, supervisa de cerca, decide con rapidez y mantiene el control sin pasar a llevar a las personas",
+          contexto:"contextos que exigen dirección clara y respuesta rápida: operaciones bajo presión, equipos nuevos o de baja autonomía, situaciones de urgencia" },
+        promedio: { rol:"Autoritario",
+          manif:"se orienta a la tarea y a los resultados, con menos atención a las relaciones",
+          conductas:"define roles y expectativas, exige cumplimiento, pero tiende a la comunicación unilateral y le cuesta delegar",
+          contexto:"contextos estructurados; en equipos maduros su control puede resultar excesivo" },
+        inefectivo: { rol:"Autócrata",
+          manif:"impone sus decisiones sin generar adhesión y es percibido como rígido o controlador",
+          conductas:"prioriza la producción de corto plazo a costa del clima, desconfía de la iniciativa del equipo y comunica de forma unilateral",
+          contexto:"genera desmotivación y rotación; poco recomendable salvo urgencias puntuales con equipos que requieran dirección externa" }
+      },
+      "Integrado": {
+        efectivo: { rol:"Ejecutivo",
+          manif:"combina el foco en resultados con un interés genuino por las personas",
+          conductas:"fija estándares altos, motiva, decide de forma participativa y da trato diferenciado según cada integrante",
+          contexto:"ideal para contextos complejos y dinámicos, equipos que requieren compromiso sostenido y coordinación: jefaturas, liderazgo de proyectos, conducción de equipos diversos" },
+        promedio: { rol:"Integrado",
+          manif:"intenta equilibrar tarea y personas, con resultados variables",
+          conductas:"favorece la participación y el trabajo en equipo, aunque puede tardar en decidir o buscar agradar",
+          contexto:"buen perfil base para roles de conducción, con desarrollo en velocidad de decisión" },
+        inefectivo: { rol:"Componedor",
+          manif:"trata de agradar a todos y vacila ante las decisiones difíciles",
+          conductas:"evita tensiones aun cuando son necesarias, genera ambigüedad por falta de definición y le cuesta sostener estándares cuando incomodan",
+          contexto:"poco efectivo donde se requieren definiciones firmes; mejor en roles de coordinación de bajo conflicto" }
+      },
+      "Relacionado": {
+        efectivo: { rol:"Promotor",
+          manif:"confía en las personas y desarrolla su potencial",
+          conductas:"escucha activamente, genera clima de confianza y cohesión, y fomenta el compromiso por la vía del vínculo",
+          contexto:"valioso en desarrollo de equipos, retención de talento y contextos donde el clima y la motivación son clave: recursos humanos, formación, equipos consolidados" },
+        promedio: { rol:"Relacionado",
+          manif:"se orienta al apoyo y al bienestar del equipo",
+          conductas:"buena disposición a escuchar, aunque puede evitar el conflicto y postergar decisiones difíciles",
+          contexto:"aporta en climas que requieren cuidado de las personas; necesita equilibrar bienestar con exigencia de resultados" },
+        inefectivo: { rol:"Misionero",
+          manif:"prioriza ser bien visto por sobre la tarea",
+          conductas:"evita el conflicto, posterga decisiones difíciles y le cuesta exigir resultados o poner límites",
+          contexto:"poco efectivo donde se requiere dirección y exigencia; el foco en la armonía termina afectando el rendimiento" }
+      },
+      "Separado": {
+        efectivo: { rol:"Burócrata",
+          manif:"mantiene distancia pero aporta orden, objetividad y respeto por la autonomía",
+          conductas:"no interviene donde el equipo se autogestiona, aporta lógica y método a los procesos y mantiene bajo nivel de conflicto",
+          contexto:"equipos maduros, calificados y autónomos, y roles técnicos o de control donde prima el procedimiento (auditoría, control de procesos, áreas normativas)" },
+        promedio: { rol:"Separado",
+          manif:"respeta la autonomía del equipo, con bajo involucramiento",
+          conductas:"aporta objetividad y bajo conflicto, pero puede percibirse como distante o poco presente",
+          contexto:"equipos autónomos; en equipos que requieren guía, su distancia juega en contra" },
+        inefectivo: { rol:"Desertor",
+          manif:"se mantiene ausente tanto de la tarea como de las personas",
+          conductas:"bajo compromiso y participación, pasividad frente a los problemas, comunicación escasa y falta de rumbo para el equipo",
+          contexto:"poco efectivo en la mayoría de los contextos; deriva en desorganización por ausencia de conducción" }
+      }
     };
     var b = banda(nivel);
-    var rol = (ROLES[estilo]||{})[b] || estilo;
-    var nat = tendNat[estilo] || "liderar según su estilo";
+    var d = (DETALLE[estilo]||{})[b] || {};
+    var rol = d.rol || estilo;
 
-    // Bloque 1: descripción base del estilo (sin recuadro aparte, todo corrido)
     var texto = (descBase ? descBase + " " : "");
 
-    // Bloque 2: lectura integrada estilo + efectividad
-    texto += "<br><br>En conjunto, este candidato presenta un estilo predominante <b>"+estilo+"</b> con un nivel de efectividad <b>"+nivel+"</b> ";
+    texto += "<br><br><b>Cómo se combinan su estilo y su efectividad:</b> ";
+    texto += "Este candidato lidera principalmente con un estilo <b>"+estilo+"</b> y su nivel de efectividad es <b>"+nivel+"</b>. ";
+    texto += "En el modelo Reddin, esta combinación corresponde al rol de <b>«"+rol+"»</b>. ";
     if(b==="efectivo"){
-      texto += "(en el modelo Reddin, rol de <b>«"+rol+"»</b>). Esto significa que, aunque su tendencia natural es "+nat+", sabe leer el contexto y aplicar ese enfoque cuando realmente conviene. El estilo en sí no es mejor ni peor que otro; lo favorable es que lo usa con buen criterio según la situación.";
+      texto += "Esto quiere decir que aplica su estilo de forma <b>acertada según la situación</b>: "+d.manif+". En la práctica, "+d.conductas+". ";
+      texto += "Su efectividad "+nivel.toLowerCase()+" indica que sabe leer el contexto y ajustar su forma de liderar cuando conviene, lo que es un buen predictor de desempeño. ";
+      texto += "Encaja especialmente en "+d.contexto+".";
     } else if(b==="inefectivo"){
-      texto += "(en el modelo Reddin, rol de <b>«"+rol+"»</b>). Esto significa que su tendencia natural ("+nat+") se manifiesta en contextos donde no siempre es lo más adecuado, lo que reduce su efectividad. Conviene revisar en entrevista cómo ajusta su estilo a la madurez y necesidades del equipo.";
+      texto += "Esto quiere decir que aplica su estilo de forma <b>poco ajustada a la situación</b>: "+d.manif+". En la práctica, "+d.conductas+". ";
+      texto += "Su efectividad "+nivel.toLowerCase()+" indica que tiende a usar este enfoque incluso cuando el contexto pide otra cosa, lo que reduce su impacto como líder. ";
+      texto += "Consideración de contexto: "+d.contexto+". Conviene profundizar en entrevista cómo adapta su estilo a la madurez del equipo.";
     } else {
-      texto += ". Aplica su estilo con resultados variables según la situación: muestra criterio en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo si trabaja la lectura del contexto y la flexibilidad de estilo.";
+      texto += "Esto quiere decir que aplica su estilo con <b>resultados variables</b>: "+d.manif+". En la práctica, "+d.conductas+". ";
+      texto += "Su efectividad intermedia indica que muestra buen criterio en algunos contextos pero no de forma consistente. Es un perfil con potencial de desarrollo. ";
+      texto += "Se desempeña mejor en "+d.contexto+".";
     }
 
-    // Bloque 3: aporte del estilo secundario (si existe)
-    if(estiloSec && aporteSec[estiloSec]){
-      texto += " Su estilo secundario <b>"+estiloSec+"</b> aporta "+aporteSec[estiloSec]+", matizando su forma principal de liderar.";
+    if(estiloSec){
+      var aporteSec = {
+        "Separado":"un componente de objetividad y respeto por la autonomía",
+        "Autoritario":"una orientación adicional a la estructura y los resultados",
+        "Relacionado":"un refuerzo en la cercanía y el cuidado de las relaciones",
+        "Integrado":"una mayor capacidad de equilibrar tarea y personas"
+      };
+      if(aporteSec[estiloSec]) texto += " Como rasgo secundario aparece un estilo <b>"+estiloSec+"</b>, que aporta "+aporteSec[estiloSec]+" y matiza su forma principal de liderar.";
     }
     return texto;
   }
@@ -3369,16 +3422,16 @@ var OPERA_BANCO = [{"comp":"responsabilidad","s":"Al finalizar tu turno observas
 function operaRecomendacion(nivelG, consistencia){
   if (consistencia === "Baja") {
     return { etiqueta:"Revisar con cautela", color:"#c0392b", icono:"⚠",
-      texto:"El patrón de respuestas presenta contradicciones que restan confiabilidad al resultado. Se sugiere no tomar decisiones solo con esta prueba y profundizar en entrevista." };
+      texto:"No tomar una decisión solo con esta prueba: el patrón de respuestas presenta contradicciones que restan confiabilidad al resultado. Antes de avanzar, confirmar en entrevista las competencias evaluadas." };
   }
-  if (nivelG === "Favorable") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
-    texto:"El candidato muestra conductas consistentemente alineadas con las competencias evaluadas. Perfil favorable para cargos operativos." };
-  if (nivelG === "Adecuado") return { etiqueta:"Recomendable con reservas", color:"#c99a2e", icono:"≈",
-    texto:"El candidato muestra conductas generalmente alineadas, con algunas oportunidades de mejora. Recomendable, validando en entrevista las áreas más débiles." };
-  if (nivelG === "Observación") return { etiqueta:"Recomendable con reservas", color:"#d4830a", icono:"≈",
-    texto:"El candidato presenta conductas parcialmente alineadas o inconsistentes. Conviene profundizar en entrevista antes de decidir, especialmente en las áreas señaladas." };
-  return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
-    texto:"El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas. Se sugiere descartar o evaluar con mucha cautela para cargos críticos." };
+  if (nivelG === "Favorable") return { etiqueta:"Avanzar — perfil favorable", color:"#1a6a4a", icono:"✓",
+    texto:"Se recomienda avanzar con este candidato. Muestra conductas alineadas de forma consistente con la responsabilidad, el compromiso y la seguridad esperados en cargos operativos." };
+  if (nivelG === "Adecuado") return { etiqueta:"Avanzar con reservas", color:"#c99a2e", icono:"≈",
+    texto:"La balanza se inclina a favor: el candidato respondió bien en la mayoría de las situaciones, con fallos puntuales. Se recomienda avanzar y usar la entrevista para confirmar las áreas más débiles, no para decidir si avanza." };
+  if (nivelG === "Observación") return { etiqueta:"Decisión depende de la entrevista", color:"#d4830a", icono:"≈",
+    texto:"La balanza está en el medio: el candidato respondió de forma mezclada, sin un patrón claro (acierta en unas situaciones y falla en otras). Esta prueba no alcanza para decidir; es la entrevista de profundización la que debe inclinar la decisión en un sentido u otro." };
+  return { etiqueta:"No avanzar / descartar", color:"#c0392b", icono:"✕",
+    texto:"No se recomienda avanzar para cargos operativos críticos. El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas." };
 }
 
 // Reconstruye las respuestas que requieren atención a partir del CSV guardado (formato M{valor}m{valor})
@@ -3481,13 +3534,7 @@ async function abrirInformeOPERA(test, rut, nombre) {
     document.getElementById("opk-ficha-rut").textContent = String(fila[2]||rutDec||"—");
     document.getElementById("opk-fecha").textContent = String(fila[0]||"—");
 
-    // Índice global badge + barra (/96)
-    var badge = document.getElementById("opk-global-badge");
-    badge.textContent = nivelG + " · " + global + "/96";
-    badge.style.background = operaColorNivel(nivelG);
-    document.getElementById("opk-global-pct").textContent = Math.round(global/96*100) + "%";
-    document.getElementById("opk-barra-global").style.width = (global/96*100) + "%";
-    document.getElementById("opk-barra-global").style.background = operaColorNivel(nivelG);
+    // (El índice global ya no se muestra como bloque; la recomendación lo resume)
 
     // Competencias (3, escala /32)
     var orden = ["responsabilidad","compromiso","seguridad"];
@@ -3525,21 +3572,26 @@ async function abrirInformeOPERA(test, rut, nombre) {
     var difMax = Math.max.apply(null,vals) - Math.min.apply(null,vals);
     if (difMax>=14) alertas.push("Perfil con alta variabilidad entre competencias ("+difMax+" puntos de diferencia); interpretar por dimensión y no solo por puntaje global.");
     if (global<40) alertas.push("Índice global en zona de Riesgo; requiere entrevista focalizada antes de tomar decisiones.");
-    if (consistencia==="Baja") alertas.push("Índice de consistencia BAJO: el patrón de respuestas presenta contradicciones. Interpretar los resultados con cautela y confirmar en entrevista.");
     document.getElementById("opk-alertas").innerHTML = alertas.length
       ? alertas.map(function(a){ return '<div class="opk-alerta">⚠ '+a+'</div>'; }).join("")
       : '<div class="opk-alerta-ok">✓ Sin alertas conductuales relevantes.</div>';
 
     // Resumen ejecutivo
-    var tendencia = (nivelG==="Favorable")?"favorable":(nivelG==="Adecuado")?"generalmente alineada":(nivelG==="Observación")?"parcialmente alineada":"de riesgo";
     var fortNom = fort.map(function(k){return OPERA_COMP[k].nombre;});
     var areaNom = areas.map(function(k){return OPERA_COMP[k].nombre;});
-    var resumen = "El perfil evaluado presenta un nivel "+nivelG+" en el Índice Global ("+global+"/96). "
-      + "Sus resultados sugieren una tendencia "+tendencia+" frente a situaciones operacionales asociadas a responsabilidad, compromiso y seguridad. ";
-    if (fortNom.length) resumen += "Se observan fortalezas relativas en "+fortNom.join(", ")+". ";
-    if (areaNom.length) resumen += "Se recomienda profundizar en "+areaNom.join(", ")+" mediante entrevista focalizada y revisión de antecedentes laborales. ";
-    else resumen += "No se identifican áreas en zona crítica; se sugiere igualmente complementar con entrevista y antecedentes del proceso. ";
-    if (consistencia!=="Alta") resumen += "El índice de consistencia es "+consistencia+", por lo que conviene contrastar estos resultados con otras fuentes.";
+    // Apertura interpretativa según nivel (no repite el puntaje crudo)
+    var apertura = {
+      "Favorable":"El candidato muestra de forma consistente las conductas esperadas en responsabilidad, compromiso y seguridad. Es un perfil sólido para cargos operativos.",
+      "Adecuado":"El candidato muestra en general las conductas esperadas, con algunos puntos a confirmar. Es un perfil aceptable que conviene validar en entrevista.",
+      "Observación":"El candidato muestra conductas dispares: en algunas situaciones responde de forma adecuada y en otras no. Su perfil no es concluyente y requiere una entrevista de profundización antes de decidir.",
+      "Riesgo":"El candidato muestra con frecuencia conductas poco efectivas o de riesgo en las situaciones evaluadas. Es un perfil que enciende alertas para cargos operativos."
+    };
+    var resumen = (apertura[nivelG] || "") + " ";
+    if (fortNom.length) resumen += "Donde se muestra más sólido es en "+fortNom.join(", ")+". ";
+    if (areaNom.length) resumen += "Conviene profundizar en entrevista en "+areaNom.join(", ")+", que es donde aparecen las mayores debilidades. ";
+    else if (!fortNom.length) resumen += "No destaca claramente en ninguna competencia ni cae en zona crítica: es un perfil plano que conviene contrastar con entrevista y antecedentes. ";
+    else resumen += "No se identifican áreas en zona crítica; aun así, conviene complementar con entrevista y antecedentes del proceso. ";
+    if (consistencia!=="Alta") resumen += "Además, la consistencia de sus respuestas es "+consistencia+", por lo que conviene contrastar el resultado con otras fuentes.";
     document.getElementById("opk-resumen-texto").textContent = resumen;
 
     // Recomendación tipo semáforo (arriba del informe)
@@ -3548,6 +3600,7 @@ async function abrirInformeOPERA(test, rut, nombre) {
     if (recoElem) {
       recoElem.innerHTML = '<div class="opk-reco" style="border-color:'+reco.color+';">'
         + '<div class="opk-reco-badge" style="background:'+reco.color+';">'+reco.icono+' '+reco.etiqueta+'</div>'
+        + '<div class="opk-reco-nivel">Nivel global: <b>'+nivelG+'</b> ('+global+'/96)</div>'
         + '<div class="opk-reco-txt">'+reco.texto+'</div></div>';
     }
 
@@ -3568,15 +3621,15 @@ async function abrirInformeOPERA(test, rut, nombre) {
       }
     }
 
-    // Índice de consistencia (sección propia)
+    // Consistencia (dentro del bloque de Confiabilidad)
     var consElem = document.getElementById("opk-consistencia");
     if (consElem) {
       var consColor = consistencia==="Alta"?"#1a6a4a":consistencia==="Media"?"#c99a2e":"#c0392b";
       var consTxt = consistencia==="Alta"
-        ? "Las respuestas son coherentes entre sí. El perfil puede interpretarse con confianza."
+        ? "Respuestas coherentes entre sí: el perfil puede interpretarse con confianza."
         : consistencia==="Media"
-        ? "Se detectaron algunas respuestas poco coherentes. Interpretar con precaución moderada."
-        : "Se detectaron varias respuestas contradictorias (ej. marcar como 'más probable' una conducta de riesgo). Interpretar los resultados con cautela.";
+        ? "Se detectaron algunas respuestas poco coherentes: interpretar con precaución moderada."
+        : "Se detectaron varias respuestas contradictorias (ej. marcar como 'más probable' una conducta de riesgo): interpretar los resultados con cautela y confirmar en entrevista.";
       consElem.innerHTML = '<span class="opk-cons-badge" style="background:'+consColor+';">Consistencia '+consistencia+'</span>'
         + '<span class="opk-cons-txt">'+consTxt+'</span>';
     }
@@ -4546,14 +4599,6 @@ function imprimirModalWONDERLIC() { window.print(); }
       <!-- Recomendación (semáforo) -->
       <div id="opk-recomendacion"></div>
 
-      <!-- Índice global -->
-      <div>
-        <div class="opk-label">Índice Global</div>
-        <div id="opk-global-badge" class="opk-global-badge">—</div>
-        <div class="opk-bar-label"><span>Puntaje global</span><span id="opk-global-pct">—</span></div>
-        <div class="opk-bar-bg"><div class="opk-bar-fill" id="opk-barra-global" style="width:0%"></div></div>
-      </div>
-
       <!-- Competencias -->
       <div>
         <div class="opk-label">Competencias evaluadas</div>
@@ -4590,16 +4635,11 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div class="opk-resumen"><div class="opk-resumen-texto" id="opk-resumen-texto">—</div></div>
       </div>
 
-      <!-- Índice de consistencia -->
+      <!-- Confiabilidad del resultado (consistencia + integridad/antitrampa) -->
       <div>
-        <div class="opk-label">Índice de consistencia</div>
+        <div class="opk-label">Confiabilidad del resultado</div>
         <div id="opk-consistencia" class="opk-cons-box"></div>
-      </div>
-
-      <!-- Integridad -->
-      <div>
-        <div class="opk-label">Integridad de la aplicación</div>
-        <div id="opk-integridad"></div>
+        <div id="opk-integridad" style="margin-top:8px;"></div>
       </div>
 
       <div class="opk-nota">Los resultados de esta evaluación describen tendencias conductuales autoinformadas frente a microescenarios laborales. No constituyen diagnóstico psicológico, no predicen por sí solos el desempeño futuro y deben interpretarse junto con entrevista, experiencia, referencias y otros antecedentes del proceso.</div>
