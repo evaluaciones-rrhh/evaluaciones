@@ -3010,19 +3010,21 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var col4 = String(fila[4]||"");
     var col5 = String(fila[5]||"");
     var tieneColSec = ESTILOS_CEAL.indexOf(col4) >= 0 && col5.length > 30;
-    var estiloSec, descripcion, efectividad, puntaje;
+    var estiloSec, descripcion, efectividad, puntaje, focoCEAL;
     if (tieneColSec) {
-      // Estructura nueva: estilo | estilo_secundario | descripcion | efectividad | puntaje
+      // Estructura nueva: estilo | estilo_secundario | descripcion | efectividad | puntaje | cambios_foco
       estiloSec   = col4;
       descripcion = col5;
       efectividad = String(fila[6]||"—");
       puntaje     = fila[7]!==undefined ? fila[7] : "—";
+      focoCEAL    = parseInt(fila[8])||0;
     } else {
-      // Estructura antigua: estilo | descripcion | efectividad | puntaje
+      // Estructura antigua: estilo | descripcion | efectividad | puntaje | cambios_foco
       estiloSec   = "";
       descripcion = String(fila[4]||"—");
       efectividad = String(fila[5]||"—");
       puntaje     = fila[6]!==undefined ? fila[6] : "—";
+      focoCEAL    = parseInt(fila[7])||0;
     }
     var fecha = String(fila[0]||"—");
 
@@ -3193,6 +3195,16 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var dess  = perfilBanda.d || [];
     document.getElementById("ceal-fortalezas-list").innerHTML = forts.map(function(f){return "<li>"+f+"</li>";}).join("");
     document.getElementById("ceal-desarrollo-list").innerHTML = dess.map(function(d){return "<li>"+d+"</li>";}).join("");
+
+    // Integridad de la aplicación (antitrampa / cambios de ventana)
+    var cealIntegEl = document.getElementById("ceal-integridad");
+    if (cealIntegEl) {
+      cealIntegEl.innerHTML = focoCEAL===0
+        ? "<div class='pf-integridad-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+        : focoCEAL<=3
+        ? "<div class='pf-integridad-leve'><strong>⚠ Alerta leve — "+focoCEAL+" cambio(s) de ventana detectado(s)</strong><div style='font-size:12px;margin-top:4px;'>Puede ser accidental. Se recomienda considerar este antecedente al interpretar el resultado.</div></div>"
+        : "<div class='pf-integridad-riesgo'><strong>⚠ ALERTA DE INTEGRIDAD — "+focoCEAL+" cambios de ventana detectados</strong><div style='font-size:12px;margin-top:4px;'>Existe riesgo de que el candidato haya consultado recursos externos. Se recomienda evaluar la validez del resultado.</div></div>";
+    }
 
     document.getElementById("modal-ceal").classList.add("activo");
     document.body.style.overflow="hidden";
@@ -3421,16 +3433,16 @@ var OPERA_BANCO = [{"comp":"responsabilidad","s":"Al finalizar tu turno observas
 // Recomendación tipo semáforo según nivel global + consistencia
 function operaRecomendacion(nivelG, consistencia){
   if (consistencia === "Baja") {
-    return { etiqueta:"Revisar con cautela", color:"#c0392b", icono:"⚠",
-      texto:"No tomar una decisión solo con esta prueba: el patrón de respuestas presenta contradicciones que restan confiabilidad al resultado. Antes de avanzar, confirmar en entrevista las competencias evaluadas." };
+    return { etiqueta:"Recomendable con observaciones", color:"#c0392b", icono:"⚠",
+      texto:"No tomar una decisión solo con esta prueba: el patrón de respuestas presenta contradicciones que restan confiabilidad al resultado (ver bloque de confiabilidad). Antes de avanzar, confirmar en entrevista las competencias evaluadas." };
   }
-  if (nivelG === "Favorable") return { etiqueta:"Avanzar — perfil favorable", color:"#1a6a4a", icono:"✓",
+  if (nivelG === "Favorable") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
     texto:"Se recomienda avanzar con este candidato. Muestra conductas alineadas de forma consistente con la responsabilidad, el compromiso y la seguridad esperados en cargos operativos." };
-  if (nivelG === "Adecuado") return { etiqueta:"Avanzar con reservas", color:"#c99a2e", icono:"≈",
+  if (nivelG === "Adecuado") return { etiqueta:"Recomendable con observaciones", color:"#c99a2e", icono:"≈",
     texto:"La balanza se inclina a favor: el candidato respondió bien en la mayoría de las situaciones, con fallos puntuales. Se recomienda avanzar y usar la entrevista para confirmar las áreas más débiles, no para decidir si avanza." };
-  if (nivelG === "Observación") return { etiqueta:"Decisión depende de la entrevista", color:"#d4830a", icono:"≈",
+  if (nivelG === "Observación") return { etiqueta:"Recomendable con observaciones", color:"#d4830a", icono:"≈",
     texto:"La balanza está en el medio: el candidato respondió de forma mezclada, sin un patrón claro (acierta en unas situaciones y falla en otras). Esta prueba no alcanza para decidir; es la entrevista de profundización la que debe inclinar la decisión en un sentido u otro." };
-  return { etiqueta:"No avanzar / descartar", color:"#c0392b", icono:"✕",
+  return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
     texto:"No se recomienda avanzar para cargos operativos críticos. El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas." };
 }
 
@@ -3565,16 +3577,8 @@ async function abrirInformeOPERA(test, rut, nombre) {
       ? areas.map(function(k){ return '<span class="opk-chip opk-chip-low">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
       : '<span class="opk-chip-empty">Sin áreas en nivel Observación o Riesgo.</span>';
 
-    // Alertas conductuales
-    var alertas = [];
-    orden.forEach(function(k){ if(operaNivelComp(sc[k])==="Riesgo") alertas.push(OPERA_ALERTAS_TXT[k]); });
-    var vals = orden.map(function(k){ return sc[k]; });
-    var difMax = Math.max.apply(null,vals) - Math.min.apply(null,vals);
-    if (difMax>=14) alertas.push("Perfil con alta variabilidad entre competencias ("+difMax+" puntos de diferencia); interpretar por dimensión y no solo por puntaje global.");
-    if (global<40) alertas.push("Índice global en zona de Riesgo; requiere entrevista focalizada antes de tomar decisiones.");
-    document.getElementById("opk-alertas").innerHTML = alertas.length
-      ? alertas.map(function(a){ return '<div class="opk-alerta">⚠ '+a+'</div>'; }).join("")
-      : '<div class="opk-alerta-ok">✓ Sin alertas conductuales relevantes.</div>';
+    // (Bloque "Alertas conductuales" eliminado: la recomendación y las
+    //  respuestas que requieren atención ya cubren esa función sin redundancia)
 
     // Resumen ejecutivo
     var fortNom = fort.map(function(k){return OPERA_COMP[k].nombre;});
@@ -3634,12 +3638,12 @@ async function abrirInformeOPERA(test, rut, nombre) {
         + '<span class="opk-cons-txt">'+consTxt+'</span>';
     }
 
-    // Integridad (cambios de ventana)
+    // Integridad (cambios de ventana) — mismo formato que los demás tests
     document.getElementById("opk-integridad").innerHTML = foco===0
-      ? "<div class='opk-integridad-ok'>✓ Sin alertas de integridad — el candidato no cambió de ventana durante la prueba.</div>"
+      ? "<div class='opk-integridad-ok'><strong>✓ Sin alertas de integridad</strong><div style='font-size:11px;margin-top:2px;font-weight:400;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div>"
       : foco<=3
-      ? "<div class='opk-integridad-leve'>⚠ Alerta leve — "+foco+" cambio(s) de ventana detectado(s). Puede ser accidental.</div>"
-      : "<div class='opk-integridad-riesgo'>⚠ Alerta — "+foco+" cambios de ventana. Posible consulta externa; evaluar validez.</div>";
+      ? "<div class='opk-integridad-leve'><strong>⚠ Alerta leve — "+foco+" cambio(s) de ventana detectado(s)</strong><div style='font-size:12px;margin-top:4px;font-weight:400;'>Puede ser accidental. Se recomienda considerar este antecedente al interpretar el resultado.</div></div>"
+      : "<div class='opk-integridad-riesgo'><strong>⚠ ALERTA DE INTEGRIDAD — "+foco+" cambios de ventana detectados</strong><div style='font-size:12px;margin-top:4px;font-weight:400;'>Existe riesgo de que el candidato haya consultado recursos externos. Se recomienda evaluar la validez del resultado.</div></div>";
 
     document.getElementById("modal-opera").classList.add("activo");
   } catch(e) {
@@ -4623,12 +4627,6 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div id="opk-areas"></div>
       </div>
 
-      <!-- Alertas -->
-      <div>
-        <div class="opk-label">Alertas conductuales</div>
-        <div id="opk-alertas"></div>
-      </div>
-
       <!-- Resumen ejecutivo -->
       <div>
         <div class="opk-label">Resumen ejecutivo</div>
@@ -4755,6 +4753,12 @@ function imprimirModalWONDERLIC() { window.print(); }
             <ul class="ceal-impl-list" id="ceal-desarrollo-list"></ul>
           </div>
         </div>
+      </div>
+
+      <!-- INTEGRIDAD DE LA APLICACIÓN -->
+      <div class="ceal-impl-section">
+        <div class="ceal-section-label">INTEGRIDAD DE LA APLICACIÓN</div>
+        <div id="ceal-integridad"></div>
       </div>
 
       <!-- FOOTER -->
