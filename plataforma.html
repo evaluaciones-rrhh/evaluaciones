@@ -500,6 +500,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .opk-comp-interp { font-size:11px;line-height:1.6;color:#555; }
 .opk-chip { display:inline-block;font-size:11px;font-weight:600;padding:5px 12px;border-radius:14px;margin:0 6px 6px 0; }
 .opk-chip-ok { background:#e8f5ee;color:#1a6a4a; }
+.opk-chip-mid { background:#fdf5e0;color:#9a7a1e; }
 .opk-chip-low { background:#fbeae8;color:#c0392b; }
 .opk-chip-empty { font-size:11px;color:#999;font-style:italic; }
 .opk-alerta { background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;padding:10px 14px;font-size:11px;line-height:1.6;color:#7a5c10;margin-bottom:8px; }
@@ -3567,21 +3568,28 @@ async function abrirInformeOPERA(test, rut, nombre) {
     }).join("");
     document.getElementById("opk-competencias").innerHTML = compHtml;
 
-    // Fortalezas (Favorable) y áreas a profundizar (Observación/Riesgo)
-    var fort = orden.filter(function(k){ return operaNivelComp(sc[k])==="Favorable"; });
-    var areas = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Observación"||n==="Riesgo"; });
-    document.getElementById("opk-fortalezas").innerHTML = fort.length
-      ? fort.map(function(k){ return '<span class="opk-chip opk-chip-ok">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
-      : '<span class="opk-chip-empty">Sin competencias en nivel Favorable.</span>';
+    // Ámbitos más sólidos (Favorable o Adecuado) y áreas a profundizar (Observación/Riesgo)
+    var solidos = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Favorable"||n==="Adecuado"; });
+    var areas   = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Observación"||n==="Riesgo"; });
+    // ordenar los sólidos de mayor a menor puntaje (lo más fuerte primero)
+    solidos.sort(function(a,b){ return sc[b]-sc[a]; });
+    document.getElementById("opk-fortalezas").innerHTML = solidos.length
+      ? solidos.map(function(k){
+          var n = operaNivelComp(sc[k]);
+          var clase = n==="Favorable" ? "opk-chip-ok" : "opk-chip-mid";
+          var etiqueta = n==="Favorable" ? "" : " <span style='opacity:.7;font-weight:400;'>(promedio)</span>";
+          return '<span class="opk-chip '+clase+'">'+OPERA_COMP[k].nombre+etiqueta+'</span>';
+        }).join("")
+      : '<span class="opk-chip-empty">No presenta ámbitos en nivel adecuado o superior; revisar con especial cuidado.</span>';
     document.getElementById("opk-areas").innerHTML = areas.length
       ? areas.map(function(k){ return '<span class="opk-chip opk-chip-low">'+OPERA_COMP[k].nombre+'</span>'; }).join("")
-      : '<span class="opk-chip-empty">Sin áreas en nivel Observación o Riesgo.</span>';
+      : '<span class="opk-chip-empty">Sin áreas en zona de observación o riesgo.</span>';
 
     // (Bloque "Alertas conductuales" eliminado: la recomendación y las
     //  respuestas que requieren atención ya cubren esa función sin redundancia)
 
     // Resumen ejecutivo
-    var fortNom = fort.map(function(k){return OPERA_COMP[k].nombre;});
+    var fortNom = solidos.map(function(k){return OPERA_COMP[k].nombre;});
     var areaNom = areas.map(function(k){return OPERA_COMP[k].nombre;});
     // Apertura interpretativa según nivel (no repite el puntaje crudo)
     var apertura = {
@@ -4617,7 +4625,7 @@ function imprimirModalWONDERLIC() { window.print(); }
 
       <!-- Fortalezas -->
       <div>
-        <div class="opk-label">Fortalezas conductuales</div>
+        <div class="opk-label">Ámbitos más sólidos</div>
         <div id="opk-fortalezas"></div>
       </div>
 
