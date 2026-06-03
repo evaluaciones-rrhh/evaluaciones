@@ -3904,7 +3904,7 @@ async function abrirInforme16PF(test, rut, nombre) {
       });
     } else {
       // Fallback (sin decatipos): recién ahí se usan los textos de Sheets, filtrando los descriptivos
-      var fortsTexto = (fila[7]||"").split("|").map(function(f){return f.trim();})
+      var fortsTexto = String(fila[7]||"").split("|").map(function(f){return f.trim();})
         .filter(function(f){
           if (!f || f==="No se identifican fortalezas destacadas") return false;
           // descartar textos descriptivos de escalas, no son fortalezas
@@ -3940,7 +3940,7 @@ async function abrirInforme16PF(test, rut, nombre) {
     } else {
       // Fallback: textos de Sheets si no hay decatipos. Se filtran los que son
       // claramente positivos (mal etiquetados en datos antiguos) o descriptivos.
-      var riesgosTexto = (fila[8]||"").split("|").map(function(r){return r.trim();})
+      var riesgosTexto = String(fila[8]||"").split("|").map(function(r){return r.trim();})
         .filter(function(r){
           if (!r || r==="No se identifican áreas de atención relevantes") return false;
           if (/alta capacidad|aprende r[áa]pido|fortaleza|zona de alejamiento|escala\(s\)/i.test(r)) return false;
@@ -4123,20 +4123,20 @@ async function abrirInformeIPV(test, rut, nombre) {
     var fila = encontrarFilaMasReciente(filas, rutNorm, nomNorm);
     if (!fila) { alert("No se encontraron datos del candidato."); return; }
 
-    // c[0]=fecha, c[1]=nombre, c[2]=rut, c[3]=edad, c[4]=sexo, c[5]=cargo,
-    // c[6]=dgv_pt, c[7]=dgv_nivel, c[8]=perfil_ra, c[9]=fortalezas,
-    // c[10]=areas, c[11]=interpretacion, c[12]=escalas_pt, c[13]=pt_r, c[14]=pt_a, c[15]=cambios_foco
-    var dgvPT    = parseInt(fila[6])||5;
-    var dgvN     = fila[7] || ipvNvlLabel(dgvPT);
-    var perfilRA = fila[8] || 'Equilibrado';
-    var fortalezas = (fila[9]||'').split(',').map(function(f){return f.trim();}).filter(function(f){return f && f!=='Sin fortalezas destacadas';});
-    var areas      = (fila[10]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a && a!=='Sin areas criticas';});
-    var interp     = fila[11]||'';
-    var escPT      = (fila[12]||'').split(',').map(function(v){return parseInt(v.trim())||5;});
+    // Estructura REAL guardada por el Apps Script:
+    // c[0]=fecha c[1]=nombre c[2]=rut c[3]=pt_dgv c[4]=nivel_dgv c[5]=perfil_ra
+    // c[6]=fortalezas c[7]=areas c[8]=interpretacion c[9]=escalas_pt c[10]=pt_r c[11]=pt_a c[12]=cambios_foco
+    var dgvPT    = parseInt(fila[3])||5;
+    var dgvN     = fila[4] || ipvNvlLabel(dgvPT);
+    var perfilRA = fila[5] || 'Equilibrado';
+    var fortalezas = String(fila[6]||'').split(',').map(function(f){return f.trim();}).filter(function(f){return f && f!=='Sin fortalezas destacadas';});
+    var areas      = String(fila[7]||'').split(',').map(function(a){return a.trim();}).filter(function(a){return a && a!=='Sin areas criticas';});
+    var interp     = fila[8]||'';
+    var escPT      = String(fila[9]||'').split(',').map(function(v){return parseInt(v.trim())||5;});
     while (escPT.length < 9) escPT.push(5);
-    var ptR  = parseInt(fila[13])||0;
-    var ptA  = parseInt(fila[14])||0;
-    var foco = parseInt(fila[15])||0;
+    var ptR  = parseInt(fila[10])||0;
+    var ptA  = parseInt(fila[11])||0;
+    var foco = parseInt(fila[12])||0;
 
     // Ficha candidato (Key Clouding)
     document.getElementById("ipv-ficha-nombre").textContent = fila[1]||"—";
