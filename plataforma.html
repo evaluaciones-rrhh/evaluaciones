@@ -2448,6 +2448,10 @@ function _pintarTablaHistorial(envios) {
   if (!tbl) return;
   var verGestor = (typeof esAdminActual !== "undefined" && esAdminActual);
   var nCols = verGestor ? 6 : 5;
+  // Asegurar que el encabezado "Gestionado por" esté visible para admin
+  // (se reaplica aquí porque al navegar entre secciones podía quedar oculto)
+  var thGestor = document.getElementById("th-gestor");
+  if (thGestor) thGestor.style.display = verGestor ? "" : "none";
   if (!envios || !envios.length) {
     tbl.innerHTML = "<tr><td colspan='"+nCols+"' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
     return;
