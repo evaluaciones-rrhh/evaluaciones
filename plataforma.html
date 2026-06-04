@@ -1618,6 +1618,7 @@ tbody tr:hover td { background: #fdf9f6; }
                 <th>Test</th>
                 <th>Fecha envío</th>
                 <th>Estado</th>
+                <th id="th-gestor" style="display:none;">Gestionado por</th>
               </tr>
             </thead>
             <tbody id="tabla-historial">
@@ -1891,6 +1892,9 @@ function aplicarVistaRol() {
   // Muestra el ítem de navegación "Usuarios" solo al admin
   var navUsuarios = document.getElementById("nav-usuarios");
   if (navUsuarios) navUsuarios.style.display = esAdminActual ? "" : "none";
+  // Muestra la columna "Gestionado por" del historial solo al admin
+  var thGestor = document.getElementById("th-gestor");
+  if (thGestor) thGestor.style.display = esAdminActual ? "" : "none";
 }
 
 async function cargarUsuarios() {
@@ -2442,8 +2446,10 @@ function renderHistorial() {
 function _pintarTablaHistorial(envios) {
   var tbl = document.getElementById("tabla-historial");
   if (!tbl) return;
+  var verGestor = (typeof esAdminActual !== "undefined" && esAdminActual);
+  var nCols = verGestor ? 6 : 5;
   if (!envios || !envios.length) {
-    tbl.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
+    tbl.innerHTML = "<tr><td colspan='"+nCols+"' style='text-align:center;padding:32px;color:var(--muted);'>Sin envíos registrados</td></tr>";
     return;
   }
   var html = "";
@@ -2457,6 +2463,7 @@ function _pintarTablaHistorial(envios) {
       + "<td><span class='badge " + testCls + "'>" + testNombre + "</span></td>"
       + "<td style='font-size:12px;color:var(--muted);'>" + (e.fecha  || "—") + "</td>"
       + "<td><span class='badge " + estCls + "'>" + (e.estado || "—") + "</span></td>"
+      + (verGestor ? "<td style='font-size:12px;color:var(--azul,#2b3a47);font-weight:600;'>" + (e.gestionadoPor || "—") + "</td>" : "")
       + "</tr>";
   });
   tbl.innerHTML = html;
