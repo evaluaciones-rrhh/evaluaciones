@@ -516,12 +516,12 @@ function calcular(resp){
   });
 
   // Dimensiones globales — fórmulas oficiales del corrector 16PF-5 (pesos por escala + constante)
-  // Validadas contra BASE16PF-5: decatipo = ABS((Σ lado+ − Σ lado−)/10)
-  var ext_de=Math.min(10,Math.max(1,Math.round(Math.abs(((16+5*de.A+1*de.B+3*de.F+1*de.G+1*de.H+2*de.I+2*de.O+1*de.Q3+1*de.Q4)-(1*de.C+3*de.N+2*de.Q1+4*de.Q2))/10))));
-  var ans_de=Math.min(10,Math.max(1,Math.round(Math.abs(((2*de.A+2*de.B+1*de.E+1*de.F+1*de.G+1*de.I+3*de.L+1*de.N+5*de.O+3*de.Q3+4*de.Q4)-(16+3*de.C+2*de.H+4*de.Q1+2*de.Q2))/10))));
-  var dur_de=Math.min(10,Math.max(1,Math.round(Math.abs(((138+3*de.F+2*de.L+1*de.N+1*de.O+3*de.Q4)-(2*de.A+1*de.B+1*de.C+1*de.E+2*de.H+3*de.I+3*de.M+8*de.Q1+3*de.Q2+1*de.Q3))/10))));
-  var ind_de=Math.min(10,Math.max(1,Math.round(Math.abs(((1*de.B+1*de.C+7*de.E+3*de.F+2*de.H+3*de.L+2*de.N+1*de.Q1+1*de.Q3+2*de.Q4)-(50+1*de.A+1*de.G+2*de.I))/10))));
-  var auc_de=Math.min(10,Math.max(1,Math.round(Math.abs(((3*de.A+1*de.E+5*de.G+1*de.I+3*de.O+7*de.Q3)-(22+1*de.C+3*de.F+1*de.H+1*de.M))/10))));
+  // decatipo = (Σ lado+ − Σ lado−)/10, acotado 1-10. (SIN valor absoluto: distingue polo bajo de alto)
+  var ext_de=Math.min(10,Math.max(1,Math.round(((16+5*de.A+1*de.B+3*de.F+1*de.G+1*de.H+2*de.I+2*de.O+1*de.Q3+1*de.Q4)-(1*de.C+3*de.N+2*de.Q1+4*de.Q2))/10)));
+  var ans_de=Math.min(10,Math.max(1,Math.round(((2*de.A+2*de.B+1*de.E+1*de.F+1*de.G+1*de.I+3*de.L+1*de.N+5*de.O+3*de.Q3+4*de.Q4)-(16+3*de.C+2*de.H+4*de.Q1+2*de.Q2))/10)));
+  var dur_de=Math.min(10,Math.max(1,Math.round(((138+3*de.F+2*de.L+1*de.N+1*de.O+3*de.Q4)-(2*de.A+1*de.B+1*de.C+1*de.E+2*de.H+3*de.I+3*de.M+8*de.Q1+3*de.Q2+1*de.Q3))/10)));
+  var ind_de=Math.min(10,Math.max(1,Math.round(((1*de.B+1*de.C+7*de.E+3*de.F+2*de.H+3*de.L+2*de.N+1*de.Q1+1*de.Q3+2*de.Q4)-(50+1*de.A+1*de.G+2*de.I))/10)));
+  var auc_de=Math.min(10,Math.max(1,Math.round(((3*de.A+1*de.E+5*de.G+1*de.I+3*de.O+7*de.Q3)-(22+1*de.C+3*de.F+1*de.H+1*de.M))/10)));
 
   // Contar escalas en zona de alerta
   var alertas=[];
@@ -530,26 +530,49 @@ function calcular(resp){
     if(v<=3||v>=8) alertas.push(e+'('+v+')');
   });
 
-  // Fortalezas y riesgos basados en decatipos reales
-  var forts=[],riesgos=[];
-  if(ext_de>=7) forts.push('Alta sociabilidad y orientación interpersonal');
-  else if(ext_de<=3) riesgos.push('Tendencia al aislamiento o introversión marcada');
-  if(ans_de<=3) forts.push('Buena estabilidad emocional y manejo del estrés');
-  else if(ans_de>=8) riesgos.push('Nivel de ansiedad elevado que puede afectar el desempeño');
-  if(de.C>=8) forts.push('Alta estabilidad emocional y madurez psicológica');
-  else if(de.C<=3) riesgos.push('Baja estabilidad emocional — posible dificultad ante la presión');
-  if(de.G>=8) forts.push('Alto respeto por normas y sentido del deber — confiable en roles que requieren rigor y cumplimiento');
-  else if(de.G<=3) riesgos.push('Tendencia al inconformismo y escasa atención a normas');
-  if(de.E>=8) forts.push('Alta capacidad de liderazgo y asertividad');
-  else if(de.E<=3) riesgos.push('Tendencia a la sumisión — dificultad para defender ideas propias');
-  if(auc_de>=8) forts.push('Buen autocontrol y capacidad para seguir procedimientos');
-  else if(auc_de<=3) riesgos.push('Dificultad para controlar impulsos y seguir normas');
-  if(de.B>=8) forts.push('Alta capacidad de razonamiento abstracto');
-  else if(de.B<=3) riesgos.push('Capacidad de razonamiento por debajo del promedio');
-  if(de.L>=8) riesgos.push('Alta suspicacia que puede dificultar el trabajo en equipo');
-  if(de.Q4>=8) riesgos.push('Nivel de tensión elevado e irritabilidad frecuente');
-  if(de.H>=8) forts.push('Alta seguridad social y disposición a relacionarse con otros');
-  else if(de.H<=3) riesgos.push('Timidez social marcada — dificultad para relacionarse con personas nuevas');
+  // Fortalezas y riesgos basados en decatipos reales.
+  // Cada uno lleva su "severidad" (distancia al centro=5.5) para ordenar y mostrar lo MÁS marcado primero.
+  var fortsObj=[],riesgosObj=[];
+  function sev(v){ return Math.abs(v-5.5); }   // qué tan extremo es el decatipo
+  function addF(v,txt){ fortsObj.push({s:sev(v),t:txt}); }
+  function addR(v,txt){ riesgosObj.push({s:sev(v),t:txt}); }
+
+  if(ext_de>=7) addF(ext_de,'Alta sociabilidad y orientación interpersonal');
+  else if(ext_de<=3) addR(ext_de,'Tendencia al aislamiento o introversión marcada');
+  if(ans_de<=3) addF(ans_de,'Buena estabilidad emocional y manejo del estrés');
+  else if(ans_de>=8) addR(ans_de,'Nivel de ansiedad elevado que puede afectar el desempeño');
+  if(de.C>=7) addF(de.C,'Buena estabilidad emocional y madurez psicológica');
+  else if(de.C<=3) addR(de.C,'Baja estabilidad emocional — posible dificultad ante la presión');
+  if(de.G>=7) addF(de.G,'Respeto por las normas y sentido del deber — confiable en roles que requieren rigor y cumplimiento');
+  else if(de.G<=3) addR(de.G,'Tendencia al inconformismo y escasa atención a normas');
+  if(de.E>=7) addF(de.E,'Capacidad de liderazgo y asertividad');
+  else if(de.E<=3) addR(de.E,'Tendencia a la sumisión — dificultad para defender ideas propias');
+  if(auc_de>=7) addF(auc_de,'Buen autocontrol y capacidad para seguir procedimientos');
+  else if(auc_de<=3) addR(auc_de,'Dificultad para controlar impulsos y seguir normas');
+  if(de.B>=7) addF(de.B,'Buena capacidad de razonamiento abstracto');
+  else if(de.B<=3) addR(de.B,'Capacidad de razonamiento por debajo del promedio');
+  if(de.H>=7) addF(de.H,'Seguridad social y disposición a relacionarse con otros');
+  else if(de.H<=3) addR(de.H,'Timidez social marcada — dificultad para relacionarse con personas nuevas');
+
+  // Fortalezas del POLO BAJO (un valor bajo en estos factores es una cualidad positiva)
+  if(de.Q4<=3) addF(de.Q4,'Persona relajada y tranquila, con baja tensión');
+  else if(de.Q4>=8) addR(de.Q4,'Nivel de tensión elevado e irritabilidad frecuente');
+  if(de.L<=3) addF(de.L,'Confiada y abierta hacia los demás, facilita el trabajo en equipo');
+  else if(de.L>=8) addR(de.L,'Alta suspicacia que puede dificultar el trabajo en equipo');
+  if(de.O<=3) addF(de.O,'Segura de sí misma, con baja preocupación o autocrítica');
+  else if(de.O>=8) addR(de.O,'Tendencia a la preocupación y la autocrítica excesiva');
+  if(dur_de<=3) addF(dur_de,'Sensible, receptiva y de mente abierta');
+
+  // Otras fortalezas positivas no contempladas antes
+  if(de.Q1>=7) addF(de.Q1,'Flexible y abierta a nuevas formas de trabajo');
+  if(de.Q3>=7) addF(de.Q3,'Organizada y orientada al detalle');
+  if(de.F>=7) addF(de.F,'Entusiasta y espontánea');
+
+  // Ordenar por severidad (lo más marcado primero) y extraer los textos
+  fortsObj.sort(function(a,b){ return b.s-a.s; });
+  riesgosObj.sort(function(a,b){ return b.s-a.s; });
+  var forts=fortsObj.map(function(o){return o.t;});
+  var riesgos=riesgosObj.map(function(o){return o.t;});
 
   // Interpretación descriptiva — género adaptativo
   var sexoVal = document.getElementById('sexo').value;
