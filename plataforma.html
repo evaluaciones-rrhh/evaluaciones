@@ -3834,7 +3834,21 @@ var PF_FORTALEZAS = {
   'M_bajo':'Sentido práctico — orientado/a a lo concreto y a resultados tangibles.',
   'L_bajo':'Confianza en los demás — fácil de integrar a equipos y receptivo/a a la retroalimentación.',
   'O_bajo':'Seguridad personal — confiado/a en sí mismo/a y en sus capacidades.',
-  'Q4_bajo':'Tranquilidad — relajado/a, paciente y con buen manejo de la presión.'
+  'Q4_bajo':'Tranquilidad — relajado/a, paciente y con buen manejo de la presión.',
+  // Variantes de nivel BUENO (decatipo 7): cualidad presente aunque no en grado extremo
+  'A_alto7':'Buena disposición hacia las personas y el trabajo en equipo.',
+  'B_alto7':'Buena capacidad de aprendizaje y resolución de problemas.',
+  'C_alto7':'Buena estabilidad emocional — maneja adecuadamente la presión.',
+  'E_alto7':'Capacidad para defender ideas y asumir roles de conducción.',
+  'F_alto7':'Buen nivel de energía y disposición activa al trabajo.',
+  'G_alto7':'Responsable y respetuoso/a de las normas y procedimientos.',
+  'H_alto7':'Se desenvuelve con seguridad en el contacto con otros.',
+  'Q3_alto7':'Organizado/a y con buena atención al detalle.',
+  'Q2_alto7':'Capaz de trabajar de forma autónoma.',
+  'Q1_alto7':'Abierto/a al cambio y a nuevas formas de trabajo.',
+  'L_bajo7':'Confiado/a y abierto/a en el trato, facilita el trabajo en equipo.',
+  'O_bajo7':'Seguro/a de sí mismo/a, con baja autocrítica excesiva.',
+  'Q4_bajo7':'Persona tranquila, con buen manejo de la tensión.'
 };
 
 function pf16GetAlertas(deVals) {
@@ -3852,8 +3866,15 @@ function pf16GetFortalezas(deVals) {
   var ESCA = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
   var out = [];
   deVals.forEach(function(v, i) {
-    var key = v >= 8 ? ESCA[i]+'_alto' : v <= 3 ? ESCA[i]+'_bajo' : null;
-    if (key && PF_FORTALEZAS[key]) out.push(PF_FORTALEZAS[key]);
+    var e = ESCA[i];
+    var key = null;
+    // Polo ALTO: 8+ fortaleza fuerte; 7 fortaleza de nivel bueno
+    if (v >= 8 && PF_FORTALEZAS[e+'_alto']) key = e+'_alto';
+    else if (v === 7 && PF_FORTALEZAS[e+'_alto7']) key = e+'_alto7';
+    // Polo BAJO (donde lo bajo es cualidad): 3- fuerte; 4 nivel bueno
+    else if (v <= 3 && PF_FORTALEZAS[e+'_bajo']) key = e+'_bajo';
+    else if (v === 4 && PF_FORTALEZAS[e+'_bajo7']) key = e+'_bajo7';
+    if (key) out.push(PF_FORTALEZAS[key]);
   });
   return out;
 }
@@ -3891,37 +3912,51 @@ function pf16GenerarInterpretacion(dimVals, nombre) {
   var n = (nombre || "El candidato").split(" ")[0];
   var DIMS = [
     { nom:"extraversión",
-      alto:"se orienta hacia las personas y los contextos sociales, mostrando facilidad para relacionarse",
-      bajo:"tiende a la introversión y al trabajo más reservado o individual",
-      medio:"presenta un nivel equilibrado de sociabilidad" },
+      alto:{d:"se orienta hacia las personas y los contextos sociales, con facilidad para relacionarse", impl:"Rinde en roles con alto contacto interpersonal, atención a público, ventas o trabajo en equipo."},
+      bajo:{d:"tiende a la introversión y al trabajo más reservado o individual", impl:"Se desempeña mejor en tareas de concentración individual; conviene no exponerlo en exceso a roles de alta interacción social."},
+      medio:{d:"presenta un nivel equilibrado de sociabilidad", impl:"Se adapta tanto a trabajo individual como en equipo."} },
     { nom:"ansiedad",
-      alto:"puede experimentar tensión o preocupación con cierta frecuencia, lo que conviene considerar en contextos de presión",
-      bajo:"muestra estabilidad emocional y buen manejo de la presión",
-      medio:"presenta un manejo emocional dentro de lo esperable" },
+      alto:{d:"puede experimentar tensión o preocupación con cierta frecuencia", impl:"En contextos de alta presión conviene asegurar apoyo y estructura; explorar en entrevista sus estrategias de afrontamiento."},
+      bajo:{d:"muestra estabilidad emocional y buen manejo de la presión", impl:"Es un recurso valioso para roles exigentes o de alta responsabilidad."},
+      medio:{d:"presenta un manejo emocional dentro de lo esperable", impl:"Maneja adecuadamente las situaciones laborales cotidianas."} },
     { nom:"dureza",
-      alto:"aborda las situaciones de manera práctica, objetiva y orientada a los hechos",
-      bajo:"se inclina por la sensibilidad, la empatía y la consideración de las personas",
-      medio:"combina criterio práctico con sensibilidad interpersonal" },
+      alto:{d:"aborda las situaciones de manera práctica, objetiva y orientada a los hechos", impl:"Útil para decisiones basadas en datos y roles técnicos; cuidar el componente empático cuando el cargo lo requiera."},
+      bajo:{d:"se inclina por la sensibilidad, la empatía y la consideración de las personas", impl:"Aporta en roles de cuidado, servicio o manejo de personas; puede verse afectado por críticas o conflictos."},
+      medio:{d:"combina criterio práctico con sensibilidad interpersonal", impl:"Equilibra el foco en la tarea con la consideración de las personas."} },
     { nom:"independencia",
-      alto:"tiende a la autonomía, la iniciativa propia y la firmeza en sus posturas",
-      bajo:"valora el acuerdo, la colaboración y el apoyo del grupo",
-      medio:"equilibra la iniciativa propia con la apertura a los demás" },
+      alto:{d:"tiende a la autonomía, la iniciativa propia y la firmeza en sus posturas", impl:"Apto para roles que requieren decisión y dirección; en equipos puede necesitar trabajar la apertura a otras opiniones."},
+      bajo:{d:"valora el acuerdo, la colaboración y el apoyo del grupo", impl:"Buen integrante de equipo; conviene reforzar su autonomía para tareas que exigen iniciativa propia."},
+      medio:{d:"equilibra la iniciativa propia con la apertura a los demás", impl:"Combina criterio propio con disposición a colaborar."} },
     { nom:"autocontrol",
-      alto:"muestra disciplina, organización y apego a normas y objetivos",
-      bajo:"se maneja de forma flexible y espontánea, con menor estructura",
-      medio:"presenta un autocontrol adecuado y flexible" }
+      alto:{d:"muestra disciplina, organización y apego a normas y objetivos", impl:"Confiable para roles que exigen rigor, cumplimiento y orden."},
+      bajo:{d:"se maneja de forma flexible y espontánea, con menor estructura", impl:"Aporta flexibilidad; en cargos que exigen método y procedimientos conviene dar estructura y seguimiento."},
+      medio:{d:"presenta un autocontrol adecuado y flexible", impl:"Equilibra el orden con la capacidad de adaptarse."} },
   ];
-  var frases = [];
+  var desc = [], impl = [];
   dimVals.slice(0,5).forEach(function(v, i){
-    var d = DIMS[i];
-    if (!d) return;
+    var d = DIMS[i]; if (!d) return;
     var t = v <= 3 ? d.bajo : v >= 8 ? d.alto : d.medio;
-    frases.push(t);
+    desc.push(t.d);
+    // recoger implicancias solo de las dimensiones marcadas (no las medias), para no diluir
+    if (v <= 3 || v >= 8) impl.push(t.impl);
   });
-  if (!frases.length) return "—";
-  var cuerpo = frases.slice(0,2).join("; ") + ". Asimismo, " + frases.slice(2).join("; ") + ".";
-  return n + " " + cuerpo.charAt(0).toLowerCase() + cuerpo.slice(1) +
-    " En conjunto, el perfil ofrece una visión orientativa que se recomienda complementar con la entrevista y los demás antecedentes del proceso.";
+  if (!desc.length) return "—";
+
+  // Párrafo 1: descripción integrada del perfil
+  var p1 = n + " " + desc.slice(0,2).join("; ") + ". Asimismo, " + desc.slice(2).join("; ") + ".";
+
+  // Párrafo 2: implicancias laborales concretas (lo que ayuda a decidir)
+  var p2 = "";
+  if (impl.length) {
+    p2 = " En términos prácticos para el cargo: " + impl.join(" ");
+  } else {
+    p2 = " El perfil es mayormente equilibrado, sin rasgos extremos que condicionen fuertemente el desempeño; su ajuste dependerá especialmente de las competencias técnicas y la experiencia.";
+  }
+
+  // Cierre
+  var cierre = " Se recomienda contrastar esta lectura con la entrevista, la experiencia y los demás antecedentes antes de la decisión final.";
+
+  return p1.charAt(0).toUpperCase() + p1.slice(1) + p2 + cierre;
 }
 
 
@@ -3977,17 +4012,17 @@ async function abrirInforme16PF(test, rut, nombre) {
     var n = alertas.length;
     var sem = n <= 2
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
-          titulo: n === 0 ? 'Perfil muy promedio' : 'Perfil poco diferenciado',
+          titulo:'Perfil equilibrado',
           texto: n === 0
-            ? 'El perfil se ubica en la zona promedio en todas las escalas. Es un perfil equilibrado; conviene contrastar en entrevista para precisar matices.'
-            : 'El perfil presenta solo ' + n + ' rasgo(s) marcado(s). Perfil equilibrado, con la mayoría de las escalas en la zona promedio.' }
+            ? 'No presenta rasgos marcados: todas las escalas se ubican en el rango medio. Es un perfil parejo, sin fortalezas ni áreas de atención que destaquen; su ajuste al cargo dependerá sobre todo de la experiencia, las competencias técnicas y lo que se observe en entrevista.'
+            : 'Presenta solo ' + n + ' rasgo(s) marcado(s); el resto de las escalas está en el rango medio. Es un perfil mayormente parejo; conviene apoyarse en la entrevista y la experiencia para afinar la decisión.' }
       : n <= 7
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
-          titulo:'Perfil dentro de lo esperado',
-          texto:'El perfil presenta ' + n + ' rasgos marcados, lo que está dentro de lo esperable (la mayoría de las personas presenta entre 3 y 7). Estos rasgos definen su estilo característico; conviene profundizar en ellos durante la entrevista.' }
+          titulo:'Perfil con rasgos definidos (dentro de lo normal)',
+          texto:'Presenta ' + n + ' rasgos marcados, una cantidad dentro de lo esperable (la mayoría de las personas tiene entre 3 y 7). Estos rasgos son los que definen su estilo personal y laboral; conviene profundizar en ellos durante la entrevista.' }
       : { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
-          titulo:'Perfil muy diferenciado',
-          texto:'El perfil presenta ' + n + ' rasgos marcados, un número elevado que indica una personalidad muy diferenciada. Conviene revisar los estilos de respuesta y profundizar en entrevista.' };
+          titulo:'Perfil muy marcado',
+          texto:'Presenta ' + n + ' rasgos marcados, una cantidad alta que indica una personalidad muy diferenciada (con varios rasgos en los extremos). Conviene revisar los estilos de respuesta y profundizar bien en entrevista antes de decidir.' };
     document.getElementById("pf-semaforo").innerHTML =
       '<div class="pf-semaforo-wrap ' + sem.wrap + '">' +
       '<div class="pf-semaforo-dot ' + sem.dot + '"></div>' +
@@ -4014,10 +4049,15 @@ async function abrirInforme16PF(test, rut, nombre) {
       // Reconstruir fortalezas con su escala para poder filtrar por coherencia
       var ESCA_F = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
       deVals.forEach(function(v, i){
-        var key = v >= 8 ? ESCA_F[i]+'_alto' : v <= 3 ? ESCA_F[i]+'_bajo' : null;
-        if (!key || !PF_FORTALEZAS[key]) return;
+        var e = ESCA_F[i];
+        var key = null;
+        if (v >= 8 && PF_FORTALEZAS[e+'_alto']) key = e+'_alto';
+        else if (v === 7 && PF_FORTALEZAS[e+'_alto7']) key = e+'_alto7';
+        else if (v <= 3 && PF_FORTALEZAS[e+'_bajo']) key = e+'_bajo';
+        else if (v === 4 && PF_FORTALEZAS[e+'_bajo7']) key = e+'_bajo7';
+        if (!key) return;
         // si esa misma escala ya es un área de atención, no la repetimos como fortaleza
-        if (alertasEsca.indexOf(ESCA_F[i]) !== -1) return;
+        if (alertasEsca.indexOf(e) !== -1) return;
         var fa = pf16AdaptarGenero(PF_FORTALEZAS[key], genero);
         if (!todasForts.some(function(t){return t.substring(0,20)===fa.substring(0,20);})) todasForts.push(fa);
       });
@@ -4076,14 +4116,12 @@ async function abrirInforme16PF(test, rut, nombre) {
         }).join("")
       : "<div class='pfk-item-vacio'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
-    // Interpretación — usar el texto de Sheets solo si es un párrafo completo (largo).
-    // Si falta, es un fragmento corto (dato viejo), o contiene frases de la versión
-    // antigua con criterio incorrecto, se regenera desde las dimensiones.
-    var interpSheets = String(fila[9] || "").trim();
-    var textoViejo = /alejamiento significativo|evaluación complementaria antes de tomar una decisión de selección|varios indicadores/i.test(interpSheets);
-    var interpFinal = (interpSheets.length >= 80 && !textoViejo)
-      ? pf16AdaptarGenero(interpSheets, genero)
-      : pf16AdaptarGenero(pf16GenerarInterpretacion(dimVals, fila[1]), genero);
+    // Interpretación — se genera SIEMPRE desde las dimensiones globales, para que
+    // sea robusta, consistente y útil para decidir en todos los informes (nuevos y
+    // antiguos), independiente de lo que se haya guardado en su momento en Sheets.
+    var interpFinal = (dimVals && dimVals.length >= 5)
+      ? pf16AdaptarGenero(pf16GenerarInterpretacion(dimVals, fila[1]), genero)
+      : pf16AdaptarGenero(String(fila[9] || "—"), genero);
     document.getElementById("pf-interp").textContent = interpFinal;
     document.getElementById("pf-fecha").textContent = fila[0] || "—";
 
