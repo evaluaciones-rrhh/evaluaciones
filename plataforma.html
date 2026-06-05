@@ -1821,7 +1821,8 @@ const DASH_HTML = {
   IC:        "inline",
   CEAL:      "inline",
   DISC:      "inline",
-  OPERA:     "inline"
+  OPERA:     "inline",
+  TECNICO_GRUERO: "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -2348,7 +2349,8 @@ function renderTablaComun(datos, tbodyId, cols) {
     var TEST_BADGE_NOMBRES = {
       "IC":"Instrucciones Complejas","CEAL":"Estilos de Liderazgo",
       "16PF":"Evaluación de Personalidad","IPV":"Personalidad Vendedores",
-      "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual","OPERA":"Conducta Operacional"
+      "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual","OPERA":"Conducta Operacional",
+      "TECNICO_GRUERO":"Prueba Técnica Gruero"
     };
     var testLabel = TEST_BADGE_NOMBRES[d.test] || d.test || "—";
     if(cols===5) {
@@ -2402,7 +2404,7 @@ function renderRecientes() {
     return;
   }
 
-  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC","OPERA"];
+  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC","OPERA","TECNICO_GRUERO"];
   var html = "";
   recientes.forEach(function(d) {
     var dotCls = "tl-dot-" + (d.test||"default").replace(/[^a-zA-Z0-9]/g,"");
