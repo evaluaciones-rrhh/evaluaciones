@@ -157,6 +157,32 @@ var CORTE = 0.80;  // 80% de las puntuables
 
 var nombre="", rut="", idx=0, respuestas={}, tiempoInicio=null, cambiosFoco=0, alertaFoco=false, ended=false;
 
+// ── Bloqueo de reingreso: si el test ya fue completado, no deja volver a entrar ──
+function pantallaBloqueo(msg){
+  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;font-family:sans-serif;"><div style="max-width:460px;text-align:center;padding:2rem;"><div style="font-size:54px;margin-bottom:1rem;">🔒</div><h2 style="font-size:22px;font-weight:600;margin-bottom:.75rem;color:#2b3a47;">Este test ya fue completado</h2><p style="font-size:14px;color:#6b7280;line-height:1.7;">'+msg+'</p></div></div>';
+}
+function validarAcceso(){
+  if(!TOKEN_URL) return;   // sin token (acceso de prueba), no se bloquea
+  // Capa 1: mismo navegador
+  if(localStorage.getItem('test_completado_'+TOKEN_URL)==='completado'){
+    pantallaBloqueo('Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.');
+    return;
+  }
+  // Capa 2: servidor (a prueba de cambio de navegador/dispositivo)
+  fetch(SCRIPT_URL+'?action=validarToken&token='+encodeURIComponent(TOKEN_URL)+'&callback=__tk')
+    .then(function(r){return r.text();})
+    .then(function(t){
+      try{
+        var j=JSON.parse(t.replace(/^__tk\(/,'').replace(/\)$/,''));
+        if(j && j.valido===false){
+          pantallaBloqueo((j.mensaje||'Ya registraste una respuesta para esta evaluación.')+'<br><br>Si crees que esto es un error, contacta a tu evaluador.');
+        }
+      }catch(e){}
+    })
+    .catch(function(){});
+}
+document.addEventListener("DOMContentLoaded", validarAcceso);
+
 // ── Antitrampa ──
 document.addEventListener("visibilitychange",function(){ if(document.hidden && !ended){ cambiosFoco++; if(!alertaFoco){ alertaFoco=true; setTimeout(function(){ alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada."); alertaFoco=false; },300);} } });
 window.addEventListener("blur",function(){ if(!ended) cambiosFoco++; });
