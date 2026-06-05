@@ -4475,15 +4475,34 @@ function wlGetRecomendacion(nivel, foco){
 
 function wlGenerarResumen(nombre, nivel, percentil, cargo, pb, pa, tiempo){
   var n = nombre.split(" ")[0];
-  var txt = "";
-  if(nivel==="Superior") txt = n+" obtiene un resultado en el rango superior, indicando una capacidad cognitiva claramente por encima del promedio. Aprende con rapidez y procesa información compleja con facilidad. ";
-  else if(nivel==="Promedio alto") txt = n+" obtiene un resultado sobre el promedio general, con buenas habilidades para razonar y manejar situaciones de mediana complejidad. ";
-  else if(nivel==="Promedio") txt = n+" obtiene un resultado dentro del rango promedio. Puede desempeñarse adecuadamente en cargos de complejidad moderada con la estructura adecuada. ";
-  else if(nivel==="Bajo promedio") txt = n+" obtiene un resultado por debajo del promedio, lo que puede implicar mayor dificultad para aprender procedimientos nuevos con rapidez. ";
-  else txt = n+" obtiene un resultado en el rango bajo, lo que sugiere dificultades en el procesamiento de información y la resolución de problemas. ";
-  if(cargo){ txt += "Para el cargo de "+cargo+", "; if(nivel==="Superior"||nivel==="Promedio alto") txt+="el perfil cognitivo es adecuado. "; else if(nivel==="Promedio") txt+="el nivel cognitivo es compatible si el cargo no requiere alta complejidad analítica. "; else txt+="se recomienda evaluar si las exigencias cognitivas del cargo son acordes al perfil. "; }
-  txt += "Completó la prueba en "+tiempo+". ";
-  if(pa!=pb) txt += "Se aplicó un ajuste por edad que modifica el puntaje bruto ("+pb+") al ajustado ("+pa+"), reflejado en el percentil reportado.";
+  var DET = {
+    "Superior": {
+      desc:"obtiene un resultado en el rango superior, lo que indica una capacidad cognitiva claramente por encima del promedio. Aprende con rapidez, procesa información compleja con facilidad y resuelve problemas nuevos sin requerir mucho apoyo.",
+      impl:"Es un perfil apto para cargos de alta complejidad, que exigen análisis, aprendizaje continuo, toma de decisiones o resolución de problemas. Tiende a aburrirse en tareas muy rutinarias o repetitivas, lo que conviene considerar al asignar funciones.",
+      cargo:"el perfil cognitivo es plenamente adecuado, e incluso podría aspirar a funciones de mayor responsabilidad o complejidad." },
+    "Promedio alto": {
+      desc:"obtiene un resultado por sobre el promedio general, con buena capacidad para razonar, aprender procedimientos y manejar situaciones de complejidad media a alta.",
+      impl:"Se adapta bien a la mayoría de los cargos, incluyendo aquellos que requieren cierto nivel de análisis o aprendizaje. Es un buen predictor de un desempeño cognitivo sólido en el puesto.",
+      cargo:"el perfil cognitivo es adecuado y favorece un buen desempeño." },
+    "Promedio": {
+      desc:"obtiene un resultado dentro del rango promedio, comparable al de la mayoría de la población. Tiene una capacidad de aprendizaje y resolución de problemas funcional para tareas de complejidad moderada.",
+      impl:"Se desempeña adecuadamente en cargos de complejidad moderada, especialmente cuando cuenta con instrucciones claras, capacitación y una estructura de trabajo definida. En funciones muy analíticas o cambiantes, puede requerir más tiempo de adaptación y apoyo.",
+      cargo:"el nivel cognitivo es compatible, sobre todo si el cargo cuenta con procedimientos claros y no exige una alta complejidad analítica constante." },
+    "Bajo promedio": {
+      desc:"obtiene un resultado por debajo del promedio, lo que puede implicar mayor dificultad para aprender procedimientos nuevos con rapidez o resolver problemas abstractos.",
+      impl:"Se desempeña mejor en cargos con tareas concretas, estables y bien definidas, con capacitación pausada y supervisión disponible. Conviene evitar funciones que exijan resolución rápida de problemas complejos o aprendizaje autónomo acelerado.",
+      cargo:"se recomienda evaluar con cuidado si las exigencias cognitivas del cargo son acordes al perfil, y reforzar la inducción y el acompañamiento." },
+    "Bajo": {
+      desc:"obtiene un resultado en el rango bajo, lo que sugiere dificultades en el procesamiento de información y la resolución de problemas que requieren razonamiento abstracto.",
+      impl:"Se ajusta mejor a tareas simples, rutinarias y muy estructuradas, con instrucciones paso a paso y supervisión cercana. Para cargos con mayor exigencia cognitiva, conviene complementar con otras evaluaciones y considerar el ajuste real al puesto.",
+      cargo:"se recomienda evaluar el ajuste al cargo con cautela y apoyarse en otros antecedentes (experiencia, entrevista, pruebas específicas)." }
+  };
+  var d = DET[nivel] || DET["Promedio"];
+  var txt = n+" "+d.desc+" En la práctica, supera al "+percentil+"% de la población de referencia. ";
+  txt += d.impl+" ";
+  if(cargo){ txt += "Para el cargo de "+cargo+", "+d.cargo+" "; }
+  if(pa!=pb) txt += "Nota: se aplicó un ajuste por edad que lleva el puntaje bruto ("+pb+") al ajustado ("+pa+"), que es el reflejado en el percentil. ";
+  txt += "Conviene complementar este resultado con la entrevista y los demás antecedentes del proceso.";
   return txt;
 }
 
@@ -4534,7 +4553,6 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     document.getElementById("wl-ficha-nombre").textContent = fila[1]||"—";
     document.getElementById("wl-ficha-rut").textContent = fila[2]||"—";
     document.getElementById("wl-ficha-fecha").textContent = wlFmtFecha(fila[0]);
-    document.getElementById("wl-ficha-tiempo").textContent = tiempoFmt;
 
     // Hero: gauge de percentil (anillo conic-gradient) + nivel
     var gaugeCol = wlNivelColor(nivel);
@@ -5152,7 +5170,6 @@ function imprimirModalWONDERLIC() { window.print(); }
         <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Candidato</span><span class="wlk-ficha-val" id="wl-ficha-nombre">—</span></div>
         <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">RUT</span><span class="wlk-ficha-val" id="wl-ficha-rut">—</span></div>
         <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Fecha evaluación</span><span class="wlk-ficha-val" id="wl-ficha-fecha">—</span></div>
-        <div class="wlk-ficha-row"><span class="wlk-ficha-lbl">Tiempo utilizado</span><span class="wlk-ficha-val" id="wl-ficha-tiempo">—</span></div>
       </div>
       <div id="wl-modal-sub" style="display:none;"></div>
     </div>
