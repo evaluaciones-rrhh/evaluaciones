@@ -3972,21 +3972,22 @@ async function abrirInforme16PF(test, rut, nombre) {
     // Semáforo
     // Semáforo calibrado: con 16 escalas se esperan 5-8 alertas por candidato
     // Verde: ≤2 (bajo la media), Amarillo: 3-5 (normal), Rojo: ≥6 (sobre la media)
-    // Cuenta áreas de escalas + áreas de dimensiones globales (coherencia total)
-    var n = alertas.length + alertasDim.length;
+    // Número de apuntamientos = escalas primarias marcadas (criterio oficial 16PF-5).
+    // La mayoría de las personas (~69%) tiene entre 3 y 7; eso es NORMAL, no un problema.
+    var n = alertas.length;
     var sem = n <= 2
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
-          titulo: n === 0 ? 'Sin áreas de atención' : 'Perfil favorable',
+          titulo: n === 0 ? 'Perfil muy promedio' : 'Perfil poco diferenciado',
           texto: n === 0
-            ? 'El perfil se encuentra dentro de la zona promedio en todas las escalas. No se identifican áreas de atención relevantes.'
-            : 'El perfil presenta solo ' + n + ' área(s) de atención. Perfil equilibrado con buen pronóstico de desempeño.' }
-      : n <= 5
-      ? { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
-          titulo:'Algunas áreas de atención',
-          texto:'El perfil presenta ' + n + ' áreas de atención — dentro del rango estadísticamente esperado para el instrumento. Se recomienda explorar en entrevista.' }
-      : { dot:'pf-sem-rojo', wrap:'pf-sw-rojo', color:'var(--low)',
-          titulo:'Varias áreas de atención',
-          texto:'El perfil presenta ' + n + ' áreas de atención, por encima del promedio esperado. Se recomienda evaluación complementaria antes de tomar una decisión.' };
+            ? 'El perfil se ubica en la zona promedio en todas las escalas. Es un perfil equilibrado; conviene contrastar en entrevista para precisar matices.'
+            : 'El perfil presenta solo ' + n + ' rasgo(s) marcado(s). Perfil equilibrado, con la mayoría de las escalas en la zona promedio.' }
+      : n <= 7
+      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
+          titulo:'Perfil dentro de lo esperado',
+          texto:'El perfil presenta ' + n + ' rasgos marcados, lo que está dentro de lo esperable (la mayoría de las personas presenta entre 3 y 7). Estos rasgos definen su estilo característico; conviene profundizar en ellos durante la entrevista.' }
+      : { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
+          titulo:'Perfil muy diferenciado',
+          texto:'El perfil presenta ' + n + ' rasgos marcados, un número elevado que indica una personalidad muy diferenciada. Conviene revisar los estilos de respuesta y profundizar en entrevista.' };
     document.getElementById("pf-semaforo").innerHTML =
       '<div class="pf-semaforo-wrap ' + sem.wrap + '">' +
       '<div class="pf-semaforo-dot ' + sem.dot + '"></div>' +
@@ -4004,11 +4005,20 @@ async function abrirInforme16PF(test, rut, nombre) {
     // lógica que las alertas). NO se inyecta el texto crudo de Sheets (fila[7]),
     // que contiene descripciones como "N escalas en zona de alejamiento: A(2)..."
     // que no son fortalezas y producían incoherencias.
+    // Coherencia general: una escala marcada aparece UNA sola vez.
+    // Si una escala ya está como ÁREA, no puede listarse también como FORTALEZA.
     var alertasKeys = alertas.map(function(a){ return a.key; });
+    var alertasEsca = alertasKeys.map(function(k){ return String(k).split('_')[0]; }); // ej. 'E_alto' -> 'E'
     var todasForts = [];
     if (deVals.length >= 16) {
-      forts.forEach(function(f){
-        var fa = pf16AdaptarGenero(f, genero);
+      // Reconstruir fortalezas con su escala para poder filtrar por coherencia
+      var ESCA_F = ['A','B','C','E','F','G','H','I','L','M','N','O','Q1','Q2','Q3','Q4'];
+      deVals.forEach(function(v, i){
+        var key = v >= 8 ? ESCA_F[i]+'_alto' : v <= 3 ? ESCA_F[i]+'_bajo' : null;
+        if (!key || !PF_FORTALEZAS[key]) return;
+        // si esa misma escala ya es un área de atención, no la repetimos como fortaleza
+        if (alertasEsca.indexOf(ESCA_F[i]) !== -1) return;
+        var fa = pf16AdaptarGenero(PF_FORTALEZAS[key], genero);
         if (!todasForts.some(function(t){return t.substring(0,20)===fa.substring(0,20);})) todasForts.push(fa);
       });
     } else {
@@ -4022,10 +4032,8 @@ async function abrirInforme16PF(test, rut, nombre) {
         });
       todasForts = fortsTexto.map(function(f){ return pf16AdaptarGenero(f, genero); });
     }
-    // Coherencia: una escala que ya es ALERTA no puede listarse como fortaleza
+    // (filtro de coherencia adicional, por si quedara algún texto redundante)
     todasForts = todasForts.filter(function(f){
-      var fLow = f.toLowerCase();
-      if (alertasKeys.indexOf('G_alto') !== -1 && fLow.indexOf('normas') !== -1 && fLow.indexOf('responsable') !== -1) return false;
       return true;
     });
     var secForts = document.getElementById("pf-sec-forts");
@@ -4069,9 +4077,11 @@ async function abrirInforme16PF(test, rut, nombre) {
       : "<div class='pfk-item-vacio'>✓ No se identifican áreas de atención relevantes en este perfil.</div>";
 
     // Interpretación — usar el texto de Sheets solo si es un párrafo completo (largo).
-    // Si falta o es solo un fragmento corto (dato viejo), se genera desde las dimensiones.
+    // Si falta, es un fragmento corto (dato viejo), o contiene frases de la versión
+    // antigua con criterio incorrecto, se regenera desde las dimensiones.
     var interpSheets = String(fila[9] || "").trim();
-    var interpFinal = (interpSheets.length >= 80)
+    var textoViejo = /alejamiento significativo|evaluación complementaria antes de tomar una decisión de selección|varios indicadores/i.test(interpSheets);
+    var interpFinal = (interpSheets.length >= 80 && !textoViejo)
       ? pf16AdaptarGenero(interpSheets, genero)
       : pf16AdaptarGenero(pf16GenerarInterpretacion(dimVals, fila[1]), genero);
     document.getElementById("pf-interp").textContent = interpFinal;
