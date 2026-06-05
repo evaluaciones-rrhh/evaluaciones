@@ -269,7 +269,9 @@ var CLAVE={1:"4",2:"4",3:"4",4:"3",5:"7",6:"1",7:"4",8:"243",9:"3",10:"1",
   31:"1",32:"3",33:"4",34:"0.8",35:"3",36:"2",37:"13",38:"2100",39:"V",40:"3",
   41:"1/8",42:"5",43:"80",44:"2",45:"10",46:"15",47:"60",48:"3",49:"0.125",50:"175"};
 
-var TABLA_P=[[95,29],[90,27],[85,25],[80,23],[75,22],[70,21],[65,20],[60,19],[55,18],[50,17],[45,16],[40,15],[35,14],[30,13],[25,11],[20,10],[15,9],[10,7],[5,5]];
+// Baremos oficiales Wonderlic (media 21, DE 7): percentil = Φ((score-21)/7).
+// Tabla [percentil, puntaje]; toPercentil devuelve el percentil del primer umbral <= pa.
+var TABLA_P=[[99,39],[98,36],[97,34],[96,33],[94,32],[92,31],[90,30],[87,29],[84,28],[80,27],[76,26],[72,25],[67,24],[61,23],[56,22],[50,21],[44,20],[39,19],[33,18],[28,17],[24,16],[20,15],[16,14],[13,13],[10,12],[8,11],[6,10],[4,9],[3,8],[2,7],[1,5],[0,1]];
 
 function ajuste(edad){
   if(edad<30) return 0;
@@ -286,9 +288,9 @@ function toPercentil(pa){
 }
 
 function toNivel(p){
-  if(p>=75) return {n:"Superior",d:"Aprende rapido, alta adaptacion a cargos complejos."};
-  if(p>=50) return {n:"Promedio alto",d:"Buen desempeño general, se adapta bien al cargo."};
-  if(p>=25) return {n:"Promedio",d:"Requiere estructura y supervision en puestos complejos."};
+  if(p>=80) return {n:"Superior",d:"Aprende rapido, alta adaptacion a cargos complejos."};
+  if(p>=60) return {n:"Promedio alto",d:"Buen desempeño general, se adapta bien al cargo."};
+  if(p>=30) return {n:"Promedio",d:"Capacidad dentro del rango esperado; se desempeña en cargos de complejidad moderada."};
   if(p>=10) return {n:"Bajo promedio",d:"Desempeno limitado en resolucion de problemas."};
   return {n:"Bajo",d:"Riesgo en aprendizaje laboral y toma de decisiones."};
 }
