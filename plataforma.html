@@ -1863,6 +1863,7 @@ async function login() {
       aplicarVistaRol();
       cargarDatos();
       cargarEntrevistas();
+      iniciarAutoRefresh();
     } else {
       document.getElementById("login-error").style.display = "block";
     }
@@ -1875,6 +1876,7 @@ async function login() {
   }
 }
 function logout() {
+  detenerAutoRefresh();
   sessionStorage.removeItem("cygnus_user");
   sessionStorage.removeItem("cygnus_nombre");
   sessionStorage.removeItem("cygnus_admin");
@@ -2005,6 +2007,7 @@ async function cambiarMiPass() {
     aplicarVistaRol();
     cargarDatos();
     cargarEntrevistas();
+    iniciarAutoRefresh();
   }
 })();
 
@@ -2211,6 +2214,35 @@ async function cargarDatos() {
     }
   }
 }
+
+// ── Auto-actualización silenciosa de reportes ──
+// Refresca los datos en segundo plano cada 30s, SOLO si la pestaña está visible
+// (para no gastar llamadas al servidor cuando la plataforma está minimizada o en otra pestaña).
+var _autoRefreshTimer = null;
+async function refrescarDatosSilencioso() {
+  if (!usuarioActual) return;            // sin sesión, no hace nada
+  if (document.hidden) return;           // pestaña no visible → pausa
+  try {
+    var dataR = await fetchJSON(APPS_URL + "?action=getAllResults&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
+    var dataH = await fetchJSON(APPS_URL + "?action=getHistorial&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
+    todosLosDatos = dataR.results || todosLosDatos;
+    if (Array.isArray(dataH.envios)) todosEnvios = dataH.envios;
+    else if (Array.isArray(dataR.envios)) todosEnvios = dataR.envios;
+    try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
+    pintarTodo();
+  } catch(e) { /* silencioso: si falla, reintenta en el próximo ciclo */ }
+}
+function iniciarAutoRefresh() {
+  if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer = setInterval(refrescarDatosSilencioso, 30000);   // cada 30 segundos
+}
+function detenerAutoRefresh() {
+  if (_autoRefreshTimer) { clearInterval(_autoRefreshTimer); _autoRefreshTimer = null; }
+}
+// Al volver a la pestaña, refresca de inmediato (sin esperar los 30s)
+document.addEventListener("visibilitychange", function(){
+  if (!document.hidden && usuarioActual) refrescarDatosSilencioso();
+});
 
 function pintarTodo() {
   actualizarStats();
