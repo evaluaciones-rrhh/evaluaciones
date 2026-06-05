@@ -20,6 +20,9 @@
   .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 12px rgba(26,58,92,.07);overflow:hidden;}
   .head{background:var(--pizarra);padding:20px 26px;color:#fff;display:flex;align-items:center;gap:12px;}
   .head-star{width:28px;height:28px;flex-shrink:0;}
+  .deneb-logo-text{ display:inline-flex; align-items:flex-start; font-weight:800; font-size:26px; letter-spacing:-.02em; line-height:1; color:#fff; }
+  .deneb-star{ width:12px; height:12px; margin-left:3px; margin-top:-1px; }
+  .deneb-logo-sub{ font-size:10px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.5); margin:5px 0 0 2px; }
   .head .org{font-size:14px;font-weight:700;letter-spacing:.01em;}
   .head .doc{font-size:10px;opacity:.65;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
   .body{padding:26px;}
@@ -64,8 +67,10 @@
   <!-- INICIO -->
   <div id="screen-inicio" class="card">
     <div class="head">
-      <svg class="head-star" viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg>
-      <div><div class="org">Deneb Evaluaciones</div></div>
+      <div>
+        <div class="deneb-logo-text">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+        <div class="deneb-logo-sub">evaluaciones</div>
+      </div>
     </div>
     <div class="body">
       <h1>Prueba Técnica — Operador de Grúa</h1>
@@ -93,8 +98,8 @@
   <!-- PRUEBA -->
   <div id="screen-prueba" class="card hidden">
     <div class="head">
-      <svg class="head-star" viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg>
-      <div><div class="org">Prueba Técnica — Operador de Grúa</div><div class="doc" id="disp-nombre"></div></div>
+      <div class="deneb-logo-text" style="font-size:18px;">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true" style="width:9px;height:9px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+      <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:12px;"><div class="org">Prueba Técnica — Operador de Grúa</div><div class="doc" id="disp-nombre"></div></div>
     </div>
     <div class="body">
       <div class="progress"><div class="progress-bar" id="pbar"></div></div>
