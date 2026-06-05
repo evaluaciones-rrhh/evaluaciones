@@ -3728,50 +3728,73 @@ async function abrirInformeGruero(test, rutDec, nomDec) {
     var puntaje   = parseInt(fila[3])||0;
     var total     = parseInt(fila[4])||0;
     var porcentaje= parseInt(fila[5])||0;
-    var resultado = String(fila[6]||"—");
-    var falloCrit = String(fila[7]||"No")==="Sí";
+    var resultado = String(fila[6]||"\u2014");
+    var falloCrit = String(fila[7]||"No")==="S\u00ed";
     var falladas  = String(fila[8]||"").split("|").map(function(s){return s.trim();}).filter(Boolean);
     var infos     = String(fila[9]||"").split("|").map(function(s){return s.trim();}).filter(Boolean);
     var foco      = parseInt(fila[10])||0;
+    var aciertos  = total - falladas.length;
 
-    // Color del resultado
-    var col = resultado==="Avanza" ? {bg:"#1a6a4a",sw:"#e8f5ee",tx:"#1a6a4a"} :
-              resultado==="No avanza" ? {bg:"#c0392b",sw:"#fbeae8",tx:"#c0392b"} :
-              {bg:"#c99a2e",sw:"#fdf5e0",tx:"#9a7a1e"};
-    var subtxt = resultado==="Avanza" ? "El candidato cumple con los conocimientos técnicos y de seguridad evaluados." :
-                 resultado==="No avanza" ? (falloCrit ? "El candidato falló al menos una pregunta crítica de seguridad. No se recomienda avanzar sin una revisión." : "El candidato no alcanzó el puntaje mínimo requerido.") :
-                 "El candidato no alcanzó el mínimo, pero no falló preguntas críticas. Conviene revisar en entrevista.";
+    var col = resultado==="Avanza" ? {bg:"#1a6a4a",ring:"#1a6a4a"} :
+              resultado==="No avanza" ? {bg:"#c0392b",ring:"#c0392b"} :
+              {bg:"#c99a2e",ring:"#c99a2e"};
+    var subtxt = resultado==="Avanza" ? "Cumple con los conocimientos t\u00e9cnicos y de seguridad evaluados para el cargo." :
+                 resultado==="No avanza" ? (falloCrit ? "Fall\u00f3 al menos una pregunta cr\u00edtica de seguridad. No se recomienda avanzar sin una revisi\u00f3n previa." : "No alcanz\u00f3 el puntaje m\u00ednimo requerido (80%).") :
+                 "No alcanz\u00f3 el m\u00ednimo requerido, pero no fall\u00f3 preguntas cr\u00edticas. Conviene revisar en entrevista.";
 
-    var fallHtml = falladas.length
-      ? falladas.map(function(f){
-          var esCrit = /\[CR[IÍ]TICA\]/i.test(f);
-          var txt = f.replace(/\s*\[CR[IÍ]TICA\]/i,"");
-          return "<div style='padding:9px 12px;border-radius:7px;margin-bottom:7px;font-size:13px;background:"+(esCrit?"#fbeae8":"#f7f5f0")+";border-left:3px solid "+(esCrit?"#c0392b":"#c99a2e")+";'>"+txt+(esCrit?" <strong style='color:#c0392b;'>(crítica de seguridad)</strong>":"")+"</div>";
-        }).join("")
-      : "<div style='font-size:13px;color:#1a6a4a;'>✓ Respondió correctamente todas las preguntas técnicas.</div>";
-
-    var infoHtml = infos.length
-      ? infos.map(function(it){ return "<div style='padding:8px 12px;border-radius:7px;margin-bottom:6px;font-size:13px;background:#f7f5f0;'>"+it+"</div>"; }).join("")
-      : "<div style='font-size:12px;color:#999;'>Sin información adicional.</div>";
-
-    var integHtml = foco===0
-      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba.</div></div></div>"
-      : foco<=3
-      ? "<div class='wl-integ-leve'><span style='font-size:18px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considérelo al interpretar el resultado.</div></div></div>"
-      : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Evalúe la validez del resultado.</div></div></div>";
-
-    document.getElementById("gru-ficha-nombre").textContent = fila[1]||"—";
-    document.getElementById("gru-ficha-rut").textContent = fila[2]||"—";
-    document.getElementById("gru-ficha-fecha").textContent = String(fila[0]||"—").split(",")[0];
+    // ── HERO: gauge de porcentaje + resultado ──
     document.getElementById("gru-hero").innerHTML =
-      "<div style='background:"+col.bg+";border-radius:10px;padding:22px 26px;color:#fff;'>"+
-        "<div style='font-size:24px;font-weight:800;'>"+resultado+"</div>"+
-        "<div style='font-size:13px;opacity:.85;margin-top:4px;line-height:1.5;'>"+subtxt+"</div>"+
-        "<div style='font-size:13px;margin-top:10px;background:rgba(255,255,255,.15);display:inline-block;padding:4px 12px;border-radius:20px;'>Puntaje: "+puntaje+"/"+total+" ("+porcentaje+"%)</div>"+
+      "<div style='background:"+col.bg+";border-radius:12px;padding:24px 26px;color:#fff;display:flex;align-items:center;gap:22px;'>"+
+        "<div style='width:84px;height:84px;border-radius:50%;flex-shrink:0;background:conic-gradient(#fff "+(porcentaje*3.6)+"deg, rgba(255,255,255,0.25) 0deg);display:grid;place-items:center;'>"+
+          "<div style='width:64px;height:64px;border-radius:50%;background:"+col.bg+";display:grid;place-items:center;'>"+
+            "<div style='text-align:center;'><div style='font-size:22px;font-weight:800;line-height:1;'>"+porcentaje+"%</div><div style='font-size:9px;opacity:.8;letter-spacing:.05em;'>LOGRO</div></div>"+
+          "</div>"+
+        "</div>"+
+        "<div style='flex:1;'>"+
+          "<div style='font-size:23px;font-weight:800;line-height:1.1;'>"+resultado+"</div>"+
+          "<div style='font-size:12.5px;opacity:.9;margin-top:5px;line-height:1.5;'>"+subtxt+"</div>"+
+          "<div style='font-size:12px;margin-top:10px;background:rgba(255,255,255,.18);display:inline-block;padding:4px 12px;border-radius:20px;'>"+aciertos+" de "+total+" respuestas t\u00e9cnicas correctas</div>"+
+        "</div>"+
       "</div>";
-    document.getElementById("gru-falladas").innerHTML = fallHtml;
-    document.getElementById("gru-info").innerHTML = infoHtml;
-    document.getElementById("gru-integridad").innerHTML = integHtml;
+
+    // ── INTEGRIDAD (justo despu\u00e9s del resultado) ──
+    document.getElementById("gru-integridad").innerHTML = foco===0
+      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>\u2713</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambi\u00f3 de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      : foco<=3
+      ? "<div class='wl-integ-leve'><span style='font-size:18px;'>\u26a0</span><div><strong>Alerta leve \u2014 "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Cons\u00edderelo al interpretar el resultado.</div></div></div>"
+      : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>\u26a0</span><div><strong>Alerta de integridad \u2014 "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Eval\u00fae la validez del resultado.</div></div></div>";
+
+    // ── RESUMEN EJECUTIVO ──
+    var nom1 = String(fila[1]||"El candidato").split(" ")[0];
+    var resumen = nom1+" obtuvo un "+porcentaje+"% de logro en la prueba t\u00e9cnica de operador de gr\u00faa ("+aciertos+" de "+total+" preguntas correctas). ";
+    if(resultado==="Avanza"){
+      resumen += "Demuestra dominio de las normas de seguridad y operaci\u00f3n esenciales del cargo. Se recomienda avanzar a la siguiente etapa del proceso.";
+    } else if(falloCrit){
+      resumen += "Sin embargo, fall\u00f3 en una o m\u00e1s preguntas cr\u00edticas de seguridad (detalladas abajo), lo que constituye un riesgo. No se recomienda avanzar sin una revisi\u00f3n especializada de esos puntos.";
+    } else {
+      resumen += "No alcanz\u00f3 el m\u00ednimo del 80% requerido, aunque no fall\u00f3 preguntas cr\u00edticas. Se sugiere revisar en entrevista los puntos d\u00e9biles antes de decidir.";
+    }
+    document.getElementById("gru-resumen").textContent = resumen;
+
+    // ── DESGLOSE: preguntas falladas ──
+    document.getElementById("gru-falladas").innerHTML = falladas.length
+      ? falladas.map(function(ff){
+          var esCrit = /\[CR[I\u00cd]TICA\]/i.test(ff);
+          var txt = ff.replace(/\s*\[CR[I\u00cd]TICA\]/i,"");
+          return "<div style='padding:10px 13px;border-radius:8px;margin-bottom:8px;font-size:13px;background:"+(esCrit?"#fbeae8":"#fdf5e0")+";border-left:3px solid "+(esCrit?"#c0392b":"#c99a2e")+";'>"+
+            "<span style='color:"+(esCrit?"#c0392b":"#9a7a1e")+";font-weight:600;'>\u2717</span> "+txt+
+            (esCrit?" <strong style='color:#c0392b;'>(cr\u00edtica de seguridad)</strong>":"")+"</div>";
+        }).join("")
+      : "<div style='padding:11px 14px;border-radius:8px;background:#e8f5ee;color:#1a6a4a;font-size:13px;'>\u2713 Respondi\u00f3 correctamente todas las preguntas t\u00e9cnicas.</div>";
+
+    // ── Informaci\u00f3n adicional ──
+    document.getElementById("gru-info").innerHTML = infos.length
+      ? infos.map(function(it){ return "<div style='padding:9px 13px;border-radius:8px;margin-bottom:6px;font-size:13px;background:#f7f5f0;'>"+it+"</div>"; }).join("")
+      : "<div style='font-size:12px;color:#999;'>Sin informaci\u00f3n adicional registrada.</div>";
+
+    document.getElementById("gru-ficha-nombre").textContent = fila[1]||"\u2014";
+    document.getElementById("gru-ficha-rut").textContent = fila[2]||"\u2014";
+    document.getElementById("gru-ficha-fecha").textContent = String(fila[0]||"\u2014").split(",")[0];
 
     document.getElementById("modal-gruero").classList.add("activo");
     document.body.style.overflow = "hidden";
@@ -5322,10 +5345,10 @@ function imprimirModalWONDERLIC() { window.print(); }
 <!-- MODAL INFORME GRUERO -->
 <div class="modal-overlay" id="modal-gruero" onclick="if(event.target===this)cerrarInformeGruero()">
   <div class="modal-box" style="max-width:620px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;border-radius:12px;">
-    <div style="flex-shrink:0;background:#1a3a5c;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;">GC</div>
-        <div><div style="color:#fff;font-weight:700;font-size:14px;">Grupo Cygnus</div><div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:.05em;">INFORME — PRUEBA TÉCNICA</div></div>
+    <div style="flex-shrink:0;background:#2b3a47;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:inline-flex;align-items:flex-start;font-weight:800;font-size:22px;letter-spacing:-.02em;color:#fff;">deneb<svg viewBox="0 0 100 100" style="width:10px;height:10px;margin-left:2px;margin-top:-1px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+        <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:10px;"><div style="color:#fff;font-weight:700;font-size:13px;">Informe Técnico</div><div style="color:rgba(255,255,255,.55);font-size:10px;letter-spacing:.05em;">PRUEBA OPERADOR DE GRÚA</div></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="wlk-btn-pdf" onclick="imprimirInformeGruero()">⬇ PDF</button>
@@ -5333,9 +5356,9 @@ function imprimirModalWONDERLIC() { window.print(); }
       </div>
     </div>
 
-    <div style="flex-shrink:0;background:#f7f5f0;border-bottom:2px solid #e0dbd0;padding:14px 24px;display:flex;gap:28px;">
+    <div style="flex-shrink:0;background:#faf9f5;border-bottom:2px solid #e7e3da;padding:14px 24px;display:flex;gap:28px;">
       <div>
-        <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1a3a5c;text-transform:uppercase;">Operador de Grúa</div>
+        <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#2b3a47;text-transform:uppercase;">Operador de Grúa</div>
         <div style="font-size:10px;color:#888;margin-top:2px;">Conocimientos técnicos y de seguridad</div>
       </div>
       <div style="flex:1;font-size:11px;">
@@ -5346,18 +5369,20 @@ function imprimirModalWONDERLIC() { window.print(); }
     </div>
 
     <div style="padding:24px;overflow-y:auto;">
-      <div id="gru-hero" style="margin-bottom:22px;"></div>
+      <div id="gru-hero" style="margin-bottom:16px;"></div>
 
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Preguntas técnicas a revisar</div>
+      <div id="gru-integridad" style="margin-bottom:22px;"></div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#e57a5f;border-bottom:2px solid #fbe9e3;padding-bottom:6px;margin-bottom:12px;">Resumen ejecutivo</div>
+      <div id="gru-resumen" style="font-size:13.5px;line-height:1.75;color:#2b3a47;background:#faf9f5;border-radius:8px;padding:14px 16px;margin-bottom:22px;"></div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#e57a5f;border-bottom:2px solid #fbe9e3;padding-bottom:6px;margin-bottom:12px;">Detalle de respuestas técnicas</div>
       <div id="gru-falladas" style="margin-bottom:22px;"></div>
 
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Información adicional del candidato</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#e57a5f;border-bottom:2px solid #fbe9e3;padding-bottom:6px;margin-bottom:12px;">Información adicional del candidato</div>
       <div id="gru-info" style="margin-bottom:22px;"></div>
 
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Integridad de la aplicación</div>
-      <div id="gru-integridad" style="margin-bottom:18px;"></div>
-
-      <div style="font-size:11px;color:#999;border-top:1px solid #e0dbd0;padding-top:12px;">Este informe es de carácter orientativo. La decisión final debe considerar la entrevista y los demás antecedentes del candidato.</div>
+      <div style="font-size:11px;color:#999;border-top:1px solid #e7e3da;padding-top:12px;">Este informe es de carácter orientativo. La decisión final debe considerar la entrevista y los demás antecedentes del candidato.</div>
     </div>
   </div>
 </div>
