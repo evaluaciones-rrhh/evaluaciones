@@ -316,6 +316,9 @@ tbody tr:hover td { background: #fdf9f6; }
 .badge-16pf { background: #e8f5ee; color: #1a6a4a; }
 .badge-ipv { background: var(--mid-bg); color: var(--mid); }
 .badge-wonderlic { background: #fce8e8; color: #8a1a1a; }
+.badge-tecnico_gruero { background: #e8eef5; color: #1a3a5c; }
+.badge-avanza { background: var(--high-bg); color: var(--high); }
+.badge-no\ avanza, .badge-revisar { background: var(--low-bg); color: var(--low); }
 .badge-alto { background: var(--high-bg); color: var(--high); }
 .badge-promedio, .badge-medio { background: var(--mid-bg); color: var(--mid); }
 .badge-bajo { background: var(--low-bg); color: var(--low); }
@@ -1535,6 +1538,9 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)">
                     <input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional
                   </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="TECNICO_GRUERO"> Prueba Técnica - Operador de Grúa
+                  </div>
                 </div>
               </div>
             </div>
@@ -1804,7 +1810,8 @@ const TESTS_LINKS = {
   WONDERLIC: BASE+"TEST_WONDERLIC.html",
   ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
   DISC:       BASE+"TEST_DISC.html",
-  OPERA:      BASE+"TEST_OPERA.html"
+  OPERA:      BASE+"TEST_OPERA.html",
+  TECNICO_GRUERO: BASE+"TEST_TECNICO_GRUERO.html"
 };
 const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
 const DASH_HTML = {
@@ -2413,7 +2420,8 @@ var TEST_NOMBRES_HTML = {
   IPV: "Perfil de Personalidad Comercial",
   WONDERLIC: "Test de Habilidad Cognitiva General",
   OPERA: "Evaluación de Conducta Operacional",
-  DISC: "Análisis de Estilo Conductual"
+  DISC: "Análisis de Estilo Conductual",
+  TECNICO_GRUERO: "Prueba Técnica - Operador de Grúa"
 };
 
 function procesarEnvios(data) {
@@ -2529,6 +2537,7 @@ async function abrirDash(test, rut, nombre) {
 
   // OPERA — modal inline
   if (test === "OPERA") { abrirInformeOPERA(test, rut, nombre); return; }
+  if (test === "TECNICO_GRUERO") { abrirInformeGruero(test, rut, nombre); return; }
 
   var endpointMap = {
     "16PF": "getDatos16PF",
@@ -3671,6 +3680,74 @@ async function abrirInformeOPERA(test, rut, nombre) {
 }
 function cerrarModalOPERA(){ document.getElementById("modal-opera").classList.remove("activo"); }
 function imprimirInformeOPERA(){ window.print(); }
+
+async function abrirInformeGruero(test, rutDec, nomDec) {
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getDatosTECNICO_GRUERO&t=" + Date.now());
+    var filas = Array.isArray(data) ? data : [];
+    function normRut(s){ return String(s||"").replace(/[\. ]/g,"").toLowerCase(); }
+    function normNom(s){ return String(s||"").trim().toLowerCase(); }
+    var fila = encontrarFilaMasReciente(filas, normRut(rutDec), normNom(nomDec));
+    if(!fila){ alert("No se encontraron datos del candidato."); return; }
+
+    // cols: 0=fecha 1=nombre 2=rut 3=puntaje 4=total 5=porcentaje 6=resultado 7=fallo_critica 8=falladas 9=informativas 10=cambios_foco 11=respuestas
+    var puntaje   = parseInt(fila[3])||0;
+    var total     = parseInt(fila[4])||0;
+    var porcentaje= parseInt(fila[5])||0;
+    var resultado = String(fila[6]||"—");
+    var falloCrit = String(fila[7]||"No")==="Sí";
+    var falladas  = String(fila[8]||"").split("|").map(function(s){return s.trim();}).filter(Boolean);
+    var infos     = String(fila[9]||"").split("|").map(function(s){return s.trim();}).filter(Boolean);
+    var foco      = parseInt(fila[10])||0;
+
+    // Color del resultado
+    var col = resultado==="Avanza" ? {bg:"#1a6a4a",sw:"#e8f5ee",tx:"#1a6a4a"} :
+              resultado==="No avanza" ? {bg:"#c0392b",sw:"#fbeae8",tx:"#c0392b"} :
+              {bg:"#c99a2e",sw:"#fdf5e0",tx:"#9a7a1e"};
+    var subtxt = resultado==="Avanza" ? "El candidato cumple con los conocimientos técnicos y de seguridad evaluados." :
+                 resultado==="No avanza" ? (falloCrit ? "El candidato falló al menos una pregunta crítica de seguridad. No se recomienda avanzar sin una revisión." : "El candidato no alcanzó el puntaje mínimo requerido.") :
+                 "El candidato no alcanzó el mínimo, pero no falló preguntas críticas. Conviene revisar en entrevista.";
+
+    var fallHtml = falladas.length
+      ? falladas.map(function(f){
+          var esCrit = /\[CR[IÍ]TICA\]/i.test(f);
+          var txt = f.replace(/\s*\[CR[IÍ]TICA\]/i,"");
+          return "<div style='padding:9px 12px;border-radius:7px;margin-bottom:7px;font-size:13px;background:"+(esCrit?"#fbeae8":"#f7f5f0")+";border-left:3px solid "+(esCrit?"#c0392b":"#c99a2e")+";'>"+txt+(esCrit?" <strong style='color:#c0392b;'>(crítica de seguridad)</strong>":"")+"</div>";
+        }).join("")
+      : "<div style='font-size:13px;color:#1a6a4a;'>✓ Respondió correctamente todas las preguntas técnicas.</div>";
+
+    var infoHtml = infos.length
+      ? infos.map(function(it){ return "<div style='padding:8px 12px;border-radius:7px;margin-bottom:6px;font-size:13px;background:#f7f5f0;'>"+it+"</div>"; }).join("")
+      : "<div style='font-size:12px;color:#999;'>Sin información adicional.</div>";
+
+    var integHtml = foco===0
+      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba.</div></div></div>"
+      : foco<=3
+      ? "<div class='wl-integ-leve'><span style='font-size:18px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considérelo al interpretar el resultado.</div></div></div>"
+      : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Evalúe la validez del resultado.</div></div></div>";
+
+    document.getElementById("gru-ficha-nombre").textContent = fila[1]||"—";
+    document.getElementById("gru-ficha-rut").textContent = fila[2]||"—";
+    document.getElementById("gru-ficha-fecha").textContent = String(fila[0]||"—").split(",")[0];
+    document.getElementById("gru-hero").innerHTML =
+      "<div style='background:"+col.bg+";border-radius:10px;padding:22px 26px;color:#fff;'>"+
+        "<div style='font-size:24px;font-weight:800;'>"+resultado+"</div>"+
+        "<div style='font-size:13px;opacity:.85;margin-top:4px;line-height:1.5;'>"+subtxt+"</div>"+
+        "<div style='font-size:13px;margin-top:10px;background:rgba(255,255,255,.15);display:inline-block;padding:4px 12px;border-radius:20px;'>Puntaje: "+puntaje+"/"+total+" ("+porcentaje+"%)</div>"+
+      "</div>";
+    document.getElementById("gru-falladas").innerHTML = fallHtml;
+    document.getElementById("gru-info").innerHTML = infoHtml;
+    document.getElementById("gru-integridad").innerHTML = integHtml;
+
+    document.getElementById("modal-gruero").classList.add("activo");
+    document.body.style.overflow = "hidden";
+  } catch(e) {
+    alert("Error cargando datos del informe: " + e.message);
+  }
+}
+function cerrarInformeGruero(){ document.getElementById("modal-gruero").classList.remove("activo"); document.body.style.overflow=""; }
+function imprimirInformeGruero(){ window.print(); }
+
 
 
 async function abrirInformeDISC(test, rut, nombre) {
@@ -5204,6 +5281,49 @@ function imprimirModalWONDERLIC() { window.print(); }
 
       <div class="wlk-nota">Este informe es de carácter orientativo. La decisión final de selección debe considerar otros antecedentes del candidato y el criterio del evaluador.</div>
 
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INFORME GRUERO -->
+<div class="modal-overlay" id="modal-gruero" onclick="if(event.target===this)cerrarInformeGruero()">
+  <div class="modal-box" style="max-width:620px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;border-radius:12px;">
+    <div style="flex-shrink:0;background:#1a3a5c;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:#c4432a;color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;">GC</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Grupo Cygnus</div><div style="color:rgba(255,255,255,.6);font-size:10px;letter-spacing:.05em;">INFORME — PRUEBA TÉCNICA</div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="wlk-btn-pdf" onclick="imprimirInformeGruero()">⬇ PDF</button>
+        <button class="wlk-close" onclick="cerrarInformeGruero()">✕</button>
+      </div>
+    </div>
+
+    <div style="flex-shrink:0;background:#f7f5f0;border-bottom:2px solid #e0dbd0;padding:14px 24px;display:flex;gap:28px;">
+      <div>
+        <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#1a3a5c;text-transform:uppercase;">Operador de Grúa</div>
+        <div style="font-size:10px;color:#888;margin-top:2px;">Conocimientos técnicos y de seguridad</div>
+      </div>
+      <div style="flex:1;font-size:11px;">
+        <div style="display:flex;gap:10px;margin-bottom:3px;"><span style="color:#888;min-width:70px;">Candidato</span><span id="gru-ficha-nombre" style="font-weight:600;">—</span></div>
+        <div style="display:flex;gap:10px;margin-bottom:3px;"><span style="color:#888;min-width:70px;">RUT</span><span id="gru-ficha-rut">—</span></div>
+        <div style="display:flex;gap:10px;"><span style="color:#888;min-width:70px;">Fecha</span><span id="gru-ficha-fecha">—</span></div>
+      </div>
+    </div>
+
+    <div style="padding:24px;overflow-y:auto;">
+      <div id="gru-hero" style="margin-bottom:22px;"></div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Preguntas técnicas a revisar</div>
+      <div id="gru-falladas" style="margin-bottom:22px;"></div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Información adicional del candidato</div>
+      <div id="gru-info" style="margin-bottom:22px;"></div>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#c4432a;border-bottom:2px solid #fce8e4;padding-bottom:6px;margin-bottom:12px;">Integridad de la aplicación</div>
+      <div id="gru-integridad" style="margin-bottom:18px;"></div>
+
+      <div style="font-size:11px;color:#999;border-top:1px solid #e0dbd0;padding-top:12px;">Este informe es de carácter orientativo. La decisión final debe considerar la entrevista y los demás antecedentes del candidato.</div>
     </div>
   </div>
 </div>
