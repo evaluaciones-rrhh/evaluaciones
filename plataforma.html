@@ -4503,11 +4503,32 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     var pb       = parseInt(fila[6])||0;
     var ajuste   = parseInt(fila[7])||0;
     var pa       = parseInt(fila[8])||0;
-    var percentil= parseInt(fila[9])||0;
-    var nivel    = fila[10]||"-";
+    if (!pa) pa = pb + ajuste;   // por si el PA guardado viniera vacío
     var tiempo   = fila[11]||"-";
-    var interp   = fila[12]||"-";
     var foco     = parseInt(fila[13])||0;
+
+    // RECÁLCULO con baremos oficiales (media 21, DE 7), para corregir informes
+    // antiguos que quedaron guardados con percentiles inflados. El puntaje bruto sí es confiable.
+    var WL_TABLA=[[99,39],[98,36],[97,34],[96,33],[94,32],[92,31],[90,30],[87,29],[84,28],[80,27],[76,26],[72,25],[67,24],[61,23],[56,22],[50,21],[44,20],[39,19],[33,18],[28,17],[24,16],[20,15],[16,14],[13,13],[10,12],[8,11],[6,10],[4,9],[3,8],[2,7],[1,5],[0,1]];
+    function wlPercentil(p){ for(var i=0;i<WL_TABLA.length;i++){ if(p>=WL_TABLA[i][1]) return WL_TABLA[i][0]; } return 0; }
+    function wlNivel(pc){
+      if(pc>=80) return "Superior";
+      if(pc>=60) return "Promedio alto";
+      if(pc>=30) return "Promedio";
+      if(pc>=10) return "Bajo promedio";
+      return "Bajo";
+    }
+    var percentil = wlPercentil(pa);
+    var nivel     = wlNivel(percentil);
+    // Interpretación coherente con el nivel recalculado
+    var WL_INTERP = {
+      "Superior":"Capacidad cognitiva por sobre el promedio. Aprende con rapidez y se adapta bien a cargos de mayor complejidad.",
+      "Promedio alto":"Buena capacidad de aprendizaje y resolución de problemas, algo sobre el promedio. Se adapta bien a la mayoría de los cargos.",
+      "Promedio":"Capacidad cognitiva dentro del rango esperado. Se desempeña adecuadamente en cargos de complejidad moderada.",
+      "Bajo promedio":"Capacidad algo por debajo del promedio. Puede requerir más tiempo de entrenamiento y apoyo en tareas complejas.",
+      "Bajo":"Capacidad cognitiva por debajo del promedio. Conviene evaluar el ajuste a cargos que exijan resolución rápida de problemas."
+    };
+    var interp = WL_INTERP[nivel] || (fila[12]||"-");
 
     var tiempoFmt = wlFmtTiempo(tiempo);
     document.getElementById("wl-ficha-nombre").textContent = fila[1]||"—";
