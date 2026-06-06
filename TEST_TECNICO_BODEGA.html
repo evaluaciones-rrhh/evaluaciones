@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prueba Técnica — Operario de Bodega | Deneb Evaluaciones</title>
+<style>
+  :root{
+    --coral:#e57a5f; --coral-dark:#c95d43; --pizarra:#2b3a47; --pizarra2:#3b4d5c;
+    --bg:#faf9f5; --surface:#ffffff; --border:#e7e3da;
+    --ink:#1c1c1c; --muted:#6b7280; --ok:#1a6a4a; --ok-bg:#e8f5ee;
+    --low:#c0392b; --low-bg:#fbeae8; --mid:#c99a2e; --mid-bg:#fdf5e0;
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.55;padding:20px;min-height:100vh;}
+  .wrap{max-width:640px;margin:0 auto;}
+  .hidden{display:none !important;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:0 2px 12px rgba(26,58,92,.07);overflow:hidden;}
+  .head{background:var(--pizarra);padding:20px 26px;color:#fff;display:flex;align-items:center;gap:12px;}
+  .head-star{width:28px;height:28px;flex-shrink:0;}
+  .deneb-logo-text{ display:inline-flex; align-items:flex-start; font-weight:800; font-size:26px; letter-spacing:-.02em; line-height:1; color:#fff; }
+  .deneb-star{ width:12px; height:12px; margin-left:3px; margin-top:-1px; }
+  .deneb-logo-sub{ font-size:10px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.5); margin:5px 0 0 2px; }
+  .head .org{font-size:14px;font-weight:700;letter-spacing:.01em;}
+  .head .doc{font-size:10px;opacity:.65;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;}
+  .body{padding:26px;}
+
+  h1{font-size:21px;color:var(--pizarra);margin-bottom:8px;font-weight:800;}
+  p.lead{font-size:14px;color:var(--muted);margin-bottom:20px;}
+  label{display:block;font-size:12px;font-weight:700;color:var(--pizarra);margin-bottom:5px;}
+  input[type=text]{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:var(--font);margin-bottom:14px;}
+  input[type=text]:focus{outline:none;border-color:var(--coral);}
+  .err{color:var(--low);font-size:12px;margin:-10px 0 12px;display:none;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 26px;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s;}
+  .btn-main{background:var(--coral);color:#fff;width:100%;}
+  .btn-main:hover{opacity:.9;}
+  .btn-main:disabled{opacity:.5;cursor:not-allowed;}
+
+  .recs{background:var(--bg);border-radius:8px;padding:16px 18px;margin:18px 0;}
+  .recs-t{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;}
+  .recs ul{margin:0;padding-left:18px;font-size:13px;color:var(--ink);line-height:1.7;}
+
+  .progress{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:20px;}
+  .progress-bar{height:100%;background:var(--coral);transition:width .3s;width:0;}
+  .qnum{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px;}
+  .qtext{font-size:17px;color:var(--ink);font-weight:700;margin-bottom:18px;line-height:1.4;}
+  .opt{display:block;padding:14px 16px;border:1.5px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14.5px;cursor:pointer;transition:all .12s;background:#fff;}
+  .opt:hover{border-color:var(--coral);background:#fef6f4;}
+  .opt.sel{border-color:var(--coral);background:#fce8e4;font-weight:600;}
+
+  .nav{display:flex;justify-content:space-between;gap:12px;margin-top:8px;}
+  .btn-sec{background:#fff;border:1.5px solid var(--border);color:var(--pizarra);padding:11px 22px;border-radius:9px;font-weight:600;cursor:pointer;font-size:14px;}
+  .btn-sec:disabled{opacity:.4;cursor:not-allowed;}
+
+  .done{text-align:center;padding:40px 26px;}
+  .done-ico{font-size:46px;margin-bottom:12px;}
+  .done h2{color:var(--pizarra);font-size:22px;margin-bottom:8px;}
+  .done p{color:var(--muted);font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- INICIO -->
+  <div id="screen-inicio" class="card">
+    <div class="head">
+      <div>
+        <div class="deneb-logo-text">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+        <div class="deneb-logo-sub">evaluaciones</div>
+      </div>
+    </div>
+    <div class="body">
+      <h1>Prueba Técnica — Operario de Bodega</h1>
+      <p class="lead">Esta evaluación mide tus conocimientos sobre operación, seguridad y gestión en bodega. Responde con honestidad según tu experiencia y criterio.</p>
+      <label>Nombre completo</label>
+      <input type="text" id="nombre" placeholder="Ej: Juan Pérez González">
+      <div class="err" id="err-nombre">Por favor ingresa tu nombre.</div>
+      <label>RUT</label>
+      <input type="text" id="rut" placeholder="Ej: 12.345.678-9">
+      <div class="err" id="err-rut">RUT inválido.</div>
+      <div class="recs">
+        <div class="recs-t">Antes de comenzar</div>
+        <ul>
+          <li>Lee cada pregunta con atención.</li>
+          <li>Selecciona la alternativa que consideres correcta.</li>
+          <li>No salgas de esta ventana durante la prueba.</li>
+          <li>Responde según las normas de seguridad y tu experiencia.</li>
+        </ul>
+      </div>
+      <div style="margin-top:14px;padding:12px 16px;background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;font-size:13px;color:#7a5c10;line-height:1.65;"><strong>Importante:</strong> Esta prueba cuenta con medidas de seguridad activas. El sistema registra cada vez que el candidato cambia de ventana o pestaña durante la evaluación. Se recomienda mantener esta ventana en primer plano durante todo el test. El uso de buscadores, inteligencia artificial u otros recursos externos queda registrado y puede afectar la validez del resultado.</div>
+      <button class="btn btn-main" onclick="iniciar()" style="margin-top:16px;">Comenzar prueba →</button>
+    </div>
+  </div>
+
+  <!-- PRUEBA -->
+  <div id="screen-prueba" class="card hidden">
+    <div class="head">
+      <div class="deneb-logo-text" style="font-size:18px;">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true" style="width:9px;height:9px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+      <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:12px;"><div class="org">Prueba Técnica — Operario de Bodega</div><div class="doc" id="disp-nombre"></div></div>
+    </div>
+    <div class="body">
+      <div class="progress"><div class="progress-bar" id="pbar"></div></div>
+      <div class="qnum" id="qnum"></div>
+      <div class="qtext" id="qtext"></div>
+      <div id="opts"></div>
+      <div class="nav">
+        <button class="btn-sec" id="btn-prev" onclick="prev()">← Anterior</button>
+        <button class="btn-sec" id="btn-next" onclick="next()" style="background:var(--coral);color:#fff;border-color:var(--coral);">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIN -->
+  <div id="screen-fin" class="card hidden">
+    <div class="done">
+      <div class="done-ico">✓</div>
+      <h2>¡Prueba completada!</h2>
+      <p>Gracias por completar la evaluación. Tus respuestas han sido registradas correctamente. El equipo de selección revisará tus resultados.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec';
+const TOKEN_URL = new URLSearchParams(window.location.search).get('token') || '';
+
+// ── PREGUNTAS ──
+// punt: true = puntuable. crit: true = crítica de seguridad. correcta = índice (0-based) de la opción correcta.
+// Las informativas (punt:false) no tienen correcta; se registran para el evaluador.
+var PREGUNTAS = [
+  { t:"¿Cuál es la función principal de un operario/a de bodega?", punt:true, crit:false, correcta:1,
+    o:["Conducir vehículos","Mantener el orden y flujo de productos en bodega","Vender productos a clientes","Diseñar planes logísticos"] },
+  { t:"¿Qué EPP es obligatorio al ingresar a una bodega?", punt:true, crit:false, correcta:1,
+    o:["Lentes de sol","Guantes, casco y calzado de seguridad","Uniforme formal","Protector solar"] },
+  { t:"Antes de mover una carga pesada, ¿qué debes hacer?", punt:true, crit:true, correcta:2,
+    o:["Levantar rápido","Empujar con los pies","Evaluar peso y técnica adecuada","No revisar la carga"] },
+  { t:"¿Qué significa \"picking\" en operaciones de bodega?", punt:true, crit:false, correcta:3,
+    o:["Recepción de camiones","Carga en camión","Armado de estanterías","Selección de productos para un pedido"] },
+  { t:"¿Qué equipo se utiliza habitualmente para mover pallets en bodega?", punt:true, crit:false, correcta:0,
+    o:["Apilador eléctrico o transpaleta","Caja de herramientas","Carretilla de carga manual","Computador"] },
+  { t:"¿Qué sistema se usa para gestionar inventarios y ubicaciones en bodega?", punt:true, crit:false, correcta:1,
+    o:["Planilla Excel","Sistema WMS","Orden del jefe","Voice Picking"] },
+  { t:"Si detectas un producto dañado, ¿qué debes hacer?", punt:true, crit:false, correcta:1,
+    o:["Guardarlo igual","Notificar y separar","Entregar al cliente","Dejarlo al final del pasillo"] },
+  { t:"¿Qué implica un inventario cíclico?", punt:true, crit:false, correcta:2,
+    o:["Inventario una vez al año","Control de vencimientos","Conteo por ciclos periódicos","Eliminar productos vencidos"] },
+  { t:"¿Qué precaución debes tener al trabajar cerca de grúas en movimiento?", punt:true, crit:true, correcta:1,
+    o:["Ignorar si manejan bien","Mantener distancia y estar alerta","Subirse para ahorrar tiempo","Caminar entre grúas"] },
+  { t:"¿Qué valoras más en un equipo de trabajo?", punt:false,
+    o:["El sueldo","El liderazgo autoritario","Colaboración y responsabilidad","Trabajar sin supervisión"] }
+];
+var CORTE = 0.80;  // 80% de las puntuables
+
+var nombre="", rut="", idx=0, respuestas={}, tiempoInicio=null, cambiosFoco=0, alertaFoco=false, ended=false;
+
+// ── Bloqueo de reingreso: si el test ya fue completado, no deja volver a entrar ──
+function pantallaBloqueo(msg){
+  document.body.innerHTML='<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#faf9f5;font-family:sans-serif;"><div style="max-width:460px;text-align:center;padding:2rem;"><div style="font-size:54px;margin-bottom:1rem;">🔒</div><h2 style="font-size:22px;font-weight:600;margin-bottom:.75rem;color:#2b3a47;">Este test ya fue completado</h2><p style="font-size:14px;color:#6b7280;line-height:1.7;">'+msg+'</p></div></div>';
+}
+function validarAcceso(){
+  if(!TOKEN_URL) return;   // sin token (acceso de prueba), no se bloquea
+  // Capa 1: mismo navegador
+  if(localStorage.getItem('test_completado_'+TOKEN_URL)==='completado'){
+    pantallaBloqueo('Ya registraste una respuesta para esta evaluación. No es posible volver a ingresarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.');
+    return;
+  }
+  // Capa 2: servidor (a prueba de cambio de navegador/dispositivo)
+  fetch(SCRIPT_URL+'?action=validarToken&token='+encodeURIComponent(TOKEN_URL)+'&callback=__tk')
+    .then(function(r){return r.text();})
+    .then(function(t){
+      try{
+        var j=JSON.parse(t.replace(/^__tk\(/,'').replace(/\)$/,''));
+        if(j && j.valido===false){
+          pantallaBloqueo((j.mensaje||'Ya registraste una respuesta para esta evaluación.')+'<br><br>Si crees que esto es un error, contacta a tu evaluador.');
+        }
+      }catch(e){}
+    })
+    .catch(function(){});
+}
+document.addEventListener("DOMContentLoaded", validarAcceso);
+
+// ── Antitrampa ──
+document.addEventListener("visibilitychange",function(){ if(document.hidden && !ended){ cambiosFoco++; if(!alertaFoco){ alertaFoco=true; setTimeout(function(){ alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada."); alertaFoco=false; },300);} } });
+window.addEventListener("blur",function(){ if(!ended) cambiosFoco++; });
+
+// ── RUT ──
+function limpiarRut(r){ return (r||"").replace(/[^0-9kK]/g,"").toUpperCase(); }
+function validarRut(r){ r=limpiarRut(r); if(r.length<2)return false; var c=r.slice(0,-1),dv=r.slice(-1); if(!/^\d+$/.test(c))return false; var s=0,m=2; for(var i=c.length-1;i>=0;i--){s+=parseInt(c[i])*m;m=m===7?2:m+1;} var res=11-(s%11); var dvc=res===11?"0":res===10?"K":String(res); return dv===dvc; }
+function formatearRut(r){ r=limpiarRut(r); if(r.length<2)return r; var c=r.slice(0,-1),dv=r.slice(-1); return c.replace(/\B(?=(\d{3})+(?!\d))/g,".")+"-"+dv; }
+
+function iniciar(){
+  nombre=document.getElementById('nombre').value.trim();
+  rut=document.getElementById('rut').value.trim();
+  var eN=document.getElementById('err-nombre'), eR=document.getElementById('err-rut');
+  eN.style.display="none"; eR.style.display="none";
+  if(!nombre){ eN.style.display="block"; return; }
+  if(!validarRut(rut)){ eR.style.display="block"; eR.textContent="RUT inválido. Verifica el número y el dígito verificador."; return; }
+  rut=formatearRut(rut);
+  document.getElementById('disp-nombre').textContent=nombre;
+  document.getElementById('screen-inicio').classList.add('hidden');
+  document.getElementById('screen-prueba').classList.remove('hidden');
+  tiempoInicio=Date.now();
+  render();
+}
+
+function render(){
+  var q=PREGUNTAS[idx];
+  document.getElementById('pbar').style.width=((idx)/PREGUNTAS.length*100)+"%";
+  document.getElementById('qnum').textContent="Pregunta "+(idx+1)+" de "+PREGUNTAS.length;
+  document.getElementById('qtext').textContent=q.t;
+  var html="";
+  q.o.forEach(function(op,i){
+    var sel = respuestas[idx]===i ? " sel" : "";
+    html+="<div class='opt"+sel+"' onclick='elegir("+i+")'>"+op+"</div>";
+  });
+  document.getElementById('opts').innerHTML=html;
+  document.getElementById('btn-prev').disabled = idx===0;
+  document.getElementById('btn-next').textContent = idx===PREGUNTAS.length-1 ? "Finalizar ✓" : "Siguiente →";
+}
+
+function elegir(i){ respuestas[idx]=i; render(); }
+function prev(){ if(idx>0){ idx--; render(); } }
+function next(){
+  if(respuestas[idx]===undefined){ alert("Por favor selecciona una alternativa antes de continuar."); return; }
+  if(idx<PREGUNTAS.length-1){ idx++; render(); } else { finalizar(); }
+}
+
+function finalizar(){
+  ended=true;
+  var puntuables=0, correctas=0, falloCritica=false;
+  var falladas=[], informativas=[];
+  PREGUNTAS.forEach(function(q,i){
+    var r=respuestas[i];
+    if(q.punt){
+      puntuables++;
+      if(r===q.correcta){ correctas++; }
+      else {
+        falladas.push((i+1)+". "+q.t+(q.crit?" [CRÍTICA]":""));
+        if(q.crit) falloCritica=true;
+      }
+    } else {
+      informativas.push(q.t+" → "+(r!==undefined?q.o[r]:"(sin responder)"));
+    }
+  });
+  var porcentaje = puntuables>0 ? Math.round(correctas/puntuables*100) : 0;
+  var aprobaPorcentaje = (correctas/puntuables) >= CORTE;
+  var resultado;
+  if(falloCritica) resultado="No avanza";
+  else if(aprobaPorcentaje) resultado="Avanza";
+  else resultado="Revisar";
+
+  var fecha=new Date().toLocaleString('es-CL');
+  var tiempoUsado=tiempoInicio?Math.round((Date.now()-tiempoInicio)/1000):0;
+  var respCSV=PREGUNTAS.map(function(q,i){ return respuestas[i]!==undefined?respuestas[i]:"-"; }).join(',');
+
+  var payload={
+    test:'TECNICO_BODEGA', fecha:fecha, nombre:nombre, rut:rut,
+    puntaje:correctas, total:puntuables, porcentaje:porcentaje,
+    resultado:resultado, fallo_critica:falloCritica?"Sí":"No",
+    falladas:falladas.join(' | '), informativas:informativas.join(' | '),
+    cambios_foco:cambiosFoco, resp:respCSV, token:TOKEN_URL
+  };
+  function enviarPayload(intento){
+    fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .catch(function(){ if(intento<3) setTimeout(function(){enviarPayload(intento+1);},1500); });
+  }
+  enviarPayload(1);
+  if(TOKEN_URL) localStorage.setItem('test_completado_'+TOKEN_URL,'completado');
+  document.getElementById('pbar').style.width="100%";
+  document.getElementById('screen-prueba').classList.add('hidden');
+  document.getElementById('screen-fin').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
