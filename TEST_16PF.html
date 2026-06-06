@@ -127,7 +127,6 @@ document.addEventListener("visibilitychange", function() {
   }
 });
 
-window.addEventListener("blur", function() { cambiosFoco++; });
 document.addEventListener("dragstart", function(e) { e.preventDefault(); });
 
 // ── VALIDACION TOKEN ──
@@ -626,13 +625,15 @@ function calcular(resp){
   else if(de.Q1>=8) cognitivo.push('Muestra alta apertura al cambio y disposición a aprender cosas nuevas, lo que lo/la hace ' + gAdj('adaptable','adaptable','adaptable') + ' a distintos contextos laborales.');
   if(cognitivo.length>0) parrafos.push(cognitivo.join(' '));
 
-  // Párrafo 5: Conclusión según alertas
-  if(alertas.length===0){
-    parrafos.push('En términos generales, el perfil se encuentra dentro de la zona promedio en la mayoría de las escalas evaluadas, sin indicadores que requieran atención especial. El evaluador puede complementar esta información con una entrevista en profundidad.');
-  } else if(alertas.length<=2){
-    parrafos.push('El perfil presenta algunas áreas que el evaluador debe considerar al momento de tomar una decisión. Se recomienda profundizar en estas características durante la entrevista.');
+  // Párrafo 5: Conclusión según número de apuntamientos.
+  // Criterio oficial 16PF-5: la mayoría de las personas (≈69%) tiene entre 3 y 7 apuntamientos;
+  // tener 3 o más NO es indicador de problema, sino lo esperable. Solo 8+ sugiere un perfil muy marcado.
+  if(alertas.length<=2){
+    parrafos.push('El perfil es poco diferenciado: la mayoría de las escalas se ubican en la zona promedio. Es un perfil equilibrado que conviene contrastar con la entrevista para precisar matices.');
+  } else if(alertas.length<=7){
+    parrafos.push('El perfil presenta un número de rasgos marcados dentro de lo esperable (la mayoría de las personas presenta entre 3 y 7). Estos rasgos definen su estilo característico; se recomienda profundizar en ellos durante la entrevista.');
   } else {
-    parrafos.push('El perfil presenta varios indicadores con alejamiento significativo de la zona promedio. Se recomienda una evaluación complementaria antes de tomar una decisión de selección.');
+    parrafos.push('El perfil presenta un número elevado de rasgos marcados, lo que indica una personalidad muy diferenciada. Conviene revisar los estilos de respuesta y profundizar en entrevista antes de tomar una decisión.');
   }
 
   var interp = parrafos.filter(function(p){return p.trim();}).join(' ');
