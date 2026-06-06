@@ -317,6 +317,7 @@ tbody tr:hover td { background: #fdf9f6; }
 .badge-ipv { background: var(--mid-bg); color: var(--mid); }
 .badge-wonderlic { background: #fce8e8; color: #8a1a1a; }
 .badge-tecnico_gruero { background: #e8eef5; color: #1a3a5c; }
+.badge-tecnico_bodega { background: #eef0e8; color: #4a5a1a; }
 .badge-avanza { background: var(--high-bg); color: var(--high); }
 .badge-no\ avanza, .badge-revisar { background: var(--low-bg); color: var(--low); }
 .badge-alto { background: var(--high-bg); color: var(--high); }
@@ -1541,6 +1542,9 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)">
                     <input type="checkbox" class="check-test" value="TECNICO_GRUERO"> Prueba Técnica - Operador de Grúa
                   </div>
+                  <div class="multi-select-option" onclick="toggleTest(this)">
+                    <input type="checkbox" class="check-test" value="TECNICO_BODEGA"> Prueba Técnica - Operario de Bodega
+                  </div>
                 </div>
               </div>
             </div>
@@ -1811,7 +1815,8 @@ const TESTS_LINKS = {
   ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
   DISC:       BASE+"TEST_DISC.html",
   OPERA:      BASE+"TEST_OPERA.html",
-  TECNICO_GRUERO: BASE+"TEST_TECNICO_GRUERO.html"
+  TECNICO_GRUERO: BASE+"TEST_TECNICO_GRUERO.html",
+  TECNICO_BODEGA: BASE+"TEST_TECNICO_BODEGA.html"
 };
 const APPS_URL_ENTREVISTA = "https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec";
 const DASH_HTML = {
@@ -1822,7 +1827,8 @@ const DASH_HTML = {
   CEAL:      "inline",
   DISC:      "inline",
   OPERA:     "inline",
-  TECNICO_GRUERO: "inline"
+  TECNICO_GRUERO: "inline",
+  TECNICO_BODEGA: "inline"
 };
 // Usuarios gestionados de forma segura en Apps Script (no expuestos en el HTML)
 
@@ -2350,7 +2356,8 @@ function renderTablaComun(datos, tbodyId, cols) {
       "IC":"Instrucciones Complejas","CEAL":"Estilos de Liderazgo",
       "16PF":"Evaluación de Personalidad","IPV":"Personalidad Vendedores",
       "WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual","OPERA":"Conducta Operacional",
-      "TECNICO_GRUERO":"Prueba Técnica Gruero"
+      "TECNICO_GRUERO":"Prueba Técnica Gruero",
+      "TECNICO_BODEGA":"Prueba Técnica Bodega"
     };
     var testLabel = TEST_BADGE_NOMBRES[d.test] || d.test || "—";
     if(cols===5) {
@@ -2404,7 +2411,7 @@ function renderRecientes() {
     return;
   }
 
-  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC","OPERA","TECNICO_GRUERO"];
+  var TESTS_CON_INFORME = ["IC","CEAL","DISC","16PF","IPV","WONDERLIC","OPERA","TECNICO_GRUERO","TECNICO_BODEGA"];
   var html = "";
   recientes.forEach(function(d) {
     var dotCls = "tl-dot-" + (d.test||"default").replace(/[^a-zA-Z0-9]/g,"");
@@ -2455,7 +2462,8 @@ var TEST_NOMBRES_HTML = {
   WONDERLIC: "Test de Habilidad Cognitiva General",
   OPERA: "Evaluación de Conducta Operacional",
   DISC: "Análisis de Estilo Conductual",
-  TECNICO_GRUERO: "Prueba Técnica - Operador de Grúa"
+  TECNICO_GRUERO: "Prueba Técnica - Operador de Grúa",
+  TECNICO_BODEGA: "Prueba Técnica - Operario de Bodega"
 };
 
 function procesarEnvios(data) {
@@ -2571,7 +2579,8 @@ async function abrirDash(test, rut, nombre) {
 
   // OPERA — modal inline
   if (test === "OPERA") { abrirInformeOPERA(test, rut, nombre); return; }
-  if (test === "TECNICO_GRUERO") { abrirInformeGruero(test, rut, nombre); return; }
+  if (test === "TECNICO_GRUERO") { abrirInformeGruero(test, rut, nombre, "TECNICO_GRUERO"); return; }
+  if (test === "TECNICO_BODEGA") { abrirInformeGruero(test, rut, nombre, "TECNICO_BODEGA"); return; }
 
   var endpointMap = {
     "16PF": "getDatos16PF",
@@ -3715,9 +3724,12 @@ async function abrirInformeOPERA(test, rut, nombre) {
 function cerrarModalOPERA(){ document.getElementById("modal-opera").classList.remove("activo"); }
 function imprimirInformeOPERA(){ window.print(); }
 
-async function abrirInformeGruero(test, rutDec, nomDec) {
+async function abrirInformeGruero(test, rutDec, nomDec, tipoTest) {
   try {
-    var data = await fetchJSON(APPS_URL + "?action=getDatosTECNICO_GRUERO&t=" + Date.now());
+    var tt = tipoTest || "TECNICO_GRUERO";
+    var esBodega = (tt === "TECNICO_BODEGA");
+    var nombreCargo = esBodega ? "Operario de Bodega" : "Operador de Grúa";
+    var data = await fetchJSON(APPS_URL + "?action=getDatos" + tt + "&t=" + Date.now());
     var filas = Array.isArray(data) ? data : [];
     function normRut(s){ return String(s||"").replace(/[\. ]/g,"").toLowerCase(); }
     function normNom(s){ return String(s||"").trim().toLowerCase(); }
@@ -3769,7 +3781,7 @@ async function abrirInformeGruero(test, rutDec, nomDec) {
 
     // ── RESUMEN EJECUTIVO ──
     var nom1 = String(fila[1]||"El candidato").split(" ")[0];
-    var resumen = nom1+" obtuvo un "+porcentaje+"% de logro en la prueba t\u00e9cnica de operador de gr\u00faa ("+aciertos+" de "+total+" preguntas correctas). ";
+    var resumen = nom1+" obtuvo un "+porcentaje+"% de logro en la prueba t\u00e9cnica de "+nombreCargo.toLowerCase()+" ("+aciertos+" de "+total+" preguntas correctas). ";
     if(resultado==="Avanza"){
       resumen += "Demuestra dominio de las normas de seguridad y operaci\u00f3n esenciales del cargo. Se recomienda avanzar a la siguiente etapa del proceso.";
     } else if(falloCrit){
@@ -3798,6 +3810,8 @@ async function abrirInformeGruero(test, rutDec, nomDec) {
     document.getElementById("gru-ficha-nombre").textContent = fila[1]||"\u2014";
     document.getElementById("gru-ficha-rut").textContent = fila[2]||"\u2014";
     document.getElementById("gru-ficha-fecha").textContent = String(fila[0]||"\u2014").split(",")[0];
+    var hc = document.getElementById("gru-header-cargo"); if(hc) hc.textContent = "PRUEBA " + nombreCargo.toUpperCase();
+    var fc = document.getElementById("gru-ficha-cargo"); if(fc) fc.textContent = nombreCargo;
 
     document.getElementById("modal-gruero").classList.add("activo");
     document.body.style.overflow = "hidden";
@@ -5351,7 +5365,7 @@ function imprimirModalWONDERLIC() { window.print(); }
     <div style="flex-shrink:0;background:#2b3a47;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;">
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="display:inline-flex;align-items:flex-start;font-weight:800;font-size:22px;letter-spacing:-.02em;color:#fff;">deneb<svg viewBox="0 0 100 100" style="width:10px;height:10px;margin-left:2px;margin-top:-1px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
-        <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:10px;"><div style="color:#fff;font-weight:700;font-size:13px;">Informe Técnico</div><div style="color:rgba(255,255,255,.55);font-size:10px;letter-spacing:.05em;">PRUEBA OPERADOR DE GRÚA</div></div>
+        <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:10px;"><div style="color:#fff;font-weight:700;font-size:13px;">Informe Técnico</div><div id="gru-header-cargo" style="color:rgba(255,255,255,.55);font-size:10px;letter-spacing:.05em;">PRUEBA OPERADOR DE GRÚA</div></div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
         <button class="wlk-btn-pdf" onclick="imprimirInformeGruero()">⬇ PDF</button>
@@ -5361,7 +5375,7 @@ function imprimirModalWONDERLIC() { window.print(); }
 
     <div style="flex-shrink:0;background:#faf9f5;border-bottom:2px solid #e7e3da;padding:14px 24px;display:flex;gap:28px;">
       <div>
-        <div style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#2b3a47;text-transform:uppercase;">Operador de Grúa</div>
+        <div id="gru-ficha-cargo" style="font-size:12px;font-weight:800;letter-spacing:.06em;color:#2b3a47;text-transform:uppercase;">Operador de Grúa</div>
         <div style="font-size:10px;color:#888;margin-top:2px;">Conocimientos técnicos y de seguridad</div>
       </div>
       <div style="flex:1;font-size:11px;">
