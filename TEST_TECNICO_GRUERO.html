@@ -185,7 +185,6 @@ document.addEventListener("DOMContentLoaded", validarAcceso);
 
 // ── Antitrampa ──
 document.addEventListener("visibilitychange",function(){ if(document.hidden && !ended){ cambiosFoco++; if(!alertaFoco){ alertaFoco=true; setTimeout(function(){ alert("Aviso: se ha detectado que saliste de la ventana del test. Esta acción queda registrada."); alertaFoco=false; },300);} } });
-window.addEventListener("blur",function(){ if(!ended) cambiosFoco++; });
 
 // ── RUT ──
 function limpiarRut(r){ return (r||"").replace(/[^0-9kK]/g,"").toUpperCase(); }
