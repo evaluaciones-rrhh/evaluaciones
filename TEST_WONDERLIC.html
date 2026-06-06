@@ -178,12 +178,6 @@ document.addEventListener("visibilitychange", function() {
   }
 });
 
-window.addEventListener("blur", function() {
-  if(document.getElementById("vt") && document.getElementById("vt").style.display !== "none") {
-    cambiosFoco++;
-  }
-});
-
 // 4 — Deshabilitar arrastrar texto
 document.addEventListener("dragstart", function(e) {
   if(document.getElementById("vt").style.display !== "none") {
