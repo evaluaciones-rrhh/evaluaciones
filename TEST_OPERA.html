@@ -542,21 +542,57 @@ function calcularYEnviar(){
   if(ended) return; ended=true;
   var sc={responsabilidad:0,compromiso:0,seguridad:0};
   var inconsist={responsabilidad:0,compromiso:0,seguridad:0};
+  var señalesAzar=0;          // acumulador de señales de respuesta al azar
+  var maxPorComp={responsabilidad:0,compromiso:0,seguridad:0};   // veces que eligió la opción ideal (4) por competencia
+  var totalPorComp={responsabilidad:0,compromiso:0,seguridad:0};
   ITEMS.forEach(function(it,i){
     var r=respuestas[i]; if(!r) return;
     var vMas=it.o[r.mas].v;
     var vMenos=it.o[r.menos].v;
     var pts=vMas + invertir(vMenos);
     sc[it.comp]+=pts;
-    // inconsistencia: marcar como MÁS una conducta de riesgo (0) o como MENOS una altamente efectiva (4)
+    totalPorComp[it.comp]++;
+    // Señal 1: incoherencia directa — marcar como MÁS una conducta de riesgo (0) o como MENOS una altamente efectiva (4)
     if(vMas===0 || vMenos===4) inconsist[it.comp]++;
+    // Señal 2: MÁS y MENOS con valores casi iguales (no distingue lo bueno de lo malo → típico del azar)
+    if(Math.abs(vMas - vMenos) <= 1) señalesAzar++;
+    // Señal 3: contradicción fuerte — elige como MÁS algo peor que lo que marcó como MENOS
+    if(vMas < vMenos) señalesAzar++;
+    // Deseabilidad social: eligió la opción IDEAL (valor 4) como "lo que más lo representa"
+    if(vMas===4) maxPorComp[it.comp]++;
   });
   var global=sc.responsabilidad+sc.compromiso+sc.seguridad;
   var totalInconsist=inconsist.responsabilidad+inconsist.compromiso+inconsist.seguridad;
-  var consistencia = totalInconsist>2 ? "Baja" : totalInconsist>0 ? "Media" : "Alta";
+
+  // Señal 4: tiempo demasiado rápido (menos de ~4 seg por pregunta sugiere que no leyó)
+  var tiempoUsado=tiempoInicio?Math.round((Date.now()-tiempoInicio)/1000):0;
+  var nResp=Object.keys(respuestas).length || 1;
+  var segPorPregunta = tiempoUsado / nResp;
+  var muyRapido = (tiempoUsado>0 && segPorPregunta < 4);
+
+  // ── DESEABILIDAD SOCIAL: perfil "demasiado perfecto" ──
+  // Si en CADA competencia eligió la opción ideal (4) en casi todas las preguntas,
+  // sin ningún matiz humano, es señal de imagen idealizada.
+  var totalIdeal = maxPorComp.responsabilidad + maxPorComp.compromiso + maxPorComp.seguridad;
+  var totalPreg  = totalPorComp.responsabilidad + totalPorComp.compromiso + totalPorComp.seguridad;
+  // proporción de respuestas "perfectas" sobre el total
+  var propIdeal = totalPreg>0 ? (totalIdeal / totalPreg) : 0;
+  // ¿es perfecto en las 3 competencias por igual? (al menos 3 de 4 ideales en cada una)
+  var perfectoEnTodas = (maxPorComp.responsabilidad>=3 && maxPorComp.compromiso>=3 && maxPorComp.seguridad>=3);
+
+  var deseabilidad;   // nivel de sospecha de imagen idealizada
+  if (perfectoEnTodas || propIdeal >= 0.85) deseabilidad = "Alta";
+  else if (propIdeal >= 0.70) deseabilidad = "Media";
+  else deseabilidad = "Baja";
+
+  // Consistencia combinando todas las señales (incluye deseabilidad como factor)
+  var puntajeRiesgo = totalInconsist + señalesAzar + (muyRapido ? 4 : 0) + (deseabilidad==="Alta" ? 5 : deseabilidad==="Media" ? 2 : 0);
+  var consistencia;
+  if (puntajeRiesgo >= 8) consistencia = "Baja";
+  else if (puntajeRiesgo >= 4) consistencia = "Media";
+  else consistencia = "Alta";
 
   var fecha=new Date().toLocaleString('es-CL');
-  var tiempoUsado=tiempoInicio?Math.round((Date.now()-tiempoInicio)/1000):0;
   var respCSV=ITEMS.map(function(it,i){ var r=respuestas[i]; return r?("M"+it.o[r.mas].v+"m"+it.o[r.menos].v):"-"; }).join(',');
 
   var payload={
