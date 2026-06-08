@@ -100,6 +100,7 @@
     <div class="head">
       <div class="deneb-logo-text" style="font-size:18px;">deneb<svg class="deneb-star" viewBox="0 0 100 100" aria-hidden="true" style="width:9px;height:9px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
       <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:12px;"><div class="org">Prueba Técnica — Operador de Grúa</div><div class="doc" id="disp-nombre"></div></div>
+      <div id="timer" style="margin-left:auto;background:rgba(255,255,255,.12);padding:6px 14px;border-radius:8px;font-size:16px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;">3:00</div>
     </div>
     <div class="body">
       <div class="progress"><div class="progress-bar" id="pbar"></div></div>
@@ -156,6 +157,32 @@ var PREGUNTAS = [
 var CORTE = 0.80;  // 80% de las puntuables
 
 var nombre="", rut="", idx=0, respuestas={}, tiempoInicio=null, cambiosFoco=0, alertaFoco=false, ended=false;
+var TIEMPO_LIMITE=180, tiempoRestante=180, timerInterval=null, avisoUnMin=false;
+
+function iniciarTemporizador(){
+  tiempoRestante=TIEMPO_LIMITE;
+  actualizarTimer();
+  timerInterval=setInterval(function(){
+    tiempoRestante--;
+    actualizarTimer();
+    if(tiempoRestante===60 && !avisoUnMin){
+      avisoUnMin=true;
+      alert("Queda 1 minuto para finalizar la prueba.");
+    }
+    if(tiempoRestante<=0){
+      clearInterval(timerInterval);
+      if(!ended){ alert("Se acabó el tiempo. Se enviarán tus respuestas."); finalizar(); }
+    }
+  },1000);
+}
+function actualizarTimer(){
+  var t=document.getElementById("timer");
+  if(!t) return;
+  var m=Math.floor(tiempoRestante/60), s=tiempoRestante%60;
+  t.textContent=m+":"+(s<10?"0":"")+s;
+  // últimos 60s en rojo
+  if(tiempoRestante<=60){ t.style.background="rgba(192,57,43,.9)"; }
+}
 
 // ── Bloqueo de reingreso: si el test ya fue completado, no deja volver a entrar ──
 function pantallaBloqueo(msg){
@@ -203,6 +230,7 @@ function iniciar(){
   document.getElementById('screen-inicio').classList.add('hidden');
   document.getElementById('screen-prueba').classList.remove('hidden');
   tiempoInicio=Date.now();
+  iniciarTemporizador();
   render();
 }
 
@@ -230,6 +258,7 @@ function next(){
 
 function finalizar(){
   ended=true;
+  if(timerInterval){ clearInterval(timerInterval); }
   var puntuables=0, correctas=0, falloCritica=false;
   var falladas=[], informativas=[];
   PREGUNTAS.forEach(function(q,i){
