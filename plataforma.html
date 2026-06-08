@@ -1284,7 +1284,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
       </div>
       <button class="btn-mipass" onclick="cambiarMiPass()">🔑 Cambiar mi contraseña</button>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;" id="version-tag">v2.1 · auto-actualización activa</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;" id="version-tag">v2.2 · filtros y cargo activos</div>
     </div>
   </div>
 
@@ -1629,6 +1629,7 @@ tbody tr:hover td { background: #fdf9f6; }
             <thead>
               <tr>
                 <th>Nombre</th>
+                <th>RUT</th>
                 <th>Email</th>
                 <th>Test</th>
                 <th>Cargo</th>
@@ -1638,7 +1639,7 @@ tbody tr:hover td { background: #fdf9f6; }
               </tr>
             </thead>
             <tbody id="tabla-historial">
-              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -2530,15 +2531,20 @@ function renderRecientes() {
   cont.innerHTML = html;
 }
 
+// Quita tildes/acentos para que la búsqueda funcione escribas o no las tildes
+function quitarTildes(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function filtrar() {
   var test = document.getElementById("filtro-test").value;
-  var q = (document.getElementById("filtro-nombre").value||"").toLowerCase().trim();
+  var q = quitarTildes((document.getElementById("filtro-nombre").value||"").toLowerCase().trim());
   // versión del texto buscado sin puntos/guiones/espacios (para que el RUT calce en cualquier formato)
   var qLimpio = q.replace(/[\.\s-]/g, "");
   var filtered = todosLosDatos.filter(function(d){
     if (test && d.test !== test) return false;
     if (!q) return true;
-    var nom = (d.nombre || "").toLowerCase();
+    var nom = quitarTildes((d.nombre || "").toLowerCase());
     var rut = (d.rut || "").toLowerCase();
     var rutLimpio = rut.replace(/[\.\s-]/g, "");
     return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio));
@@ -2583,15 +2589,32 @@ function cargarHistorial() {
 }
 
 function filtrarHistorial() {
-  var q = (document.getElementById("filtro-historial").value || "").toLowerCase().trim();
+  var q = quitarTildes((document.getElementById("filtro-historial").value || "").toLowerCase().trim());
   if (!q) { _pintarTablaHistorial(todosEnvios); return; }
+  var qLimpio = q.replace(/[\.\s-]/g, "");   // para calzar RUT en cualquier formato
   var filtrado = todosEnvios.filter(function(e) {
-    return (e.nombre || "").toLowerCase().includes(q)
-        || (e.email  || "").toLowerCase().includes(q)
-        || (e.test   || "").toLowerCase().includes(q)
-        || (e.cargo  || "").toLowerCase().includes(q);
+    var rutCruzado = (buscarRutCandidato(e.nombre) || "").toLowerCase();
+    var rutLimpio = rutCruzado.replace(/[\.\s-]/g, "");
+    return quitarTildes((e.nombre || "").toLowerCase()).includes(q)
+        || quitarTildes((e.email  || "").toLowerCase()).includes(q)
+        || quitarTildes((e.test   || "").toLowerCase()).includes(q)
+        || quitarTildes((e.cargo  || "").toLowerCase()).includes(q)
+        || rutCruzado.includes(q)
+        || (qLimpio && rutLimpio.includes(qLimpio));
   });
   _pintarTablaHistorial(filtrado);
+}
+
+// Busca el RUT de un candidato cruzando con los resultados de tests (por nombre)
+function buscarRutCandidato(nombre) {
+  var nn = String(nombre || "").trim().toLowerCase();
+  if (!nn) return "";
+  for (var i = 0; i < todosLosDatos.length; i++) {
+    if (String(todosLosDatos[i].nombre || "").trim().toLowerCase() === nn && todosLosDatos[i].rut) {
+      return todosLosDatos[i].rut;
+    }
+  }
+  return "";
 }
 
 function renderHistorial() {
@@ -2618,6 +2641,7 @@ function _pintarTablaHistorial(envios) {
     var estCls = (e.estado || "").toLowerCase() === "enviado" ? "badge-enviado" : "badge-pendiente";
     html += "<tr>"
       + "<td class='td-nombre'>" + (e.nombre || "—") + "</td>"
+      + "<td style='font-size:12px;color:var(--muted);'>" + (buscarRutCandidato(e.nombre) || "—") + "</td>"
       + "<td style='font-size:12px;color:var(--muted);'>" + (e.email  || "—") + "</td>"
       + "<td><span class='badge " + testCls + "'>" + testNombre + "</span></td>"
       + "<td style='font-size:12px;color:var(--ink-soft,#444);'>" + (e.cargo || "—") + "</td>"
