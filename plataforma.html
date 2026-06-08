@@ -3576,11 +3576,9 @@ function operaRecomendacion(nivelG, consistencia){
     return { etiqueta:"Recomendable con observaciones", color:"#c0392b", icono:"⚠",
       texto:"No tomar una decisión solo con esta prueba: el patrón de respuestas presenta contradicciones que restan confiabilidad al resultado (ver bloque de confiabilidad). Antes de avanzar, confirmar en entrevista las competencias evaluadas." };
   }
-  if (nivelG === "Favorable") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
+  if (nivelG === "Adecuado") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
     texto:"Se recomienda avanzar con este candidato. Muestra conductas alineadas de forma consistente con la responsabilidad, el compromiso y la seguridad esperados en cargos operativos." };
-  if (nivelG === "Adecuado") return { etiqueta:"Recomendable con observaciones", color:"#c99a2e", icono:"≈",
-    texto:"La balanza se inclina a favor: el candidato respondió bien en la mayoría de las situaciones, con fallos puntuales. Se recomienda avanzar y usar la entrevista para confirmar las áreas más débiles, no para decidir si avanza." };
-  if (nivelG === "Observación") return { etiqueta:"Recomendable con observaciones", color:"#d4830a", icono:"≈",
+  if (nivelG === "Con observación") return { etiqueta:"Recomendable con observaciones", color:"#d4830a", icono:"≈",
     texto:"La balanza está en el medio: el candidato respondió de forma mezclada, sin un patrón claro (acierta en unas situaciones y falla en otras). Esta prueba no alcanza para decidir; es la entrevista de profundización la que debe inclinar la decisión en un sentido u otro." };
   return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
     texto:"No se recomienda avanzar para cargos operativos críticos. El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas." };
@@ -3620,21 +3618,18 @@ var OPERA_COMP = {
 // Textos interpretativos por nivel y competencia (escala 0-32, niveles v2)
 var OPERA_INTERP = {
   responsabilidad: {
-    Favorable:"Muestra conductas consistentemente alineadas con hacerse cargo de tareas, comunicar desviaciones y cuidar la continuidad del trabajo. Tiende a anticipar impactos y actuar de manera ordenada frente a pendientes o errores.",
-    Adecuado:"Presenta conductas generalmente responsables, con algunas oportunidades de mejora. Puede requerir estructura o supervisión en situaciones ambiguas, cambios de prioridad o presión de tiempo.",
-    "Observación":"Presenta conductas parcialmente alineadas o inconsistentes en responsabilidad. Conviene profundizar en entrevista la anticipación, la comunicación oportuna y la capacidad de hacerse cargo de desviaciones.",
+    Adecuado:"Muestra conductas alineadas con hacerse cargo de tareas, comunicar desviaciones y cuidar la continuidad del trabajo. Tiende a anticipar impactos y actuar de manera ordenada frente a pendientes o errores.",
+    "Con observación":"Presenta conductas parcialmente alineadas o inconsistentes en responsabilidad. Conviene profundizar en entrevista la anticipación, la comunicación oportuna y la capacidad de hacerse cargo de desviaciones.",
     Riesgo:"Frecuencia elevada de conductas poco efectivas en responsabilidad. Usar con cautela y confirmar con otras fuentes antes de tomar decisiones."
   },
   compromiso: {
-    Favorable:"Evidencia disposición consistente a colaborar, aprender y sostener su desempeño frente a demandas del equipo o cambios operacionales.",
-    Adecuado:"Muestra compromiso funcional con sus tareas, con oportunidades de mejora. Su involucramiento adicional puede depender de instrucciones o condiciones del contexto.",
-    "Observación":"Conductas parcialmente alineadas en compromiso. Conviene explorar motivación, disposición a colaborar y adaptación a los cambios.",
+    Adecuado:"Evidencia disposición a colaborar, aprender y sostener su desempeño frente a demandas del equipo o cambios operacionales.",
+    "Con observación":"Conductas parcialmente alineadas en compromiso. Conviene explorar motivación, disposición a colaborar y adaptación a los cambios.",
     Riesgo:"Frecuencia elevada de conductas poco efectivas en compromiso y adaptación. Usar con cautela y confirmar con otras fuentes."
   },
   seguridad: {
-    Favorable:"Prioriza de forma consistente conductas preventivas, respeta procedimientos y tiende a actuar frente a riesgos antes de continuar la operación.",
-    Adecuado:"Reconoce la importancia de la seguridad, con oportunidades de mejora. Puede equilibrarla con la continuidad operacional o requerir orientación en situaciones ambiguas.",
-    "Observación":"Conductas parcialmente alineadas en seguridad. Conviene revisar el manejo de riesgos, el reporte de condiciones inseguras y el apego a procedimientos.",
+    Adecuado:"Prioriza conductas preventivas, respeta procedimientos y tiende a actuar frente a riesgos antes de continuar la operación.",
+    "Con observación":"Conductas parcialmente alineadas en seguridad. Conviene revisar el manejo de riesgos, el reporte de condiciones inseguras y el apego a procedimientos.",
     Riesgo:"Frecuencia elevada de conductas poco efectivas en seguridad. Revisar con especial cuidado, sobre todo para cargos críticos de seguridad."
   }
 };
@@ -3645,12 +3640,11 @@ var OPERA_ALERTAS_TXT = {
   compromiso:"Revisar motivación, disposición a colaborar y adaptación a cambios."
 };
 // Nivel por competencia (0-32) y global (0-96) — rangos v2
-function operaNivelComp(p){ if(p>=27)return"Favorable"; if(p>=20)return"Adecuado"; if(p>=14)return"Observación"; return"Riesgo"; }
-function operaNivelGlobal(g){ if(g>=80)return"Favorable"; if(g>=60)return"Adecuado"; if(g>=40)return"Observación"; return"Riesgo"; }
+function operaNivelComp(p){ if(p>=20)return"Adecuado"; if(p>=13)return"Con observación"; return"Riesgo"; }
+function operaNivelGlobal(g){ if(g>=60)return"Adecuado"; if(g>=40)return"Con observación"; return"Riesgo"; }
 function operaColorNivel(n){
-  if(n==="Favorable")return"#1a6a4a";
-  if(n==="Adecuado")return"#c99a2e";
-  if(n==="Observación")return"#d4830a";
+  if(n==="Adecuado")return"#1a6a4a";
+  if(n==="Con observación")return"#d4830a";
   return"#c0392b"; // Riesgo
 }
 
@@ -3699,7 +3693,7 @@ async function abrirInformeOPERA(test, rut, nombre) {
         + '<div class="opk-comp-top">'
         +   '<span class="opk-comp-ico">'+OPERA_COMP[k].icono+'</span>'
         +   '<span class="opk-comp-nom">'+OPERA_COMP[k].nombre+'</span>'
-        +   '<span class="opk-comp-badge" style="background:'+color+';">'+nivel+' · '+p+'/32</span>'
+        +   '<span class="opk-comp-badge" style="background:'+color+';">'+nivel+' · '+Math.round(pct)+'%</span>'
         + '</div>'
         + '<div class="opk-comp-bar-bg"><div class="opk-comp-bar-fill" style="width:'+pct+'%;background:'+color+';"></div></div>'
         + '<div class="opk-comp-interp">'+OPERA_INTERP[k][nivel]+'</div>'
@@ -3708,15 +3702,15 @@ async function abrirInformeOPERA(test, rut, nombre) {
     document.getElementById("opk-competencias").innerHTML = compHtml;
 
     // Ámbitos más sólidos (Favorable o Adecuado) y áreas a profundizar (Observación/Riesgo)
-    var solidos = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Favorable"||n==="Adecuado"; });
-    var areas   = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Observación"||n==="Riesgo"; });
+    var solidos = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Adecuado"; });
+    var areas   = orden.filter(function(k){ var n=operaNivelComp(sc[k]); return n==="Con observación"||n==="Riesgo"; });
     // ordenar los sólidos de mayor a menor puntaje (lo más fuerte primero)
     solidos.sort(function(a,b){ return sc[b]-sc[a]; });
     document.getElementById("opk-fortalezas").innerHTML = solidos.length
       ? solidos.map(function(k){
           var n = operaNivelComp(sc[k]);
-          var clase = n==="Favorable" ? "opk-chip-ok" : "opk-chip-mid";
-          var etiqueta = n==="Favorable" ? "" : " <span style='opacity:.7;font-weight:400;'>(promedio)</span>";
+          var clase = n==="Adecuado" ? "opk-chip-ok" : "opk-chip-mid";
+          var etiqueta = n==="Adecuado" ? "" : " <span style='opacity:.7;font-weight:400;'>(promedio)</span>";
           return '<span class="opk-chip '+clase+'">'+OPERA_COMP[k].nombre+etiqueta+'</span>';
         }).join("")
       : '<span class="opk-chip-empty">No presenta ámbitos en nivel adecuado o superior; revisar con especial cuidado.</span>';
@@ -3732,9 +3726,8 @@ async function abrirInformeOPERA(test, rut, nombre) {
     var areaNom = areas.map(function(k){return OPERA_COMP[k].nombre;});
     // Apertura interpretativa según nivel (no repite el puntaje crudo)
     var apertura = {
-      "Favorable":"El candidato muestra de forma consistente las conductas esperadas en responsabilidad, compromiso y seguridad. Es un perfil sólido para cargos operativos.",
-      "Adecuado":"El candidato muestra en general las conductas esperadas, con algunos puntos a confirmar. Es un perfil aceptable que conviene validar en entrevista.",
-      "Observación":"El candidato muestra conductas dispares: en algunas situaciones responde de forma adecuada y en otras no. Su perfil no es concluyente y requiere una entrevista de profundización antes de decidir.",
+      "Adecuado":"El candidato muestra en general las conductas esperadas en responsabilidad, compromiso y seguridad. Es un perfil adecuado para cargos operativos, que conviene validar en entrevista.",
+      "Con observación":"El candidato muestra conductas dispares: en algunas situaciones responde de forma adecuada y en otras no. Su perfil no es concluyente y requiere una entrevista de profundización antes de decidir.",
       "Riesgo":"El candidato muestra con frecuencia conductas poco efectivas o de riesgo en las situaciones evaluadas. Es un perfil que enciende alertas para cargos operativos."
     };
     var resumen = (apertura[nivelG] || "") + " ";
