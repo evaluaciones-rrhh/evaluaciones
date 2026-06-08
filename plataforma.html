@@ -1911,6 +1911,28 @@ var esAdminActual = false;
 var todosLosDatos = [];
 var todosEnvios = [];
 
+// Contexto del informe abierto (para nombrar el archivo al descargar)
+var _informeNombre = "";
+var _informeTest = "";
+
+// Nombres legibles de test para el archivo
+var NOMBRE_ARCHIVO_TEST = {
+  IC:"Instrucciones_Complejas", CEAL:"Estilos_Liderazgo", "16PF":"Personalidad_16PF",
+  IPV:"Personalidad_Comercial", WONDERLIC:"Habilidad_Cognitiva", DISC:"Estilo_Conductual",
+  OPERA:"Conducta_Operacional", TECNICO_GRUERO:"Tecnico_Gruero", TECNICO_BODEGA:"Tecnico_Bodega"
+};
+
+// Imprime poniendo el nombre del candidato como nombre de archivo sugerido
+function imprimirConNombre() {
+  var tituloOriginal = document.title;
+  var nom = (_informeNombre || "").trim().replace(/\s+/g, "_").replace(/[^\wáéíóúñÁÉÍÓÚÑ_-]/g, "");
+  var tst = NOMBRE_ARCHIVO_TEST[_informeTest] || _informeTest || "Informe";
+  if (nom) { document.title = "Informe_" + tst + "_" + nom; }
+  window.print();
+  // Restaurar el título después de un momento (el diálogo de impresión ya tomó el nombre)
+  setTimeout(function(){ document.title = tituloOriginal; }, 1500);
+}
+
 // LOGIN SEGURO — valida contra Apps Script (contraseñas NO están en el HTML)
 async function login() {
   var u = document.getElementById("inp-user").value.trim().toLowerCase();
@@ -2544,8 +2566,8 @@ function filtrar() {
   var filtered = todosLosDatos.filter(function(d){
     if (test && d.test !== test) return false;
     if (!q) return true;
-    var nom = quitarTildes((d.nombre || "").toLowerCase());
-    var rut = (d.rut || "").toLowerCase();
+    var nom = quitarTildes(String(d.nombre || "").toLowerCase());
+    var rut = String(d.rut || "").toLowerCase();
     var rutLimpio = rut.replace(/[\.\s-]/g, "");
     return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio));
   });
@@ -2593,12 +2615,12 @@ function filtrarHistorial() {
   if (!q) { _pintarTablaHistorial(todosEnvios); return; }
   var qLimpio = q.replace(/[\.\s-]/g, "");   // para calzar RUT en cualquier formato
   var filtrado = todosEnvios.filter(function(e) {
-    var rutCruzado = (buscarRutCandidato(e.nombre) || "").toLowerCase();
+    var rutCruzado = String(buscarRutCandidato(e.nombre) || "").toLowerCase();
     var rutLimpio = rutCruzado.replace(/[\.\s-]/g, "");
-    return quitarTildes((e.nombre || "").toLowerCase()).includes(q)
-        || quitarTildes((e.email  || "").toLowerCase()).includes(q)
-        || quitarTildes((e.test   || "").toLowerCase()).includes(q)
-        || quitarTildes((e.cargo  || "").toLowerCase()).includes(q)
+    return quitarTildes(String(e.nombre || "").toLowerCase()).includes(q)
+        || quitarTildes(String(e.email  || "").toLowerCase()).includes(q)
+        || quitarTildes(String(e.test   || "").toLowerCase()).includes(q)
+        || quitarTildes(String(e.cargo  || "").toLowerCase()).includes(q)
         || rutCruzado.includes(q)
         || (qLimpio && rutLimpio.includes(qLimpio));
   });
@@ -2611,7 +2633,7 @@ function buscarRutCandidato(nombre) {
   if (!nn) return "";
   for (var i = 0; i < todosLosDatos.length; i++) {
     if (String(todosLosDatos[i].nombre || "").trim().toLowerCase() === nn && todosLosDatos[i].rut) {
-      return todosLosDatos[i].rut;
+      return String(todosLosDatos[i].rut);
     }
   }
   return "";
@@ -2656,6 +2678,9 @@ function _pintarTablaHistorial(envios) {
 async function abrirDash(test, rut, nombre) {
   var dashUrl = DASH_HTML[test];
   if (!dashUrl) { alert("Este test no tiene dashboard disponible aún."); return; }
+  // Guardar nombre y test del informe abierto (para el nombre del archivo al descargar)
+  _informeNombre = decodeURIComponent(nombre || "");
+  _informeTest = test;
 
   // IC — cargar datos completos desde getDatosIC
   if (test === "IC") {
@@ -2909,7 +2934,7 @@ async function cargarEntrevistas() {
 function filtrarEntrevistas() {
   var q = document.getElementById("filtro-entrevista").value.toLowerCase();
   var filtrado = datosEntrevistas.filter(function(e) {
-    return (e.nombre||"").toLowerCase().includes(q) || (e.rut||"").toLowerCase().includes(q);
+    return String(e.nombre||"").toLowerCase().includes(q) || String(e.rut||"").toLowerCase().includes(q);
   });
   renderTablaEntrevistas(filtrado);
 }
@@ -3055,10 +3080,8 @@ function abrirInformeIC(d) {
 }
 
 function imprimirInformeIC() {
-  window.print();
-}
-
-function cerrarModalIC() {
+  imprimirConNombre();
+}function cerrarModalIC() {
   document.getElementById("modal-ic").classList.remove("activo");
   document.body.style.overflow = "";
 }
@@ -3418,7 +3441,7 @@ function imprimirInformeCEAL() {
     alert("Para conservar los colores del informe:\n\nEn el diálogo de impresión que se abrirá, activa la opción \"Más ajustes\" → \"Gráficos de fondo\" (o \"Background graphics\").\n\nLuego selecciona \"Guardar como PDF\" en Destino.");
     sessionStorage.setItem("ceal_aviso_pdf", "1");
   }
-  window.print();
+  imprimirConNombre();
 }
 
 
@@ -3847,7 +3870,7 @@ async function abrirInformeOPERA(test, rut, nombre) {
   }
 }
 function cerrarModalOPERA(){ document.getElementById("modal-opera").classList.remove("activo"); }
-function imprimirInformeOPERA(){ window.print(); }
+function imprimirInformeOPERA(){ imprimirConNombre(); }
 
 async function abrirInformeGruero(test, rutDec, nomDec, tipoTest) {
   try {
@@ -3945,7 +3968,7 @@ async function abrirInformeGruero(test, rutDec, nomDec, tipoTest) {
   }
 }
 function cerrarInformeGruero(){ document.getElementById("modal-gruero").classList.remove("activo"); document.body.style.overflow=""; }
-function imprimirInformeGruero(){ window.print(); }
+function imprimirInformeGruero(){ imprimirConNombre(); }
 
 
 
@@ -4052,7 +4075,7 @@ function cerrarModalDISC() {
   document.body.style.overflow = "";
 }
 
-function imprimirModalDISC() { window.print(); }
+function imprimirModalDISC() { imprimirConNombre(); }
 
 // ══════════ INFORME 16PF ══════════
 
@@ -4450,7 +4473,7 @@ function cerrarModal16PF() {
   document.body.style.overflow = "";
 }
 
-function imprimirModal16PF() { window.print(); }
+function imprimirModal16PF() { imprimirConNombre(); }
 
 // ══════════ INFORME IPV ══════════
 var IPV_NOMBRES_ESC = {I:'Comprensión',II:'Adaptabilidad',III:'Control de sí mismo',
@@ -4675,7 +4698,7 @@ function cerrarModalIPV() {
   document.body.style.overflow = "";
 }
 
-function imprimirModalIPV() { window.print(); }
+function imprimirModalIPV() { imprimirConNombre(); }
 
 // ══════════ INFORME WONDERLIC ══════════
 function wlGetNivelBadge(nivel){
@@ -4874,7 +4897,7 @@ function cerrarModalWONDERLIC() {
   document.body.style.overflow = "";
 }
 
-function imprimirModalWONDERLIC() { window.print(); }
+function imprimirModalWONDERLIC() { imprimirConNombre(); }
 
 </script>
 
