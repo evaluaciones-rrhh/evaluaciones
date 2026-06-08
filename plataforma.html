@@ -1894,13 +1894,9 @@ function logout() {
   todosEnvios = [];
   esAdminActual = false;
   usuarioActual = "";
-  document.getElementById("app-screen").style.display = "none";
-  document.getElementById("login-screen").style.display = "flex";
-  document.getElementById("inp-pass").value = "";
-  document.getElementById("inp-user").value = "";
-  document.getElementById("login-error").style.display = "none";
-  var btn = document.querySelector(".btn-login");
-  if (btn) { btn.textContent = "Ingresar →"; btn.disabled = false; }
+  // Recargar la página: vuelve a la pantalla de login limpia y el navegador
+  // autocompleta las credenciales guardadas (sin tener que recargar a mano).
+  location.reload();
 }
 document.getElementById("inp-user").addEventListener("keydown",function(e){if(e.key==="Enter")login();});
 
