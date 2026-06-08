@@ -2532,9 +2532,16 @@ function renderRecientes() {
 
 function filtrar() {
   var test = document.getElementById("filtro-test").value;
-  var nombre = (document.getElementById("filtro-nombre").value||"").toLowerCase();
+  var q = (document.getElementById("filtro-nombre").value||"").toLowerCase().trim();
+  // versión del texto buscado sin puntos/guiones/espacios (para que el RUT calce en cualquier formato)
+  var qLimpio = q.replace(/[\.\s-]/g, "");
   var filtered = todosLosDatos.filter(function(d){
-    return (!test||d.test===test) && (!nombre||(d.nombre||"").toLowerCase().includes(nombre)||(d.rut||"").toLowerCase().includes(nombre));
+    if (test && d.test !== test) return false;
+    if (!q) return true;
+    var nom = (d.nombre || "").toLowerCase();
+    var rut = (d.rut || "").toLowerCase();
+    var rutLimpio = rut.replace(/[\.\s-]/g, "");
+    return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio));
   });
   document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
   // Ordenar por fecha y hora descendente (más reciente primero)
@@ -2576,11 +2583,13 @@ function cargarHistorial() {
 }
 
 function filtrarHistorial() {
-  var q = (document.getElementById("filtro-historial").value || "").toLowerCase();
+  var q = (document.getElementById("filtro-historial").value || "").toLowerCase().trim();
+  if (!q) { _pintarTablaHistorial(todosEnvios); return; }
   var filtrado = todosEnvios.filter(function(e) {
     return (e.nombre || "").toLowerCase().includes(q)
         || (e.email  || "").toLowerCase().includes(q)
-        || (e.test   || "").toLowerCase().includes(q);
+        || (e.test   || "").toLowerCase().includes(q)
+        || (e.cargo  || "").toLowerCase().includes(q);
   });
   _pintarTablaHistorial(filtrado);
 }
