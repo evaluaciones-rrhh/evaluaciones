@@ -1284,6 +1284,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
       </div>
       <button class="btn-mipass" onclick="cambiarMiPass()">🔑 Cambiar mi contraseña</button>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;" id="version-tag">v2.1 · auto-actualización activa</div>
     </div>
   </div>
 
@@ -2158,7 +2159,7 @@ function encontrarFilaMasReciente(filas, rutNorm, nomNorm, colRut, colNom, colFe
 }
 
 async function fetchJSON(url) {
-  var resp = await fetch(url, { method: "GET", redirect: "follow" });
+  var resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store" });
   var texto = await resp.text();
   // Buscar inicio de JSON: puede ser objeto {} o array []
   var jObj = texto.indexOf("{");
@@ -2202,22 +2203,26 @@ async function cargarDatos() {
       }
     }).catch(function(){});
 
-    // getAllResults (6 hojas) llega después → pintar todo completo
+    // getAllResults (varias hojas) llega después → pintar todo completo
     var dataR = await promAll;
-    todosLosDatos = dataR.results || [];
-    var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
-    if (enviosR.length >= 0) todosEnvios = enviosR; // siempre tomar datos frescos
+    if (dataR && Array.isArray(dataR.results)) {
+      todosLosDatos = dataR.results;   // siempre tomar lo fresco del servidor
+      var enviosR = Array.isArray(dataR.envios) ? dataR.envios : [];
+      todosEnvios = enviosR;
 
-    // Guardar caché (por usuario)
-    try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
+      // Guardar caché (por usuario)
+      try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
 
-    pintarTodo();
+      pintarTodo();   // repintar con datos frescos (aquí aparece lo recién contestado)
+    }
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
+    // Si falló el servidor, reintentar una vez a los 3s (en vez de quedarse con caché viejo)
+    setTimeout(function(){ if (usuarioActual) refrescarDatosSilencioso(); }, 3000);
     if (!todosLosDatos.length) {
-      document.getElementById("st-total").textContent    = "!";
-      document.getElementById("st-enviados").textContent = "!";
+      var stt = document.getElementById("st-total"); if (stt) stt.textContent = "!";
+      var ste = document.getElementById("st-enviados"); if (ste) ste.textContent = "!";
     }
   }
 }
@@ -2237,18 +2242,26 @@ async function refrescarDatosSilencioso() {
     else if (Array.isArray(dataR.envios)) todosEnvios = dataR.envios;
     try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
     pintarTodo();
+    var vt = document.getElementById("version-tag");
+    if (vt) { var h = new Date(); vt.textContent = "Actualizado " + String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0")+":"+String(h.getSeconds()).padStart(2,"0"); }
   } catch(e) { /* silencioso: si falla, reintenta en el próximo ciclo */ }
 }
 function iniciarAutoRefresh() {
   if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
-  _autoRefreshTimer = setInterval(refrescarDatosSilencioso, 30000);   // cada 30 segundos
+  _autoRefreshTimer = setInterval(refrescarDatosSilencioso, 20000);   // cada 20 segundos
+  // primer refresco a los 5s de entrar (por si quedó algo recién contestado)
+  setTimeout(function(){ if(usuarioActual) refrescarDatosSilencioso(); }, 5000);
 }
 function detenerAutoRefresh() {
   if (_autoRefreshTimer) { clearInterval(_autoRefreshTimer); _autoRefreshTimer = null; }
 }
-// Al volver a la pestaña, refresca de inmediato (sin esperar los 30s)
+// Al volver a la pestaña, refresca de inmediato (sin esperar el ciclo)
 document.addEventListener("visibilitychange", function(){
   if (!document.hidden && usuarioActual) refrescarDatosSilencioso();
+});
+// También al volver el foco a la ventana
+window.addEventListener("focus", function(){
+  if (usuarioActual) refrescarDatosSilencioso();
 });
 
 function pintarTodo() {
