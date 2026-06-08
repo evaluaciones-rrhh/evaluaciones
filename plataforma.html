@@ -1458,8 +1458,8 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Candidato</th><th>RUT</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
-            <tbody id="tabla-candidatos"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
+            <thead><tr><th>Candidato</th><th>RUT</th><th>Cargo</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
+            <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -1510,6 +1510,10 @@ tbody tr:hover td { background: #fdf9f6; }
             <div class="form-group">
               <label>EMAIL</label>
               <input type="email" id="env-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>CARGO AL QUE POSTULA <span style="font-weight:400;color:var(--muted);text-transform:none;">(uso interno, no se muestra al candidato)</span></label>
+              <input type="text" id="env-cargo" placeholder="Ej: Operador de Grúa">
             </div>
             <div class="form-group" style="grid-column:1/-1;">
               <label>TESTS A ENVIAR</label>
@@ -1627,6 +1631,7 @@ tbody tr:hover td { background: #fdf9f6; }
                 <th>Nombre</th>
                 <th>Email</th>
                 <th>Test</th>
+                <th>Cargo</th>
                 <th>Fecha envío</th>
                 <th>Estado</th>
                 <th id="th-gestor" style="display:none;">Gestionado por</th>
@@ -2439,10 +2444,25 @@ function renderTablaComun(datos, tbodyId, cols) {
     if(cols===5) {
       html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     } else {
-      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+      var cargoCand = buscarCargoCandidato(d.rut, d.nombre);
+      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td style='font-size:12px;color:var(--ink-soft,#444);'>"+(cargoCand||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     }
   });
   tbody.innerHTML = html;
+}
+
+// Busca el cargo registrado para un candidato (cruzando con los envíos por RUT o nombre)
+function buscarCargoCandidato(rut, nombre) {
+  function norm(s){ return String(s||"").replace(/[\.\s-]/g,"").toLowerCase(); }
+  var rn = norm(rut), nn = String(nombre||"").trim().toLowerCase();
+  for (var i = todosEnvios.length - 1; i >= 0; i--) {  // del más reciente al más antiguo
+    var e = todosEnvios[i];
+    if (!e.cargo) continue;
+    var coincideNom = nn && String(e.nombre||"").trim().toLowerCase() === nn;
+    // los envíos guardan email/nombre, no siempre rut; cruzamos por nombre principalmente
+    if (coincideNom) return e.cargo;
+  }
+  return "";
 }
 
 function tiempoRelativo(fecha) {
@@ -2591,6 +2611,7 @@ function _pintarTablaHistorial(envios) {
       + "<td class='td-nombre'>" + (e.nombre || "—") + "</td>"
       + "<td style='font-size:12px;color:var(--muted);'>" + (e.email  || "—") + "</td>"
       + "<td><span class='badge " + testCls + "'>" + testNombre + "</span></td>"
+      + "<td style='font-size:12px;color:var(--ink-soft,#444);'>" + (e.cargo || "—") + "</td>"
       + "<td style='font-size:12px;color:var(--muted);'>" + (e.fecha  || "—") + "</td>"
       + "<td><span class='badge " + estCls + "'>" + (e.estado || "—") + "</span></td>"
       + (verGestor ? "<td style='font-size:12px;color:var(--azul,#2b3a47);font-weight:600;'>" + (e.gestionadoPor || "—") + "</td>" : "")
@@ -2716,6 +2737,7 @@ function toggleTest(el) {
 async function enviarEvaluacion() {
   var nombre = document.getElementById("env-nombre").value.trim();
   var email  = document.getElementById("env-email").value.trim();
+  var cargo  = document.getElementById("env-cargo").value.trim();
   var okEl   = document.getElementById("env-ok");
   var errEl  = document.getElementById("env-err");
   okEl.style.display="none"; errEl.style.display="none";
@@ -2745,14 +2767,14 @@ async function enviarEvaluacion() {
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:"", link:TESTS_LINKS[test], solicitante:usuarioActual})
+        body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:cargo, link:TESTS_LINKS[test], solicitante:usuarioActual})
       });
     } else {
       // Múltiples tests → un solo correo con todos los botones
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, tests:testsSeleccionados, solicitante:usuarioActual})
+        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, cargo:cargo, tests:testsSeleccionados, solicitante:usuarioActual})
       });
     }
 
@@ -2765,6 +2787,7 @@ async function enviarEvaluacion() {
     okEl.style.display="block";
     document.getElementById("env-nombre").value="";
     document.getElementById("env-email").value="";
+    document.getElementById("env-cargo").value="";
     document.querySelectorAll(".check-test:checked").forEach(function(cb){ cb.checked=false; });
     document.getElementById("link-preview").style.display="none";
     setTimeout(function(){ cargarDatos(); }, 3000);
