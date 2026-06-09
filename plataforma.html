@@ -1460,6 +1460,54 @@ tbody tr:hover td { background: #fdf9f6; }
       </div>
     </div>
 
+    <!-- ENVIAR EVALUACIÓN -->
+    <div class="page" id="page-enviar">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Enviar evaluación a candidato</div></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>NOMBRE DEL CANDIDATO</label>
+              <input type="text" id="env-nombre" placeholder="Apellido Nombre">
+            </div>
+            <div class="form-group">
+              <label>EMAIL</label>
+              <input type="email" id="env-email" placeholder="candidato@email.com">
+            </div>
+            <div class="form-group">
+              <label>CARGO AL QUE POSTULA <span style="font-weight:400;color:var(--muted);">(uso interno)</span></label>
+              <input type="text" id="env-cargo" placeholder="Ej: Operador de grúa">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label>TESTS A ENVIAR</label>
+              <div class="multi-select-wrap" id="multi-wrap">
+                <button type="button" class="multi-select-btn" onclick="toggleMultiSelect()">
+                  <span id="multi-label">Seleccionar tests...</span>
+                  <span>▾</span>
+                </button>
+                <div class="multi-select-dropdown" id="multi-dropdown">
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IC"> Test de Instrucciones Complejas</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="CEAL"> Test de Estilos de Liderazgo</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="TECNICO_GRUERO"> Prueba Técnica - Operador de Grúa</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="TECNICO_BODEGA"> Prueba Técnica - Operario de Bodega</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+            <button class="btn btn-primary" onclick="enviarEvaluacion()" id="btn-env">📧 Enviar invitación</button>
+          </div>
+          <div class="alert alert-ok" id="env-ok"></div>
+          <div class="alert alert-err" id="env-err"></div>
+        </div>
+      </div>
+    </div>
+
 <!-- HISTORIAL -->
     <div class="page" id="page-historial">
       <div class="card">
@@ -2650,7 +2698,7 @@ function toggleTest(el) {
   el.classList.toggle("checked", cb.checked);
   var sel = Array.from(document.querySelectorAll(".check-test:checked"));
   var label = document.getElementById("multi-label");
-  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General",DISC:"Análisis de Estilo Conductual",OPERA:"Evaluación de Conducta Operacional"};
+  var nombres = {IC:"Test de Instrucciones Complejas",CEAL:"Test de Estilos de Liderazgo","16PF":"Evaluación de Personalidad",IPV:"Perfil de Personalidad Comercial",WONDERLIC:"Test de Habilidad Cognitiva General",DISC:"Análisis de Estilo Conductual",OPERA:"Evaluación de Conducta Operacional",TECNICO_GRUERO:"Prueba Técnica - Operador de Grúa",TECNICO_BODEGA:"Prueba Técnica - Operario de Bodega"};
   if (sel.length === 0) label.textContent = "Seleccionar tests...";
   else if (sel.length === 1) label.textContent = nombres[sel[0].value] || sel[0].value;
   else label.textContent = sel.length + " tests seleccionados";
