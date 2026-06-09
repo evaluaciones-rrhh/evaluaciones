@@ -2330,12 +2330,10 @@ function buscarCargoCandidato(rut, nombre) {
     if (!e.cargo) continue;
     var palEnvio = palabras(e.nombre);
     if (!palEnvio.length) continue;
-    // contar cuántas palabras del nombre coinciden
     var coincidencias = 0;
     palObjetivo.forEach(function(p){ if (palEnvio.indexOf(p) > -1) coincidencias++; });
-    // si coinciden al menos 2 palabras (o todas las que haya si son pocas), es la misma persona
-    var minimo = Math.min(2, palObjetivo.length, palEnvio.length);
-    if (coincidencias >= minimo && coincidencias > mejorCoincidencias) {
+    // basta 1 palabra en común; se queda con la MEJOR coincidencia (más palabras iguales)
+    if (coincidencias >= 1 && coincidencias > mejorCoincidencias) {
       mejorCoincidencias = coincidencias;
       mejor = e.cargo;
     }
