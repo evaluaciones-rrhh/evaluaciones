@@ -1353,6 +1353,21 @@ tbody tr:hover td { background: #fdf9f6; }
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-disc" style="height:0px;"></div></div>
                 <div class="grafico-lbl">DISC</div>
               </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-opera">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-opera" style="height:0px;"></div></div>
+                <div class="grafico-lbl">OPERA</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-tecnico_gruero">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_gruero" style="height:0px;"></div></div>
+                <div class="grafico-lbl">GRÚA</div>
+              </div>
+              <div class="grafico-col">
+                <div class="grafico-num" id="num-tecnico_bodega">0</div>
+                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_bodega" style="height:0px;"></div></div>
+                <div class="grafico-lbl">BODEGA</div>
+              </div>
             </div>
             <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
           </div>
@@ -1368,6 +1383,9 @@ tbody tr:hover td { background: #fdf9f6; }
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_IPV.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Perfil de Personalidad Comercial <span>→</span></a>
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_WONDERLIC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Test de Habilidad Cognitiva General <span>→</span></a>
             <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_DISC.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Análisis de Estilo Conductual <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_OPERA.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Evaluación de Conducta Operacional <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_TECNICO_GRUERO.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Prueba Técnica - Operador de Grúa <span>→</span></a>
+            <a href="https://evaluaciones-rrhh.github.io/evaluaciones/TEST_TECNICO_BODEGA.html" target="_blank" class="btn btn-secondary" style="justify-content:space-between;">Prueba Técnica - Operario de Bodega <span>→</span></a>
           </div>
         </div>
       </div>
@@ -2311,9 +2329,11 @@ function actualizarStats() {
     "IPV":"Personalidad Comercial",
     "WONDERLIC":"Habilidad Cognitiva",
     "DISC":"Análisis Conductual",
-    "OPERA":"Conducta Operacional"
+    "OPERA":"Conducta Operacional",
+    "TECNICO_GRUERO":"Téc. Grúa",
+    "TECNICO_BODEGA":"Téc. Bodega"
   };
-  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA"];
+  var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA","TECNICO_GRUERO","TECNICO_BODEGA"];
   var conteos = {};
   tests.forEach(function(t){ conteos[t] = todosLosDatos.filter(function(d){ return d.test===t; }).length; });
   var maxC = Math.max(1, Math.max.apply(null, tests.map(function(t){ return conteos[t]; })));
@@ -2749,7 +2769,7 @@ async function enviarEvaluacion() {
     }
 
     var nombresTests = testsSeleccionados.map(function(t){
-      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC"};
+      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC",DISC:"DISC",OPERA:"OPERA",TECNICO_GRUERO:"Téc. Grúa",TECNICO_BODEGA:"Téc. Bodega"};
       return nombres[t]||t;
     }).join(", ");
 
@@ -2759,7 +2779,6 @@ async function enviarEvaluacion() {
     document.getElementById("env-email").value="";
     document.getElementById("env-cargo").value="";
     document.querySelectorAll(".check-test:checked").forEach(function(cb){ cb.checked=false; });
-    document.getElementById("link-preview").style.display="none";
     setTimeout(function(){ cargarDatos(); }, 3000);
   } catch(e) {
     errEl.textContent="Error: "+e.message;
