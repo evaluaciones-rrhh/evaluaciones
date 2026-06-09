@@ -2476,14 +2476,18 @@ function renderTablaComun(datos, tbodyId, cols) {
 
 // Busca el cargo registrado para un candidato (cruzando con los envíos por RUT o nombre)
 function buscarCargoCandidato(rut, nombre) {
-  function norm(s){ return String(s||"").replace(/[\.\s-]/g,"").toLowerCase(); }
-  var rn = norm(rut), nn = String(nombre||"").trim().toLowerCase();
+  function quitaTildes(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
+  // normaliza nombre: minúsculas, sin tildes, sin espacios extra → conjunto de palabras ordenadas
+  function normNombre(s){
+    var limpio = quitaTildes(String(s||"").toLowerCase().trim()).replace(/\s+/g," ");
+    return limpio.split(" ").filter(Boolean).sort().join(" ");
+  }
+  var objetivo = normNombre(nombre);
+  if (!objetivo) return "";
   for (var i = todosEnvios.length - 1; i >= 0; i--) {  // del más reciente al más antiguo
     var e = todosEnvios[i];
     if (!e.cargo) continue;
-    var coincideNom = nn && String(e.nombre||"").trim().toLowerCase() === nn;
-    // los envíos guardan email/nombre, no siempre rut; cruzamos por nombre principalmente
-    if (coincideNom) return e.cargo;
+    if (normNombre(e.nombre) === objetivo) return e.cargo;
   }
   return "";
 }
