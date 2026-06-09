@@ -2477,19 +2477,40 @@ function renderTablaComun(datos, tbodyId, cols) {
 // Busca el cargo registrado para un candidato (cruzando con los envíos por RUT o nombre)
 function buscarCargoCandidato(rut, nombre) {
   function quitaTildes(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
-  // normaliza nombre: minúsculas, sin tildes, sin espacios extra → conjunto de palabras ordenadas
-  function normNombre(s){
-    var limpio = quitaTildes(String(s||"").toLowerCase().trim()).replace(/\s+/g," ");
-    return limpio.split(" ").filter(Boolean).sort().join(" ");
+  function palabras(s){
+    return quitaTildes(String(s||"").toLowerCase().trim()).replace(/\s+/g," ").split(" ").filter(function(p){ return p.length>=2; });
   }
-  var objetivo = normNombre(nombre);
-  if (!objetivo) return "";
-  for (var i = todosEnvios.length - 1; i >= 0; i--) {  // del más reciente al más antiguo
+  var palObjetivo = palabras(nombre);
+  if (!palObjetivo.length) return "";
+  var mejor = "", mejorCoincidencias = 0;
+  for (var i = todosEnvios.length - 1; i >= 0; i--) {
     var e = todosEnvios[i];
     if (!e.cargo) continue;
-    if (normNombre(e.nombre) === objetivo) return e.cargo;
+    var palEnvio = palabras(e.nombre);
+    if (!palEnvio.length) continue;
+    // contar cuántas palabras del nombre coinciden
+    var coincidencias = 0;
+    palObjetivo.forEach(function(p){ if (palEnvio.indexOf(p) > -1) coincidencias++; });
+    // si coinciden al menos 2 palabras (o todas las que haya si son pocas), es la misma persona
+    var minimo = Math.min(2, palObjetivo.length, palEnvio.length);
+    if (coincidencias >= minimo && coincidencias > mejorCoincidencias) {
+      mejorCoincidencias = coincidencias;
+      mejor = e.cargo;
+    }
   }
-  return "";
+  return mejor;
+}
+
+// DIAGNÓSTICO: corre diagnosticarCargo() en la consola para ver qué pasa con el cargo
+function diagnosticarCargo() {
+  console.log("=== DIAGNÓSTICO CARGO ===");
+  console.log("Total envíos cargados:", todosEnvios.length);
+  var conCargo = todosEnvios.filter(function(e){ return e.cargo; });
+  console.log("Envíos QUE TIENEN cargo:", conCargo.length);
+  conCargo.slice(0,5).forEach(function(e){ console.log("  - Nombre:", e.nombre, "| Cargo:", e.cargo); });
+  if (!conCargo.length) console.log("⚠️ NINGÚN envío tiene cargo. El problema es el guardado o que los envíos no traen el campo cargo.");
+  console.log("Total resultados:", todosLosDatos.length);
+  todosLosDatos.slice(0,3).forEach(function(d){ console.log("  Resultado:", d.nombre, "→ cargo encontrado:", buscarCargoCandidato(d.rut, d.nombre)||"(ninguno)"); });
 }
 
 function tiempoRelativo(fecha) {
