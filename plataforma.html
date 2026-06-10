@@ -2329,9 +2329,9 @@ function actualizarStats() {
     "IPV":"Personalidad Comercial",
     "WONDERLIC":"Habilidad Cognitiva",
     "DISC":"Análisis Conductual",
-    "OPERA":"Conducta Operacional",
-    "TECNICO_GRUERO":"Téc. Grúa",
-    "TECNICO_BODEGA":"Téc. Bodega"
+    "OPERA":"Evaluación de Conducta Operacional",
+    "TECNICO_GRUERO":"Prueba Técnica - Operador de Grúa",
+    "TECNICO_BODEGA":"Prueba Técnica - Operario de Bodega"
   };
   var tests = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA","TECNICO_GRUERO","TECNICO_BODEGA"];
   var conteos = {};
@@ -2347,7 +2347,7 @@ function actualizarStats() {
   });
   var ctEl = document.getElementById("conteos-tests");
   if(ctEl) ctEl.innerHTML = tests.filter(function(t){ return conteos[t] > 0; }).map(function(t){
-    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> " + t + "</span>";
+    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> " + (testNombresCortos[t]||t) + "</span>";
   }).join(" &nbsp;·&nbsp; ");
 }
 
