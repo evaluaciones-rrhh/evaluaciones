@@ -1326,47 +1326,47 @@ tbody tr:hover td { background: #fdf9f6; }
               <div class="grafico-col">
                 <div class="grafico-num" id="num-ic">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ic" style="height:0px;"></div></div>
-                <div class="grafico-lbl">IC</div>
+                <div class="grafico-lbl">Instrucciones</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-ceal">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ceal" style="height:0px;"></div></div>
-                <div class="grafico-lbl">CEAL</div>
+                <div class="grafico-lbl">Liderazgo</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-16pf">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-16pf" style="height:0px;"></div></div>
-                <div class="grafico-lbl">16PF</div>
+                <div class="grafico-lbl">Personalidad</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-ipv">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ipv" style="height:0px;"></div></div>
-                <div class="grafico-lbl">IPV</div>
+                <div class="grafico-lbl">P. Comercial</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-wonderlic">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-wonderlic" style="height:0px;"></div></div>
-                <div class="grafico-lbl">WOND</div>
+                <div class="grafico-lbl">Cognitiva</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-disc">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-disc" style="height:0px;"></div></div>
-                <div class="grafico-lbl">DISC</div>
+                <div class="grafico-lbl">Conductual</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-opera">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-opera" style="height:0px;"></div></div>
-                <div class="grafico-lbl">OPERA</div>
+                <div class="grafico-lbl">Operacional</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-tecnico_gruero">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_gruero" style="height:0px;"></div></div>
-                <div class="grafico-lbl">GRÚA</div>
+                <div class="grafico-lbl">Grúa</div>
               </div>
               <div class="grafico-col">
                 <div class="grafico-num" id="num-tecnico_bodega">0</div>
                 <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_bodega" style="height:0px;"></div></div>
-                <div class="grafico-lbl">BODEGA</div>
+                <div class="grafico-lbl">Bodega</div>
               </div>
             </div>
             <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
@@ -2346,9 +2346,7 @@ function actualizarStats() {
     if (num) { num.textContent = conteos[t]; num.style.visibility = conteos[t] > 0 ? "visible" : "hidden"; }
   });
   var ctEl = document.getElementById("conteos-tests");
-  if(ctEl) ctEl.innerHTML = tests.filter(function(t){ return conteos[t] > 0; }).map(function(t){
-    return "<span style='font-size:11px;color:var(--muted);'><strong style='color:var(--ink);'>" + conteos[t] + "</strong> " + (testNombresCortos[t]||t) + "</span>";
-  }).join(" &nbsp;·&nbsp; ");
+  if(ctEl) ctEl.innerHTML = "";
 }
 
 function renderTablaComun(datos, tbodyId, cols) {
