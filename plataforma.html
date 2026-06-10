@@ -383,6 +383,13 @@ tbody tr:hover td { background: #fdf9f6; }
 .grafico-barra { width: 100%; border-radius: 4px 4px 0 0; background: var(--naranja); opacity: 0.8; transition: opacity 0.2s, height 0.5s ease; }
 .grafico-barra:hover { opacity: 1; cursor: default; }
 .grafico-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.grafico-h { display: flex; flex-direction: column; gap: 11px; }
+.gh-row { display: flex; align-items: center; gap: 12px; }
+.gh-lbl { font-size: 12.5px; color: var(--ink); width: 150px; flex-shrink: 0; text-align: right; }
+.gh-track { flex: 1; background: #f1efe8; border-radius: 20px; height: 9px; overflow: hidden; }
+.gh-bar { width: 0; height: 100%; background: var(--coral); border-radius: 20px; transition: width 0.6s ease; }
+.gh-num { font-size: 13px; font-weight: 700; color: var(--ink); width: 28px; text-align: right; flex-shrink: 0; }
+@media(max-width:640px){ .gh-lbl{ width:100px; font-size:11.5px; } }
 
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
@@ -1322,54 +1329,19 @@ tbody tr:hover td { background: #fdf9f6; }
             <div class="card-title">Evaluaciones por test</div>
           </div>
           <div class="card-body">
-            <div class="grafico-barras" id="grafico-tests">
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-ic">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ic" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Instrucciones</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-ceal">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ceal" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Liderazgo</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-16pf">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-16pf" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Personalidad</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-ipv">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-ipv" style="height:0px;"></div></div>
-                <div class="grafico-lbl">P. Comercial</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-wonderlic">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-wonderlic" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Cognitiva</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-disc">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-disc" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Conductual</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-opera">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-opera" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Operacional</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-tecnico_gruero">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_gruero" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Grúa</div>
-              </div>
-              <div class="grafico-col">
-                <div class="grafico-num" id="num-tecnico_bodega">0</div>
-                <div class="grafico-barra-wrap"><div class="grafico-barra" id="bar-tecnico_bodega" style="height:0px;"></div></div>
-                <div class="grafico-lbl">Bodega</div>
-              </div>
+            <div id="total-evals" style="font-size:12px;color:var(--muted);margin-bottom:14px;"></div>
+            <div class="grafico-h" id="grafico-tests">
+              <div class="gh-row"><span class="gh-lbl">Instrucciones Complejas</span><div class="gh-track"><div class="gh-bar" id="bar-ic"></div></div><span class="gh-num" id="num-ic">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Estilos de Liderazgo</span><div class="gh-track"><div class="gh-bar" id="bar-ceal"></div></div><span class="gh-num" id="num-ceal">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Personalidad</span><div class="gh-track"><div class="gh-bar" id="bar-16pf"></div></div><span class="gh-num" id="num-16pf">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Personalidad Comercial</span><div class="gh-track"><div class="gh-bar" id="bar-ipv"></div></div><span class="gh-num" id="num-ipv">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Habilidad Cognitiva</span><div class="gh-track"><div class="gh-bar" id="bar-wonderlic"></div></div><span class="gh-num" id="num-wonderlic">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Estilo Conductual</span><div class="gh-track"><div class="gh-bar" id="bar-disc"></div></div><span class="gh-num" id="num-disc">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Conducta Operacional</span><div class="gh-track"><div class="gh-bar" id="bar-opera"></div></div><span class="gh-num" id="num-opera">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Operador de Grúa</span><div class="gh-track"><div class="gh-bar" id="bar-tecnico_gruero"></div></div><span class="gh-num" id="num-tecnico_gruero">0</span></div>
+              <div class="gh-row"><span class="gh-lbl">Operario de Bodega</span><div class="gh-track"><div class="gh-bar" id="bar-tecnico_bodega"></div></div><span class="gh-num" id="num-tecnico_bodega">0</span></div>
             </div>
-            <div id="conteos-tests" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;"></div>
+            <div id="conteos-tests" style="display:none;"></div>
           </div>
         </div>
         <div class="card">
@@ -2341,10 +2313,13 @@ function actualizarStats() {
     var key = t === "16PF" ? "16pf" : t.toLowerCase();
     var bar = document.getElementById("bar-"+key);
     var num = document.getElementById("num-"+key);
-    var px  = maxC > 0 ? Math.round((conteos[t]/maxC)*72) : 0;
-    if (bar) bar.style.height = (conteos[t] > 0 ? Math.max(px, 8) : 0) + "px";
-    if (num) { num.textContent = conteos[t]; num.style.visibility = conteos[t] > 0 ? "visible" : "hidden"; }
+    var pct = maxC > 0 ? Math.round((conteos[t]/maxC)*100) : 0;
+    if (bar) bar.style.width = (conteos[t] > 0 ? Math.max(pct, 3) : 0) + "%";
+    if (num) { num.textContent = conteos[t]; }
   });
+  var totalEv = tests.reduce(function(s,t){ return s + conteos[t]; }, 0);
+  var totEl = document.getElementById("total-evals");
+  if (totEl) totEl.textContent = totalEv + " evaluaciones en total";
   var ctEl = document.getElementById("conteos-tests");
   if(ctEl) ctEl.innerHTML = "";
 }
