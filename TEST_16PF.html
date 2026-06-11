@@ -529,6 +529,22 @@ function calcular(resp){
     if(v<=3||v>=8) alertas.push(e+'('+v+')');
   });
 
+  // ── Veredicto por FACTORES de alerta (mismo criterio que el dashboard) ──
+  // Factor → dirección preocupante: 'B'=bajo(≤3), 'A'=alto(≥8).
+  // Para cambiar a quién vigilar, edita ALERTA_16PF (agrega/quita factores o cambia B/A).
+  var ALERTA_16PF = { C:'B', O:'A', Q4:'A', G:'B', L:'A' };
+  var NOMBRE_ALERTA = { C:'Estabilidad emocional baja', O:'Aprensión/inseguridad alta', Q4:'Tensión alta', G:'Baja atención a normas', L:'Desconfianza alta' };
+  var factoresAlerta = [];
+  Object.keys(ALERTA_16PF).forEach(function(f){
+    var v = de[f];
+    if (v === undefined) return;
+    if ((ALERTA_16PF[f]==='B' && v<=3) || (ALERTA_16PF[f]==='A' && v>=8))
+      factoresAlerta.push(NOMBRE_ALERTA[f] + ' (' + f + '=' + v + ')');
+  });
+  var veredicto = factoresAlerta.length>=3 ? 'No adecuado'
+                : factoresAlerta.length>=1 ? 'Con observaciones'
+                : 'Adecuado';
+
   // Fortalezas y riesgos basados en decatipos reales.
   // Cada uno lleva su "severidad" (distancia al centro=5.5) para ordenar y mostrar lo MÁS marcado primero.
   var fortsObj=[],riesgosObj=[];
@@ -625,15 +641,22 @@ function calcular(resp){
   else if(de.Q1>=8) cognitivo.push('Muestra alta apertura al cambio y disposición a aprender cosas nuevas, lo que lo/la hace ' + gAdj('adaptable','adaptable','adaptable') + ' a distintos contextos laborales.');
   if(cognitivo.length>0) parrafos.push(cognitivo.join(' '));
 
-  // Párrafo 5: Conclusión según número de apuntamientos.
-  // Criterio oficial 16PF-5: la mayoría de las personas (≈69%) tiene entre 3 y 7 apuntamientos;
-  // tener 3 o más NO es indicador de problema, sino lo esperable. Solo 8+ sugiere un perfil muy marcado.
+  // Párrafo 5: Diferenciación del perfil (descriptivo, NO es el veredicto).
   if(alertas.length<=2){
-    parrafos.push('El perfil es poco diferenciado: la mayoría de las escalas se ubican en la zona promedio. Es un perfil equilibrado que conviene contrastar con la entrevista para precisar matices.');
+    parrafos.push('El perfil es poco diferenciado: la mayoría de las escalas se ubican en la zona promedio.');
   } else if(alertas.length<=7){
-    parrafos.push('El perfil presenta un número de rasgos marcados dentro de lo esperable (la mayoría de las personas presenta entre 3 y 7). Estos rasgos definen su estilo característico; se recomienda profundizar en ellos durante la entrevista.');
+    parrafos.push('El perfil presenta un número de rasgos marcados dentro de lo esperable (la mayoría de las personas presenta entre 3 y 7). Estos rasgos definen su estilo característico.');
   } else {
-    parrafos.push('El perfil presenta un número elevado de rasgos marcados, lo que indica una personalidad muy diferenciada. Conviene revisar los estilos de respuesta y profundizar en entrevista antes de tomar una decisión.');
+    parrafos.push('El perfil presenta un número elevado de rasgos marcados, lo que indica una personalidad muy diferenciada.');
+  }
+
+  // Párrafo 6: VEREDICTO según factores de alerta (mismo criterio que el dashboard).
+  if(factoresAlerta.length===0){
+    parrafos.push('Veredicto: ADECUADO. No se detectan factores de personalidad en niveles preocupantes para el ámbito laboral.');
+  } else if(factoresAlerta.length<=2){
+    parrafos.push('Veredicto: CON OBSERVACIONES. Se detectan factores que conviene revisar en entrevista — ' + factoresAlerta.join('; ') + '.');
+  } else {
+    parrafos.push('Veredicto: NO ADECUADO. Se detectan varios factores en niveles preocupantes — ' + factoresAlerta.join('; ') + '. Se recomienda revisar con detención antes de tomar una decisión.');
   }
 
   var interp = parrafos.filter(function(p){return p.trim();}).join(' ');
@@ -652,6 +675,8 @@ function calcular(resp){
     decatipos_escalas:deStr,
     decatipos_dims:dimStr,
     nivel_perfil:nivelStr,
+    veredicto:veredicto,
+    factores_alerta:factoresAlerta.length?factoresAlerta.join(' | '):'Ninguno',
     fortalezas:forts.length?forts.slice(0,3).join(' | '):'No se identifican fortalezas destacadas',
     areas_riesgo:riesgos.length?riesgos.slice(0,3).join(' | '):'No se identifican áreas de atención relevantes',
     interpretacion:interp,
