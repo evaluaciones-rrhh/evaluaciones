@@ -4751,8 +4751,8 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
     var WL_TABLA=[[99,39],[98,36],[97,34],[96,33],[94,32],[92,31],[90,30],[87,29],[84,28],[80,27],[76,26],[72,25],[67,24],[61,23],[56,22],[50,21],[44,20],[39,19],[33,18],[28,17],[24,16],[20,15],[16,14],[13,13],[10,12],[8,11],[6,10],[4,9],[3,8],[2,7],[1,5],[0,1]];
     function wlPercentil(p){ for(var i=0;i<WL_TABLA.length;i++){ if(p>=WL_TABLA[i][1]) return WL_TABLA[i][0]; } return 0; }
     function wlNivel(pc){
-      if(pc>=80) return "Superior";
-      if(pc>=60) return "Promedio alto";
+      if(pc>=90) return "Superior";
+      if(pc>=75) return "Promedio alto";
       if(pc>=30) return "Promedio";
       if(pc>=10) return "Bajo promedio";
       return "Bajo";
@@ -4791,7 +4791,7 @@ async function abrirInformeWONDERLIC(test, rut, nombre) {
 
     // Integridad
     document.getElementById("wl-integridad").innerHTML = foco===0
-      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de integridad</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de ventana durante la prueba. Resultado confiable.</div></div></div>"
+      ? "<div class='wl-integ-ok'><span style='font-size:18px;'>✓</span><div><strong>Sin alertas de cambio de ventana</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>El candidato no cambió de pestaña durante la prueba. Aun así, por rendirse a distancia, el sistema no puede detectar el uso de calculadora, celular o ayuda de terceros: conviene corroborar los resultados altos en la entrevista.</div></div></div>"
       : foco<=3
       ? "<div class='wl-integ-leve'><span style='font-size:18px;'>⚠</span><div><strong>Alerta leve — "+foco+" cambio(s) detectado(s)</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Puede ser accidental. Considere este antecedente al interpretar el resultado.</div></div></div>"
       : "<div class='wl-integ-riesgo'><span style='font-size:18px;'>⚠</span><div><strong>Alerta de integridad — "+foco+" cambios detectados</strong><div style='font-size:11px;font-weight:400;margin-top:2px;'>Riesgo de consulta externa. Se recomienda evaluar la validez del resultado antes de tomar una decisión.</div></div></div>";
