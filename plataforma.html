@@ -2882,54 +2882,60 @@ function verInformeEntrevista(ent) {
 
 
 // ══════════ INFORME IC ══════════
+// ══════════ INFORME IC — baremo oficial (puntaje de fallas → percentil → categoría) ══════════
+// Puntaje de fallas = errores + omisiones (0-30, MENOS es MEJOR).
+// Cada fila del baremo: [percentil E. Universitaria, percentil E. Media].
+var BAREMO_IC = {
+  0:[99,99],1:[98,98],2:[93,96],3:[91,94],4:[87,91],5:[80,89],6:[75,85],7:[72,82],8:[69,76],9:[67,75],
+  10:[54,69],11:[49,63],12:[44,58],13:[34,52],14:[25,46],15:[15,41],16:[14,35],17:[10,27],18:[9,20],19:[6,14],
+  20:[5,11],21:[3,7],22:[2,6],23:[1,4],24:[1,3],25:[1,3],26:[1,2],27:[1,2],28:[1,1],29:[1,1],30:[1,1]
+};
+function percentilIC(fallas, escolaridad){
+  var p = Math.max(0, Math.min(30, parseInt(fallas)||0));
+  var fila = BAREMO_IC[p] || [1,1];
+  return (escolaridad === 'media') ? fila[1] : fila[0];
+}
+function categoriaIC(percentil){
+  if (percentil >= 80) return "Muy Superior";
+  if (percentil >= 60) return "Superior al Promedio";
+  if (percentil >= 40) return "Promedio";
+  if (percentil >= 30) return "Bajo el Promedio";
+  if (percentil >= 20) return "Bajo";
+  return "Deficiente";
+}
+var icDatosActual = null;
+var icEscolaridad = 'universitaria';
+
 var IC_RESUMENES = {
-  "Muy alto": {
-    cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "Excelente capacidad de concentración, precisión y control atencional. Presenta bajo nivel de error y alta consistencia en tareas que requieren foco y seguimiento detallado. Precisión igual o superior al 85%."
-  },
-  "Alto": {
-    cls: "ic-cat-adecuado", emoji: "✅",
-    texto: "Buen nivel de atención y precisión en la ejecución de tareas. Mantiene adecuada concentración y control operativo. Precisión entre 70% y 84%."
-  },
-  "Medio": {
-    cls: "ic-cat-regular", emoji: "⚠️",
-    texto: "Rendimiento atencional promedio. Puede desempeñarse adecuadamente en tareas estructuradas, aunque podría presentar fluctuaciones bajo presión o alta demanda. Precisión entre 55% y 69%."
-  },
-  "Bajo": {
-    cls: "ic-cat-inferior", emoji: "🔴",
-    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión. Precisión inferior al 55%."
-  },
-  "Deficiente": {
-    cls: "ic-cat-inferior", emoji: "🔴",
-    texto: "Presenta importantes dificultades en concentración y control de errores, lo que podría afectar el desempeño en funciones que requieren atención sostenida y precisión."
-  }
+  "Muy Superior": { cls:"ick-cat-adecuado", texto:"Desempeño muy superior al promedio en el seguimiento de instrucciones complejas. Muy baja tasa de errores y omisiones; excelente atención sostenida, precisión y control operativo." },
+  "Superior al Promedio": { cls:"ick-cat-adecuado", texto:"Desempeño superior al promedio. Buen control atencional, con baja tasa de errores y omisiones en la ejecución de instrucciones detalladas." },
+  "Promedio": { cls:"ick-cat-adecuado", texto:"Desempeño dentro del promedio esperado para su nivel educacional. Atención y precisión adecuadas para tareas estructuradas." },
+  "Bajo el Promedio": { cls:"ick-cat-regular", texto:"Desempeño levemente bajo el promedio. Puede presentar algunas dificultades de atención o precisión bajo presión o alta demanda; conviene complementar con otros antecedentes." },
+  "Bajo": { cls:"ick-cat-inferior", texto:"Desempeño bajo el promedio en el seguimiento de instrucciones complejas. La tasa de errores y/u omisiones puede afectar tareas que requieren atención sostenida y precisión." },
+  "Deficiente": { cls:"ick-cat-inferior", texto:"Desempeño muy por debajo del promedio. Alta tasa de errores y/u omisiones; se recomienda cautela y complementar con entrevista y otros antecedentes antes de concluir." }
 };
 
 function abrirInformeIC(d) {
-  var cat = d.nivel || d.categoria || "";
+  icDatosActual = d;
+  renderIC();
+  document.getElementById("modal-ic").classList.add("activo");
+  document.body.style.overflow = "hidden";
+}
 
-  // Regla de cobertura: la categoría por precisión engaña si hubo muchas omisiones.
-  // El IC tiene 25 ítems. Si respondió pocas, se topa la categoría hacia abajo.
-  // (Corrige también registros antiguos cuya categoría guardada no consideró omisiones.)
-  var ORDEN_CAT = ["Deficiente","Bajo","Medio","Alto","Muy alto"];
-  var omis = parseInt(d.omisiones) || 0;
-  var errs = parseInt(d.errores) || 0;
-  var correctas = parseInt(d.pb !== undefined ? d.pb : d.correctas) || 0;
-  var respondidas = correctas + errs;          // ítems que efectivamente contestó
-  var totalItems = respondidas + omis;          // debería ser ~25
-  var coberturaBaja = false, topeCat = null;
-  if (totalItems > 0) {
-    if (respondidas < 13) { topeCat = "Deficiente"; coberturaBaja = true; }   // <~50% respondido
-    else if (respondidas < 20) { topeCat = "Bajo"; coberturaBaja = true; }    // <80% respondido
-    else if (respondidas < 23) { topeCat = "Medio"; coberturaBaja = true; }   // dejó 3+ sin responder
-  }
-  if (topeCat) {
-    var idxActual = ORDEN_CAT.indexOf(cat);
-    var idxTope   = ORDEN_CAT.indexOf(topeCat);
-    if (idxActual === -1 || idxActual > idxTope) cat = topeCat;  // bajar si está por encima del tope
-  }
+function setEscolaridadIC(esc) {
+  icEscolaridad = esc;
+  if (icDatosActual) renderIC();
+}
 
-  var info = IC_RESUMENES[cat] || { cls: "ick-cat-regular", emoji: "", texto: "No se encontró interpretación para la categoría: " + cat };
+function renderIC() {
+  var d = icDatosActual; if (!d) return;
+  var correctas = parseInt(d.correctas) || 0;
+  var errores   = parseInt(d.errores) || 0;
+  var omisiones = parseInt(d.omisiones) || 0;
+  var fallas    = errores + omisiones;                 // puntaje del baremo (menos es mejor)
+  var percentil = percentilIC(fallas, icEscolaridad);
+  var cat       = categoriaIC(percentil);
+  var info      = IC_RESUMENES[cat] || { cls: "ick-cat-regular", texto: "" };
 
   // Ficha candidato
   document.getElementById("ic-ficha-nombre").textContent = d.nombre || "—";
@@ -2937,38 +2943,35 @@ function abrirInformeIC(d) {
   var icSub = document.getElementById("ic-modal-sub");
   if (icSub) icSub.textContent = (d.nombre || "—") + (d.rut ? "  ·  " + d.rut : "");
 
-  // Categoría — mapear clase legacy (ic-cat-*) a Key Clouding (ick-cat-*)
-  var clsKey = (info.cls||"").replace("ic-cat-","ick-cat-");
-  if (clsKey.indexOf("ick-cat-")===-1) clsKey = "ick-cat-regular";
+  // Categoría
+  var clsKey = info.cls || "ick-cat-regular";
   var badge = document.getElementById("ic-categoria-badge");
   badge.className = "ick-cat-badge " + clsKey;
   badge.textContent = cat;
 
-  document.getElementById("ic-pb").textContent        = d.pb !== undefined ? d.pb : (d.correctas || "—");
-  // percentil en Sheets guarda el índice de precisión (campo legacy)
-  var precisionVal = d.percentil || d.indice_precision || d.precision || "—";
-  document.getElementById("ic-percentil").textContent  = precisionVal;
-  document.getElementById("ic-errores").textContent    = d.errores   || "0";
-  document.getElementById("ic-omisiones").textContent  = d.omisiones || "0";
+  // Desglose
+  document.getElementById("ic-pb").textContent        = correctas;
+  document.getElementById("ic-percentil").textContent = fallas;       // puntaje de fallas
+  document.getElementById("ic-errores").textContent   = errores;
+  document.getElementById("ic-omisiones").textContent = omisiones;
 
-  // Índice de precisión como barra visual
-  var pct = parseInt(String(precisionVal).replace(/[^0-9]/g, "")) || 0;
-  document.getElementById("ic-percentil-pct").textContent = pct + "%";
-  document.getElementById("ic-barra-percentil").style.width = Math.min(pct, 100) + "%";
-
+  // Barra: percentil normativo
+  document.getElementById("ic-percentil-pct").textContent = "Pc " + percentil;
+  document.getElementById("ic-barra-percentil").style.width = Math.min(percentil, 100) + "%";
   var barColor = clsKey === "ick-cat-adecuado" ? "#1a6a4a" : clsKey === "ick-cat-inferior" ? "#c0392b" : "#c99a2e";
   document.getElementById("ic-barra-percentil").style.background = barColor;
 
-  var resumenTxt = info.texto;
-  if (coberturaBaja) {
-    resumenTxt = "⚠ Cobertura insuficiente: el candidato respondió solo " + respondidas + " de " + totalItems +
-      " ítems (" + omis + " sin responder). Por esta razón, el resultado no puede interpretarse como una medida confiable de su capacidad atencional: la precisión se calcula únicamente sobre lo que alcanzó a contestar, de modo que un índice alto sobre pocas respuestas no equivale a un buen desempeño global, y un índice bajo puede deberse a la falta de tiempo o a que no completó la prueba, más que a dificultades reales de concentración. La categoría \"" + cat + "\" refleja esta baja cobertura, no necesariamente un déficit. Se recomienda repetir la evaluación asegurando que el candidato disponga del tiempo y las condiciones para responder la totalidad de los ítems antes de extraer conclusiones.";
+  // Toggle escolaridad (estado activo)
+  var bu = document.getElementById("ic-esc-univ"), bm = document.getElementById("ic-esc-media");
+  if (bu && bm) {
+    bu.style.background = (icEscolaridad === 'universitaria') ? "#2b3a47" : "#fff";
+    bu.style.color      = (icEscolaridad === 'universitaria') ? "#fff" : "#2b3a47";
+    bm.style.background = (icEscolaridad === 'media') ? "#2b3a47" : "#fff";
+    bm.style.color      = (icEscolaridad === 'media') ? "#fff" : "#2b3a47";
   }
-  document.getElementById("ic-resumen-texto").textContent = resumenTxt;
-  document.getElementById("ic-fecha").textContent = d.fecha || "—";
 
-  document.getElementById("modal-ic").classList.add("activo");
-  document.body.style.overflow = "hidden";
+  document.getElementById("ic-resumen-texto").textContent = info.texto;
+  document.getElementById("ic-fecha").textContent = d.fecha || "—";
 }
 
 function imprimirInformeIC() {
@@ -4860,20 +4863,29 @@ function imprimirModalWONDERLIC() { imprimirConNombre(); }
         <div id="ic-categoria-badge" class="ick-cat-badge">—</div>
       </div>
 
+      <!-- Nivel educacional (define la columna del baremo) -->
+      <div style="margin-top:12px;">
+        <div class="ick-label">Nivel educacional (baremo)</div>
+        <div style="display:inline-flex;border:1px solid #d8d4cc;border-radius:8px;overflow:hidden;">
+          <button type="button" id="ic-esc-univ" onclick="setEscolaridadIC('universitaria')" style="border:none;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:#2b3a47;color:#fff;">Universitaria</button>
+          <button type="button" id="ic-esc-media" onclick="setEscolaridadIC('media')" style="border:none;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;background:#fff;color:#2b3a47;">Media</button>
+        </div>
+      </div>
+
       <!-- Stats -->
       <div>
         <div class="ick-label">Desglose</div>
         <div class="ick-stats">
-          <div class="ick-stat"><div class="ick-stat-num" id="ic-pb">—</div><div class="ick-stat-lbl">Correctas (de 25)</div></div>
-          <div class="ick-stat"><div class="ick-stat-num" id="ic-percentil">—</div><div class="ick-stat-lbl">Precisión</div></div>
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-pb">—</div><div class="ick-stat-lbl">Correctas (de 20)</div></div>
+          <div class="ick-stat"><div class="ick-stat-num" id="ic-percentil">—</div><div class="ick-stat-lbl">Puntaje fallas</div></div>
           <div class="ick-stat"><div class="ick-stat-num" id="ic-errores" style="color:#c0392b;">—</div><div class="ick-stat-lbl">Errores</div></div>
           <div class="ick-stat"><div class="ick-stat-num" id="ic-omisiones" style="color:#c99a2e;">—</div><div class="ick-stat-lbl">Omisiones</div></div>
         </div>
       </div>
 
-      <!-- Barra índice de precisión -->
+      <!-- Barra: percentil normativo -->
       <div class="ick-bar-wrap">
-        <div class="ick-bar-label"><span>Índice de precisión</span><span id="ic-percentil-pct">—</span></div>
+        <div class="ick-bar-label"><span>Percentil (según escolaridad)</span><span id="ic-percentil-pct">—</span></div>
         <div class="ick-bar-bg"><div class="ick-bar-fill" id="ic-barra-percentil" style="width:0%"></div></div>
       </div>
 
