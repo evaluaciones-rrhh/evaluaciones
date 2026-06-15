@@ -3541,18 +3541,15 @@ function renderDiscList(containerId, items) {
 // Banco de situaciones OPERA (para reconstruir respuestas que requieren atención)
 var OPERA_BANCO = [{"comp":"responsabilidad","s":"Al finalizar tu turno observas que una actividad quedó incompleta y podría afectar el trabajo del siguiente equipo.","mejor":"Informas la situación y dejas registro.","peor":"Consideras que el siguiente equipo podrá resolverlo."},{"comp":"responsabilidad","s":"Durante una tarea detectas que interpretaste incorrectamente una instrucción.","mejor":"Informas la situación y propones una solución.","peor":"Consultas con un compañero qué haría."},{"comp":"responsabilidad","s":"Recibes una indicación importante y posteriormente te quedan dudas.","mejor":"Solicitas aclaración.","peor":"Avanzas y corriges después si surge algún problema."},{"comp":"responsabilidad","s":"Una tarea asignada presenta retraso.","mejor":"Informas oportunamente.","peor":"Esperas para evaluar si realmente habrá retraso."},{"comp":"compromiso","s":"Tu equipo enfrenta una semana con alta carga laboral.","mejor":"Ofreces apoyo cuando terminas tus tareas.","peor":"Mantienes tu ritmo habitual."},{"comp":"compromiso","s":"La empresa implementa una nueva forma de trabajo.","mejor":"Intentas aprenderla rápidamente.","peor":"Continúas utilizando tu forma habitual."},{"comp":"compromiso","s":"Surge una capacitación relacionada con tu trabajo.","mejor":"Participas porque puede aportar a tu desarrollo.","peor":"Prefieres enfocarte en tu experiencia actual."},{"comp":"compromiso","s":"Un problema operativo afecta al equipo.","mejor":"Buscas aportar a la solución.","peor":"Esperas que otros definan cómo abordarlo."},{"comp":"seguridad","s":"Observas una condición que podría generar un riesgo.","mejor":"Informas la situación antes de continuar.","peor":"Continúas trabajando mientras observas."},{"comp":"seguridad","s":"Un procedimiento de seguridad genera retraso.","mejor":"Mantienes el procedimiento completo.","peor":"Priorizas terminar la tarea."},{"comp":"seguridad","s":"Observas a un compañero realizando una maniobra riesgosa.","mejor":"Le comentas la situación de inmediato.","peor":"Asumes que conoce los riesgos."},{"comp":"seguridad","s":"Antes de comenzar una actividad detectas que falta un EPP requerido.","mejor":"Gestionas el elemento antes de iniciar.","peor":"Comienzas mientras consigues el elemento."}];
 
-// Recomendación tipo semáforo según nivel global + consistencia
-function operaRecomendacion(nivelG, consistencia){
-  if (consistencia === "Baja") {
-    return { etiqueta:"Recomendable con observaciones", color:"#c0392b", icono:"⚠",
-      texto:"No tomar una decisión solo con esta prueba: el patrón de respuestas presenta contradicciones que restan confiabilidad al resultado (ver bloque de confiabilidad). Antes de avanzar, confirmar en entrevista las competencias evaluadas." };
-  }
-  if (nivelG === "Adecuado") return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
-    texto:"Se recomienda avanzar con este candidato. Muestra conductas alineadas de forma consistente con la responsabilidad, el compromiso y la seguridad esperados en cargos operativos." };
-  if (nivelG === "Con observación") return { etiqueta:"Recomendable con observaciones", color:"#d4830a", icono:"≈",
-    texto:"La balanza está en el medio: el candidato respondió de forma mezclada, sin un patrón claro (acierta en unas situaciones y falla en otras). Esta prueba no alcanza para decidir; es la entrevista de profundización la que debe inclinar la decisión en un sentido u otro." };
-  return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
+// Recomendación tipo semáforo según los NIVELES de las competencias (ya penalizadas)
+function operaRecomendacion(nivelG, niveles){
+  var todasAdecuado = niveles.every(function(n){ return n==="Adecuado"; });
+  if (todasAdecuado) return { etiqueta:"Recomendable", color:"#1a6a4a", icono:"✓",
+    texto:"Se recomienda avanzar con este candidato. Muestra conductas alineadas con la responsabilidad, el compromiso y la seguridad esperados en cargos operativos. Validar en entrevista, como con toda evaluación." };
+  if (nivelG === "Riesgo") return { etiqueta:"No recomendable", color:"#c0392b", icono:"✕",
     texto:"No se recomienda avanzar para cargos operativos críticos. El candidato presenta una frecuencia elevada de conductas poco efectivas o de riesgo en las competencias evaluadas." };
+  return { etiqueta:"Recomendable con observaciones", color:"#d4830a", icono:"≈",
+    texto:"El candidato muestra fortalezas en algunas competencias y debilidades o inconsistencias en otras. Conviene profundizar en entrevista las competencias que aparecen en observación antes de tomar una decisión." };
 }
 
 // Reconstruye las respuestas que requieren atención a partir del CSV guardado (formato M{valor}m{valor})
@@ -3646,6 +3643,23 @@ async function abrirInformeOPERA(test, rut, nombre) {
     var consistencia = String(fila[8]||"Alta");
     var foco   = parseInt(fila[11])||0;
 
+    // ── Castigo por inconsistencia: limita el nivel de LA competencia donde ocurrió ──
+    // Inconsistencia = marcar una conducta de riesgo como MÁS (0) o la mejor como MENOS (4).
+    // 1 inconsistencia → la competencia no supera "Con observación" (tope 19/32); 2+ → "Riesgo" (tope 12/32).
+    var incOP = {responsabilidad:0, compromiso:0, seguridad:0};
+    String(fila[12]||"").split(",").forEach(function(p,i){
+      if(!OPERA_BANCO[i]) return;
+      var mm = String(p).match(/M(\d+)m(\d+)/); if(!mm) return;
+      if(parseInt(mm[1])===0 || parseInt(mm[2])===4) incOP[OPERA_BANCO[i].comp]++;
+    });
+    ["responsabilidad","compromiso","seguridad"].forEach(function(c){
+      if(incOP[c]>=2) sc[c]=Math.min(sc[c],12);
+      else if(incOP[c]>=1) sc[c]=Math.min(sc[c],19);
+    });
+    // Recalcular global y nivel global con los puntajes ya penalizados
+    global = sc.responsabilidad+sc.compromiso+sc.seguridad;
+    nivelG = operaNivelGlobal(global);
+
     // Ficha
     document.getElementById("opk-ficha-nombre").textContent = String(fila[1]||nomDec);
     document.getElementById("opk-ficha-rut").textContent = String(fila[2]||rutDec||"—");
@@ -3710,7 +3724,8 @@ async function abrirInformeOPERA(test, rut, nombre) {
     document.getElementById("opk-resumen-texto").textContent = resumen;
 
     // Recomendación tipo semáforo (arriba del informe)
-    var reco = operaRecomendacion(nivelG, consistencia);
+    var nivelesComp = orden.map(function(k){ return operaNivelComp(sc[k]); });
+    var reco = operaRecomendacion(nivelG, nivelesComp);
     var recoElem = document.getElementById("opk-recomendacion");
     if (recoElem) {
       recoElem.innerHTML = '<div class="opk-reco" style="border-color:'+reco.color+';">'
@@ -4205,7 +4220,7 @@ async function abrirInforme16PF(test, rut, nombre) {
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
           titulo:'Perfil equilibrado',
           texto: n === 0
-            ? 'No presenta rasgos marcados: todas las escalas se ubican en el rango medio. Es un perfil parejo, sin fortalezas ni áreas de atención que destaquen; su ajuste al cargo dependerá sobre todo de la experiencia, las competencias técnicas y lo que se observe en entrevista.'
+            ? 'No presenta rasgos marcados: todas las escalas se ubican en el rango medio. Es un perfil parejo y estable, sin rasgos extremos ni áreas que enciendan alertas. Su ajuste al cargo dependerá sobre todo de la experiencia, las competencias técnicas y lo que se observe en entrevista.'
             : 'Presenta solo ' + n + ' rasgo(s) marcado(s); el resto de las escalas está en el rango medio. Es un perfil mayormente parejo; conviene apoyarse en la entrevista y la experiencia para afinar la decisión.' }
       : n <= 7
       ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
@@ -4326,7 +4341,7 @@ async function abrirInforme16PF(test, rut, nombre) {
         datasets: [{
           label: "Perfil", data: dimVals,
           backgroundColor: "rgba(26,58,92,0.15)", borderColor: "#1a3a5c", borderWidth: 2,
-          pointBackgroundColor: dimVals.map(function(v){ return v<=3?"#c0392b":v>=8?"#1a3a5c":"#1a6a4a"; }),
+          pointBackgroundColor: dimVals.map(function(v){ return colorDim(v); }),
           pointRadius: 5
         }]
       },
@@ -4341,7 +4356,13 @@ async function abrirInforme16PF(test, rut, nombre) {
 
     // Barras de dimensiones (Key Clouding) — imprimen bien en PDF
     var DIM_NOMBRES = ["Extraversión","Ansiedad","Dureza","Independencia","Autocontrol"];
-    function colorDim(v){ return v<=3 ? "#c0392b" : v>=8 ? "#1a3a5c" : "#1a6a4a"; }
+    // Color de cada dimensión según el estándar de decatipos (sten): 1-3 bajo, 4-7 promedio, 8-10 alto.
+    // Es la POSICIÓN en la escala, independiente de las "áreas de atención" (que son direccionales).
+    function colorDim(v){
+      if (v <= 3) return "#c0392b";   // rojo: bajo (sten 1-3)
+      if (v >= 8) return "#1a3a5c";   // azul: alto (sten 8-10)
+      return "#1a6a4a";               // verde: promedio (sten 4-7)
+    }
     var barsEl = document.getElementById("pf-dims-bars");
     if (barsEl) {
       barsEl.innerHTML = DIM_NOMBRES.map(function(nom, i){
@@ -4354,6 +4375,11 @@ async function abrirInforme16PF(test, rut, nombre) {
           "<div class='pfk-bar-track'><div class='pfk-bar-fill' style='width:" + pct + "%;background:" + col + ";'></div></div>" +
           "</div>";
       }).join("");
+      barsEl.innerHTML += "<div style='display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:10.5px;color:#666;'>" +
+        "<span><span style='display:inline-block;width:9px;height:9px;border-radius:2px;background:#c0392b;vertical-align:middle;'></span> Bajo (1-3)</span>" +
+        "<span><span style='display:inline-block;width:9px;height:9px;border-radius:2px;background:#1a6a4a;vertical-align:middle;'></span> Promedio (4-7)</span>" +
+        "<span><span style='display:inline-block;width:9px;height:9px;border-radius:2px;background:#1a3a5c;vertical-align:middle;'></span> Alto (8-10)</span>" +
+        "</div>";
     }
   } catch(e) {
     alert("Error cargando datos 16PF: " + e.message);
