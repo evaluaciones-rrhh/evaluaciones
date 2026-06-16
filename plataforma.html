@@ -2118,7 +2118,7 @@ function encontrarFilaMasReciente(filas, rutNorm, nomNorm, colRut, colNom, colFe
 }
 
 async function fetchJSON(url) {
-  var resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store" });
+  var resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store", credentials: "omit" });
   var texto = await resp.text();
   // Buscar inicio de JSON: puede ser objeto {} o array []
   var jObj = texto.indexOf("{");
@@ -2814,7 +2814,7 @@ var datosEntrevistas = [];
 
 async function cargarEntrevistas() {
   try {
-    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas");
+    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas", { redirect:"follow", cache:"no-store", credentials:"omit" });
     var d = await r.json();
     datosEntrevistas = (d.entrevistas || []).slice().reverse();
     renderTablaEntrevistas(datosEntrevistas);
