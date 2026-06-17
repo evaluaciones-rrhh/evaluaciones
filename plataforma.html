@@ -4218,20 +4218,32 @@ async function abrirInforme16PF(test, rut, nombre) {
     // Verde: ≤2 (bajo la media), Amarillo: 3-5 (normal), Rojo: ≥6 (sobre la media)
     // Número de apuntamientos = escalas primarias marcadas (criterio oficial 16PF-5).
     // La mayoría de las personas (~69%) tiene entre 3 y 7; eso es NORMAL, no un problema.
-    var n = alertas.length;
-    var sem = n <= 2
-      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
-          titulo:'Perfil equilibrado',
-          texto: n === 0
-            ? 'No presenta rasgos marcados: todas las escalas se ubican en el rango medio. Es un perfil parejo y estable, sin rasgos extremos ni áreas que enciendan alertas. Su ajuste al cargo dependerá sobre todo de la experiencia, las competencias técnicas y lo que se observe en entrevista.'
-            : 'Presenta solo ' + n + ' rasgo(s) marcado(s); el resto de las escalas está en el rango medio. Es un perfil mayormente parejo; conviene apoyarse en la entrevista y la experiencia para afinar la decisión.' }
-      : n <= 7
-      ? { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
-          titulo:'Perfil con rasgos definidos (dentro de lo normal)',
-          texto:'Presenta ' + n + ' rasgos marcados, una cantidad dentro de lo esperable (la mayoría de las personas tiene entre 3 y 7). Estos rasgos son los que definen su estilo personal y laboral; conviene profundizar en ellos durante la entrevista.' }
-      : { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
-          titulo:'Perfil muy marcado',
-          texto:'Presenta ' + n + ' rasgos marcados, una cantidad alta que indica una personalidad muy diferenciada (con varios rasgos en los extremos). Conviene revisar los estilos de respuesta y profundizar bien en entrevista antes de decidir.' };
+    // ENCABEZADO guiado por las 5 DIMENSIONES GLOBALES (lectura estructural y estable).
+    // Las 16 escalas primarias NO definen el titular; alimentan el detalle (fortalezas/áreas).
+    var n = alertas.length; // se mantiene solo para el detalle, no para el encabezado
+    var dimNoms = ['Extraversión','Ansiedad','Dureza','Independencia','Autocontrol'];
+    var dimsFuera = [];
+    dimVals.slice(0,5).forEach(function(v,i){
+      if (v <= 3) dimsFuera.push(dimNoms[i] + ' (baja)');
+      else if (v >= 8) dimsFuera.push(dimNoms[i] + ' (alta)');
+    });
+    var dimsRiesgo = alertasDim.map(function(a){ return a.dim; });   // direccionales: Ansiedad alta, Extrav baja, Autocontrol bajo
+    var nFuera = dimsFuera.length;
+    var otras = dimsFuera.filter(function(d){ return !dimsRiesgo.some(function(r){ return d.indexOf(r) === 0; }); });
+    var sem;
+    if (nFuera === 0) {
+      sem = { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
+        titulo:'Perfil equilibrado',
+        texto:'Las cinco dimensiones globales se ubican en el rango promedio (4-7). Es un perfil parejo y estable, sin dimensiones extremas. Su ajuste al cargo dependerá sobre todo de la experiencia, las competencias técnicas y lo que se observe en entrevista.' };
+    } else if (dimsRiesgo.length > 0) {
+      sem = { dot:'pf-sem-amarillo', wrap:'pf-sw-amarillo', color:'var(--mid)',
+        titulo: nFuera >= 3 ? 'Perfil muy marcado, con áreas de atención' : 'Perfil con áreas de atención',
+        texto:'El perfil muestra dimensiones globales que <strong>requieren atención</strong>: ' + dimsRiesgo.join(', ') + '. Conviene revisarlas en el gráfico y en las áreas de desarrollo, y profundizarlas en entrevista.' + (otras.length ? ' Otras dimensiones fuera del promedio: ' + otras.join(', ') + '.' : '') };
+    } else {
+      sem = { dot:'pf-sem-verde', wrap:'pf-sw-verde', color:'var(--high)',
+        titulo: nFuera >= 3 ? 'Perfil muy definido' : 'Perfil con dimensiones definidas',
+        texto:'El perfil presenta ' + nFuera + ' dimensión(es) global(es) fuera del rango promedio (' + dimsFuera.join(', ') + '), que definen su estilo pero no constituyen áreas de riesgo. Conviene describirlas a partir del gráfico y contrastarlas en entrevista.' };
+    }
     document.getElementById("pf-semaforo").innerHTML =
       '<div class="pf-semaforo-wrap ' + sem.wrap + '">' +
       '<div class="pf-semaforo-dot ' + sem.dot + '"></div>' +
