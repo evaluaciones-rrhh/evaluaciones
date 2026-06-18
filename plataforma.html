@@ -1286,7 +1286,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <button class="btn-logout-sidebar" onclick="logout()" title="Cerrar sesión">⏻</button>
       </div>
       <button class="btn-mipass" onclick="cambiarMiPass()">🔑 Cambiar mi contraseña</button>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;" id="version-tag">v2.2 · filtros y cargo activos</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;" id="version-tag">v2.3 · carga corporativa</div>
     </div>
   </div>
 
@@ -2202,8 +2202,11 @@ async function refrescarDatosSilencioso() {
     try { localStorage.setItem("cygnus_cache_" + usuarioActual, JSON.stringify({ results: todosLosDatos, envios: todosEnvios })); } catch(x) {}
     pintarTodo();
     var vt = document.getElementById("version-tag");
-    if (vt) { var h = new Date(); vt.textContent = "Actualizado " + String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0")+":"+String(h.getSeconds()).padStart(2,"0"); }
-  } catch(e) { /* silencioso: si falla, reintenta en el próximo ciclo */ }
+    if (vt) { var h = new Date(); vt.textContent = "✓ Actualizado " + String(h.getHours()).padStart(2,"0")+":"+String(h.getMinutes()).padStart(2,"0")+":"+String(h.getSeconds()).padStart(2,"0") + " · " + (todosLosDatos ? todosLosDatos.length : 0) + " resultados"; }
+  } catch(e) {
+    var vte = document.getElementById("version-tag");
+    if (vte) vte.textContent = "⚠ Sin conexión al servidor — reintentando…";
+  }
 }
 function iniciarAutoRefresh() {
   if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
