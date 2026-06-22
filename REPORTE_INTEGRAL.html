@@ -629,6 +629,49 @@ function expandirFortalezas(texto, seed){
     return info ? generarLineaComp(info.comp, info.nivel, seed) : it.replace(/[.;]\s*$/,"");
   }).filter(Boolean).join("\n");
 }
+// Versión EXTENDIDA (dos frases por competencia) — usada en Servicios Transitorios
+function generarLineaCompExt(nombre, nivel, seed){
+  var n = (nombre||"").trim();
+  if (!n || !nivel) return "";
+  var nl = n.toLowerCase();
+  var V = {
+    alto:[
+      "Se destaca de manera consistente en {c}, demostrando solvencia y autonomía en su aplicación. Esta capacidad le permite asumir responsabilidades exigentes y responder con seguridad ante las distintas situaciones del puesto.",
+      "Cuenta con un dominio sólido de {c}, que sostiene de forma estable en el trabajo cotidiano. Constituye una de sus principales fortalezas y un aporte directo al desempeño esperado en el cargo.",
+      "Maneja {c} con notable seguridad, resolviendo con eficacia incluso las situaciones de mayor complejidad. Es un recurso confiable en este aspecto, capaz de sostener el rendimiento aun bajo presión.",
+      "Demuestra un manejo destacado de {c}, aplicándolo con criterio y consistencia. Esta solidez se traduce en un aporte concreto al equipo y en una buena adaptación a las exigencias del rol."
+    ],
+    medio:[
+      "Presenta un manejo adecuado de {c}, suficiente para resolver las situaciones habituales del cargo. Cuenta con una base sólida sobre la cual seguir desarrollándose con la experiencia y el acompañamiento adecuados.",
+      "Aborda {c} de forma competente en lo cotidiano, respondiendo correctamente a las tareas propias del puesto. Tiene un margen de crecimiento que puede potenciarse con práctica y retroalimentación.",
+      "Muestra un desempeño correcto en {c}, apropiado para las demandas habituales del rol. Con apoyo y oportunidades de práctica, puede consolidar aún más esta competencia.",
+      "Maneja {c} de manera funcional, resolviendo de forma efectiva las situaciones cotidianas. Se observa potencial de desarrollo que conviene acompañar para alcanzar un desempeño más avanzado."
+    ],
+    bajo:[
+      "Muestra un desarrollo todavía incipiente en {c}, por lo que requiere acompañamiento para consolidarlo. Con apoyo, práctica y seguimiento, puede ir fortaleciendo esta competencia de manera progresiva.",
+      "Presenta algunas dificultades en {c}, que conviene reforzar mediante apoyo y experiencia guiada. Es un aspecto a trabajar de forma prioritaria para alcanzar el desempeño esperado en el cargo.",
+      "Requiere fortalecer {c}, que se encuentra en una etapa inicial de desarrollo. Un plan de acompañamiento y práctica sostenida le permitiría avanzar de manera concreta en este punto.",
+      "Evidencia un manejo aún limitado de {c}, que constituye un área prioritaria de desarrollo. Con orientación y oportunidades de práctica, puede ir mejorando gradualmente."
+    ]
+  };
+  var arr = V[nivel]; if (!arr) return "";
+  var h = hashStr((seed||"") + "|ext|" + nl);
+  h = (h ^ (h >>> 13) ^ (h >>> 7) ^ (h >>> 3)) >>> 0;
+  var idx = h % arr.length;
+  return arr[idx].split("{c}").join(nl);
+}
+function expandirFortalezasExt(texto, seed){
+  texto = (texto||"").trim();
+  if (!texto) return "";
+  var items = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+  if (items.length === 1 && (items[0].match(/,/g)||[]).length >= 1) {
+    items = items[0].split(/,\s*/).map(function(b){return b.trim();}).filter(Boolean);
+  }
+  return items.map(function(it){
+    var info = detectarNivel(it);
+    return info ? generarLineaCompExt(info.comp, info.nivel, seed) : it.replace(/[.;]\s*$/,"");
+  }).filter(Boolean).join("\n");
+}
 // Render en viñetas (Dashboard)
 function fortalezasNivel(texto, seed){
   var exp = expandirFortalezas(texto, seed);
@@ -889,7 +932,7 @@ function construirInforme(d) {
       '<div class="st">Conclusión</div><div class="concl">'+aParrafos(d.conclusion)+'</div>'
     )+
     (d.tipo === "transitorio" ?
-      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezas(d.fortalezas, d.nombre))+'</div>'
+      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezasExt(d.fortalezas, d.nombre))+'</div>'
     : "")+
     '</div>'+
     '<div class="footer">Documento generado por Deneb Evaluaciones · Confidencial</div>'+
