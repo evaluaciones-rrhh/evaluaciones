@@ -2034,15 +2034,42 @@ function irA(pag) {
 
 // ── INFORMES GUARDADOS ──
 var informesData = [];
+
+// Ejemplos para presentación: se muestran solo si no hay informes reales guardados.
+var INFORMES_DEMO = [
+  {
+    fecha:"18-06-2026, 10:42", nombre:"Camila Rojas Vergara", rut:"18.452.901-7",
+    cargo:"Jefa de Operaciones", categoria:"Recomendable", tipo:"completo", evaluador:"Tarina Franco",
+    conclusion:"Camila presenta un perfil sólido y bien ajustado a las exigencias del cargo de Jefa de Operaciones. Muestra capacidad de liderazgo, orientación a resultados y un manejo emocional estable bajo presión. Se considera recomendable para avanzar a la etapa final del proceso.",
+    fortalezas:"Liderazgo y conducción de equipos.\nOrientación al logro y foco en resultados.\nComunicación clara y asertiva.",
+    areas:"Delegación: tiende a asumir tareas que podría distribuir.\nManejo de la frustración ante cambios de última hora."
+  },
+  {
+    fecha:"16-06-2026, 09:15", nombre:"Sebastián Díaz Morales", rut:"20.114.553-2",
+    cargo:"Operario de Bodega", categoria:"Recomendable con observaciones", tipo:"transitorio", evaluador:"Tarina Franco",
+    conclusion:"Sebastián cumple con los requisitos operativos del cargo y muestra disposición al trabajo y respeto por las normas de seguridad. Se recomienda con observaciones, sugiriendo acompañamiento inicial en el ritmo de trabajo y la organización de tareas.",
+    fortalezas:"Compromiso y responsabilidad.\nRespeto por las normas de seguridad.\nDisposición al trabajo en equipo.",
+    areas:"Ritmo de trabajo bajo alta demanda.\nOrganización y priorización de tareas."
+  },
+  {
+    fecha:"12-06-2026, 16:30", nombre:"Valentina Soto Herrera", rut:"17.985.210-4",
+    cargo:"Ejecutiva Comercial", categoria:"Recomendable", tipo:"completo", evaluador:"Tarina Franco",
+    conclusion:"Valentina muestra un perfil comercial dinámico, con habilidades de comunicación y orientación al cliente destacadas. Su motivación de logro y capacidad de adaptación la hacen recomendable para el cargo de Ejecutiva Comercial.",
+    fortalezas:"Habilidades de comunicación y persuasión.\nOrientación al cliente y a la venta.\nAdaptabilidad y energía.",
+    areas:"Tolerancia a tareas administrativas y de registro.\nManejo del detalle en el seguimiento post-venta."
+  }
+];
+
 async function cargarInformes(){
   var cont = document.getElementById("lista-informes");
   if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
-    informesData = (data && data.informes) ? data.informes : [];
+    informesData = (data && data.informes && data.informes.length) ? data.informes : INFORMES_DEMO.slice();
     renderInformes(informesData);
   } catch(e){
-    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los informes. Intenta de nuevo.</div>";
+    informesData = INFORMES_DEMO.slice();   // para la presentación, igual muestra ejemplos
+    renderInformes(informesData);
   }
 }
 
