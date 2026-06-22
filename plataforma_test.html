@@ -1466,7 +1466,10 @@ tbody tr:hover td { background: #fdf9f6; }
       <div style="background:#fff;max-width:720px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
         <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
           <div><div id="mi-nombre" style="font-size:18px;font-weight:700;"></div><div id="mi-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
-          <button onclick="cerrarInforme()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button onclick="descargarInformeActual()" style="background:var(--coral);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;padding:8px 14px;">⬇ Descargar</button>
+            <button onclick="cerrarInforme()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+          </div>
         </div>
         <div id="mi-cuerpo" style="padding:24px;max-height:70vh;overflow:auto;"></div>
       </div>
@@ -2034,12 +2037,14 @@ function irA(pag) {
 
 // ── INFORMES GUARDADOS ──
 var informesData = [];
+var informeAbierto = -1;
 
 // Ejemplos para presentación: se muestran solo si no hay informes reales guardados.
 var INFORMES_DEMO = [
   {
     fecha:"18-06-2026, 10:42", nombre:"Camila Rojas Vergara", rut:"18.452.901-7",
-    cargo:"Jefa de Operaciones", categoria:"Recomendable", tipo:"completo", evaluador:"Tarina Franco",
+    cargo:"Jefa de Operaciones", categoria:"Recomendable", tipo:"dashboard", evaluador:"Tarina Franco",
+    dashboardHTML:"<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"><title>Dashboard — Camila Rojas Vergara</title><style>*{box-sizing:border-box;}body{font-family:\"Segoe UI\",system-ui,sans-serif;background:#ece7dd;color:#1c1c1c;line-height:1.6;padding:28px 16px;margin:0;}.dash{max-width:680px;margin:0 auto;background:#fff;border:1px solid #d4d0c6;border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(43,58,71,.14);}.dhead{background:#2b3a47;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;}.dhead-t{color:#fff;font-size:18px;font-weight:300;}.dhead-d{color:rgba(255,255,255,.6);font-size:11px;}.dcand{padding:18px 24px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}.dini{width:50px;height:50px;border-radius:50%;background:#f7f4ee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#2b3a47;flex-shrink:0;}.dnom{font-size:17px;font-weight:700;}.dsub{font-size:12.5px;color:#6b7280;}.dbody{padding:20px 24px;}.dst{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#2b3a47;margin:0 0 10px;}.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:12.5px;margin-bottom:20px;}.dgrid .k{color:#6b7280;}.dcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px;}.dbox{border:1px solid #d4d0c6;border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.65;margin-bottom:20px;}.dcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}.dcol-f{border-left:3px solid #1a6a4a;background:#e8f5ee;border-radius:0 8px 8px 0;padding:13px 16px;}.dcol-a{border-left:3px solid #c99a2e;background:#fdf5e0;border-radius:0 8px 8px 0;padding:13px 16px;}.dcol-f .dst{color:#1a6a4a;}.dcol-a .dst{color:#9a7510;}.dtxt{font-size:12.5px;line-height:1.6;color:#1c1c1c;}.dcol ul{margin:0;padding-left:17px;font-size:12.5px;}.dconcl{font-size:13px;line-height:1.7;background:#f7f4ee;border-left:3px solid #e57a5f;border-radius:0 8px 8px 0;padding:14px 18px;}.dcomp{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}.comp-it{border:1px solid #d4d0c6;border-radius:8px;padding:11px 14px;}.comp-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}.comp-nm{font-size:13.5px;font-weight:700;color:#2b3a47;}.comp-bd{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 10px;border-radius:20px;color:#fff;white-space:nowrap;}.cn-alto{background:#1a6a4a;}.cn-medio{background:#c99a2e;}.cn-bajo{background:#b3492f;}.comp-ln{font-size:12.5px;line-height:1.6;color:#1c1c1c;}.dfoot{text-align:center;font-size:10px;color:#aaa;padding:14px;border-top:1px solid #eee;}.btn-pdf{position:fixed;top:20px;right:20px;background:#e57a5f;color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}.btn-pdf:hover{background:#d4694f;}@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}</style></head><body><button class=\"btn-pdf\" onclick=\"window.print()\">⬇ Descargar PDF</button><div class=\"dash\"><div class=\"dhead\"><div><div style=\"display:inline-flex;align-items:flex-start;font-weight:800;font-size:26px;letter-spacing:-.02em;color:#fff;\">deneb<svg viewBox=\"0 0 100 100\" style=\"width:11px;height:11px;margin-left:3px;margin-top:1px;\"><path d=\"M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z\" fill=\"#e57a5f\"/></svg></div><div style=\"font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px;\">evaluaciones</div></div><div style=\"text-align:right;\"><div class=\"dhead-t\">Reporte de Candidato</div><div class=\"dhead-d\">18-06-2026</div></div></div><div class=\"dcand\"><div class=\"dini\">CR</div><div style=\"flex:1;min-width:160px;\"><div class=\"dnom\">Camila Rojas Vergara</div><div class=\"dsub\">Jefa de Operaciones · RUT 18.452.901-7</div></div><span style=\"display:inline-block;background:#e8f5ee;color:#1a6a4a;font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;white-space:nowrap;\">Recomendable</span></div><div class=\"dbody\"><div class=\"dgrid\"><div><span class=\"k\">Estudios:</span> Ingeniería en Administración</div><div><span class=\"k\">Renta:</span> $1.800.000</div><div><span class=\"k\">Entrevistador:</span> Tarina Franco</div><div><span class=\"k\">Fecha:</span> 18-06-2026</div></div><div class=\"dst\">Test aplicados</div><div class=\"dcards\"><div style=\"background:#f7f5f0;border-radius:10px;padding:13px 15px;border-left:3px solid #2b3a47;\"><div style=\"font-size:14px;font-weight:600;color:#2b3a47;\">Personalidad 16PF</div><div style=\"font-size:10px;color:#aaa;margin-top:3px;\">15-06-2026</div></div><div style=\"background:#f7f5f0;border-radius:10px;padding:13px 15px;border-left:3px solid #2b3a47;\"><div style=\"font-size:14px;font-weight:600;color:#2b3a47;\">Estilos de Liderazgo (CEAL)</div><div style=\"font-size:10px;color:#aaa;margin-top:3px;\">15-06-2026</div></div><div style=\"background:#f7f5f0;border-radius:10px;padding:13px 15px;border-left:3px solid #2b3a47;\"><div style=\"font-size:14px;font-weight:600;color:#2b3a47;\">Habilidad Cognitiva (Wonderlic)</div><div style=\"font-size:10px;color:#aaa;margin-top:3px;\">14-06-2026</div></div></div><div class=\"dst\">Experiencia laboral</div><div class=\"dbox\" style=\"margin-bottom:20px;\"><ul style=\"margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;color:#1c1c1c;\"><li style=\"margin-bottom:5px;\">Supervisora de Operaciones en Logística del Pacífico (2021–2025)</li><li style=\"margin-bottom:5px;\">Coordinadora de Bodega en Comercial Andes (2018–2021)</li></ul></div><div class=\"dst\">Observaciones de la entrevista</div><div class=\"dbox\"><p style=\"margin:0 0 10px;\">Manifiesta alta motivación por asumir un rol de mayor responsabilidad y liderazgo. Se muestra segura, con expectativas claras de desarrollo dentro de la organización y disposición a comprometerse con los objetivos del área.</p></div><div class=\"dcols\"><div class=\"dcol dcol-f\"><div class=\"dst\">Fortalezas</div><div class=\"dtxt\"><ul style=\"margin:0;padding-left:18px;line-height:1.7;\"><li style=\"margin-bottom:6px;\">Maneja liderazgo con seguridad y autonomía, sobresaliendo en este aspecto.</li><li style=\"margin-bottom:6px;\">Maneja comunicación de manera correcta en lo cotidiano, con espacio para seguir desarrollándose.</li><li style=\"margin-bottom:6px;\">Maneja orientación a resultados con seguridad y autonomía, sobresaliendo en este aspecto.</li></ul></div></div><div class=\"dcol dcol-a\"><div class=\"dst\">Aspectos a considerar</div><div class=\"dtxt\"><ul style=\"margin:0;padding-left:18px;line-height:1.7;\"><li style=\"margin-bottom:5px;\">Delegación de tareas operativas en su equipo</li><li style=\"margin-bottom:5px;\">Manejo de la frustración ante cambios de última hora</li></ul></div></div></div><div class=\"dst\">Conclusión</div><div class=\"dconcl\"><p style=\"margin:0 0 10px;\">Camila presenta un perfil sólido y bien ajustado a las exigencias del cargo de Jefa de Operaciones. Muestra capacidad de liderazgo, orientación a resultados y un manejo emocional estable bajo presión.</p><p style=\"margin:0 0 10px;\">Se considera recomendable para avanzar a la etapa final del proceso de selección.</p></div></div><div class=\"dfoot\">Documento generado por Deneb Evaluaciones · Confidencial</div></div></body></html>",
     conclusion:"Camila presenta un perfil sólido y bien ajustado a las exigencias del cargo de Jefa de Operaciones. Muestra capacidad de liderazgo, orientación a resultados y un manejo emocional estable bajo presión. Se considera recomendable para avanzar a la etapa final del proceso.",
     fortalezas:"Liderazgo y conducción de equipos.\nOrientación al logro y foco en resultados.\nComunicación clara y asertiva.",
     areas:"Delegación: tiende a asumir tareas que podría distribuir.\nManejo de la frustración ante cambios de última hora."
@@ -2117,6 +2122,7 @@ function filtrarInformes(){
 function verInforme(i){
   var inf = informesData[i];
   if (!inf) return;
+  informeAbierto = i;
   document.getElementById("mi-nombre").textContent = inf.nombre || "—";
   var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Dashboard" : "Cargos internos");
   document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
@@ -2137,6 +2143,72 @@ function verInforme(i){
 
 function cerrarInforme(){
   document.getElementById("modal-informe").style.display = "none";
+}
+
+function descargarInformeActual(){
+  if (informeAbierto < 0 || !informesData[informeAbierto]) return;
+  descargarInforme(informesData[informeAbierto]);
+}
+
+function descargarInforme(inf){
+  // Si el informe trae su dashboard ya armado (ej. demo), se descarga ese modelo completo
+  if (inf.dashboardHTML){
+    var wd = window.open("", "_blank");
+    if (!wd){ alert("Habilita las ventanas emergentes para descargar el informe."); return; }
+    wd.document.write(inf.dashboardHTML);
+    wd.document.close();
+    return;
+  }
+  var esCygnus = (inf.tipo === "transitorio");
+  var acento = esCygnus ? "#cc5223" : "#e57a5f";
+  var oscuro = esCygnus ? "#4a4a4a" : "#2b3a47";
+  var marca  = esCygnus ? "grupo cygnus" : "deneb";
+  var sub    = esCygnus ? "servicios transitorios" : "evaluaciones";
+  var tipoTxt = esCygnus ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Resumen ejecutivo" : "Cargos internos");
+  function lista(texto){
+    var items = (texto||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+    if (!items.length) return "<p style='color:#999;'>—</p>";
+    return "<ul>"+items.map(function(s){return "<li>"+s+"</li>";}).join("")+"</ul>";
+  }
+  function parrafos(texto){
+    var ps = (texto||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+    if (!ps.length) return "<p style='color:#999;'>—</p>";
+    return ps.map(function(s){return "<p>"+s+"</p>";}).join("");
+  }
+  var html = "<!doctype html><html><head><meta charset='utf-8'><title>Informe - "+(inf.nombre||"")+"</title>"+
+    "<link href='https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap' rel='stylesheet'>"+
+    "<style>"+
+    "*{box-sizing:border-box;} body{font-family:Montserrat,Arial,sans-serif;color:#1f2a33;margin:0;padding:0;}"+
+    ".wrap{max-width:760px;margin:0 auto;padding:34px 40px;}"+
+    ".top{border-bottom:3px solid "+acento+";padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;}"+
+    ".marca{font-size:26px;font-weight:800;color:"+oscuro+";letter-spacing:-.5px;}"+
+    ".sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;}"+
+    ".meta{text-align:right;font-size:12px;color:#666;}"+
+    "h1{font-size:22px;margin:0 0 4px;color:"+oscuro+";}"+
+    ".cargo{font-size:13px;color:#666;margin-bottom:16px;}"+
+    ".badge{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:"+acento+";border-radius:20px;padding:5px 16px;margin-bottom:8px;}"+
+    "h2{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:"+acento+";margin:22px 0 8px;border-bottom:1px solid #eee;padding-bottom:4px;}"+
+    "p{font-size:13.5px;line-height:1.6;margin:0 0 8px;} ul{margin:0;padding-left:20px;} li{font-size:13.5px;line-height:1.6;margin-bottom:4px;}"+
+    ".pie{margin-top:30px;border-top:1px solid #eee;padding-top:12px;font-size:11px;color:#999;}"+
+    "@media print{.noprint{display:none;} body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}"+
+    "</style></head><body><div class='wrap'>"+
+    "<div class='top'><div><div class='marca'>"+marca+"</div><div class='sub'>"+sub+"</div></div>"+
+    "<div class='meta'>Informe psicolaboral<br>"+(inf.fecha||"")+"</div></div>"+
+    "<h1>"+(inf.nombre||"—")+"</h1>"+
+    "<div class='cargo'>"+(inf.cargo||"")+(inf.rut?" · "+inf.rut:"")+" · "+tipoTxt+"</div>"+
+    "<div class='badge'>"+(inf.categoria||"—")+"</div>"+
+    "<h2>Conclusión</h2>"+parrafos(inf.conclusion)+
+    "<h2>Fortalezas</h2>"+lista(inf.fortalezas)+
+    "<h2>Áreas de desarrollo</h2>"+lista(inf.areas)+
+    (inf.evaluador ? "<div class='pie'>Evaluador: "+inf.evaluador+" · Deneb Evaluaciones</div>" : "<div class='pie'>Deneb Evaluaciones</div>")+
+    "<button class='noprint' onclick='window.print()' style='margin-top:24px;background:"+acento+";color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;'>⬇ Guardar como PDF</button>"+
+    "</div>"+
+    "<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},400);};<\/scr"+"ipt>"+
+    "</body></html>";
+  var w = window.open("", "_blank");
+  if (!w) { alert("Habilita las ventanas emergentes para descargar el informe."); return; }
+  w.document.write(html);
+  w.document.close();
 }
 
 // CARGAR DATOS
