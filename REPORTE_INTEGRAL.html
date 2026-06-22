@@ -192,6 +192,7 @@
   </div>
 
   <button class="btn-main" onclick="generarInforme()">📄 Generar informe</button>
+  <div id="ind-guardado" style="text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#2e7d32;opacity:0;transition:opacity .3s;">✓ Informe guardado</div>
 
 </div>
 
@@ -528,6 +529,7 @@ async function generarConclusion() {
   if (tipoReporteActual === "dashboard") {
     document.getElementById("txt-conclusion").value = conclusionDashboard(nombre, cargo, cat, document.getElementById("txt-aspectos").value);
     est.textContent = "✓ Listo";
+    guardarInformeAuto();   // guarda en segundo plano
     return;
   }
 
@@ -541,6 +543,7 @@ async function generarConclusion() {
     });
     document.getElementById("txt-conclusion").value = con;
     est.textContent = "✓ Listo";
+    guardarInformeAuto();   // guarda en segundo plano
   } catch(e) {
     est.textContent = "✗ Error: " + e.message;
   }
@@ -656,8 +659,48 @@ function generarInforme() {
   var w = window.open("", "_blank");
   w.document.write(html);
   w.document.close();
+  guardarInformeAuto();   // guarda en segundo plano
 }
 function val(id){ return (document.getElementById(id).value || "").trim(); }
+
+// ── Guardado automático del informe (segundo plano, sin botón) ──
+function guardarInformeAuto(){
+  try {
+    var g = function(id){ var el = document.getElementById(id); return el ? (el.value || "") : ""; };
+    var nombre = g("d-nombre").trim();
+    if (!nombre) return;   // sin nombre no guarda
+    var solicitante = "";
+    try { solicitante = sessionStorage.getItem("cygnus_user") || ""; } catch(e){}
+    var payload = {
+      action: "guardarInforme",
+      nombre: nombre,
+      rut: g("d-rut"),
+      cargo: g("d-cargo"),
+      categoria: g("d-categoria"),
+      conclusion: g("txt-conclusion"),
+      fortalezas: g("txt-fortalezas"),
+      areas: g("txt-aspectos"),
+      evaluador: g("d-entrevistador"),
+      tipo: (typeof tipoReporteActual !== "undefined" ? tipoReporteActual : ""),
+      solicitante: solicitante
+    };
+    fetch(APPS_TESTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },   // text/plain evita preflight CORS
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); })
+      .then(function(j){ if (j && j.ok) marcarGuardado(); })
+      .catch(function(){ /* silencioso: si falla, no molesta al evaluador */ });
+  } catch(e){}
+}
+
+function marcarGuardado(){
+  var el = document.getElementById("ind-guardado");
+  if (!el) return;
+  el.style.opacity = "1";
+  clearTimeout(window.__indGuardadoTmr);
+  window.__indGuardadoTmr = setTimeout(function(){ el.style.opacity = "0"; }, 3500);
+}
 
 // ── Buscar tests rendidos del candidato (búsqueda rápida por RUT) ──
 var testsEncontrados = [];
