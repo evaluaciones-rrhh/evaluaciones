@@ -2124,7 +2124,7 @@ function verInforme(i){
   if (!inf) return;
   informeAbierto = i;
   document.getElementById("mi-nombre").textContent = inf.nombre || "—";
-  var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Dashboard" : "Informe extendido");
+  var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
   document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
   function bloque(titulo, texto){
     if (!texto || !texto.trim()) return "";
@@ -2164,7 +2164,7 @@ function descargarInforme(inf){
   var oscuro = esCygnus ? "#4a4a4a" : "#2b3a47";
   var marca  = esCygnus ? "grupo cygnus" : "deneb";
   var sub    = esCygnus ? "servicios transitorios" : "evaluaciones";
-  var tipoTxt = esCygnus ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Resumen ejecutivo" : "Informe extendido");
+  var tipoTxt = esCygnus ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
   function lista(texto){
     var items = (texto||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
     if (!items.length) return "<p style='color:#999;'>—</p>";
