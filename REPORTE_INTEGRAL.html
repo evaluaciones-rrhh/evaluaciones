@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Integral — Deneb Evaluaciones</title>
+<style>
+  :root{
+    --coral:#e57a5f; --coral-dark:#c95d43; --pizarra:#2b3a47; --pizarra2:#3b4d5c;
+    --bg:#ece7dd; --surface:#ffffff; --border:#d4d0c6;
+    --ink:#22282e; --muted:#6b7280; --ok:#1a6a4a; --ok-bg:#e8f5ee;
+    --font:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.55;padding:24px 16px;}
+  .wrap{max-width:820px;margin:0 auto;}
+  .hidden{display:none !important;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+  .deneb-logo{display:inline-flex;align-items:flex-start;font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1;color:var(--pizarra);}
+  .deneb-logo svg{width:13px;height:13px;margin-left:3px;margin-top:1px;}
+  .deneb-sub{font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+
+  .card{background:#fff;border:1px solid var(--border);border-top:4px solid var(--coral);border-radius:10px;box-shadow:0 6px 24px rgba(43,58,71,.12);padding:24px 26px;margin-bottom:18px;}
+  .card h2{font-size:15px;color:var(--pizarra);margin-bottom:16px;font-weight:800;display:flex;align-items:center;gap:8px;}
+  .card h2 .badge{background:var(--coral);color:#fff;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;}
+
+  label{display:block;font-size:12px;font-weight:700;color:var(--pizarra);margin:12px 0 5px;}
+  input[type=text],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:7px;font-size:14px;font-family:var(--font);background:#fff;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--coral);}
+  textarea{resize:vertical;min-height:90px;line-height:1.6;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+  .voz-row{display:flex;align-items:center;gap:10px;margin:4px 0 8px;}
+  .btn-voz{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;background:var(--coral);color:#fff;transition:all .15s;}
+  .btn-voz:hover{background:var(--coral-dark);}
+  .btn-voz.grabando{background:#c0392b;animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+  .voz-estado{font-size:12px;color:var(--muted);}
+
+  .btn-cv{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border:1.5px solid var(--coral);border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;color:var(--coral-dark);}
+  .cv-drop{border:2px dashed var(--coral);border-radius:10px;padding:22px 18px;text-align:center;cursor:pointer;background:#fdf7f4;transition:background .15s,border-color .15s;display:flex;align-items:center;justify-content:center;gap:14px;}
+  .cv-drop:hover{background:#fbeee8;}
+  .cv-drop.dragover{background:#f8e2d9;border-color:var(--coral-dark);}
+  .cv-drop-icon{font-size:30px;}
+  .cv-drop-txt{text-align:left;font-size:13px;color:var(--pizarra);line-height:1.4;}
+  .cv-drop-txt span{font-size:12px;color:var(--muted);}
+  .btn-cv:hover{background:#fef6f4;}
+
+  .sub-sec{border-left:3px solid #eee;padding-left:14px;margin:16px 0;}
+  .sub-sec .tit{font-size:13px;font-weight:700;color:var(--pizarra2);margin-bottom:2px;}
+  .sub-sec .hint{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .tabs-reporte{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .tab-rep{padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .tab-rep:hover{border-color:var(--coral);color:var(--coral-dark);}
+  .tab-rep.activo{background:var(--pizarra);color:#fff;border-color:var(--pizarra);}
+
+  .btn-main{display:block;width:100%;padding:14px;background:var(--pizarra);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
+  .btn-main:hover{background:var(--pizarra2);}
+  .btn-main:disabled{opacity:.5;cursor:not-allowed;}
+
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  .alerta-config{background:#fdf5e0;border-left:3px solid #d4830a;border-radius:0 6px 6px 0;padding:12px 16px;font-size:13px;color:#7a5c10;margin-bottom:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div>
+      <div class="deneb-logo">deneb<svg viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div>
+      <div class="deneb-sub">evaluaciones · reporte integral</div>
+    </div>
+  </div>
+
+  <div id="alerta-config" class="alerta-config hidden">⚠️ Falta configurar la URL del Apps Script. Abre el archivo y pega tu URL donde dice APPS_REPORTE_URL.</div>
+
+  <!-- PESTAÑAS: TIPO DE REPORTE -->
+  <div class="tabs-reporte">
+    <button class="tab-rep activo" data-tipo="completo" onclick="cambiarTipoReporte('completo')">Reporte Cargos Internos</button>
+    <button class="tab-rep" data-tipo="transitorio" onclick="cambiarTipoReporte('transitorio')">Reporte Servicios Transitorios</button>
+    <button class="tab-rep" data-tipo="dashboard" onclick="cambiarTipoReporte('dashboard')">Reporte Dashboard</button>
+  </div>
+
+  <!-- 1. DATOS -->
+  <div class="card" id="sec-datos">
+    <h2><span class="badge">1</span> Datos del candidato</h2>
+    <div class="grid2">
+      <div><label>Nombre completo</label><input type="text" id="d-nombre" placeholder="Ej: Constanza Correa"></div>
+      <div><label>Cargo postulado</label><input type="text" id="d-cargo" placeholder="Ej: Jefe Zonal"></div>
+      <div><label>RUT</label><input type="text" id="d-rut" placeholder="Ej: 17.598.072-5"></div>
+      <div><label>Estudios</label><input type="text" id="d-estudios" placeholder="Ej: Ingeniería..."></div>
+      <div><label>Fecha de entrevista</label><input type="text" id="d-fecha" placeholder="Ej: 29-05-2026"></div>
+      <div><label>Entrevistador</label><input type="text" id="d-entrevistador" placeholder="Nombre del evaluador"></div>
+      <div><label>Pretensiones de renta</label><input type="text" id="d-renta" placeholder="Ej: $2.500.000 líquidos"></div>
+    </div>
+    <div class="voz-row" style="margin-top:14px;" id="bloque-buscar-tests">
+      <button class="btn-cv" onclick="buscarTests()">🔍 Buscar tests rendidos del candidato</button>
+      <span class="voz-estado" id="est-tests"></span>
+    </div>
+    <div id="lista-tests" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- 2. OBSERVACIONES DE LA ENTREVISTA -->
+  <div class="card">
+    <h2><span class="badge">2</span> Observaciones de la entrevista</h2>
+
+    <div class="sub-sec" id="subsec-actitud">
+      <div class="tit">Actitud del candidato</div>
+      <div class="hint">Graba tu observación hablando natural. La plataforma la pasa a lenguaje formal.</div>
+      <div class="voz-row">
+        <button class="btn-voz" data-campo="actitud" data-tipo="actitud" onclick="toggleGrab(this)">🎤 Grabar</button>
+        <button class="btn-voz" onclick="subirAudio('actitud','actitud')" style="background:#6b7c8a;">📁 Audio</button>
+        <button class="btn-voz" onclick="procesarTexto('actitud','actitud')" style="background:#8a7c6b;">✍️ Escribir</button>
+        <span class="voz-estado" id="est-actitud"></span>
+      </div>
+      <textarea id="txt-actitud" placeholder="Aquí aparecerá el texto formal (editable)..."></textarea>
+    </div>
+
+    <div class="sub-sec">
+      <div class="tit">Motivación</div>
+      <div class="hint">¿Qué motiva al candidato a postular? Grábalo.</div>
+      <div class="voz-row">
+        <button class="btn-voz" data-campo="motivacion" data-tipo="motivacion" onclick="toggleGrab(this)">🎤 Grabar</button>
+        <button class="btn-voz" onclick="subirAudio('motivacion','motivacion')" style="background:#6b7c8a;">📁 Audio</button>
+        <button class="btn-voz" onclick="procesarTexto('motivacion','motivacion')" style="background:#8a7c6b;">✍️ Escribir</button>
+        <span class="voz-estado" id="est-motivacion"></span>
+      </div>
+      <textarea id="txt-motivacion" placeholder="Aquí aparecerá el texto formal (editable)..."></textarea>
+    </div>
+
+    <div class="sub-sec">
+      <div class="tit">Experiencia (desde el CV)</div>
+      <div class="hint">Arrastra el CV en PDF aquí, o haz clic para buscarlo. La plataforma extrae y resume la experiencia.</div>
+      <div id="cv-drop" class="cv-drop" onclick="document.getElementById('cv-file').click()">
+        <div class="cv-drop-icon">📄</div>
+        <div class="cv-drop-txt"><strong>Arrastra el CV aquí</strong><br><span>o haz clic para seleccionar el PDF</span></div>
+        <input type="file" id="cv-file" accept="application/pdf" style="display:none;" onchange="procesarCV(this)">
+      </div>
+      <span class="voz-estado" id="est-cv" style="display:block;margin-top:8px;"></span>
+      <textarea id="txt-experiencia" placeholder="Aquí aparecerá el resumen de experiencia (editable)..."></textarea>
+    </div>
+  </div>
+
+  <!-- 3. FORTALEZAS -->
+  <div class="card">
+    <h2><span class="badge">3</span> Fortalezas</h2>
+    <div class="hint" style="font-size:11px;color:var(--muted);margin-bottom:6px;">Escribe o dicta cada competencia con su nivel (ej: "liderazgo alto, comunicación medio, trabajo en equipo bajo"). El informe arma una línea por cada una según el nivel. Lo que escribas sin nivel sale tal cual.</div>
+    <div class="voz-row">
+      <button class="btn-voz" data-campo="fortalezas" data-tipo="fortalezas" onclick="toggleGrab(this)">🎤 Grabar</button>
+      <button class="btn-voz" onclick="subirAudio('fortalezas','fortalezas')" style="background:#6b7c8a;">📁 Audio</button>
+      <button class="btn-voz" onclick="procesarTexto('fortalezas','fortalezas')" style="background:#8a7c6b;">✍️ Escribir</button>
+      <span class="voz-estado" id="est-fortalezas"></span>
+    </div>
+    <textarea id="txt-fortalezas" placeholder="Aquí aparecerá el párrafo de fortalezas (editable)..."></textarea>
+  </div>
+
+  <!-- 4. ASPECTOS A CONSIDERAR -->
+  <div class="card" id="sec-aspectos">
+    <h2><span class="badge">4</span> Aspectos a considerar</h2>
+    <div class="voz-row">
+      <button class="btn-voz" data-campo="aspectos" data-tipo="aspectos" onclick="toggleGrab(this)">🎤 Grabar</button>
+      <button class="btn-voz" onclick="subirAudio('aspectos','aspectos')" style="background:#6b7c8a;">📁 Audio</button>
+      <button class="btn-voz" onclick="procesarTexto('aspectos','aspectos')" style="background:#8a7c6b;">✍️ Escribir</button>
+      <span class="voz-estado" id="est-aspectos"></span>
+    </div>
+    <textarea id="txt-aspectos" placeholder="Aquí aparecerá el párrafo de aspectos a considerar (editable)..."></textarea>
+  </div>
+
+  <!-- 5. CONCLUSIÓN -->
+  <div class="card" id="sec-conclusion">
+    <h2><span class="badge">5</span> Conclusión</h2>
+    <label>Categoría de recomendación</label>
+    <select id="d-categoria">
+      <option value="">Selecciona una categoría...</option>
+      <option value="recomendable">Recomendable</option>
+      <option value="recomendable_obs">Recomendable con observaciones</option>
+      <option value="no_recomendable">No recomendable</option>
+    </select>
+    <div class="voz-row" style="margin-top:10px;">
+      <button class="btn-voz" id="btn-gen-concl" onclick="generarConclusion()" style="background:var(--pizarra);">✨ Generar conclusión</button>
+      <span class="voz-estado" id="est-conclusion"></span>
+    </div>
+    <textarea id="txt-conclusion" placeholder="Aquí aparecerá la conclusión generada (editable)..."></textarea>
+  </div>
+
+  <button class="btn-main" onclick="generarInforme()">📄 Generar informe</button>
+
+</div>
+
+<script>
+var LOGO_CYGNUS = "data:image/png;base64,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";
+var LOGO_POSTULA = "data:image/png;base64,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";
+// ⬇️ PEGA AQUÍ la URL del Apps Script del Reporte Integral (la que termina en /exec)
+const APPS_REPORTE_URL = "https://script.google.com/macros/s/AKfycbxrc7QN_CuEPB61gkB4pT_5jamJpVG0AK2azpxjK81HCjNtJgXKfEKYzo-1PfZP5hFy/exec";
+// URL del Apps Script de los TESTS (para traer los resultados del candidato)
+const APPS_TESTS_URL = "https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec";
+
+if (!APPS_REPORTE_URL || APPS_REPORTE_URL.indexOf("AKfycb") === -1) {
+  document.getElementById("alerta-config").classList.remove("hidden");
+}
+
+// ── Llamada al Apps Script ──
+async function llamarApps(payload) {
+  var res = await fetch(APPS_REPORTE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },  // text/plain evita preflight CORS
+    body: JSON.stringify(payload)
+  });
+  var data = await res.json();
+  if (!data.ok) throw new Error(data.error || "Error en el servidor");
+  return data.texto;
+}
+
+// ── Grabación de voz por sección ──
+var grabando = {}, mediaRecorder = null, chunks = [], campoActivo = null;
+
+async function toggleGrab(btn) {
+  var campo = btn.getAttribute("data-campo");
+  var tipo  = btn.getAttribute("data-tipo");
+
+  if (btn.classList.contains("grabando")) {
+    // detener
+    mediaRecorder.stop();
+    btn.classList.remove("grabando");
+    btn.innerHTML = "🎤 Grabar";
+    return;
+  }
+
+  // iniciar
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    campoActivo = { campo: campo, tipo: tipo };
+    mediaRecorder.ondataavailable = function(e){ if (e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = function(){
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      procesarAudio(campoActivo.campo, campoActivo.tipo);
+    };
+    mediaRecorder.start();
+    btn.classList.add("grabando");
+    btn.innerHTML = "⏹ Detener";
+    document.getElementById("est-"+campo).textContent = "Grabando...";
+  } catch(e) {
+    alert("No se pudo acceder al micrófono: " + e.message);
+  }
+}
+
+// Reformula prosa libre (con integración de tests para fortalezas/aspectos)
+async function reformularProsa(textoProsa, tipo, est){
+  var textoParaIA = textoProsa;
+  if (tipo === "fortalezas" || tipo === "aspectos") {
+    var sel = testsSeleccionados();
+    if (sel.length) {
+      if (est) est.textContent = "Integrando tests...";
+      var interp = await traerInterpretacionTests(sel);
+      var infoTests = (tipo === "fortalezas") ? interp.fortalezas : interp.areas;
+      if (infoTests) {
+        textoParaIA = "Observación del evaluador:\n" + textoProsa +
+          "\n\n" + (tipo==="fortalezas" ? "Fortalezas detectadas en los tests" : "Aspectos a considerar detectados en los tests") + " (a integrar):\n" + infoTests;
+      }
+    }
+  }
+  var esDash = (tipoReporteActual === "dashboard");
+  return await llamarApps({
+    accion:"reformular", texto:textoParaIA, tipo:tipo,
+    modo: (esDash ? "dashboard" : "completo"),
+    nombre:document.getElementById("d-nombre").value,
+    cargo: (esDash ? "__DASH__" : document.getElementById("d-cargo").value)
+  });
+}
+
+// Procesa el texto de un campo. En FORTALEZAS: expande las competencias con nivel
+// (cliente, sin IA) y reformula solo el resto. En los demás campos: reformula todo.
+async function procesarCampoTexto(crudo, tipo, est){
+  if (tipo === "fortalezas") {
+    var items = crudo.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+    if (items.length === 1 && (items[0].match(/,/g)||[]).length >= 1) {
+      items = items[0].split(/,\s*/).map(function(b){return b.trim();}).filter(Boolean);
+    }
+    var seed = (document.getElementById("d-nombre") ? document.getElementById("d-nombre").value : "") || "";
+    var lineas = [], prosa = [];
+    items.forEach(function(it){
+      var info = detectarNivel(it);
+      if (info) lineas.push(generarLineaComp(info.comp, info.nivel, seed));
+      else prosa.push(it);
+    });
+    var prosaTxt = prosa.join(", ").trim();
+    var reformulado = prosaTxt ? await reformularProsa(prosaTxt, tipo, est) : "";
+    var todo = lineas.slice();
+    if (reformulado) todo.push(reformulado.trim());
+    return todo.join("\n");
+  }
+  return await reformularProsa(crudo, tipo, est);
+}
+
+function procesarAudio(campo, tipo, blobSubido) {
+  var est = document.getElementById("est-"+campo);
+  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Transcribiendo...";
+  var blob = blobSubido || new Blob(chunks, { type: "audio/webm" });
+  var mime = blob.type || "audio/m4a";
+  var reader = new FileReader();
+  reader.onloadend = async function(){
+    var base64 = reader.result.split(",")[1];
+    try {
+      // 1. Transcribir
+      var crudo = await llamarApps({ accion:"transcribir", audio:base64, mime:mime });
+      est.textContent = "Reformulando...";
+
+      // 2-3. Expandir competencias con nivel (si las hay) y reformular el resto
+      var formal = await procesarCampoTexto(crudo, tipo, est);
+      document.getElementById("txt-"+campo).value = formal;
+      est.textContent = "✓ Listo";
+    } catch(e) {
+      est.textContent = "✗ Error: " + e.message;
+    }
+  };
+  reader.readAsDataURL(blob);
+}
+
+// Subir un audio ya grabado (ej. desde el teléfono) y transcribirlo con el mismo flujo
+function subirAudio(campo, tipo) {
+  var inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "audio/*";
+  inp.onchange = function(){
+    var f = inp.files[0];
+    if (!f) return;
+    procesarAudio(campo, tipo, f);
+  };
+  inp.click();
+}
+
+// Escribir a mano y reformular con la MISMA lógica que un audio (transcribir se omite, ya es texto)
+async function procesarTexto(campo, tipo) {
+  var est = document.getElementById("est-"+campo);
+  var ta = document.getElementById("txt-"+campo);
+  var crudo = (ta.value||"").trim();
+  if (!crudo) { if(est) est.textContent = "✏ Escribe tus notas en el cuadro y vuelve a apretar."; ta.focus(); return; }
+  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Reformulando...";
+  try {
+    var formal = await procesarCampoTexto(crudo, tipo, est);
+    ta.value = formal;
+    est.textContent = "✓ Listo";
+  } catch(e) {
+    est.textContent = "✗ Error: " + e.message;
+  }
+}
+async function traerInterpretacionTests(sel) {
+  var rut = val("d-rut");
+  if (!rut) return { fortalezas:"", areas:"" };
+  var nombresTests = [];
+  sel.forEach(function(t){ if (nombresTests.indexOf(t.test) === -1) nombresTests.push(t.test); });
+  try {
+    var res = await fetch(APPS_TESTS_URL + "?action=getInterpretacionPorRut&rut=" + encodeURIComponent(rut) +
+      "&tests=" + encodeURIComponent(nombresTests.join(",")) + "&t=" + Date.now());
+    var data = await res.json();
+    if (!data.detalle || !data.detalle.length) return { fortalezas:"", areas:"" };
+    var fort = [], area = [];
+    data.detalle.forEach(function(d){
+      if (d.fortalezas && d.fortalezas.trim()) fort.push("- " + d.fortalezas.trim());
+      if (d.areas && d.areas.trim()) area.push("- " + d.areas.trim());
+    });
+    return { fortalezas: fort.join("\n"), areas: area.join("\n") };
+  } catch(e) { return { fortalezas:"", areas:"" }; }
+}
+
+// ── Procesar CV (PDF) ──
+async function procesarCV(inputOrFile) {
+  var file = inputOrFile && inputOrFile.files ? inputOrFile.files[0] : inputOrFile;
+  if (!file) return;
+  if (file.type !== "application/pdf") { document.getElementById("est-cv").textContent = "✗ El archivo debe ser un PDF"; return; }
+  var est = document.getElementById("est-cv");
+  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Leyendo PDF...";
+  try {
+    var texto = await extraerTextoPDF(file);
+    est.textContent = "Resumiendo experiencia...";
+    var exp = await llamarApps({
+      accion:"resumirCV", textoCV:texto,
+      nombre:document.getElementById("d-nombre").value,
+      cargo:document.getElementById("d-cargo").value
+    });
+    document.getElementById("txt-experiencia").value = exp;
+    est.textContent = "✓ Listo";
+  } catch(e) {
+    est.textContent = "✗ Error: " + e.message;
+  }
+}
+
+// Drag & drop del CV
+(function(){
+  function initDropCV(){
+    var dz = document.getElementById("cv-drop");
+    if (!dz) return;
+    ["dragenter","dragover"].forEach(function(ev){
+      dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.add("dragover"); });
+    });
+    ["dragleave","drop"].forEach(function(ev){
+      dz.addEventListener(ev, function(e){ e.preventDefault(); e.stopPropagation(); dz.classList.remove("dragover"); });
+    });
+    dz.addEventListener("drop", function(e){
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) procesarCV(f);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initDropCV);
+  else initDropCV();
+})();
+
+// Extrae texto de un PDF usando pdf.js
+async function extraerTextoPDF(file) {
+  if (!window.pdfjsLib) {
+    await new Promise(function(res, rej){
+      var s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+  var buf = await file.arrayBuffer();
+  var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+  var texto = "";
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var content = await page.getTextContent();
+    texto += content.items.map(function(it){ return it.str; }).join(" ") + "\n";
+  }
+  return texto;
+}
+
+// ── Conclusión breve para el Dashboard (formato fijo, sin IA) ──
+// Convierte el texto de "aspectos a considerar" en una frase corta en línea (quita viñetas/saltos)
+function aspectosInline(txt){
+  if (!txt) return "";
+  var t = String(txt).split(/\n+/).map(function(s){
+    return s.replace(/^[\s•\-\*\u2022\u00b7]+/, "").trim();
+  }).filter(Boolean);
+  var unido = t.join("; ").replace(/[.;\s]+$/, "").trim();
+  return unido;
+}
+
+// Librería de recomendaciones de desarrollo por competencia (cómo trabajar cada brecha)
+var DESARROLLO = [
+  { k:["liderazgo","liderar","conducción de equipo","conduccion de equipo"], s:"consolidar sus competencias de liderazgo mediante la asunción progresiva de responsabilidades de conducción de equipos, reforzada con retroalimentación sistemática de su jefatura y formación específica en liderazgo y gestión de personas" },
+  { k:["comunicación","comunicacion","comunicar","expresión oral","expresion oral"], s:"robustecer sus habilidades de comunicación a través de instancias estructuradas de exposición y presentación, con retroalimentación dirigida que fortalezca la claridad, la escucha activa y la asertividad" },
+  { k:["redacción","redaccion","comunicación escrita","comunicacion escrita","escrita"], s:"fortalecer la comunicación escrita mediante pautas de redacción profesional y retroalimentación sobre la estructura y claridad de sus documentos" },
+  { k:["conflicto"], s:"desarrollar el manejo constructivo de conflictos mediante el acompañamiento de su jefatura en situaciones reales y formación en técnicas de negociación y resolución de diferencias" },
+  { k:["delegación","delegacion","delegar"], s:"instalar el hábito de la delegación efectiva, comenzando por tareas acotadas y avanzando hacia responsabilidades de mayor alcance, con seguimiento y construcción progresiva de confianza en el equipo" },
+  { k:["presión","presion","estrés","estres","carga laboral"], s:"fortalecer la tolerancia a la presión incorporando estrategias de autorregulación, priorización y organización de la carga laboral, con acompañamiento cercano en los períodos de mayor exigencia" },
+  { k:["frustración","frustracion"], s:"fortalecer la tolerancia a la frustración mediante el acompañamiento ante obstáculos y el desarrollo de estrategias de afrontamiento orientadas a la solución" },
+  { k:["trabajo en equipo","colaboración","colaboracion","colaborativo"], s:"potenciar el trabajo colaborativo a través de su participación activa en proyectos transversales que requieran coordinación e interdependencia con otras áreas" },
+  { k:["organización","organizacion","planificación","planificacion","planificar","gestión del tiempo","gestion del tiempo"], s:"reforzar de manera sistemática la planificación y organización del trabajo mediante herramientas de gestión del tiempo, definición de prioridades y metodologías de seguimiento de tareas" },
+  { k:["detalle","minuciosidad","prolijidad","precisión","precision"], s:"elevar la orientación al detalle y la prolijidad incorporando protocolos de revisión, listas de verificación y controles de calidad en sus entregables" },
+  { k:["adaptabilidad","adaptación","adaptacion","flexibilidad","cambio"], s:"desarrollar la adaptabilidad mediante una exposición gradual a nuevos procesos, tecnologías y escenarios, acompañada de soporte durante las etapas iniciales de cambio" },
+  { k:["toma de decisiones","decisiones","decidir"], s:"fortalecer la toma de decisiones delegando progresivamente decisiones de mayor complejidad, con respaldo de su jefatura y análisis posterior de los resultados obtenidos" },
+  { k:["proactividad","iniciativa"], s:"estimular la proactividad y la iniciativa mediante la fijación de objetivos que demanden anticipación y autogestión, reconociendo de forma explícita los avances logrados" },
+  { k:["autoconfianza","confianza en sí","confianza en si","seguridad en sí","seguridad en si","autoestima"], s:"reforzar la autoconfianza a partir del logro de metas progresivas y alcanzables, sostenidas por retroalimentación positiva y reconocimiento de sus fortalezas" },
+  { k:["ansiedad","manejo emocional","autocontrol","regulación emocional","regulacion emocional","impulsividad"], s:"acompañar el desarrollo del autocontrol y la regulación emocional, con espacios de contención y, de ser necesario, derivación a apoyo especializado" },
+  { k:["autonomía","autonomia","independencia"], s:"promover la autonomía asignando responsabilidades que pueda resolver de manera independiente, reduciendo gradualmente la supervisión a medida que demuestre solvencia" },
+  { k:["técnic","tecnic"], s:"cerrar las brechas técnicas mediante un plan de capacitación específico y el acompañamiento de un referente experto del área que asegure la transferencia de conocimiento" },
+  { k:["negociación","negociacion","comercial","cierre de venta","ventas","venta"], s:"desarrollar las competencias comerciales y de negociación a través de formación especializada y acompañamiento en terreno que fortalezca la prospección, la argumentación y el cierre" },
+  { k:["logro","resultados","metas","orientación al logro","orientacion al logro"], s:"fortalecer la orientación al logro mediante la definición de objetivos medibles, indicadores de desempeño y seguimiento periódico de resultados" },
+  { k:["cliente","servicio","atención al cliente","atencion al cliente"], s:"consolidar la orientación al cliente mediante protocolos de servicio, estándares de atención y retroalimentación sistemática sobre la experiencia entregada" },
+  { k:["analítico","analitico","análisis","analisis","resolución de problemas","resolucion de problemas"], s:"desarrollar el pensamiento analítico y la resolución de problemas mediante la exposición a casos de creciente complejidad y metodologías estructuradas de análisis" },
+  { k:["creatividad","innovación","innovacion","creativ"], s:"estimular la creatividad y la innovación a través de espacios de generación de ideas y la participación en iniciativas de mejora de procesos" },
+  { k:["asertividad","asertiv"], s:"fortalecer la asertividad mediante entrenamiento en comunicación directa y respetuosa, que le permita expresar opiniones y establecer límites de manera adecuada" },
+  { k:["empatía","empatia","interpersonal","relaciones interpersonales","habilidades sociales"], s:"potenciar las habilidades interpersonales y la empatía a través de instancias de trabajo colaborativo y retroalimentación sobre el impacto de su estilo relacional" },
+  { k:["aprendizaje","capacidad de aprender"], s:"favorecer el aprendizaje continuo mediante un plan formativo orientado a la actualización permanente de conocimientos y al desarrollo de nuevas competencias" },
+  { k:["responsabilidad","compromiso","cumplimiento","puntualidad"], s:"reforzar la responsabilidad y el compromiso a través de acuerdos claros de desempeño, con seguimiento del cumplimiento de plazos y compromisos asumidos" },
+  { k:["concentración","concentracion","atención sostenida","atencion sostenida","foco"], s:"fortalecer la atención sostenida y la concentración mediante la organización del entorno de trabajo y técnicas de enfoque que minimicen las interrupciones" },
+  { k:["supervisión","supervision","manejo de personas","gestión de personas","gestion de personas"], s:"desarrollar la capacidad de supervisión y conducción de personas mediante formación en gestión de equipos y el ejercicio gradual de roles de coordinación" },
+  { k:["estratégic","estrategic","visión global","vision global","visión de negocio","vision de negocio"], s:"ampliar la visión estratégica involucrándolo en instancias de planificación que le permitan comprender el panorama global del negocio y su contribución a los objetivos" },
+  { k:["motivación","motivacion","desmotiv","sentido de propósito","sentido de proposito"], s:"fortalecer la motivación y el sentido de propósito alineando sus objetivos personales con los desafíos del cargo y reconociendo de forma concreta sus contribuciones" }
+];
+function recomendacionesDesarrollo(aspectos){
+  var t = (aspectos || "").toLowerCase();
+  var out = [];
+  DESARROLLO.forEach(function(item){
+    if (item.k.some(function(kw){ return t.indexOf(kw) > -1; }) && out.indexOf(item.s) === -1) out.push(item.s);
+  });
+  return out.slice(0, 4);
+}
+
+function conclusionDashboard(nombre, cargo, cat, aspectos){
+  var frase = {
+    "recomendable":"Recomendable",
+    "recomendable_obs":"Recomendable con observaciones",
+    "no_recomendable":"No recomendable"
+  }[cat] || "";
+  var n = (nombre && nombre.trim()) ? nombre.trim() : "el/la candidato/a";
+  var c = (cargo && cargo.trim()) ? (" para el cargo de " + cargo.trim()) : "";
+  var p1 = "Según la evaluación realizada, se considera a " + n + " " + frase + c + ".";
+  var p2 = {
+    "recomendable":" Para su incorporación, se sugiere acompañar el proceso de inducción, con seguimiento de su jefatura.",
+    "recomendable_obs":" Para su incorporación, se sugiere un acompañamiento cercano de la jefatura durante el período inicial.",
+    "no_recomendable":" De considerarse su incorporación, se recomienda un plan de desarrollo con seguimiento de la jefatura."
+  }[cat] || "";
+  var asp = aspectosInline(aspectos);
+  var p3 = "";
+  if (asp) {
+    var recs = recomendacionesDesarrollo(aspectos);
+    var como = recs.length
+      ? " Para trabajarlas, se sugiere: " + recs.join("; ") + "."
+      : " Para trabajarlas, se sugiere un plan de desarrollo con objetivos concretos, capacitación pertinente y seguimiento periódico de la jefatura.";
+    p3 = " Como áreas de desarrollo se identifican: " + asp + "." + como;
+  }
+  return p1 + p2 + p3;
+}
+
+// ── Generar conclusión ──
+async function generarConclusion() {
+  var cat = document.getElementById("d-categoria").value;
+  if (!cat) { alert("Selecciona una categoría primero."); return; }
+  var est = document.getElementById("est-conclusion");
+  var nombre = document.getElementById("d-nombre").value;
+  var cargo  = document.getElementById("d-cargo").value;
+
+  // En el Dashboard: conclusión breve y directa (formato fijo, instantánea)
+  if (tipoReporteActual === "dashboard") {
+    document.getElementById("txt-conclusion").value = conclusionDashboard(nombre, cargo, cat, document.getElementById("txt-aspectos").value);
+    est.textContent = "✓ Listo";
+    return;
+  }
+
+  // Reporte completo: conclusión con IA (como antes)
+  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Generando...";
+  try {
+    var con = await llamarApps({
+      accion:"conclusion", categoria:cat,
+      nombre:nombre,
+      cargo:cargo
+    });
+    document.getElementById("txt-conclusion").value = con;
+    est.textContent = "✓ Listo";
+  } catch(e) {
+    est.textContent = "✗ Error: " + e.message;
+  }
+}
+
+// ── Generar informe final ──
+// ── Tipo de reporte (pestañas) ──
+var tipoReporteActual = "completo";
+function cambiarTipoReporte(tipo){
+  tipoReporteActual = tipo;
+  // marcar pestaña activa
+  document.querySelectorAll(".tab-rep").forEach(function(t){
+    t.classList.toggle("activo", t.getAttribute("data-tipo") === tipo);
+  });
+  // Mostrar/ocultar secciones según el tipo
+  // "transitorio" = Datos + Observaciones + Fortalezas (sin tests, sin aspectos, sin conclusión)
+  var esTransitorio = (tipo === "transitorio");
+  var esDashboard = (tipo === "dashboard");
+  document.getElementById("bloque-buscar-tests").style.display = esTransitorio ? "none" : "";
+  document.getElementById("lista-tests").style.display = esTransitorio ? "none" : "";
+  document.getElementById("sec-aspectos").style.display = esTransitorio ? "none" : "";
+  document.getElementById("sec-conclusion").style.display = esTransitorio ? "none" : "";
+  // En el Dashboard NO se usa la actitud (solo motivación), así que se oculta ese campo
+  var subActitud = document.getElementById("subsec-actitud");
+  if (subActitud) subActitud.style.display = esDashboard ? "none" : "";
+}
+
+// ── COMPETENCIAS EVALUADAS (nivel Alto/Medio/Bajo → línea corta editable) ──
+function escC(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function hashStr(s){ var h=0; s=String(s||""); for(var i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return Math.abs(h); }
+function generarLineaComp(nombre, nivel, seed){
+  var n = (nombre||"").trim();
+  if (!n || !nivel) return "";
+  var nl = n.toLowerCase();
+  var V = {
+    alto:[
+      "Se destaca en {c}, demostrando solvencia y consistencia; constituye una de sus fortalezas.",
+      "Maneja {c} con seguridad y autonomía, sobresaliendo en este aspecto.",
+      "Cuenta con un sólido manejo de {c}, que constituye una de sus principales fortalezas.",
+      "Demuestra un dominio destacado de {c}, que sostiene de forma consistente en distintas situaciones."
+    ],
+    medio:[
+      "Presenta un manejo adecuado de {c}, suficiente para las situaciones habituales y con margen de desarrollo.",
+      "Maneja {c} de manera correcta en lo cotidiano, con espacio para seguir desarrollándose.",
+      "Muestra un desempeño competente en {c}, apropiado para las tareas habituales y perfectible.",
+      "Aborda {c} de forma adecuada, resolviendo las situaciones habituales, con potencial de mejora."
+    ],
+    bajo:[
+      "Muestra un desarrollo incipiente en {c}, que requiere acompañamiento y seguimiento para consolidarse.",
+      "Presenta dificultades en {c}, por lo que conviene reforzar esta competencia con apoyo y práctica.",
+      "Requiere fortalecer {c}, que aún se encuentra en una etapa inicial de desarrollo.",
+      "Evidencia un manejo limitado de {c}, que constituye un área prioritaria a trabajar."
+    ]
+  };
+  var arr = V[nivel]; if (!arr) return "";
+  var h = hashStr((seed||"") + "|" + nl);
+  h = (h ^ (h >>> 13) ^ (h >>> 7) ^ (h >>> 3)) >>> 0;   // mezcla de bits para repartir mejor
+  var idx = h % arr.length;
+  return arr[idx].split("{c}").join(nl);
+}
+// Detecta "competencia + nivel" en una línea (ej: "liderazgo alto", "comunicación nivel medio")
+function normNivel(w){ w=(w||"").toLowerCase(); if(w.indexOf("alt")===0)return"alto"; if(w.indexOf("medi")===0)return"medio"; if(w.indexOf("baj")===0)return"bajo"; return null; }
+function detectarNivel(item){
+  var s = (item||"").trim();
+  // El nivel debe ir AL FINAL del ítem (ej: "liderazgo alto", "comunicación nivel medio")
+  var m = s.match(/[\s:,–\-]+(?:nivel\s+)?(alto|alta|medio|media|bajo|baja)\s*\.?$/i);
+  if (!m) return null;
+  var comp = s.slice(0, m.index).replace(/[\s:,–\-]+$/,"").trim();
+  if (!comp) return null;
+  return { comp: comp, nivel: normNivel(m[1]) };
+}
+// Render de Fortalezas con detección de nivel: cada "competencia + nivel" se expande a su línea
+// Expande competencias con nivel a su línea (texto → texto, una por línea). No toca lo que no tiene nivel.
+function expandirFortalezas(texto, seed){
+  texto = (texto||"").trim();
+  if (!texto) return "";
+  var items = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+  if (items.length === 1 && (items[0].match(/,/g)||[]).length >= 1) {
+    items = items[0].split(/,\s*/).map(function(b){return b.trim();}).filter(Boolean);
+  }
+  return items.map(function(it){
+    var info = detectarNivel(it);
+    return info ? generarLineaComp(info.comp, info.nivel, seed) : it.replace(/[.;]\s*$/,"");
+  }).filter(Boolean).join("\n");
+}
+// Render en viñetas (Dashboard)
+function fortalezasNivel(texto, seed){
+  var exp = expandirFortalezas(texto, seed);
+  if (!exp) return '<span style="color:#999;">—</span>';
+  return '<ul style="margin:0;padding-left:18px;line-height:1.7;">'+
+    exp.split("\n").map(function(b){return '<li style="margin-bottom:6px;">'+escC(b)+'</li>';}).join("")+'</ul>';
+}
+
+function generarInforme() {
+  // Recoger los tests seleccionados (para la sección de resultados)
+  var testsParaInforme = [];
+  document.querySelectorAll(".chk-test:checked").forEach(function(chk){
+    var idx = parseInt(chk.getAttribute("data-idx"));
+    var t = testsEncontrados[idx];
+    if (t) testsParaInforme.push({ nombre: NOMBRES_TEST[t.test] || t.test, test: t.test, nivel: t.nivel || "—", fecha: t.fecha || "" });
+  });
+  var d = {
+    nombre: val("d-nombre"), cargo: val("d-cargo"), rut: val("d-rut"),
+    estudios: val("d-estudios"), fecha: val("d-fecha"), entrevistador: val("d-entrevistador"), renta: val("d-renta"),
+    actitud: val("txt-actitud"), motivacion: val("txt-motivacion"), experiencia: val("txt-experiencia"),
+    fortalezas: val("txt-fortalezas"), aspectos: val("txt-aspectos"), conclusion: val("txt-conclusion"),
+    categoria: val("d-categoria"),
+    tests: testsParaInforme,
+    tipo: tipoReporteActual
+  };
+  if (!d.nombre) { alert("Ingresa al menos el nombre del candidato."); return; }
+  var html = (tipoReporteActual === "dashboard") ? construirDashboard(d) : construirInforme(d);
+  var w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+}
+function val(id){ return (document.getElementById(id).value || "").trim(); }
+
+// ── Buscar tests rendidos del candidato (búsqueda rápida por RUT) ──
+var testsEncontrados = [];
+async function buscarTests() {
+  var rut = val("d-rut");
+  if (!rut) { alert("Ingresa el RUT del candidato primero (la búsqueda rápida es por RUT)."); return; }
+  var est = document.getElementById("est-tests");
+  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Buscando...";
+  try {
+    var res = await fetch(APPS_TESTS_URL + "?action=getTestsPorRut&rut=" + encodeURIComponent(rut) + "&t=" + Date.now());
+    var data = await res.json();
+    testsEncontrados = data.tests || [];
+    pintarListaTests();
+    est.textContent = testsEncontrados.length ? "✓ " + testsEncontrados.length + " test(s) encontrado(s)" : "Sin tests para este RUT";
+  } catch(e) {
+    est.textContent = "✗ Error: " + e.message;
+  }
+}
+
+var NOMBRES_TEST = {
+  IC:"Instrucciones Complejas", CEAL:"Estilos de Liderazgo", "16PF":"Personalidad 16PF",
+  IPV:"Personalidad Comercial", WONDERLIC:"Habilidad Cognitiva", DISC:"Estilo Conductual",
+  OPERA:"Conducta Operacional", TECNICO_GRUERO:"Técnica Gruero", TECNICO_BODEGA:"Técnica Bodega"
+};
+function pintarListaTests() {
+  var cont = document.getElementById("lista-tests");
+  if (!testsEncontrados.length) { cont.innerHTML = ""; return; }
+  cont.innerHTML = "<div id='tests-expandido'>"+
+    "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;'>"+
+      "<span style='font-size:12px;font-weight:700;color:var(--pizarra);'>Marca los tests a incluir en el informe:</span>"+
+      "<button onclick='contraerTests()' style='background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--muted);'>Listo ✓</button>"+
+    "</div>" +
+    testsEncontrados.map(function(t, i){
+      var nom = NOMBRES_TEST[t.test] || t.test;
+      return "<label style='display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;font-size:13px;cursor:pointer;'>"+
+        "<input type='checkbox' class='chk-test' data-idx='"+i+"' checked onchange='actualizarResumenTests()'> "+
+        "<strong>"+nom+"</strong> — "+(t.nivel||"sin nivel")+" <span style='color:#999;font-size:11px;'>("+(t.fecha||"")+")</span></label>";
+    }).join("") +
+    "</div>" +
+    "<div id='tests-contraido' style='display:none;align-items:center;justify-content:space-between;padding:9px 13px;background:#f7f4ee;border-radius:7px;'>"+
+      "<span style='font-size:13px;color:var(--pizarra);' id='resumen-tests'></span>"+
+      "<button onclick='expandirTests()' style='background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--coral-dark);'>Cambiar</button>"+
+    "</div>";
+}
+function contraerTests() {
+  document.getElementById("tests-expandido").style.display = "none";
+  document.getElementById("tests-contraido").style.display = "flex";
+  actualizarResumenTests();
+}
+function expandirTests() {
+  document.getElementById("tests-expandido").style.display = "block";
+  document.getElementById("tests-contraido").style.display = "none";
+}
+function actualizarResumenTests() {
+  var n = document.querySelectorAll(".chk-test:checked").length;
+  var el = document.getElementById("resumen-tests");
+  if (el) el.textContent = n + " test(s) seleccionado(s) para el informe";
+}
+function testsSeleccionados() {
+  var sel = [];
+  document.querySelectorAll(".chk-test:checked").forEach(function(chk){
+    var t = testsEncontrados[parseInt(chk.getAttribute("data-idx"))];
+    if (t) sel.push(t);
+  });
+  return sel;
+}
+
+// Convierte saltos de línea en párrafos separados (para fortalezas/aspectos con varios párrafos)
+function aParrafos(texto){
+  texto = (texto || "").trim();
+  if (!texto) return "—";
+  // separar por saltos de línea dobles o simples; cada bloque no vacío es un párrafo
+  var bloques = texto.split(/\n\s*\n|\n/).map(function(b){ return b.trim(); }).filter(Boolean);
+  if (!bloques.length) return "—";
+  return bloques.map(function(b){ return "<p>"+b+"</p>"; }).join("");
+}
+
+// Convierte cada línea en una viñeta (para fortalezas y aspectos)
+function aPunteo(texto){
+  texto = (texto || "").trim();
+  if (!texto) return "<p style='color:#999;margin:0;'>—</p>";
+  var lineas = texto.split(/\n\s*\n|\n/).map(function(b){ return b.trim().replace(/^[-•·]\s*/, ""); }).filter(Boolean);
+  if (!lineas.length) return "<p style='color:#999;margin:0;'>—</p>";
+  return "<ul class='punteo'>"+lineas.map(function(b){ return "<li>"+b+"</li>"; }).join("")+"</ul>";
+}
+
+function construirInforme(d) {
+  // Identidad visual según el tipo de reporte
+  var esCygnus = (d.tipo === "transitorio");
+  var C = esCygnus
+    ? { acento:"#cc5223", oscuro:"#4a4a4a", acentoSuave:"#f7ede8", borde:"#e0d8d2", fondo:"#f2efec", titFondo:"#4a4a4a", btn:"#cc5223", btnHover:"#b3461d", btnSombra:"rgba(204,82,35,.4)" }
+    : { acento:"#e57a5f", oscuro:"#2b3a47", acentoSuave:"#f7f4ee", borde:"#d4d0c6", fondo:"#ece7dd", titFondo:"#2b3a47", btn:"#e57a5f", btnHover:"#d4694f", btnSombra:"rgba(229,122,95,.4)" };
+  // Logo: Cygnus (imagen) o Deneb (texto+estrella)
+  var logoHTML = esCygnus
+    ? '<img src="'+LOGO_CYGNUS+'" alt="Grupo Cygnus" style="height:48px;">'
+    : '<div><div class="dl">deneb<svg viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div><div class="dsub">evaluaciones</div></div>';
+
+  // Convierte la experiencia (una línea por trabajo) en un párrafo redactado con conectores
+  function expParrafo(texto){
+    texto = (texto||"").trim();
+    if(!texto) return "";
+    var l = texto.split(/\n\s*\n|\n/)
+      .map(function(b){ return b.trim().replace(/^[-•·*\d.)]+\s*/,"").replace(/[.;]+$/,""); })
+      .filter(Boolean);
+    if(!l.length) return "";
+    // Si ya viene como prosa (una sola línea con varias oraciones), se deja tal cual
+    if(l.length===1){
+      if(/\.\s/.test(texto.trim())) return texto.trim();
+      return "Se destaca su experiencia como " + l[0] + ".";
+    }
+    var con = [
+      "También se ha desempeñado como ",
+      "Asimismo, trabajó como ",
+      "Además, cuenta con experiencia como ",
+      "Por otra parte, se desempeñó como "
+    ];
+    var out = "Se destaca su experiencia como " + l[0] + ".";
+    for(var i=1;i<l.length;i++){ out += " " + con[(i-1)%con.length] + l[i] + "."; }
+    return out;
+  }
+  function obsParr(){
+    var p = "";
+    if (d.actitud) p += "<p>"+d.actitud+"</p>";
+    if (d.motivacion) p += "<p>"+d.motivacion+"</p>";
+    if (d.experiencia) p += "<p>"+expParrafo(d.experiencia)+"</p>";
+    return p || "<p style='color:#999;'>Sin observaciones registradas.</p>";
+  }
+  // Sección de resultados de tests (si hay tests seleccionados)
+  function tablaTests(){
+    if (!d.tests || !d.tests.length) return "";
+    var filas = d.tests.map(function(t){
+      return '<tr><td class="lbl" style="width:50%;">'+t.nombre+'</td><td>'+t.nivel+(t.fecha?' <span style="color:#999;font-size:11px;">('+t.fecha+')</span>':'')+'</td></tr>';
+    }).join("");
+    return '<div class="st">Resultados de Evaluaciones</div>'+
+      '<table>'+filas+'</table>'+
+      '<p style="font-size:11px;color:#888;margin-top:8px;font-style:italic;">Los resultados detallados de cada evaluación se encuentran disponibles en la plataforma.</p>';
+  }
+  return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Informe — '+d.nombre+'</title>'+
+    '<style>'+
+    'body{font-family:"Segoe UI",sans-serif;background:'+C.fondo+';color:#22282e;line-height:1.6;padding:30px 16px;}'+
+    '.doc{max-width:760px;margin:0 auto;background:#fff;border:1px solid '+C.borde+';border-top:4px solid '+C.acento+';border-radius:8px;box-shadow:0 8px 30px rgba(43,58,71,.14);overflow:hidden;}'+
+    '.header{padding:22px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid '+C.borde+';}'+
+    '.dl{display:inline-flex;align-items:flex-start;font-weight:800;font-size:30px;letter-spacing:-.02em;color:#2b3a47;}'+
+    '.dl svg{width:13px;height:13px;margin-left:3px;margin-top:1px;}'+
+    '.dsub{font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;margin-top:4px;}'+
+    '.titdoc{background:'+C.titFondo+';color:#fff;text-align:center;padding:11px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}'+
+    '.content{padding:30px 32px;}'+
+    '.st{background:'+C.acento+';color:#fff;font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:5px;margin:24px 0 14px;}'+
+    '.st:first-child{margin-top:0;}'+
+    'table{width:100%;border-collapse:collapse;font-size:13.5px;}'+
+    'td{border:1px solid '+C.borde+';padding:8px 12px;}'+
+    'td.lbl{font-weight:700;background:#faf9f5;width:38%;color:'+C.oscuro+';}'+
+    '.box{border:1px solid '+C.borde+';border-radius:6px;padding:16px 18px;font-size:13.5px;line-height:1.7;text-align:justify;}'+
+    '.box p{margin-bottom:12px;}.box p:last-child{margin-bottom:0;}'+
+    '.box-f{border-left:3px solid #1a6a4a;background:#e8f5ee;}'+
+    '.box-a{border-left:3px solid #c99a2e;background:#fdf5e0;}'+
+    '.concl{font-size:13.5px;line-height:1.7;text-align:justify;background:'+C.acentoSuave+';border-left:3px solid '+C.acento+';border-radius:0 6px 6px 0;padding:16px 20px;}'+
+    '.footer{text-align:center;font-size:10px;color:#aaa;padding:16px;border-top:1px solid '+C.borde+';}'+
+    '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px '+C.btnSombra+';z-index:999;}'+
+    '.btn-pdf:hover{background:'+C.btnHover+';}'+
+    '@media print{body{background:#fff;padding:0;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
+    '</style></head><body>'+
+    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
+    '<div class="doc">'+
+    '<div class="header">'+logoHTML+
+    (esCygnus
+      ? '<img src="'+LOGO_POSTULA+'" alt="Postula Aquí" style="height:50px;">'
+      : '<div style="text-align:right;font-size:11px;color:#6b7280;">Informe confidencial<br>Proceso de selección</div>'
+    )+'</div>'+
+    '<div class="titdoc">Resumen Entrevista Laboral</div>'+
+    '<div class="content">'+
+    '<div class="st">Datos del candidato</div>'+
+    '<table>'+
+    fila("Nombre", d.nombre)+fila("Cargo postulado", d.cargo)+fila("RUT", d.rut)+
+    fila("Estudios", d.estudios)+fila("Fecha de entrevista", d.fecha)+fila("Entrevistador", d.entrevistador)+fila("Pretensiones de renta", d.renta)+
+    '</table>'+
+    (d.tipo === "transitorio" ? "" :
+      '<div class="st">Test aplicados</div>'+
+      (d.tests && d.tests.length
+        ? '<table>'+d.tests.map(function(t){ return '<tr><td>'+t.nombre+(t.fecha?' <span style="color:#999;font-size:11px;">('+t.fecha+')</span>':'')+'</td></tr>'; }).join("")+'</table>'
+        : '<div class="box" style="color:#999;font-size:13px;">No se aplicaron evaluaciones.</div>'))+
+    '<div class="st">Observaciones de la Entrevista</div><div class="box">'+obsParr()+'</div>'+
+    (d.tipo === "transitorio" ? "" :
+      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezas(d.fortalezas, d.nombre))+'</div>'+
+      '<div class="st">Aspectos a considerar</div><div class="box box-a">'+aParrafos(d.aspectos)+'</div>'+
+      '<div class="st">Conclusión</div><div class="concl">'+aParrafos(d.conclusion)+'</div>'
+    )+
+    (d.tipo === "transitorio" ?
+      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezas(d.fortalezas, d.nombre))+'</div>'
+    : "")+
+    '</div>'+
+    '<div class="footer">Documento generado por Deneb Evaluaciones · Confidencial</div>'+
+    '</div></body></html>';
+}
+function fila(lbl, val){ return '<tr><td class="lbl">'+lbl+'</td><td>'+(val||"—")+'</td></tr>'; }
+
+// ════════ DASHBOARD VISUAL (informe alternativo) ════════
+function construirDashboard(d) {
+  var esCygnus = (d.tipo === "transitorio");
+  var C = esCygnus
+    ? { acento:"#cc5223", oscuro:"#4a4a4a", suave:"#f7ede8", borde:"#e0d8d2", fondo:"#f2efec", tit:"#4a4a4a", btn:"#cc5223", btnH:"#b3461d" }
+    : { acento:"#e57a5f", oscuro:"#2b3a47", suave:"#f7f4ee", borde:"#d4d0c6", fondo:"#ece7dd", tit:"#2b3a47", btn:"#e57a5f", btnH:"#d4694f" };
+  var logoHTML = esCygnus
+    ? '<img src="'+LOGO_CYGNUS+'" alt="Grupo Cygnus" style="height:42px;">'
+    : '<div><div style="display:inline-flex;align-items:flex-start;font-weight:800;font-size:26px;letter-spacing:-.02em;color:#fff;">deneb<svg viewBox="0 0 100 100" style="width:11px;height:11px;margin-left:3px;margin-top:1px;"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div><div style="font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:2px;">evaluaciones</div></div>';
+
+  // Etiqueta de recomendación (al lado del nombre)
+  var recoMap = {
+    "recomendable":      { txt:"Recomendable",       bg:"#e8f5ee", col:"#1a6a4a" },
+    "recomendable_obs":  { txt:"Con observaciones",  bg:"#fdf5e0", col:"#9a7510" },
+    "no_recomendable":   { txt:"No recomendable",    bg:"#fbeae8", col:"#c0392b" }
+  };
+  var reco = recoMap[d.categoria] || null;
+  var recoBadge = reco ? '<span style="display:inline-block;background:'+reco.bg+';color:'+reco.col+';font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;white-space:nowrap;">'+reco.txt+'</span>' : '';
+
+  // Iniciales para el círculo
+  var ini = (d.nombre||"?").trim().split(/\s+/).map(function(p){return p.charAt(0);}).slice(0,2).join("").toUpperCase();
+
+  // ── Clasificación UNIFICADA: todo test cae en 1 de 3 niveles fijos ──
+  // Nunca muestra el dato técnico crudo. Devuelve {label, color}.
+  var COL_OK  = "#2e8b57";  // verde    → Adecuado
+  var COL_OBS = "#c99a2e";  // amarillo → Con observaciones
+  var COL_NO  = "#c0392b";  // rojo     → No adecuado
+  // Tests que entregan un ESTILO/PERFIL (descriptivo, no bueno/malo): por defecto Adecuado
+  var TESTS_PERFIL = ["CEAL","DISC","IPV","OPERA"];
+  function clasificar(testCode, nivelRaw){
+    var low = String(nivelRaw||"").toLowerCase().trim();
+    var code = String(testCode||"").toUpperCase();
+    // CASO ESPECIAL 16PF: evalúa QUÉ factores están en extremo preocupante (no solo cuántos).
+    // Lista de alerta: factor → dirección preocupante ("B"=bajo 1-3, "A"=alto 8-10).
+    // Para cambiar a quién vigilar, edita ALERTA_16PF (agrega/quita factores o cambia B/A).
+    if (code === "16PF") {
+      var ALERTA_16PF = { "C":"B", "O":"A", "Q4":"A", "G":"B", "L":"A" };
+      var pares = String(nivelRaw||"").toUpperCase().match(/(?:Q[1-4]|[A-Z])\s*\(\s*\d+\s*\)/g) || [];
+      var alertas = 0;
+      pares.forEach(function(p){
+        var m = p.match(/(Q[1-4]|[A-Z])\s*\(\s*(\d+)\s*\)/);
+        if (!m) return;
+        var f = m[1], sten = parseInt(m[2], 10);
+        var dir = ALERTA_16PF[f];
+        if (!dir) return;
+        if (dir === "B" && sten <= 3) alertas++;
+        else if (dir === "A" && sten >= 8) alertas++;
+      });
+      // Si no vino el detalle de factores, caer al conteo simple (respaldo)
+      if (pares.length === 0) {
+        var mz = low.match(/(\d+)\s*escala/);
+        if (mz) return parseInt(mz[1],10) <= 7 ? { label:"Adecuado", color:COL_OK } : { label:"Con observaciones", color:COL_OBS };
+      }
+      if (alertas >= 3) return { label:"No adecuado", color:COL_NO };
+      if (alertas >= 1) return { label:"Con observaciones", color:COL_OBS };
+      return { label:"Adecuado", color:COL_OK };
+    }
+    // 1) Matices de OBSERVACIÓN (chequear antes que "bajo" suelto)
+    if (/bajo promedio|promedio bajo|\bdebajo\b|por debajo|observaci|moderad|limitad|\bregular\b|en desarrollo|por mejorar|leve/.test(low))
+      return { label:"Con observaciones", color:COL_OBS };
+    // 2) PROBLEMA → No adecuado
+    if (/no adecuado|no recomendable|no aprueba|no avanza|no apto|deficiente|insuficiente|inadecuad|muy bajo|\bbajo\b|riesgo|cr[ií]tico/.test(low))
+      return { label:"No adecuado", color:COL_NO };
+    // 3) BIEN → Adecuado
+    if (/adecuado|\balto\b|superior|muy alto|promedio alto|\bmedio\b|promedio|aprueba|avanza|\bapto\b|bueno|excelente|[óo]ptimo|satisfact|democr|dentro de lo normal|rango normal|nivel normal|normalidad|esperabl|esperad|rasgos definid|perfil definid/.test(low))
+      return { label:"Adecuado", color:COL_OK };
+    // 4) Valor NUMÉRICO (ej. "5 escala", sten 1-10): bajo se marca, resto adecuado
+    var num = low.match(/-?\d+(?:[.,]\d+)?/);
+    if (num) {
+      var n = parseFloat(num[0].replace(",", "."));
+      if (n <= 3) return { label:"No adecuado", color:COL_NO };
+      if (n === 4) return { label:"Con observaciones", color:COL_OBS };
+      return { label:"Adecuado", color:COL_OK };
+    }
+    // 5) Test de ESTILO/PERFIL con valor descriptivo (ej. CEAL "Relacionado") → Adecuado
+    if (TESTS_PERFIL.indexOf(String(testCode||"").toUpperCase()) !== -1)
+      return { label:"Adecuado", color:COL_OK };
+    // 6) Desconocido → Con observaciones (para revisar), NUNCA el dato crudo
+    return { label:"Con observaciones", color:COL_OBS };
+  }
+  // Deja solo la fecha (corta la hora si viene incluida)
+  function soloFecha(f){
+    if(!f) return "";
+    f = String(f).trim();
+    var m = f.match(/^\s*(\d{1,4}[-\/]\d{1,2}[-\/]\d{1,4})/);
+    return m ? m[1] : f.split(/[ ,]/)[0];
+  }
+  // Tarjetas de tests (solo el nombre del test aplicado, sin resultado)
+  var testCards = (d.tests && d.tests.length)
+    ? d.tests.map(function(t){
+        return '<div style="background:#f7f5f0;border-radius:10px;padding:13px 15px;border-left:3px solid #2b3a47;">'+
+          '<div style="font-size:14px;font-weight:600;color:#2b3a47;">'+t.nombre+'</div>'+
+          (t.fecha?'<div style="font-size:10px;color:#aaa;margin-top:3px;">'+soloFecha(t.fecha)+'</div>':'')+
+        '</div>';
+      }).join("")
+    : '<div style="color:#999;font-size:12.5px;">No se seleccionaron evaluaciones.</div>';
+
+  // Punteo de fortalezas y aspectos (cada línea una viñeta)
+  function punteo(texto){
+    // En el dashboard, fortalezas/aspectos van como viñetas (igual que la experiencia)
+    texto = (texto||"").trim();
+    if (!texto) return '<span style="color:#999;">—</span>';
+    // separar por líneas, quitando guiones/viñetas/números iniciales y punto final
+    var l = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"").replace(/[.;]\s*$/,"");}).filter(Boolean);
+    // si vino todo en una sola línea con varias comas, separar por comas
+    if (l.length === 1 && (l[0].match(/,/g)||[]).length >= 2) {
+      l = l[0].split(/,\s*/).map(function(b){return b.trim().replace(/^y\s+/i,"").replace(/[.;]\s*$/,"");}).filter(Boolean);
+    }
+    if (!l.length) return '<span style="color:#999;">—</span>';
+    return '<ul style="margin:0;padding-left:18px;line-height:1.7;">'+
+      l.map(function(b){return '<li style="margin-bottom:5px;">'+b+'</li>';}).join("")+'</ul>';
+  }
+  function parrs(texto){
+    texto = (texto||"").trim();
+    if (!texto) return '<p style="color:#999;margin:0;">—</p>';
+    return texto.split(/\n\s*\n|\n/).map(function(b){return b.trim();}).filter(Boolean).map(function(b){return '<p style="margin:0 0 10px;">'+b+'</p>';}).join("");
+  }
+  var obs = "";
+  if (d.motivacion) obs += '<p style="margin:0 0 10px;">'+d.motivacion+'</p>';
+  if (!obs) obs = '<p style="color:#999;margin:0;">Sin observaciones registradas.</p>';
+  // Experiencia laboral como punteo (cada línea = un trabajo: Cargo en Empresa)
+  function expPunteo(texto){
+    texto = (texto||"").trim();
+    if (!texto) return "";
+    var l = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+    if (!l.length) return "";
+    return '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;color:#1c1c1c;">'+
+      l.map(function(b){return '<li style="margin-bottom:5px;">'+b+'</li>';}).join("")+'</ul>';
+  }
+  var expHTML = expPunteo(d.experiencia);
+
+  return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Dashboard — '+d.nombre+'</title>'+
+    '<style>'+
+    '*{box-sizing:border-box;}'+
+    'body{font-family:"Segoe UI",system-ui,sans-serif;background:'+C.fondo+';color:#1c1c1c;line-height:1.6;padding:28px 16px;margin:0;}'+
+    '.dash{max-width:680px;margin:0 auto;background:#fff;border:1px solid '+C.borde+';border-radius:12px;overflow:hidden;box-shadow:0 8px 30px rgba(43,58,71,.14);}'+
+    '.dhead{background:'+C.tit+';padding:18px 24px;display:flex;justify-content:space-between;align-items:center;}'+
+    '.dhead-t{color:#fff;font-size:18px;font-weight:300;}'+
+    '.dhead-d{color:rgba(255,255,255,.6);font-size:11px;}'+
+    '.dcand{padding:18px 24px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}'+
+    '.dini{width:50px;height:50px;border-radius:50%;background:'+C.suave+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:'+C.oscuro+';flex-shrink:0;}'+
+    '.dnom{font-size:17px;font-weight:700;}'+
+    '.dsub{font-size:12.5px;color:#6b7280;}'+
+    '.dbody{padding:20px 24px;}'+
+    '.dst{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:'+C.oscuro+';margin:0 0 10px;}'+
+    '.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:12.5px;margin-bottom:20px;}'+
+    '.dgrid .k{color:#6b7280;}'+
+    '.dcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px;}'+
+    '.dbox{border:1px solid '+C.borde+';border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.65;margin-bottom:20px;}'+
+    '.dcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}'+
+    '.dcol-f{border-left:3px solid #1a6a4a;background:#e8f5ee;border-radius:0 8px 8px 0;padding:13px 16px;}'+
+    '.dcol-a{border-left:3px solid #c99a2e;background:#fdf5e0;border-radius:0 8px 8px 0;padding:13px 16px;}'+
+    '.dcol-f .dst{color:#1a6a4a;}.dcol-a .dst{color:#9a7510;}'+
+    '.dtxt{font-size:12.5px;line-height:1.6;color:#1c1c1c;}'+
+    '.dcol ul{margin:0;padding-left:17px;font-size:12.5px;}'+
+    '.dconcl{font-size:13px;line-height:1.7;background:'+C.suave+';border-left:3px solid '+C.acento+';border-radius:0 8px 8px 0;padding:14px 18px;}'+
+    '.dcomp{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}'+
+    '.comp-it{border:1px solid '+C.borde+';border-radius:8px;padding:11px 14px;}'+
+    '.comp-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}'+
+    '.comp-nm{font-size:13.5px;font-weight:700;color:'+C.oscuro+';}'+
+    '.comp-bd{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 10px;border-radius:20px;color:#fff;white-space:nowrap;}'+
+    '.cn-alto{background:#1a6a4a;}.cn-medio{background:#c99a2e;}.cn-bajo{background:#b3492f;}'+
+    '.comp-ln{font-size:12.5px;line-height:1.6;color:#1c1c1c;}'+
+    '.dfoot{text-align:center;font-size:10px;color:#aaa;padding:14px;border-top:1px solid #eee;}'+
+    '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}'+
+    '.btn-pdf:hover{background:'+C.btnH+';}'+
+    '@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
+    '</style></head><body>'+
+    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
+    '<div class="dash">'+
+    '<div class="dhead">'+logoHTML+'<div style="text-align:right;"><div class="dhead-t">Reporte de Candidato</div><div class="dhead-d">'+(d.fecha||"")+'</div></div></div>'+
+    '<div class="dcand">'+
+      '<div class="dini">'+ini+'</div>'+
+      '<div style="flex:1;min-width:160px;"><div class="dnom">'+d.nombre+'</div><div class="dsub">'+(d.cargo||"")+(d.rut?' · RUT '+d.rut:'')+'</div></div>'+
+      recoBadge+
+    '</div>'+
+    '<div class="dbody">'+
+      '<div class="dgrid">'+
+        '<div><span class="k">Estudios:</span> '+(d.estudios||"—")+'</div>'+
+        '<div><span class="k">Renta:</span> '+(d.renta||"—")+'</div>'+
+        '<div><span class="k">Entrevistador:</span> '+(d.entrevistador||"—")+'</div>'+
+        '<div><span class="k">Fecha:</span> '+(d.fecha||"—")+'</div>'+
+      '</div>'+
+      '<div class="dst">Test aplicados</div>'+
+      '<div class="dcards">'+testCards+'</div>'+
+      (expHTML ? '<div class="dst">Experiencia laboral</div><div class="dbox" style="margin-bottom:20px;">'+expHTML+'</div>' : '')+
+      '<div class="dst">Observaciones de la entrevista</div>'+
+      '<div class="dbox">'+obs+'</div>'+
+      (d.tipo==="transitorio" ? 
+        '<div class="dcol dcol-f"><div class="dst">Fortalezas</div><div class="dtxt">'+fortalezasNivel(d.fortalezas, d.nombre)+'</div></div>'
+       :
+        '<div class="dcols">'+
+          '<div class="dcol dcol-f"><div class="dst">Fortalezas</div><div class="dtxt">'+fortalezasNivel(d.fortalezas, d.nombre)+'</div></div>'+
+          '<div class="dcol dcol-a"><div class="dst">Aspectos a considerar</div><div class="dtxt">'+punteo(d.aspectos)+'</div></div>'+
+        '</div>'+
+        '<div class="dst">Conclusión</div><div class="dconcl">'+parrs(d.conclusion)+'</div>'
+      )+
+    '</div>'+
+    '<div class="dfoot">Documento generado por Deneb Evaluaciones · Confidencial</div>'+
+    '</div></body></html>';
+}
+
+</script>
+</body>
+</html>
