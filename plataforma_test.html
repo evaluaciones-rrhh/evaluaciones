@@ -1266,6 +1266,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('reportes')">
         <span class="nav-icon">📝</span> Generar informe
       </div>
+      <div class="nav-item" onclick="irA('informes')">
+        <span class="nav-icon">🗂️</span> Informes guardados
+      </div>
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
@@ -1444,8 +1447,29 @@ tbody tr:hover td { background: #fdf9f6; }
 
     <!-- ENVIAR EVALUACIÓN -->
     <div class="page" id="page-reportes">
-      <iframe id="iframe-reportes" data-src="REPORTE_INTEGRAL.html"
+      <iframe id="iframe-reportes" data-src="REPORTE_INTEGRAL.html?embed=1"
         style="width:100%;height:calc(100vh - 120px);min-height:560px;border:none;border-radius:12px;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.08);"></iframe>
+    </div>
+
+    <div class="page" id="page-informes">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text" id="buscar-informes" oninput="filtrarInformes()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+          <span id="info-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
+          <button onclick="cargarInformes()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+        </div>
+        <div id="lista-informes"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div id="modal-informe" style="display:none;position:fixed;inset:0;background:rgba(20,28,35,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;">
+      <div style="background:#fff;max-width:720px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
+        <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div id="mi-nombre" style="font-size:18px;font-weight:700;"></div><div id="mi-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
+          <button onclick="cerrarInforme()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="mi-cuerpo" style="padding:24px;max-height:70vh;overflow:auto;"></div>
+      </div>
     </div>
 
     <div class="page" id="page-enviar">
@@ -1988,12 +2012,12 @@ async function cambiarMiPass() {
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  var ordenNav = ["panel","candidatos","reportes","enviar","historial","tests","competencias","usuarios"];
+  var ordenNav = ["panel","candidatos","reportes","informes","enviar","historial","tests","competencias","usuarios"];
   var navIdx = ordenNav.indexOf(pag);
   var navEls = document.querySelectorAll(".nav-item");
   if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
@@ -2001,10 +2025,91 @@ function irA(pag) {
   paginaActual = pag;
   if (pag === "historial") renderHistorial();
   if (pag === "usuarios") cargarUsuarios();
-  if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src"); }
+  if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
+  if (pag === "informes") cargarInformes();
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
+}
+
+// ── INFORMES GUARDADOS ──
+var informesData = [];
+async function cargarInformes(){
+  var cont = document.getElementById("lista-informes");
+  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
+    informesData = (data && data.informes) ? data.informes : [];
+    renderInformes(informesData);
+  } catch(e){
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los informes. Intenta de nuevo.</div>";
+  }
+}
+
+function colorCat(cat){
+  var c = (cat||"").toLowerCase();
+  if (c.indexOf("no recomend")>-1) return "#b3261e";
+  if (c.indexOf("observ")>-1 || c.indexOf("reserva")>-1) return "#b8860b";
+  if (c.indexOf("recomend")>-1) return "var(--high)";
+  return "var(--muted)";
+}
+
+function renderInformes(lista){
+  var cont = document.getElementById("lista-informes");
+  var cnt = document.getElementById("info-count");
+  if (cnt) cnt.textContent = lista.length + " informe(s)";
+  if (!lista.length){
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay informes guardados. Se guardan solos al generar un reporte o una conclusión.</div>";
+    return;
+  }
+  cont.innerHTML = lista.map(function(inf, i){
+    var col = colorCat(inf.categoria);
+    return "<div onclick='verInforme("+i+")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;' onmouseover='this.style.background=\"#faf8f4\"' onmouseout='this.style.background=\"#fff\"'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;'>"+
+        "<div>"+
+          "<div style='font-size:15px;font-weight:700;color:var(--ink);'>"+(inf.nombre||"—")+"</div>"+
+          "<div style='font-size:12.5px;color:var(--muted);margin-top:2px;'>"+(inf.cargo||"sin cargo")+(inf.rut?" · "+inf.rut:"")+"</div>"+
+        "</div>"+
+        "<div style='text-align:right;'>"+
+          "<div style='font-size:12px;font-weight:700;color:"+col+";'>"+(inf.categoria||"—")+"</div>"+
+          "<div style='font-size:11px;color:var(--muted);margin-top:3px;'>"+(inf.fecha||"")+"</div>"+
+        "</div>"+
+      "</div></div>";
+  }).join("");
+}
+
+function filtrarInformes(){
+  var q = (document.getElementById("buscar-informes").value||"").toLowerCase().trim();
+  if (!q) { renderInformes(informesData); return; }
+  var f = informesData.filter(function(inf){
+    return ((inf.nombre||"")+" "+(inf.rut||"")+" "+(inf.cargo||"")).toLowerCase().indexOf(q) > -1;
+  });
+  renderInformes(f);
+}
+
+function verInforme(i){
+  var inf = informesData[i];
+  if (!inf) return;
+  document.getElementById("mi-nombre").textContent = inf.nombre || "—";
+  var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Dashboard" : "Cargos internos");
+  document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
+  function bloque(titulo, texto){
+    if (!texto || !texto.trim()) return "";
+    var html = texto.split(/\n+/).map(function(p){ return "<p style='margin:0 0 8px;'>"+p+"</p>"; }).join("");
+    return "<div style='margin-bottom:18px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral-dark);font-weight:700;margin-bottom:6px;'>"+titulo+"</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+html+"</div></div>";
+  }
+  var col = colorCat(inf.categoria);
+  var cuerpo = "<div style='display:inline-block;font-size:13px;font-weight:700;color:"+col+";border:1px solid "+col+";border-radius:20px;padding:4px 14px;margin-bottom:18px;'>"+(inf.categoria||"—")+"</div>";
+  cuerpo += bloque("Conclusión", inf.conclusion);
+  cuerpo += bloque("Fortalezas", inf.fortalezas);
+  cuerpo += bloque("Áreas de desarrollo", inf.areas);
+  if (inf.evaluador) cuerpo += "<div style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:6px;'>Evaluador: "+inf.evaluador+"</div>";
+  document.getElementById("mi-cuerpo").innerHTML = cuerpo;
+  document.getElementById("modal-informe").style.display = "flex";
+}
+
+function cerrarInforme(){
+  document.getElementById("modal-informe").style.display = "none";
 }
 
 // CARGAR DATOS
