@@ -96,8 +96,12 @@
       <div class="card-label">Datos del candidato</div>
       <div class="field-grid" style="margin-bottom:1rem;">
         <div>
-          <label for="nombre">Nombre completo</label>
-          <input type="text" id="nombre" placeholder="Apellido Nombre">
+          <label for="nombre">Nombres</label>
+          <input type="text" id="nombre" placeholder="Nombres">
+        </div>
+        <div>
+          <label for="apellidos">Apellidos</label>
+          <input type="text" id="apellidos" placeholder="Apellidos">
         </div>
         <div>
           <label for="rut">RUT</label>
@@ -105,7 +109,7 @@
           <div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div>
         </div>
       </div>
-      <div id="err-nombre" class="err-msg">Por favor ingresa el nombre del candidato.</div>
+      <div id="err-nombre" class="err-msg">Por favor ingresa nombres y apellidos del candidato.</div>
     </div>
 
     <div class="card" style="background:#fafaf8;border-style:dashed;">
@@ -314,7 +318,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function iniciar(){
   let n = document.getElementById('nombre').value.trim();
-  if(!n){ document.getElementById('err-nombre').style.display='block'; return; }
+  let ap = document.getElementById('apellidos').value.trim();
+  if(!n || !ap){ document.getElementById('err-nombre').style.display='block'; return; }
   document.getElementById('err-nombre').style.display='none';
   let rutVal = document.getElementById('rut').value.trim();
   let errRut = document.getElementById('err-rut');
@@ -437,7 +442,7 @@ function calcularYEnviar(porTiempo){
   let estiloConductual = getEstiloConductual(precision, velocidad, incorrectas, omitidas);
 
   let fecha = new Date().toLocaleString('es-CL');
-  let nombre = document.getElementById('nombre').value.trim();
+  let nombre = (document.getElementById('nombre').value.trim()+' '+document.getElementById('apellidos').value.trim()).trim();
   let rut = document.getElementById('rut').value.trim();
 
   // NOTA: "percentil" renombrado a "indice_precision" — no es un percentil normativo.
