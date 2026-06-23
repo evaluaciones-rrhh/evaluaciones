@@ -2059,6 +2059,25 @@ function colorCat(cat){
   if (c.indexOf("recomend")>-1) return "var(--high)";
   return "var(--muted)";
 }
+function catStyle(cat){
+  var c = (cat||"").toLowerCase();
+  if (c.indexOf("no recomend")>-1) return {fg:"#b3261e", bg:"#f8e6e4"};
+  if (c.indexOf("observ")>-1 || c.indexOf("reserva")>-1) return {fg:"#b8860b", bg:"#fbf0d8"};
+  if (c.indexOf("recomend")>-1) return {fg:"var(--high)", bg:"var(--high-bg)"};
+  return {fg:"var(--muted)", bg:"#efece6"};
+}
+function tipoLabel(t){
+  return t === "transitorio" ? "Servicios transitorios" : (t === "dashboard" ? "Cargos internos" : "Informe extendido");
+}
+function resumir(texto, n){
+  var s = (texto||"").replace(/\s+/g," ").trim();
+  if (!s) return "";
+  if (s.length <= n) return s;
+  var corte = s.slice(0, n);
+  var sp = corte.lastIndexOf(" ");
+  if (sp > 60) corte = corte.slice(0, sp);
+  return corte + "…";
+}
 
 function renderInformes(lista){
   var cont = document.getElementById("lista-informes");
@@ -2069,16 +2088,18 @@ function renderInformes(lista){
     return;
   }
   cont.innerHTML = lista.map(function(inf, i){
-    var col = colorCat(inf.categoria);
-    return "<div onclick='verInforme("+i+")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;' onmouseover='this.style.background=\"#faf8f4\"' onmouseout='this.style.background=\"#fff\"'>"+
+    var st = catStyle(inf.categoria);
+    return "<div style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;' onmouseover='this.style.background=\"#faf8f4\"' onmouseout='this.style.background=\"#fff\"'>"+
       "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;'>"+
         "<div>"+
           "<div style='font-size:15px;font-weight:700;color:var(--ink);'>"+(inf.nombre||"—")+"</div>"+
           "<div style='font-size:12.5px;color:var(--muted);margin-top:2px;'>"+(inf.cargo||"sin cargo")+(inf.rut?" · "+inf.rut:"")+"</div>"+
+          "<div style='margin-top:7px;'><span style='font-size:11px;color:var(--muted);background:#f1ede7;border-radius:20px;padding:3px 10px;'>"+tipoLabel(inf.tipo)+"</span></div>"+
         "</div>"+
-        "<div style='text-align:right;'>"+
-          "<div style='font-size:12px;font-weight:700;color:"+col+";'>"+(inf.categoria||"—")+"</div>"+
-          "<div style='font-size:11px;color:var(--muted);margin-top:3px;'>"+(inf.fecha||"")+"</div>"+
+        "<div style='display:flex;flex-direction:column;align-items:flex-end;gap:8px;'>"+
+          "<span style='font-size:12px;font-weight:700;color:"+st.fg+";background:"+st.bg+";border-radius:20px;padding:4px 12px;white-space:nowrap;'>"+(inf.categoria||"—")+"</span>"+
+          "<div style='font-size:11px;color:var(--muted);'>"+(inf.fecha||"")+"</div>"+
+          "<button onclick='verInforme("+i+")' style='background:var(--coral);border:none;color:#fff;font-size:12px;font-weight:600;cursor:pointer;border-radius:7px;padding:7px 14px;white-space:nowrap;'>Ver informe</button>"+
         "</div>"+
       "</div></div>";
   }).join("");
@@ -2098,20 +2119,18 @@ function verInforme(i){
   if (!inf) return;
   informeAbierto = i;
   document.getElementById("mi-nombre").textContent = inf.nombre || "—";
-  var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
-  document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
-  function bloque(titulo, texto){
-    if (!texto || !texto.trim()) return "";
-    var html = texto.split(/\n+/).map(function(p){ return "<p style='margin:0 0 8px;'>"+p+"</p>"; }).join("");
-    return "<div style='margin-bottom:18px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral-dark);font-weight:700;margin-bottom:6px;'>"+titulo+"</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+html+"</div></div>";
-  }
-  var col = colorCat(inf.categoria);
-  var cuerpo = "<div style='display:inline-block;font-size:13px;font-weight:700;color:"+col+";border:1px solid "+col+";border-radius:20px;padding:4px 14px;margin-bottom:18px;'>"+(inf.categoria||"—")+"</div>";
-  cuerpo += bloque("Conclusión", inf.conclusion);
-  cuerpo += bloque("Fortalezas", inf.fortalezas);
-  cuerpo += bloque("Áreas de desarrollo", inf.areas);
-  if (inf.evaluador) cuerpo += "<div style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:6px;'>Evaluador: "+inf.evaluador+"</div>";
-  document.getElementById("mi-cuerpo").innerHTML = cuerpo;
+  document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipoLabel(inf.tipo) + (inf.fecha?" · "+inf.fecha:"");
+  // ── VISTA PREVIA: el reporte REAL, el mismo que se descarga (sin auto-imprimir) ──
+  var cont = document.getElementById("mi-cuerpo");
+  cont.style.padding = "0";
+  cont.innerHTML = "";
+  var ifr = document.createElement("iframe");
+  ifr.style.cssText = "width:100%;border:none;min-height:60vh;background:#fff;display:block;";
+  ifr.onload = function(){
+    try { ifr.style.height = (ifr.contentDocument.documentElement.scrollHeight + 24) + "px"; } catch(e){}
+  };
+  ifr.srcdoc = construirReporteHTML(inf, false);
+  cont.appendChild(ifr);
   document.getElementById("modal-informe").style.display = "flex";
 }
 
@@ -2124,15 +2143,9 @@ function descargarInformeActual(){
   descargarInforme(informesData[informeAbierto]);
 }
 
-function descargarInforme(inf){
-  // Si el informe trae su dashboard ya armado (ej. demo), se descarga ese modelo completo
-  if (inf.dashboardHTML){
-    var wd = window.open("", "_blank");
-    if (!wd){ alert("Habilita las ventanas emergentes para descargar el informe."); return; }
-    wd.document.write(inf.dashboardHTML);
-    wd.document.close();
-    return;
-  }
+function construirReporteHTML(inf, autoprint){
+  // Si el informe trae su dashboard ya armado (ej. demo / tipo dashboard), ese ES el reporte real
+  if (inf.dashboardHTML) return inf.dashboardHTML;
   var esCygnus = (inf.tipo === "transitorio");
   var acento = esCygnus ? "#cc5223" : "#e57a5f";
   var oscuro = esCygnus ? "#4a4a4a" : "#2b3a47";
@@ -2175,10 +2188,15 @@ function descargarInforme(inf){
     "<h2>Fortalezas</h2>"+lista(inf.fortalezas)+
     "<h2>Áreas de desarrollo</h2>"+lista(inf.areas)+
     (inf.evaluador ? "<div class='pie'>Evaluador: "+inf.evaluador+" · Deneb Evaluaciones</div>" : "<div class='pie'>Deneb Evaluaciones</div>")+
-    "<button class='noprint' onclick='window.print()' style='margin-top:24px;background:"+acento+";color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;'>⬇ Guardar como PDF</button>"+
+    (autoprint ? "<button class='noprint' onclick='window.print()' style='margin-top:24px;background:"+acento+";color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;'>⬇ Guardar como PDF</button>" : "")+
     "</div>"+
-    "<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},400);};<\/scr"+"ipt>"+
+    (autoprint ? "<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},400);};<\/scr"+"ipt>" : "")+
     "</body></html>";
+  return html;
+}
+
+function descargarInforme(inf){
+  var html = construirReporteHTML(inf, true);
   var w = window.open("", "_blank");
   if (!w) { alert("Habilita las ventanas emergentes para descargar el informe."); return; }
   w.document.write(html);
