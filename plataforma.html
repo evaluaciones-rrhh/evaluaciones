@@ -1263,6 +1263,12 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('candidatos')">
         <span class="nav-icon">📁</span> Reporte Tests
       </div>
+      <div class="nav-item" onclick="irA('reportes')">
+        <span class="nav-icon">📝</span> Generar informe
+      </div>
+      <div class="nav-item" onclick="irA('informes')">
+        <span class="nav-icon">🗂️</span> Informes guardados
+      </div>
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
@@ -1440,6 +1446,35 @@ tbody tr:hover td { background: #fdf9f6; }
     </div>
 
     <!-- ENVIAR EVALUACIÓN -->
+    <div class="page" id="page-reportes">
+      <iframe id="iframe-reportes" data-src="REPORTE_INTEGRAL.html?embed=1"
+        style="width:100%;height:calc(100vh - 120px);min-height:560px;border:none;border-radius:12px;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.08);"></iframe>
+    </div>
+
+    <div class="page" id="page-informes">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text" id="buscar-informes" oninput="filtrarInformes()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+          <span id="info-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
+          <button onclick="cargarInformes()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+        </div>
+        <div id="lista-informes"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div id="modal-informe" style="display:none;position:fixed;inset:0;background:rgba(20,28,35,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;">
+      <div style="background:#fff;max-width:720px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
+        <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div id="mi-nombre" style="font-size:18px;font-weight:700;"></div><div id="mi-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button onclick="descargarInformeActual()" style="background:var(--coral);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;padding:8px 14px;">⬇ Descargar</button>
+            <button onclick="cerrarInforme()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+          </div>
+        </div>
+        <div id="mi-cuerpo" style="padding:24px;max-height:70vh;overflow:auto;"></div>
+      </div>
+    </div>
+
     <div class="page" id="page-enviar">
       <div class="card">
         <div class="card-body">
@@ -1980,12 +2015,12 @@ async function cambiarMiPass() {
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  var ordenNav = ["panel","candidatos","enviar","historial","tests","competencias","usuarios"];
+  var ordenNav = ["panel","candidatos","reportes","informes","enviar","historial","tests","competencias","usuarios"];
   var navIdx = ordenNav.indexOf(pag);
   var navEls = document.querySelectorAll(".nav-item");
   if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
@@ -1993,9 +2028,161 @@ function irA(pag) {
   paginaActual = pag;
   if (pag === "historial") renderHistorial();
   if (pag === "usuarios") cargarUsuarios();
+  if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
+  if (pag === "informes") cargarInformes();
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
+}
+
+// ── INFORMES GUARDADOS ──
+var informesData = [];
+var informeAbierto = -1;
+
+
+async function cargarInformes(){
+  var cont = document.getElementById("lista-informes");
+  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  try {
+    var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
+    informesData = (data && data.informes) ? data.informes : [];
+    renderInformes(informesData);
+  } catch(e){
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los informes. Intenta de nuevo.</div>";
+  }
+}
+
+function colorCat(cat){
+  var c = (cat||"").toLowerCase();
+  if (c.indexOf("no recomend")>-1) return "#b3261e";
+  if (c.indexOf("observ")>-1 || c.indexOf("reserva")>-1) return "#b8860b";
+  if (c.indexOf("recomend")>-1) return "var(--high)";
+  return "var(--muted)";
+}
+
+function renderInformes(lista){
+  var cont = document.getElementById("lista-informes");
+  var cnt = document.getElementById("info-count");
+  if (cnt) cnt.textContent = lista.length + " informe(s)";
+  if (!lista.length){
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay informes guardados. Se guardan solos al generar un reporte o una conclusión.</div>";
+    return;
+  }
+  cont.innerHTML = lista.map(function(inf, i){
+    var col = colorCat(inf.categoria);
+    return "<div onclick='verInforme("+i+")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;' onmouseover='this.style.background=\"#faf8f4\"' onmouseout='this.style.background=\"#fff\"'>"+
+      "<div style='display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;'>"+
+        "<div>"+
+          "<div style='font-size:15px;font-weight:700;color:var(--ink);'>"+(inf.nombre||"—")+"</div>"+
+          "<div style='font-size:12.5px;color:var(--muted);margin-top:2px;'>"+(inf.cargo||"sin cargo")+(inf.rut?" · "+inf.rut:"")+"</div>"+
+        "</div>"+
+        "<div style='text-align:right;'>"+
+          "<div style='font-size:12px;font-weight:700;color:"+col+";'>"+(inf.categoria||"—")+"</div>"+
+          "<div style='font-size:11px;color:var(--muted);margin-top:3px;'>"+(inf.fecha||"")+"</div>"+
+        "</div>"+
+      "</div></div>";
+  }).join("");
+}
+
+function filtrarInformes(){
+  var q = (document.getElementById("buscar-informes").value||"").toLowerCase().trim();
+  if (!q) { renderInformes(informesData); return; }
+  var f = informesData.filter(function(inf){
+    return ((inf.nombre||"")+" "+(inf.rut||"")+" "+(inf.cargo||"")).toLowerCase().indexOf(q) > -1;
+  });
+  renderInformes(f);
+}
+
+function verInforme(i){
+  var inf = informesData[i];
+  if (!inf) return;
+  informeAbierto = i;
+  document.getElementById("mi-nombre").textContent = inf.nombre || "—";
+  var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
+  document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
+  function bloque(titulo, texto){
+    if (!texto || !texto.trim()) return "";
+    var html = texto.split(/\n+/).map(function(p){ return "<p style='margin:0 0 8px;'>"+p+"</p>"; }).join("");
+    return "<div style='margin-bottom:18px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral-dark);font-weight:700;margin-bottom:6px;'>"+titulo+"</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+html+"</div></div>";
+  }
+  var col = colorCat(inf.categoria);
+  var cuerpo = "<div style='display:inline-block;font-size:13px;font-weight:700;color:"+col+";border:1px solid "+col+";border-radius:20px;padding:4px 14px;margin-bottom:18px;'>"+(inf.categoria||"—")+"</div>";
+  cuerpo += bloque("Conclusión", inf.conclusion);
+  cuerpo += bloque("Fortalezas", inf.fortalezas);
+  cuerpo += bloque("Áreas de desarrollo", inf.areas);
+  if (inf.evaluador) cuerpo += "<div style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:6px;'>Evaluador: "+inf.evaluador+"</div>";
+  document.getElementById("mi-cuerpo").innerHTML = cuerpo;
+  document.getElementById("modal-informe").style.display = "flex";
+}
+
+function cerrarInforme(){
+  document.getElementById("modal-informe").style.display = "none";
+}
+
+function descargarInformeActual(){
+  if (informeAbierto < 0 || !informesData[informeAbierto]) return;
+  descargarInforme(informesData[informeAbierto]);
+}
+
+function descargarInforme(inf){
+  // Si el informe trae su dashboard ya armado (ej. demo), se descarga ese modelo completo
+  if (inf.dashboardHTML){
+    var wd = window.open("", "_blank");
+    if (!wd){ alert("Habilita las ventanas emergentes para descargar el informe."); return; }
+    wd.document.write(inf.dashboardHTML);
+    wd.document.close();
+    return;
+  }
+  var esCygnus = (inf.tipo === "transitorio");
+  var acento = esCygnus ? "#cc5223" : "#e57a5f";
+  var oscuro = esCygnus ? "#4a4a4a" : "#2b3a47";
+  var marca  = esCygnus ? "grupo cygnus" : "deneb";
+  var sub    = esCygnus ? "servicios transitorios" : "evaluaciones";
+  var tipoTxt = esCygnus ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
+  function lista(texto){
+    var items = (texto||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+    if (!items.length) return "<p style='color:#999;'>—</p>";
+    return "<ul>"+items.map(function(s){return "<li>"+s+"</li>";}).join("")+"</ul>";
+  }
+  function parrafos(texto){
+    var ps = (texto||"").split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);
+    if (!ps.length) return "<p style='color:#999;'>—</p>";
+    return ps.map(function(s){return "<p>"+s+"</p>";}).join("");
+  }
+  var html = "<!doctype html><html><head><meta charset='utf-8'><title>Informe - "+(inf.nombre||"")+"</title>"+
+    "<link href='https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap' rel='stylesheet'>"+
+    "<style>"+
+    "*{box-sizing:border-box;} body{font-family:Montserrat,Arial,sans-serif;color:#1f2a33;margin:0;padding:0;}"+
+    ".wrap{max-width:760px;margin:0 auto;padding:34px 40px;}"+
+    ".top{border-bottom:3px solid "+acento+";padding-bottom:14px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;}"+
+    ".marca{font-size:26px;font-weight:800;color:"+oscuro+";letter-spacing:-.5px;}"+
+    ".sub{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;}"+
+    ".meta{text-align:right;font-size:12px;color:#666;}"+
+    "h1{font-size:22px;margin:0 0 4px;color:"+oscuro+";}"+
+    ".cargo{font-size:13px;color:#666;margin-bottom:16px;}"+
+    ".badge{display:inline-block;font-size:13px;font-weight:700;color:#fff;background:"+acento+";border-radius:20px;padding:5px 16px;margin-bottom:8px;}"+
+    "h2{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:"+acento+";margin:22px 0 8px;border-bottom:1px solid #eee;padding-bottom:4px;}"+
+    "p{font-size:13.5px;line-height:1.6;margin:0 0 8px;} ul{margin:0;padding-left:20px;} li{font-size:13.5px;line-height:1.6;margin-bottom:4px;}"+
+    ".pie{margin-top:30px;border-top:1px solid #eee;padding-top:12px;font-size:11px;color:#999;}"+
+    "@media print{.noprint{display:none;} body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}"+
+    "</style></head><body><div class='wrap'>"+
+    "<div class='top'><div><div class='marca'>"+marca+"</div><div class='sub'>"+sub+"</div></div>"+
+    "<div class='meta'>Informe psicolaboral<br>"+(inf.fecha||"")+"</div></div>"+
+    "<h1>"+(inf.nombre||"—")+"</h1>"+
+    "<div class='cargo'>"+(inf.cargo||"")+(inf.rut?" · "+inf.rut:"")+" · "+tipoTxt+"</div>"+
+    "<div class='badge'>"+(inf.categoria||"—")+"</div>"+
+    "<h2>Conclusión</h2>"+parrafos(inf.conclusion)+
+    "<h2>Fortalezas</h2>"+lista(inf.fortalezas)+
+    "<h2>Áreas de desarrollo</h2>"+lista(inf.areas)+
+    (inf.evaluador ? "<div class='pie'>Evaluador: "+inf.evaluador+" · Deneb Evaluaciones</div>" : "<div class='pie'>Deneb Evaluaciones</div>")+
+    "<button class='noprint' onclick='window.print()' style='margin-top:24px;background:"+acento+";color:#fff;border:none;border-radius:8px;padding:12px 24px;font-size:14px;font-weight:600;cursor:pointer;'>⬇ Guardar como PDF</button>"+
+    "</div>"+
+    "<scr"+"ipt>window.onload=function(){setTimeout(function(){window.print();},400);};<\/scr"+"ipt>"+
+    "</body></html>";
+  var w = window.open("", "_blank");
+  if (!w) { alert("Habilita las ventanas emergentes para descargar el informe."); return; }
+  w.document.write(html);
+  w.document.close();
 }
 
 // CARGAR DATOS
