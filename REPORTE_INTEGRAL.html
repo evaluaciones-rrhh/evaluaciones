@@ -702,30 +702,41 @@ function generarInforme() {
   var w = window.open("", "_blank");
   w.document.write(html);
   w.document.close();
-  guardarInformeAuto();   // guarda en segundo plano
+  guardarInformeAuto(html);   // guarda en segundo plano el reporte original completo
 }
 function val(id){ return (document.getElementById(id).value || "").trim(); }
 
 // ── Guardado automático del informe (segundo plano, sin botón) ──
-function guardarInformeAuto(){
+function guardarInformeAuto(htmlReporte){
   try {
     var g = function(id){ var el = document.getElementById(id); return el ? (el.value || "") : ""; };
     var nombre = g("d-nombre").trim();
     if (!nombre) return;   // sin nombre no guarda
     var solicitante = "";
     try { solicitante = sessionStorage.getItem("cygnus_user") || ""; } catch(e){}
+    var tipoActual = (typeof tipoReporteActual !== "undefined" ? tipoReporteActual : "");
+    // Fortalezas: guardar el MISMO texto expandido que muestra el reporte (según el tipo)
+    var rawFort = g("txt-fortalezas");
+    var fortFinal;
+    try {
+      fortFinal = (tipoActual === "transitorio") ? expandirFortalezasExt(rawFort, nombre) : expandirFortalezas(rawFort, nombre);
+    } catch(e){ fortFinal = rawFort; }
+    // Categoría: guardar la etiqueta legible, no el código interno
+    var catMap = { "recomendable":"Recomendable", "recomendable_obs":"Recomendable con observaciones", "no_recomendable":"No recomendable" };
+    var catRaw = g("d-categoria");
     var payload = {
       action: "guardarInforme",
       nombre: nombre,
       rut: g("d-rut"),
       cargo: g("d-cargo"),
-      categoria: g("d-categoria"),
+      categoria: catMap[catRaw] || catRaw,
       conclusion: g("txt-conclusion"),
-      fortalezas: g("txt-fortalezas"),
+      fortalezas: fortFinal,
       areas: g("txt-aspectos"),
       evaluador: g("d-entrevistador"),
-      tipo: (typeof tipoReporteActual !== "undefined" ? tipoReporteActual : ""),
-      solicitante: solicitante
+      tipo: tipoActual,
+      solicitante: solicitante,
+      html: (htmlReporte || "")
     };
     fetch(APPS_TESTS_URL, {
       method: "POST",
