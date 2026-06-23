@@ -812,13 +812,26 @@ function testsSeleccionados() {
 }
 
 // Convierte saltos de línea en párrafos separados (para fortalezas/aspectos con varios párrafos)
+// Pulir texto: corrige espacios, asegura espacio tras coma/punto entre palabras,
+// mayúscula inicial y punto final. (No inventa acentos: eso lo afina la IA.)
+function pulirTexto(s){
+  s = (s || "").trim();
+  if (!s) return s;
+  s = s.replace(/\s+/g, " ");                                          // espacios múltiples → uno
+  s = s.replace(/\s+([,.;:])/g, "$1");                                 // sin espacio antes de , . ; :
+  s = s.replace(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])([,.;:])([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])/g, "$1$2 $3"); // espacio tras puntuación
+  s = s.charAt(0).toUpperCase() + s.slice(1);                          // mayúscula inicial
+  if (!/[.!?…:]$/.test(s)) s += ".";                                   // punto final si falta
+  return s;
+}
+
 function aParrafos(texto){
   texto = (texto || "").trim();
   if (!texto) return "—";
   // separar por saltos de línea dobles o simples; cada bloque no vacío es un párrafo
   var bloques = texto.split(/\n\s*\n|\n/).map(function(b){ return b.trim(); }).filter(Boolean);
   if (!bloques.length) return "—";
-  return bloques.map(function(b){ return "<p>"+b+"</p>"; }).join("");
+  return bloques.map(function(b){ return "<p>"+pulirTexto(b)+"</p>"; }).join("");
 }
 
 // Convierte cada línea en una viñeta (para fortalezas y aspectos)
@@ -827,7 +840,7 @@ function aPunteo(texto){
   if (!texto) return "<p style='color:#999;margin:0;'>—</p>";
   var lineas = texto.split(/\n\s*\n|\n/).map(function(b){ return b.trim().replace(/^[-•·]\s*/, ""); }).filter(Boolean);
   if (!lineas.length) return "<p style='color:#999;margin:0;'>—</p>";
-  return "<ul class='punteo'>"+lineas.map(function(b){ return "<li>"+b+"</li>"; }).join("")+"</ul>";
+  return "<ul class='punteo'>"+lineas.map(function(b){ return "<li>"+pulirTexto(b)+"</li>"; }).join("")+"</ul>";
 }
 
 function construirInforme(d) {
@@ -1050,15 +1063,15 @@ function construirDashboard(d) {
     }
     if (!l.length) return '<span style="color:#999;">—</span>';
     return '<ul style="margin:0;padding-left:18px;line-height:1.7;">'+
-      l.map(function(b){return '<li style="margin-bottom:5px;">'+b+'</li>';}).join("")+'</ul>';
+      l.map(function(b){return '<li style="margin-bottom:5px;">'+pulirTexto(b)+'</li>';}).join("")+'</ul>';
   }
   function parrs(texto){
     texto = (texto||"").trim();
     if (!texto) return '<p style="color:#999;margin:0;">—</p>';
-    return texto.split(/\n\s*\n|\n/).map(function(b){return b.trim();}).filter(Boolean).map(function(b){return '<p style="margin:0 0 10px;">'+b+'</p>';}).join("");
+    return texto.split(/\n\s*\n|\n/).map(function(b){return b.trim();}).filter(Boolean).map(function(b){return '<p style="margin:0 0 10px;">'+pulirTexto(b)+'</p>';}).join("");
   }
   var obs = "";
-  if (d.motivacion) obs += '<p style="margin:0 0 10px;">'+d.motivacion+'</p>';
+  if (d.motivacion) obs += '<p style="margin:0 0 10px;">'+pulirTexto(d.motivacion)+'</p>';
   if (!obs) obs = '<p style="color:#999;margin:0;">Sin observaciones registradas.</p>';
   // Experiencia laboral como punteo (cada línea = un trabajo: Cargo en Empresa)
   function expPunteo(texto){
@@ -1088,21 +1101,21 @@ function construirDashboard(d) {
     '.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;font-size:12.5px;margin-bottom:20px;}'+
     '.dgrid .k{color:#6b7280;}'+
     '.dcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px;}'+
-    '.dbox{border:1px solid '+C.borde+';border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.65;margin-bottom:20px;}'+
+    '.dbox{border:1px solid '+C.borde+';border-radius:8px;padding:14px 16px;font-size:13px;line-height:1.65;margin-bottom:20px;text-align:justify;}'+
     '.dcols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}'+
     '.dcol-f{border-left:3px solid #1a6a4a;background:#e8f5ee;border-radius:0 8px 8px 0;padding:13px 16px;}'+
     '.dcol-a{border-left:3px solid #c99a2e;background:#fdf5e0;border-radius:0 8px 8px 0;padding:13px 16px;}'+
     '.dcol-f .dst{color:#1a6a4a;}.dcol-a .dst{color:#9a7510;}'+
-    '.dtxt{font-size:12.5px;line-height:1.6;color:#1c1c1c;}'+
+    '.dtxt{font-size:12.5px;line-height:1.6;color:#1c1c1c;text-align:justify;}'+
     '.dcol ul{margin:0;padding-left:17px;font-size:12.5px;}'+
-    '.dconcl{font-size:13px;line-height:1.7;background:'+C.suave+';border-left:3px solid '+C.acento+';border-radius:0 8px 8px 0;padding:14px 18px;}'+
+    '.dconcl{font-size:13px;line-height:1.7;background:'+C.suave+';border-left:3px solid '+C.acento+';border-radius:0 8px 8px 0;padding:14px 18px;text-align:justify;}'+
     '.dcomp{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;}'+
     '.comp-it{border:1px solid '+C.borde+';border-radius:8px;padding:11px 14px;}'+
     '.comp-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px;}'+
     '.comp-nm{font-size:13.5px;font-weight:700;color:'+C.oscuro+';}'+
     '.comp-bd{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 10px;border-radius:20px;color:#fff;white-space:nowrap;}'+
     '.cn-alto{background:#1a6a4a;}.cn-medio{background:#c99a2e;}.cn-bajo{background:#b3492f;}'+
-    '.comp-ln{font-size:12.5px;line-height:1.6;color:#1c1c1c;}'+
+    '.comp-ln{font-size:12.5px;line-height:1.6;color:#1c1c1c;text-align:justify;}'+
     '.dfoot{text-align:center;font-size:10px;color:#aaa;padding:14px;border-top:1px solid #eee;}'+
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnH+';}'+
