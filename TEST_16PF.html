@@ -58,11 +58,12 @@ input,select{width:100%;padding:8px 10px;border:1px solid #d8d6ce;border-radius:
   <div id="s-inicio">
     <div class="card">
       <div class="fg4">
-        <div><label>Nombre completo</label><input type="text" id="nombre" placeholder="Apellido Nombre"></div>
+        <div><label>Nombres</label><input type="text" id="nombre" placeholder="Nombres"></div>
+        <div><label>Apellidos</label><input type="text" id="apellidos" placeholder="Apellidos"></div>
         <div><label>RUT</label><input type="text" id="rut" placeholder="12.345.678-9"><div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div></div>
         <div><label>Género</label><select id="sexo"><option value="m">Masculino</option><option value="f">Femenino</option><option value="nd">Prefiero no indicar</option></select></div>
       </div>
-      <div id="err-n" class="err">Ingresa el nombre del candidato.</div>
+      <div id="err-n" class="err">Ingresa nombres y apellidos del candidato.</div>
     </div>
     <div class="card" style="background:#fafaf8;border-style:dashed;">
       <p style="font-size:11px;font-weight:bold;color:#a09d96;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;">Consigna — leer en voz alta</p>
@@ -146,7 +147,8 @@ function validarAcceso() {
   }
   document.getElementById('btn-ini').onclick = function() {
     var n = document.getElementById('nombre').value.trim();
-    if (!n) { document.getElementById('err-n').style.display='block'; return; }
+    var ap = document.getElementById('apellidos').value.trim();
+    if (!n || !ap) { document.getElementById('err-n').style.display='block'; return; }
     document.getElementById('err-n').style.display='none';
     document.getElementById('s-inicio').style.display='none';
     document.getElementById('s-carga').style.display='block';
@@ -188,7 +190,8 @@ function formatearRut(rut){var l=limpiarRut(rut);if(l.length<2)return rut;var dv
 
 document.getElementById('btn-ini').onclick=function(){
   var n=document.getElementById('nombre').value.trim();
-  if(!n){document.getElementById('err-n').style.display='block';return;}
+  var ap=document.getElementById('apellidos').value.trim();
+  if(!n||!ap){document.getElementById('err-n').style.display='block';return;}
   document.getElementById('err-n').style.display='none';
   var rutVal=document.getElementById('rut').value.trim();
   var errRut=document.getElementById('err-rut');
@@ -669,7 +672,7 @@ function calcular(resp){
 
   var payload={
     fecha:new Date().toLocaleString('es-CL'),
-    nombre:document.getElementById('nombre').value.trim(),
+    nombre:(document.getElementById('nombre').value.trim()+' '+document.getElementById('apellidos').value.trim()).trim(),
     rut:document.getElementById('rut').value.trim(),
     sexo:sexo==='f'?'Femenino':sexo==='nd'?'Prefiero no indicar':'Masculino',
     decatipos_escalas:deStr,
