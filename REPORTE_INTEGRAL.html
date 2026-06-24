@@ -636,22 +636,22 @@ function generarLineaCompExt(nombre, nivel, seed){
   var nl = n.toLowerCase();
   var V = {
     alto:[
-      "Se destaca de manera consistente en {c}, demostrando solvencia y autonomía en su aplicación. Esta capacidad le permite asumir responsabilidades exigentes y responder con seguridad ante las distintas situaciones del puesto.",
-      "Cuenta con un dominio sólido de {c}, que sostiene de forma estable en el trabajo cotidiano. Constituye una de sus principales fortalezas y un aporte directo al desempeño esperado en el cargo.",
-      "Maneja {c} con notable seguridad, resolviendo con eficacia incluso las situaciones de mayor complejidad. Es un recurso confiable en este aspecto, capaz de sostener el rendimiento aun bajo presión.",
-      "Demuestra un manejo destacado de {c}, aplicándolo con criterio y consistencia. Esta solidez se traduce en un aporte concreto al equipo y en una buena adaptación a las exigencias del rol."
+      "Se destaca de manera consistente en {c}, demostrando solvencia y autonomía en su aplicación. Esta capacidad le permite asumir responsabilidades exigentes y responder con seguridad ante las distintas situaciones del puesto. Constituye uno de sus principales recursos y un aporte directo al desempeño esperado en el cargo.",
+      "Cuenta con un dominio sólido de {c}, que sostiene de forma estable en el trabajo cotidiano. Lo aplica con criterio incluso en contextos de mayor exigencia, manteniendo la calidad y la consistencia de su desempeño. Representa una fortaleza clara que agrega valor al equipo y al rol que ocuparía.",
+      "Maneja {c} con notable seguridad, resolviendo con eficacia incluso las situaciones de mayor complejidad. Es un recurso confiable en este aspecto, capaz de sostener el rendimiento aun bajo presión o ante imprevistos. Esta solidez favorece una rápida adaptación a las exigencias propias del cargo.",
+      "Demuestra un manejo destacado de {c}, aplicándolo con criterio, consistencia y autonomía. Esta competencia se refleja de forma concreta en su comportamiento laboral y en los resultados que es capaz de alcanzar. Se trata de una de sus fortalezas más sólidas y de un claro aporte al puesto."
     ],
     medio:[
-      "Presenta un manejo adecuado de {c}, suficiente para resolver las situaciones habituales del cargo. Cuenta con una base sólida sobre la cual seguir desarrollándose con la experiencia y el acompañamiento adecuados.",
-      "Aborda {c} de forma competente en lo cotidiano, respondiendo correctamente a las tareas propias del puesto. Tiene un margen de crecimiento que puede potenciarse con práctica y retroalimentación.",
-      "Muestra un desempeño correcto en {c}, apropiado para las demandas habituales del rol. Con apoyo y oportunidades de práctica, puede consolidar aún más esta competencia.",
-      "Maneja {c} de manera funcional, resolviendo de forma efectiva las situaciones cotidianas. Se observa potencial de desarrollo que conviene acompañar para alcanzar un desempeño más avanzado."
+      "Presenta un manejo adecuado de {c}, suficiente para resolver las situaciones habituales del cargo. Cuenta con una base sólida sobre la cual seguir desarrollándose con la experiencia y el acompañamiento adecuados. Con el tiempo y la práctica, esta competencia puede consolidarse y proyectarse a un nivel mayor.",
+      "Aborda {c} de forma competente en lo cotidiano, respondiendo correctamente a las tareas propias del puesto. Si bien resuelve con efectividad las demandas habituales, dispone de margen de crecimiento en situaciones de mayor complejidad. Con práctica y retroalimentación, puede potenciar de manera notable este aspecto.",
+      "Muestra un desempeño correcto en {c}, apropiado para las demandas habituales del rol. Aplica esta competencia de forma funcional, aunque aún con espacio para ganar profundidad y seguridad. El acompañamiento y la experiencia le permitirán afianzarla de manera progresiva.",
+      "Maneja {c} de manera funcional, resolviendo de forma efectiva las situaciones cotidianas del cargo. Cuenta con las herramientas básicas necesarias, sobre las que puede seguir construyendo con apoyo y práctica. Se observa un potencial de desarrollo que conviene acompañar para alcanzar un desempeño más avanzado."
     ],
     bajo:[
-      "Muestra un desarrollo todavía incipiente en {c}, por lo que requiere acompañamiento para consolidarlo. Con apoyo, práctica y seguimiento, puede ir fortaleciendo esta competencia de manera progresiva.",
-      "Presenta algunas dificultades en {c}, que conviene reforzar mediante apoyo y experiencia guiada. Es un aspecto a trabajar de forma prioritaria para alcanzar el desempeño esperado en el cargo.",
-      "Requiere fortalecer {c}, que se encuentra en una etapa inicial de desarrollo. Un plan de acompañamiento y práctica sostenida le permitiría avanzar de manera concreta en este punto.",
-      "Evidencia un manejo aún limitado de {c}, que constituye un área prioritaria de desarrollo. Con orientación y oportunidades de práctica, puede ir mejorando gradualmente."
+      "Muestra un desarrollo todavía incipiente en {c}, por lo que requiere acompañamiento para consolidarlo. En las situaciones habituales se desenvuelve con cierta dificultad, necesitando apoyo y orientación para responder con seguridad. Con práctica sostenida y seguimiento, puede ir fortaleciendo esta competencia de manera progresiva.",
+      "Presenta algunas dificultades en {c}, que conviene reforzar mediante apoyo y experiencia guiada. Por ahora resuelve con limitaciones las tareas que la involucran, lo que sugiere un trabajo focalizado en este ámbito. Es un aspecto prioritario a desarrollar para alcanzar el desempeño esperado en el cargo.",
+      "Requiere fortalecer {c}, que se encuentra en una etapa inicial de desarrollo. Su desempeño en este ámbito es aún básico y se beneficia de pautas claras y de un acompañamiento cercano. Un plan de práctica y seguimiento sostenido le permitiría avanzar de manera concreta en este punto.",
+      "Evidencia un manejo aún limitado de {c}, que constituye un área prioritaria de desarrollo. Las situaciones que demandan esta competencia le resultan exigentes y requieren apoyo para resolverse adecuadamente. Con orientación y oportunidades de práctica, puede ir mejorando de forma gradual."
     ]
   };
   var arr = V[nivel]; if (!arr) return "";
@@ -829,6 +829,9 @@ function pulirTexto(s){
   s = (s || "").trim();
   if (!s) return s;
   s = s.replace(/\s+/g, " ");                                          // espacios múltiples → uno
+  // quitar tratamientos de cortesía (el señor, la señorita, Sr., etc.)
+  s = s.replace(/\b(el|la|los|las)\s+(señor(?:a|ita)?|sr|sra|srta)\.?\s+/gi, "");
+  s = s.replace(/\b(señor(?:a|ita)?|don|doña|sr|sra|srta)\.?\s+(?=[A-ZÁÉÍÓÚÑ])/g, "");
   s = s.replace(/\s+([,.;:])/g, "$1");                                 // sin espacio antes de , . ; :
   s = s.replace(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])([,.;:])([A-Za-zÁÉÍÓÚÜÑáéíóúüñ])/g, "$1$2 $3"); // espacio tras puntuación
   s = s.charAt(0).toUpperCase() + s.slice(1);                          // mayúscula inicial
