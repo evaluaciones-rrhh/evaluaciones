@@ -201,18 +201,18 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6
 // Puntajes por pregunta y alternativa: [A, B, C, D]
 // Pauta de corrección OFICIAL — Manual CEEL (Ossandón RR.HH. / Hersey-Blanchard)
 const PUNTAJES = [
-  [+2, +1, -1, -2], // 1
-  [-1, +2, +1, -2], // 2
-  [-2, +1, +2, -1], // 3
-  [-2, -1, +1, +2], // 4
-  [+2, +1, -1, -2], // 5
-  [+1, +2, -1, -2], // 6
-  [-2, -1, +2, +1], // 7
-  [-2, -1, +1, +2], // 8
-  [+2, +1, -1, -2], // 9
-  [-2, +2, +1, -1], // 10
-  [-2, -1, +2, +1], // 11
-  [-2, -1, +1, +2], // 12
+  [+2, -1, +1, -2], // 1
+  [+2, -2, +1, -1], // 2
+  [+1, -1, -2, +2], // 3
+  [+1, -2, +2, -1], // 4
+  [-2, +1, +2, -1], // 5
+  [-1, +1, -2, +2], // 6
+  [-2, +2, -1, +1], // 7
+  [+2, -1, -2, +1], // 8
+  [-2, +1, +2, -1], // 9
+  [+1, -2, -1, +2], // 10
+  [-2, +2, -1, +1], // 11
+  [-1, +2, -2, +1], // 12
 ];
 
 // Estilo predominante por columna: A=Autoritario, B=Integrado, C=Relacionado, D=Separado
@@ -223,17 +223,17 @@ const ESTILOS = ['Autoritario','Integrado','Relacionado','Separado'];
 // Mapa estilo↔alternativa según pauta oficial del manual
 const MAPA_ESTILOS = [
   ['Autoritario','Relacionado','Integrado','Separado'], // P1
-  ['Separado','Autoritario','Relacionado','Integrado'], // P2
-  ['Relacionado','Autoritario','Separado','Integrado'], // P3
-  ['Integrado','Separado','Autoritario','Relacionado'], // P4
-  ['Relacionado','Integrado','Separado','Autoritario'], // P5
-  ['Integrado','Separado','Autoritario','Relacionado'], // P6
+  ['Integrado','Separado','Relacionado','Autoritario'], // P2
+  ['Integrado','Separado','Autoritario','Relacionado'], // P3
+  ['Relacionado','Autoritario','Separado','Integrado'], // P4
+  ['Separado','Integrado','Autoritario','Relacionado'], // P5
+  ['Relacionado','Autoritario','Separado','Integrado'], // P6
   ['Autoritario','Relacionado','Integrado','Separado'], // P7
-  ['Relacionado','Integrado','Separado','Autoritario'], // P8
-  ['Relacionado','Integrado','Separado','Autoritario'], // P9
-  ['Integrado','Separado','Autoritario','Relacionado'], // P10
+  ['Separado','Integrado','Autoritario','Relacionado'], // P8
+  ['Separado','Integrado','Autoritario','Relacionado'], // P9
+  ['Relacionado','Autoritario','Separado','Integrado'], // P10
   ['Autoritario','Relacionado','Integrado','Separado'], // P11
-  ['Relacionado','Autoritario','Separado','Integrado'], // P12
+  ['Integrado','Separado','Autoritario','Relacionado'], // P12
 ];
 
 const PREGUNTAS = [
