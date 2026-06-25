@@ -3422,6 +3422,41 @@ async function abrirInformeCEAL(test, rut, nombre) {
     var descEl = document.getElementById("ceal-descripcion");
     descEl.innerHTML = textoFinal;
 
+    // ── Distribución de estilos: amplitud, estilos rechazados y desglose por estilo ──
+    (function(){
+      var contEl = document.getElementById("ceal-distribucion");
+      var secEl  = document.getElementById("ceal-distribucion-section");
+      if(!contEl) return;
+      var amplitudTxt = String(fila[9]||"");
+      var rechazados  = String(fila[10]||"");
+      var desg = [];
+      try { desg = JSON.parse(fila[11]||"[]"); } catch(e){ desg = []; }
+      if(!amplitudTxt && (!desg || !desg.length)){ if(secEl) secEl.style.display="none"; return; }
+      if(secEl) secEl.style.display="";
+      var COLORES = {Autoritario:"#e57a5f", Integrado:"#6366f1", Relacionado:"#10b981", Separado:"#94a3b8"};
+      var maxVeces = desg.reduce(function(m,d){ return Math.max(m, d.veces||0); }, 1);
+      var barras = desg.map(function(d){
+        var pct = Math.round(((d.veces||0)/maxVeces)*100);
+        var col = COLORES[d.estilo] || "#94a3b8";
+        var signo = (d.puntaje>=0?"+":"") + d.puntaje;
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'
+             + '<div style="width:96px;font-size:12px;color:#5b6b78;flex-shrink:0;">'+d.estilo+'</div>'
+             + '<div style="flex:1;background:#eef1f4;border-radius:6px;height:18px;overflow:hidden;">'
+             +   '<div style="width:'+pct+'%;background:'+col+';height:100%;border-radius:6px;min-width:2px;"></div>'
+             + '</div>'
+             + '<div style="width:84px;text-align:right;font-size:12px;color:#1f2a33;flex-shrink:0;">'+(d.veces||0)+'× <span style="color:#9aa5ad;">('+signo+')</span></div>'
+             + '</div>';
+      }).join("");
+      var chips = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">'
+        + (amplitudTxt ? '<span style="background:#eef2ff;color:#3730a3;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">Flexibilidad: '+amplitudTxt+'</span>' : '')
+        + (rechazados
+            ? '<span style="background:#fef2f2;color:#991b1b;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">Estilos que evita: '+rechazados+'</span>'
+            : '<span style="background:#ecfdf5;color:#065f46;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;">Usa los 4 estilos</span>')
+        + '</div>';
+      contEl.innerHTML = chips + barras
+        + '<div style="font-size:11px;color:#9aa5ad;margin-top:8px;line-height:1.5;">Veces que eligió cada estilo y su aporte a la efectividad (entre paréntesis). Un líder adaptable reparte sus elecciones según la situación, en lugar de usar siempre el mismo estilo.</div>';
+    })();
+
     // Fortalezas y áreas de desarrollo — dependen del ESTILO y de la BANDA de efectividad.
     // Fundamento: Manual CEEL (Reddin 3D). Cada estilo tiene versión eficaz e ineficaz:
     //   Autoritario: eficaz "Autócrata Benévolo" / ineficaz "Autoritario"
@@ -5276,6 +5311,12 @@ function imprimirModalWONDERLIC() { imprimirConNombre(); }
       <div class="ceal-desc-section">
         <div class="ceal-section-label">DESCRIPCIÓN DEL ESTILO</div>
         <div class="ceal-desc-body" id="ceal-descripcion">—</div>
+      </div>
+
+      <!-- DISTRIBUCIÓN DE ESTILOS -->
+      <div class="ceal-desc-section" id="ceal-distribucion-section">
+        <div class="ceal-section-label">DISTRIBUCIÓN DE ESTILOS</div>
+        <div id="ceal-distribucion"></div>
       </div>
 
       <!-- IMPLICANCIAS PARA EL ROL -->
