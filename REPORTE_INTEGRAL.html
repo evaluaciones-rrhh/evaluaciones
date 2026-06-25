@@ -896,6 +896,9 @@ function construirInforme(d) {
     if (d.actitud) p += "<p>"+d.actitud+"</p>";
     if (d.motivacion) p += "<p>"+d.motivacion+"</p>";
     if (d.experiencia) p += "<p>"+expParrafo(d.experiencia)+"</p>";
+    // Fortalezas integradas dentro de las observaciones (sin recuadro aparte)
+    var fort = (d.tipo === "transitorio") ? expandirFortalezasExt(d.fortalezas, d.nombre) : expandirFortalezas(d.fortalezas, d.nombre);
+    if (fort && fort.trim()) p += aParrafos(fort);
     return p || "<p style='color:#999;'>Sin observaciones registradas.</p>";
   }
   // Sección de resultados de tests (si hay tests seleccionados)
@@ -931,7 +934,8 @@ function construirInforme(d) {
     '.footer{text-align:center;font-size:10px;color:#aaa;padding:16px;border-top:1px solid '+C.borde+';}'+
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px '+C.btnSombra+';z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnHover+';}'+
-    '@media print{body{background:#fff;padding:0;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
+    '@page{margin:0;}'+
+    '@media print{body{background:#fff;padding:14mm 12mm;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
     '<div class="doc">'+
@@ -954,13 +958,9 @@ function construirInforme(d) {
         : '<div class="box" style="color:#999;font-size:13px;">No se aplicaron evaluaciones.</div>'))+
     '<div class="st">Observaciones de la Entrevista</div><div class="box">'+obsParr()+'</div>'+
     (d.tipo === "transitorio" ? "" :
-      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezas(d.fortalezas, d.nombre))+'</div>'+
       '<div class="st">Aspectos a considerar</div><div class="box box-a">'+aParrafos(d.aspectos)+'</div>'+
       '<div class="st">Conclusión</div><div class="concl">'+aParrafos(d.conclusion)+'</div>'
     )+
-    (d.tipo === "transitorio" ?
-      '<div class="st">Fortalezas</div><div class="box box-f">'+aParrafos(expandirFortalezasExt(d.fortalezas, d.nombre))+'</div>'
-    : "")+
     '</div>'+
     '<div class="footer">Documento generado por Deneb Evaluaciones · Confidencial</div>'+
     '</div></body></html>';
@@ -1133,7 +1133,8 @@ function construirDashboard(d) {
     '.dfoot{text-align:center;font-size:10px;color:#aaa;padding:14px;border-top:1px solid #eee;}'+
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnH+';}'+
-    '@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
+    '@page{margin:0;}'+
+    '@media print{body{background:#fff;padding:14mm 12mm;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
     '<div class="dash">'+
