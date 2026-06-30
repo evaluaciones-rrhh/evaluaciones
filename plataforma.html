@@ -1433,10 +1433,7 @@ tbody tr:hover td { background: #fdf9f6; }
               <option value="DISC">Estilo Conductual</option>
               <option value="OPERA">Conducta Operacional</option>
             </select>
-            <select class="filtro-select" id="filtro-cargo" onchange="filtrar()">
-              <option value="">Todos los cargos</option>
-            </select>
-            <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
+            <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre, RUT o cargo..." oninput="filtrar()">
           </div>
         </div>
         <div class="table-wrap">
@@ -2420,7 +2417,6 @@ window.addEventListener("focus", function(){
 function pintarTodo() {
   actualizarStats();
   renderRecientes();
-  poblarFiltroCargo();
   filtrar();
   renderRanking(todosLosDatos);
   document.getElementById("st-enviados").textContent = todosEnvios.length;
@@ -2665,18 +2661,17 @@ function quitarTildes(s){
 
 function filtrar() {
   var test = document.getElementById("filtro-test").value;
-  var cargoSel = document.getElementById("filtro-cargo") ? document.getElementById("filtro-cargo").value : "";
   var q = quitarTildes((document.getElementById("filtro-nombre").value||"").toLowerCase().trim());
   // versión del texto buscado sin puntos/guiones/espacios (para que el RUT calce en cualquier formato)
   var qLimpio = q.replace(/[\.\s-]/g, "");
   var filtered = todosLosDatos.filter(function(d){
     if (test && d.test !== test) return false;
-    if (cargoSel && buscarCargoCandidato(d.rut, d.nombre) !== cargoSel) return false;
     if (!q) return true;
     var nom = quitarTildes(String(d.nombre || "").toLowerCase());
     var rut = String(d.rut || "").toLowerCase();
     var rutLimpio = rut.replace(/[\.\s-]/g, "");
-    return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio));
+    var cargo = quitarTildes(String(buscarCargoCandidato(d.rut, d.nombre) || "").toLowerCase());
+    return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio)) || cargo.includes(q);
   });
   document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
   // Ordenar por fecha y hora descendente (más reciente primero)
