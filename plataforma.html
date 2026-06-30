@@ -1433,6 +1433,9 @@ tbody tr:hover td { background: #fdf9f6; }
               <option value="DISC">Estilo Conductual</option>
               <option value="OPERA">Conducta Operacional</option>
             </select>
+            <select class="filtro-select" id="filtro-cargo" onchange="filtrar()">
+              <option value="">Todos los cargos</option>
+            </select>
             <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre o RUT..." oninput="filtrar()">
           </div>
         </div>
@@ -2417,6 +2420,7 @@ window.addEventListener("focus", function(){
 function pintarTodo() {
   actualizarStats();
   renderRecientes();
+  poblarFiltroCargo();
   filtrar();
   renderRanking(todosLosDatos);
   document.getElementById("st-enviados").textContent = todosEnvios.length;
@@ -2536,6 +2540,22 @@ function renderTablaComun(datos, tbodyId, cols) {
   tbody.innerHTML = html;
 }
 
+// Llena el desplegable de cargo con los cargos existentes en los envíos
+function poblarFiltroCargo(){
+  var sel = document.getElementById("filtro-cargo");
+  if(!sel || typeof todosEnvios === "undefined") return;
+  var actual = sel.value;
+  var cargos = [];
+  todosEnvios.forEach(function(e){
+    var c = String(e.cargo||"").trim();
+    if (c && cargos.indexOf(c) === -1) cargos.push(c);
+  });
+  cargos.sort(function(a,b){ return a.localeCompare(b, "es"); });
+  sel.innerHTML = '<option value="">Todos los cargos</option>' +
+    cargos.map(function(c){ return '<option value="'+c.replace(/"/g,"&quot;")+'">'+c+'</option>'; }).join("");
+  if (actual && cargos.indexOf(actual) > -1) sel.value = actual;
+}
+
 // Busca el cargo registrado para un candidato (cruzando con los envíos por RUT o nombre)
 function buscarCargoCandidato(rut, nombre) {
   function quitaTildes(s){ return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,""); }
@@ -2645,11 +2665,13 @@ function quitarTildes(s){
 
 function filtrar() {
   var test = document.getElementById("filtro-test").value;
+  var cargoSel = document.getElementById("filtro-cargo") ? document.getElementById("filtro-cargo").value : "";
   var q = quitarTildes((document.getElementById("filtro-nombre").value||"").toLowerCase().trim());
   // versión del texto buscado sin puntos/guiones/espacios (para que el RUT calce en cualquier formato)
   var qLimpio = q.replace(/[\.\s-]/g, "");
   var filtered = todosLosDatos.filter(function(d){
     if (test && d.test !== test) return false;
+    if (cargoSel && buscarCargoCandidato(d.rut, d.nombre) !== cargoSel) return false;
     if (!q) return true;
     var nom = quitarTildes(String(d.nombre || "").toLowerCase());
     var rut = String(d.rut || "").toLowerCase();
