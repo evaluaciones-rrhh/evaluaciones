@@ -2836,6 +2836,21 @@ function renderHistorial() {
   _pintarTablaHistorial(todosEnvios);
 }
 
+// Convierte la fecha del envío ("dd-MM-yyyy[, HH:mm:ss]" o ISO) a timestamp para ordenar
+function _fechaEnvioTs(e){
+  var s = String((e && (e.fecha_iso || e.fecha)) || "");
+  if (!s) return 0;
+  if (s.indexOf("T") > -1){ var ti = Date.parse(s); return isNaN(ti) ? 0 : ti; }
+  var partes = s.split(",");
+  var f = partes[0].trim().split(/[-\/]/);
+  var h = (partes[1] || "").trim().split(":");
+  if (f.length === 3){
+    var d = new Date(+f[2], (+f[1]) - 1, +f[0], +(h[0]||0), +(h[1]||0), +(h[2]||0));
+    return isNaN(d.getTime()) ? 0 : d.getTime();
+  }
+  var t2 = Date.parse(s); return isNaN(t2) ? 0 : t2;
+}
+
 function _pintarTablaHistorial(envios) {
   var tbl = document.getElementById("tabla-historial");
   if (!tbl) return;
@@ -2850,7 +2865,7 @@ function _pintarTablaHistorial(envios) {
     return;
   }
   var html = "";
-  envios.slice().reverse().forEach(function(e) {
+  envios.slice().sort(function(a, b){ return _fechaEnvioTs(b) - _fechaEnvioTs(a); }).forEach(function(e) {
     var testCls = "badge-" + (e.test || "").toLowerCase().replace("16pf","16pf");
     var testNombre = TEST_NOMBRES_HTML[e.test] || e.test || "—";
     var estCls = (e.estado || "").toLowerCase() === "enviado" ? "badge-enviado" : "badge-pendiente";
