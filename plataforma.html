@@ -304,6 +304,8 @@ tbody td {
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: #fdf9f6; }
 .td-nombre { font-weight: 600; color: var(--ink); }
+.nombre-link { cursor: pointer; color: #e57a5f; }
+.nombre-link:hover { text-decoration: underline; }
 .td-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
 
 /* BADGES */
@@ -1475,7 +1477,17 @@ tbody tr:hover td { background: #fdf9f6; }
       </div>
     </div>
 
-    <div class="page" id="page-enviar">
+    <!-- FICHA DEL CANDIDATO: resumen de todos sus tests -->
+    <div id="modal-ficha" style="display:none;position:fixed;inset:0;background:rgba(20,28,35,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;" onclick="if(event.target===this)cerrarFicha()">
+      <div style="background:#fff;max-width:840px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
+        <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div id="ficha-nombre" style="font-size:19px;font-weight:700;"></div><div id="ficha-sub" style="font-size:12px;opacity:.8;margin-top:3px;"></div></div>
+          <button onclick="cerrarFicha()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="ficha-cuerpo" style="padding:24px;max-height:74vh;overflow:auto;background:#f7f8fa;"></div>
+      </div>
+    </div>
+
       <div class="card">
         <div class="card-body">
           <div class="form-grid">
@@ -2527,10 +2539,10 @@ function renderTablaComun(datos, tbodyId, cols) {
     };
     var testLabel = TEST_BADGE_NOMBRES[d.test] || d.test || "—";
     if(cols===5) {
-      html += "<tr><td class='td-nombre'>"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+      html += "<tr><td class='td-nombre nombre-link' onclick=\"abrirFichaCandidato('"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">"+(d.nombre||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     } else {
-      var cargoCand = buscarCargoCandidato(d.rut, d.nombre);
-      html += "<tr><td><div class='td-nombre'>"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td style='font-size:12px;color:var(--ink-soft,#444);'>"+(cargoCand||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
+      var cargoCand = d.cargo || buscarCargoCandidato(d.rut, d.nombre);
+      html += "<tr><td><div class='td-nombre nombre-link' onclick=\"abrirFichaCandidato('"+encodeURIComponent(d.rut||'')+"','"+encodeURIComponent(d.nombre||'')+"')\">"+(d.nombre||"—")+"</div></td><td style='color:var(--muted);font-size:12px;'>"+(d.rut||"—")+"</td><td style='font-size:12px;color:var(--ink-soft,#444);'>"+(cargoCand||"—")+"</td><td><span class='badge "+testCls+"'>"+testLabel+"</span></td><td style='color:var(--muted);font-size:12px;'>"+(d.fecha||"—")+"</td><td>"+btnVer+"</td></tr>";
     }
   });
   tbody.innerHTML = html;
@@ -2550,6 +2562,85 @@ function poblarFiltroCargo(){
   sel.innerHTML = '<option value="">Todos los cargos</option>' +
     cargos.map(function(c){ return '<option value="'+c.replace(/"/g,"&quot;")+'">'+c+'</option>'; }).join("");
   if (actual && cargos.indexOf(actual) > -1) sel.value = actual;
+}
+
+// ── Ficha del candidato: resumen de todos los tests aplicados ──
+var TEST_NOMBRES_FICHA = {
+  "IC":"Instrucciones Complejas","CEAL":"Estilos de Liderazgo","16PF":"Evaluación de Personalidad",
+  "IPV":"Personalidad Vendedores","WONDERLIC":"Habilidad Cognitiva","DISC":"Estilo Conductual",
+  "OPERA":"Conducta Operacional","TECNICO_GRUERO":"Prueba Técnica Gruero","TECNICO_BODEGA":"Prueba Técnica Bodega"
+};
+var ORDEN_TESTS_FICHA = ["IC","CEAL","16PF","IPV","WONDERLIC","DISC","OPERA","TECNICO_GRUERO","TECNICO_BODEGA"];
+
+function colorNivelFicha(niv){
+  var n = quitarTildes(String(niv||"").toLowerCase());
+  if (!n) return "#94a3b8";
+  if (n.indexOf("no ")===0 || n.includes("no recomend") || n.includes("bajo") || n.includes("infer") || n.includes("inefect") || n.includes("rechaz")) return "#e5484d";
+  if (n.includes("alto") || n.includes("super") || n.includes("avanza") || n.includes("recomend") || n.includes("efect")) return "#10b981";
+  return "#e08a00";
+}
+
+function abrirFichaCandidato(rutEnc, nombreEnc){
+  var rut = decodeURIComponent(rutEnc||"");
+  var nombre = decodeURIComponent(nombreEnc||"");
+  var rutN = String(rut).replace(/[\.\s-]/g,"").toLowerCase();
+  var nomN = quitarTildes(String(nombre).toLowerCase().trim());
+  var suyos = todosLosDatos.filter(function(d){
+    var dr = String(d.rut||"").replace(/[\.\s-]/g,"").toLowerCase();
+    var dn = quitarTildes(String(d.nombre||"").toLowerCase().trim());
+    if (rutN && dr) return dr === rutN;
+    return dn === nomN;
+  });
+  var porTest = {};
+  suyos.forEach(function(d){
+    var t = d.test;
+    if (!porTest[t] || String(d.fecha_iso||"") > String(porTest[t].fecha_iso||"")) porTest[t] = d;
+  });
+  var rendidos = ORDEN_TESTS_FICHA.filter(function(t){ return porTest[t]; });
+  var cargoSello = "";
+  suyos.forEach(function(d){ if (d.cargo && !cargoSello) cargoSello = d.cargo; });
+  var cargo = cargoSello || buscarCargoCandidato(rut, nombre) || "—";
+  var enviadosCand = [];
+  todosEnvios.forEach(function(e){
+    var en = quitarTildes(String(e.nombre||"").toLowerCase().trim());
+    if (en === nomN && e.test && enviadosCand.indexOf(e.test)===-1) enviadosCand.push(e.test);
+  });
+  var pendientes = enviadosCand.filter(function(t){ return rendidos.indexOf(t)===-1; });
+  var totalPos = rendidos.length + pendientes.length;
+
+  document.getElementById("ficha-nombre").textContent = nombre || "—";
+  document.getElementById("ficha-sub").innerHTML =
+    (rut ? rut+" · " : "") + "Cargo: "+cargo+" · <strong>"+rendidos.length+" de "+(totalPos||rendidos.length)+"</strong> tests rendidos";
+
+  var cards = rendidos.map(function(t){
+    var d = porTest[t];
+    var niv = String(d.nivel||"—") || "—";
+    var col = colorNivelFicha(niv);
+    var btn = DASH_HTML[t]
+      ? "<button class='btn btn-ghost btn-sm' style='margin-top:10px;' onclick=\"abrirDash('"+t+"','"+encodeURIComponent(rut)+"','"+encodeURIComponent(nombre)+"')\">Ver detalle →</button>"
+      : "";
+    return "<div style='background:#fff;border:1px solid #e6e9ec;border-left:4px solid "+col+";border-radius:10px;padding:14px 16px;'>"
+      + "<div style='font-size:11px;color:#8a95a0;text-transform:uppercase;letter-spacing:.5px;'>"+(TEST_NOMBRES_FICHA[t]||t)+"</div>"
+      + "<div style='font-size:16px;font-weight:700;color:#1f2a33;margin-top:4px;'>"+niv+"</div>"
+      + "<div style='font-size:11px;color:#9aa5ad;margin-top:3px;'>"+(d.fecha||"")+"</div>"
+      + btn
+      + "</div>";
+  }).join("");
+
+  var cuerpo = rendidos.length
+    ? "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;'>"+cards+"</div>"
+    : "<div style='text-align:center;color:#8a95a0;padding:30px;'>Este candidato aún no tiene tests rendidos.</div>";
+  if (pendientes.length) {
+    cuerpo += "<div style='margin-top:20px;'><div style='font-size:11px;color:#8a95a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;'>Tests pendientes</div><div style='display:flex;flex-wrap:wrap;gap:8px;'>"
+      + pendientes.map(function(t){ return "<span style='background:#eef1f4;color:#6b7680;padding:5px 12px;border-radius:20px;font-size:12px;'>"+(TEST_NOMBRES_FICHA[t]||t)+"</span>"; }).join("")
+      + "</div></div>";
+  }
+  document.getElementById("ficha-cuerpo").innerHTML = cuerpo;
+  document.getElementById("modal-ficha").style.display = "flex";
+}
+
+function cerrarFicha(){
+  document.getElementById("modal-ficha").style.display = "none";
 }
 
 // Busca el cargo registrado para un candidato (cruzando con los envíos por RUT o nombre)
