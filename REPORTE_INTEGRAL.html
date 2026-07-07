@@ -191,6 +191,12 @@
     <textarea id="txt-conclusion" placeholder="Aquí aparecerá la conclusión generada (editable)..."></textarea>
   </div>
 
+  <div id="opts-transitorio" style="display:none;margin:6px 0 12px;font-size:13px;color:var(--pizarra);background:#f3f0ea;border-radius:8px;padding:10px 14px;">
+    <div style="font-weight:600;margin-bottom:6px;">Campos opcionales de Servicios Transitorios:</div>
+    <label style="margin-right:20px;cursor:pointer;"><input type="checkbox" id="opt-motivacion" checked> Incluir motivación</label>
+    <label style="cursor:pointer;"><input type="checkbox" id="opt-renta" checked> Incluir pretensiones de renta</label>
+  </div>
+
   <button class="btn-main" onclick="generarInforme()">📄 Generar informe</button>
   <div id="ind-guardado" style="text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#2e7d32;opacity:0;transition:opacity .3s;">✓ Informe guardado</div>
 
@@ -569,6 +575,9 @@ function cambiarTipoReporte(tipo){
   // En el Dashboard NO se usa la actitud (solo motivación), así que se oculta ese campo
   var subActitud = document.getElementById("subsec-actitud");
   if (subActitud) subActitud.style.display = esDashboard ? "none" : "";
+  // Opciones de campos opcionales (solo en Servicios Transitorios)
+  var optsT = document.getElementById("opts-transitorio");
+  if (optsT) optsT.style.display = esTransitorio ? "" : "none";
 }
 
 // ── COMPETENCIAS EVALUADAS (nivel Alto/Medio/Bajo → línea corta editable) ──
@@ -695,7 +704,9 @@ function generarInforme() {
     fortalezas: val("txt-fortalezas"), aspectos: val("txt-aspectos"), conclusion: val("txt-conclusion"),
     categoria: val("d-categoria"),
     tests: testsParaInforme,
-    tipo: tipoReporteActual
+    tipo: tipoReporteActual,
+    incluirMotivacion: (document.getElementById("opt-motivacion") ? document.getElementById("opt-motivacion").checked : true),
+    incluirRenta: (document.getElementById("opt-renta") ? document.getElementById("opt-renta").checked : true)
   };
   if (!d.nombre) { alert("Ingresa al menos el nombre del candidato."); return; }
   var html = (tipoReporteActual === "dashboard") ? construirDashboard(d) : construirInforme(d);
@@ -894,7 +905,8 @@ function construirInforme(d) {
   function obsParr(){
     var p = "";
     if (d.actitud) p += "<p>"+d.actitud+"</p>";
-    if (d.motivacion) p += "<p>"+d.motivacion+"</p>";
+    var mostrarMotiv = (d.tipo === "transitorio") ? (d.incluirMotivacion !== false) : true;
+    if (d.motivacion && mostrarMotiv) p += "<p>"+d.motivacion+"</p>";
     if (d.experiencia) p += "<p>"+expParrafo(d.experiencia)+"</p>";
     // Fortalezas integradas dentro de las observaciones (sin recuadro aparte)
     var fort = (d.tipo === "transitorio") ? expandirFortalezasExt(d.fortalezas, d.nombre) : expandirFortalezas(d.fortalezas, d.nombre);
@@ -949,7 +961,7 @@ function construirInforme(d) {
     '<div class="st">Datos del candidato</div>'+
     '<table>'+
     fila("Nombre", d.nombre)+fila("Cargo postulado", d.cargo)+fila("RUT", d.rut)+
-    fila("Estudios", d.estudios)+fila("Fecha de entrevista", d.fecha)+fila("Entrevistador", d.entrevistador)+fila("Pretensiones de renta", d.renta)+
+    fila("Estudios", d.estudios)+fila("Fecha de entrevista", d.fecha)+fila("Entrevistador", d.entrevistador)+((d.tipo === "transitorio" && d.incluirRenta === false) ? "" : fila("Pretensiones de renta", d.renta))+
     '</table>'+
     (d.tipo === "transitorio" ? "" :
       '<div class="st">Test aplicados</div>'+
