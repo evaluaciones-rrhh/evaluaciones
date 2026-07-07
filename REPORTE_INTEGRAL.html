@@ -99,7 +99,7 @@
       <div><label>Estudios</label><input type="text" id="d-estudios" placeholder="Ej: Ingeniería..."></div>
       <div><label>Fecha de entrevista</label><input type="text" id="d-fecha" placeholder="Ej: 29-05-2026"></div>
       <div><label>Entrevistador</label><input type="text" id="d-entrevistador" placeholder="Nombre del evaluador"></div>
-      <div><label>Pretensiones de renta</label><input type="text" id="d-renta" placeholder="Ej: $2.500.000 líquidos"></div>
+      <div><label>Pretensiones de renta</label><input type="text" id="d-renta" placeholder="Ej: $2.500.000 líquidos"><label id="wrap-opt-renta" style="display:none;font-size:12px;font-weight:400;margin-top:5px;cursor:pointer;color:var(--pizarra);"><input type="checkbox" id="opt-renta" checked> Incluir en el informe</label></div>
     </div>
     <div class="voz-row" style="margin-top:14px;" id="bloque-buscar-tests">
       <button class="btn-cv" onclick="buscarTests()">🔍 Buscar tests rendidos del candidato</button>
@@ -125,7 +125,7 @@
     </div>
 
     <div class="sub-sec">
-      <div class="tit">Motivación</div>
+      <div class="tit" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">Motivación<label id="wrap-opt-motivacion" style="display:none;font-size:12px;font-weight:400;cursor:pointer;color:var(--pizarra);"><input type="checkbox" id="opt-motivacion" checked> Incluir en el informe</label></div>
       <div class="hint">¿Qué motiva al candidato a postular? Grábalo.</div>
       <div class="voz-row">
         <button class="btn-voz" data-campo="motivacion" data-tipo="motivacion" onclick="toggleGrab(this)">🎤 Grabar</button>
@@ -189,12 +189,6 @@
       <span class="voz-estado" id="est-conclusion"></span>
     </div>
     <textarea id="txt-conclusion" placeholder="Aquí aparecerá la conclusión generada (editable)..."></textarea>
-  </div>
-
-  <div id="opts-transitorio" style="display:none;margin:6px 0 12px;font-size:13px;color:var(--pizarra);background:#f3f0ea;border-radius:8px;padding:10px 14px;">
-    <div style="font-weight:600;margin-bottom:6px;">Campos opcionales de Servicios Transitorios:</div>
-    <label style="margin-right:20px;cursor:pointer;"><input type="checkbox" id="opt-motivacion" checked> Incluir motivación</label>
-    <label style="cursor:pointer;"><input type="checkbox" id="opt-renta" checked> Incluir pretensiones de renta</label>
   </div>
 
   <button class="btn-main" onclick="generarInforme()">📄 Generar informe</button>
@@ -650,9 +644,11 @@ function cambiarTipoReporte(tipo){
   // En el Dashboard NO se usa la actitud (solo motivación), así que se oculta ese campo
   var subActitud = document.getElementById("subsec-actitud");
   if (subActitud) subActitud.style.display = esDashboard ? "none" : "";
-  // Opciones de campos opcionales (solo en Servicios Transitorios)
-  var optsT = document.getElementById("opts-transitorio");
-  if (optsT) optsT.style.display = esTransitorio ? "" : "none";
+  // Opciones de campos opcionales (solo en Servicios Transitorios), al lado de cada campo
+  var wOptR = document.getElementById("wrap-opt-renta");
+  var wOptM = document.getElementById("wrap-opt-motivacion");
+  if (wOptR) wOptR.style.display = esTransitorio ? "inline-block" : "none";
+  if (wOptM) wOptM.style.display = esTransitorio ? "inline-flex" : "none";
 }
 
 // ── COMPETENCIAS EVALUADAS (nivel Alto/Medio/Bajo → línea corta editable) ──
