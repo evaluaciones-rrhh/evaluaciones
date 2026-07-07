@@ -138,11 +138,11 @@
 
     <div class="sub-sec">
       <div class="tit">Experiencia (desde el CV)</div>
-      <div class="hint">Arrastra el CV en PDF aquí, o haz clic para buscarlo. La plataforma extrae y resume la experiencia.</div>
+      <div class="hint">Arrastra el CV (PDF o imagen JPG/PNG) aquí, o haz clic para buscarlo. La plataforma extrae y resume la experiencia.</div>
       <div id="cv-drop" class="cv-drop" onclick="document.getElementById('cv-file').click()">
         <div class="cv-drop-icon">📄</div>
-        <div class="cv-drop-txt"><strong>Arrastra el CV aquí</strong><br><span>o haz clic para seleccionar el PDF</span></div>
-        <input type="file" id="cv-file" accept="application/pdf" style="display:none;" onchange="procesarCV(this)">
+        <div class="cv-drop-txt"><strong>Arrastra el CV aquí</strong><br><span>PDF o imagen (JPG/PNG) — clic para seleccionar</span></div>
+        <input type="file" id="cv-file" accept="application/pdf,image/*" style="display:none;" onchange="procesarCV(this)">
       </div>
       <span class="voz-estado" id="est-cv" style="display:block;margin-top:8px;"></span>
       <textarea id="txt-experiencia" placeholder="Aquí aparecerá el resumen de experiencia (editable)..."></textarea>
@@ -380,15 +380,30 @@ async function traerInterpretacionTests(sel) {
   } catch(e) { return { fortalezas:"", areas:"" }; }
 }
 
-// ── Procesar CV (PDF) ──
+// ── Procesar CV (PDF o imagen) ──
 async function procesarCV(inputOrFile) {
   var file = inputOrFile && inputOrFile.files ? inputOrFile.files[0] : inputOrFile;
   if (!file) return;
-  if (file.type !== "application/pdf") { document.getElementById("est-cv").textContent = "✗ El archivo debe ser un PDF"; return; }
   var est = document.getElementById("est-cv");
-  est.innerHTML = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> Leyendo PDF...";
+  var esPDF = file.type === "application/pdf";
+  var esImg = /^image\//.test(file.type) || /\.(jpe?g|png|webp|bmp|gif|tiff?)$/i.test(file.name || "");
+  if (!esPDF && !esImg) { est.textContent = "✗ Sube un PDF o una imagen (JPG/PNG)"; return; }
+  var spin = "<span class='spin' style='border-color:rgba(0,0,0,.2);border-top-color:#888;'></span> ";
   try {
-    var texto = await extraerTextoPDF(file);
+    var texto = "";
+    if (esImg) {
+      est.innerHTML = spin + "Leyendo imagen (OCR)...";
+      texto = await extraerTextoImagen(file, est, spin);
+    } else {
+      est.innerHTML = spin + "Leyendo PDF...";
+      texto = await extraerTextoPDF(file);
+      // Si el PDF trae poco o nada de texto, probablemente es escaneado → OCR de las páginas
+      if ((texto || "").replace(/\s/g, "").length < 40) {
+        est.innerHTML = spin + "PDF escaneado, aplicando OCR...";
+        texto = await extraerTextoPDFComoImagen(file, est, spin);
+      }
+    }
+    if (!texto || !texto.trim()) { est.textContent = "✗ No se pudo leer texto del CV. Prueba con una imagen más nítida."; return; }
     est.textContent = "Resumiendo experiencia...";
     var exp = await llamarApps({
       accion:"resumirCV", textoCV:texto,
@@ -422,8 +437,8 @@ async function procesarCV(inputOrFile) {
   else initDropCV();
 })();
 
-// Extrae texto de un PDF usando pdf.js
-async function extraerTextoPDF(file) {
+// Carga pdf.js una sola vez
+async function cargarPdfJs(){
   if (!window.pdfjsLib) {
     await new Promise(function(res, rej){
       var s = document.createElement("script");
@@ -433,6 +448,23 @@ async function extraerTextoPDF(file) {
     });
     window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   }
+}
+
+// Carga Tesseract.js (OCR) una sola vez
+async function cargarTesseract(){
+  if (!window.Tesseract) {
+    await new Promise(function(res, rej){
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+}
+
+// Extrae texto de un PDF usando pdf.js
+async function extraerTextoPDF(file) {
+  await cargarPdfJs();
   var buf = await file.arrayBuffer();
   var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
   var texto = "";
@@ -440,6 +472,49 @@ async function extraerTextoPDF(file) {
     var page = await pdf.getPage(i);
     var content = await page.getTextContent();
     texto += content.items.map(function(it){ return it.str; }).join(" ") + "\n";
+  }
+  return texto;
+}
+
+// Extrae texto de una imagen (JPG/PNG/etc.) mediante OCR
+async function extraerTextoImagen(file, est, spin) {
+  await cargarTesseract();
+  var url = URL.createObjectURL(file);
+  try {
+    var result = await window.Tesseract.recognize(url, "spa+eng", {
+      logger: function(m){
+        if (m.status === "recognizing text" && est) {
+          est.innerHTML = (spin||"") + "Leyendo imagen (OCR)... " + Math.round((m.progress||0)*100) + "%";
+        }
+      }
+    });
+    return (result && result.data && result.data.text) || "";
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+// Extrae texto de un PDF escaneado: renderiza cada página a imagen y le aplica OCR
+async function extraerTextoPDFComoImagen(file, est, spin) {
+  await cargarPdfJs();
+  await cargarTesseract();
+  var buf = await file.arrayBuffer();
+  var pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
+  var texto = "";
+  for (var i = 1; i <= pdf.numPages; i++) {
+    var page = await pdf.getPage(i);
+    var viewport = page.getViewport({ scale: 2 });
+    var canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport: viewport }).promise;
+    var r = await window.Tesseract.recognize(canvas, "spa+eng", {
+      logger: function(m){
+        if (m.status === "recognizing text" && est) {
+          est.innerHTML = (spin||"") + "OCR página " + i + "/" + pdf.numPages + "... " + Math.round((m.progress||0)*100) + "%";
+        }
+      }
+    });
+    texto += ((r && r.data && r.data.text) || "") + "\n";
   }
   return texto;
 }
