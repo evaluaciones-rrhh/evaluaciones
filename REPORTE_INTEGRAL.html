@@ -191,7 +191,10 @@
     <textarea id="txt-conclusion" placeholder="Aquí aparecerá la conclusión generada (editable)..."></textarea>
   </div>
 
-  <button class="btn-main" onclick="generarInforme()">📄 Generar informe</button>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px;">
+    <button class="btn-main" onclick="generarInforme()" style="margin-top:0;">📄 Generar informe</button>
+    <button class="btn-main" onclick="nuevoInforme()" style="margin-top:0;background:#8a6d5b;">🧹 Nuevo informe</button>
+  </div>
   <div id="ind-guardado" style="text-align:center;margin-top:10px;font-size:13px;font-weight:600;color:#2e7d32;opacity:0;transition:opacity .3s;">✓ Informe guardado</div>
 
 </div>
@@ -770,8 +773,25 @@ function fortalezasNivel(texto, seed){
     exp.split("\n").map(function(b){return '<li style="margin-bottom:6px;">'+escC(b)+'</li>';}).join("")+'</ul>';
 }
 
-function generarInforme() {
-  // Recoger los tests seleccionados (para la sección de resultados)
+// Limpia todo el formulario para empezar un informe nuevo (sin recargar la página)
+function nuevoInforme(){
+  if (!confirm("¿Borrar todos los datos y empezar un informe nuevo?")) return;
+  ["d-nombre","d-cargo","d-rut","d-estudios","d-fecha","d-entrevistador","d-renta",
+   "txt-actitud","txt-motivacion","txt-experiencia","txt-fortalezas","txt-aspectos","txt-conclusion"]
+   .forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ""; });
+  var cat = document.getElementById("d-categoria"); if (cat) cat.selectedIndex = 0;
+  var cvf = document.getElementById("cv-file"); if (cvf) cvf.value = "";
+  ["opt-motivacion","opt-renta"].forEach(function(id){ var el = document.getElementById(id); if (el) el.checked = true; });
+  var lt = document.getElementById("lista-tests"); if (lt) lt.innerHTML = "";
+  try { testsEncontrados = []; } catch(e){}
+  document.querySelectorAll(".voz-estado").forEach(function(e){ e.textContent = ""; });
+  var estcv = document.getElementById("est-cv"); if (estcv) estcv.textContent = "";
+  var ind = document.getElementById("ind-guardado"); if (ind) ind.style.opacity = "0";
+  window.scrollTo(0, 0);
+  var n = document.getElementById("d-nombre"); if (n) n.focus();
+}
+
+function generarInforme() {  // Recoger los tests seleccionados (para la sección de resultados)
   var testsParaInforme = [];
   document.querySelectorAll(".chk-test:checked").forEach(function(chk){
     var idx = parseInt(chk.getAttribute("data-idx"));
