@@ -961,6 +961,34 @@ function construirInforme(d) {
     : '<div><div class="dl">deneb<svg viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div><div class="dsub">evaluaciones</div></div>';
 
   // Convierte la experiencia (una línea por trabajo) en un párrafo redactado con conectores
+  function expParrafoHTML(texto){
+    texto = (texto||"").trim();
+    if(!texto) return "";
+    // ¿Ya viene redactado como prosa? (tiene oraciones, o es largo)
+    var esProsa = /[.:]\s/.test(texto) || texto.length > 140;
+    if (esProsa){
+      // Respeta párrafos (líneas en blanco) y saltos simples; cada bloque = un párrafo
+      var parr = texto.split(/\n\s*\n|\n/)
+        .map(function(b){ return b.trim().replace(/^[-•·*]+\s*/,""); })
+        .filter(Boolean);
+      return parr.map(function(b){ return "<p style='margin:0 0 9px;'>"+pulirTexto(b)+"</p>"; }).join("");
+    }
+    // Lista de cargos sueltos (sin redacción): se arma una narrativa breve
+    var l = texto.split(/\n\s*\n|\n/)
+      .map(function(b){ return b.trim().replace(/^[-•·*\d.)]+\s*/,"").replace(/[.;]+$/,""); })
+      .filter(Boolean);
+    if(!l.length) return "";
+    var con = [
+      "También se ha desempeñado como ",
+      "Asimismo, trabajó como ",
+      "Además, cuenta con experiencia como ",
+      "Por otra parte, se desempeñó como "
+    ];
+    var out = "Se destaca su experiencia como " + l[0] + ".";
+    for(var i=1;i<l.length;i++){ out += " " + con[(i-1)%con.length] + l[i] + "."; }
+    return "<p style='margin:0 0 9px;'>"+out+"</p>";
+  }
+  // Versión original (Informe Extendido): narrativa en un solo párrafo
   function expParrafo(texto){
     texto = (texto||"").trim();
     if(!texto) return "";
@@ -968,7 +996,6 @@ function construirInforme(d) {
       .map(function(b){ return b.trim().replace(/^[-•·*\d.)]+\s*/,"").replace(/[.;]+$/,""); })
       .filter(Boolean);
     if(!l.length) return "";
-    // Si ya viene como prosa (una sola línea con varias oraciones), se deja tal cual
     if(l.length===1){
       if(/\.\s/.test(texto.trim())) return texto.trim();
       return "Se destaca su experiencia como " + l[0] + ".";
@@ -988,7 +1015,10 @@ function construirInforme(d) {
     if (d.actitud) p += "<p>"+d.actitud+"</p>";
     var mostrarMotiv = (d.tipo === "transitorio") ? (d.incluirMotivacion !== false) : true;
     if (d.motivacion && mostrarMotiv) p += "<p>"+d.motivacion+"</p>";
-    if (d.experiencia) p += "<p>"+expParrafo(d.experiencia)+"</p>";
+    if (d.experiencia) {
+      if (d.tipo === "transitorio") p += expParrafoHTML(d.experiencia);
+      else p += "<p>"+expParrafo(d.experiencia)+"</p>";
+    }
     // Fortalezas integradas dentro de las observaciones (sin recuadro aparte)
     var fort = (d.tipo === "transitorio") ? expandirFortalezasExt(d.fortalezas, d.nombre) : expandirFortalezas(d.fortalezas, d.nombre);
     if (fort && fort.trim()) p += aParrafos(fort);
