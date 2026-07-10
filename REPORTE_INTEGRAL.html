@@ -1077,8 +1077,8 @@ function construirInforme(d) {
     '.footer{text-align:center;font-size:10px;color:#aaa;padding:16px;border-top:1px solid '+C.borde+';}'+
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px '+C.btnSombra+';z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnHover+';}'+
-    '@page{margin:0;}'+
-    '@media print{body{background:#fff;padding:14mm 12mm;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
+    '@page{margin:14mm 12mm;}'+
+    '@media print{body{background:#fff;padding:0;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
     '<div class="doc">'+
@@ -1276,8 +1276,8 @@ function construirDashboard(d) {
     '.dfoot{text-align:center;font-size:10px;color:#aaa;padding:14px;border-top:1px solid #eee;}'+
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnH+';}'+
-    '@page{margin:0;}'+
-    '@media print{body{background:#fff;padding:14mm 12mm;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
+    '@page{margin:14mm 12mm;}'+
+    '@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
     '<div class="dash">'+
