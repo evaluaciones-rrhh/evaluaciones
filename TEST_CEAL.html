@@ -89,8 +89,12 @@
       <div class="card-label">Datos del candidato</div>
       <div class="field-grid" style="margin-bottom:1rem;">
         <div>
-          <label for="nombre">Nombre completo</label>
-          <input type="text" id="nombre" placeholder="Apellido Nombre">
+          <label for="nombre">Nombres</label>
+          <input type="text" id="nombre" placeholder="Nombres">
+        </div>
+        <div>
+          <label for="apellidos">Apellidos</label>
+          <input type="text" id="apellidos" placeholder="Apellidos">
         </div>
         <div>
           <label for="rut">RUT</label>
@@ -98,7 +102,7 @@
           <div id="err-rut" style="display:none;color:#c0392b;font-size:12px;margin-top:4px;"></div>
         </div>
       </div>
-      <div id="err-nombre" class="err-msg">Por favor ingresa el nombre del candidato.</div>
+      <div id="err-nombre" class="err-msg">Por favor ingresa nombres y apellidos del candidato.</div>
     </div>
 
     <div class="card" style="background:#fafaf8;border-style:dashed;">
@@ -375,7 +379,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 function iniciar(){
   let n = document.getElementById('nombre').value.trim();
-  if(!n){ document.getElementById('err-nombre').style.display='block'; return; }
+  let ap = document.getElementById('apellidos').value.trim();
+  if(!n || !ap){ document.getElementById('err-nombre').style.display='block'; return; }
   document.getElementById('err-nombre').style.display='none';
   let rutVal = document.getElementById('rut').value.trim();
   let errRut = document.getElementById('err-rut');
@@ -497,6 +502,35 @@ function enviar(){
   else if(puntajeTotal >= -14) efectividad = 'Baja';
   else efectividad = 'Muy Baja';
 
+  // Amplitud de estilos (flexibilidad / adaptabilidad): cuántos de los 4 estilos usa al menos una vez
+  let amplitud = conteoEstilo.filter(c => c > 0).length;
+  let amplitudTxt = amplitud >= 3 ? 'Amplia (alta flexibilidad de estilo)'
+                  : amplitud === 2 ? 'Moderada'
+                  : 'Estrecha (estilo poco flexible)';
+  // Estilos rechazados: los que nunca eligió
+  let estilosRechazados = ESTILOS.filter((_,i) => conteoEstilo[i] === 0);
+
+  // Perfil efectivo vs. inefectivo del estilo predominante (Manual CEEL, pág. 5)
+  const VARIANTES = {
+    'Autoritario': { ef: 'Autócrata Benévolo', inef: 'Autoritario',
+      txtEf: 'Sabe lo que desea e impone sus métodos para lograrlo sin generar resentimiento; dirige con claridad y obtiene resultados.',
+      txtInef: 'Visto como alguien que no confía en los demás, resulta desagradable y se interesa solo en la producción a corto plazo.' },
+    'Integrado': { ef: 'Ejecutivo', inef: 'Componedor',
+      txtEf: 'Buen motivador: fija normas elevadas, trata a cada persona según sus necesidades y administra a través del equipo.',
+      txtInef: 'Trata de agradar a todos y vacila de un lado a otro para evitar tensiones, sin sostener una dirección firme.' },
+    'Relacionado': { ef: 'Promotor', inef: 'Misionero',
+      txtEf: 'Confía en las personas y se interesa, ante todo, en desarrollar sus aptitudes y su autonomía.',
+      txtInef: 'Prioriza la armonía y ser considerado “buena gente”, reticente a arriesgar la relación frente al cumplimiento de la tarea.' },
+    'Separado': { ef: 'Burócrata', inef: 'Desertor',
+      txtEf: 'Permite que el equipo decida cómo hacer el trabajo y mantiene un rol acotado; valora la estructura, la lógica y la estabilidad.',
+      txtInef: 'Se muestra pasivo y poco comprometido, con escasa preocupación por la tarea y por las personas que participan en ella.' }
+  };
+  let v = VARIANTES[estilo] || {};
+  let perfilTipo, perfilNombre, perfilTexto;
+  if (puntajeTotal >= 2) { perfilTipo = 'Efectivo'; perfilNombre = v.ef; perfilTexto = v.txtEf; }
+  else if (puntajeTotal <= -2) { perfilTipo = 'Inefectivo'; perfilNombre = v.inef; perfilTexto = v.txtInef; }
+  else { perfilTipo = 'En transición'; perfilNombre = v.ef + ' / ' + v.inef; perfilTexto = 'Su efectividad se ubica en torno al promedio: alterna entre la versión efectiva (' + v.ef + ') e inefectiva (' + v.inef + ') de su estilo según la situación.'; }
+
   const DESCRIPCIONES = {
     'Autoritario': 'Estilo Autoritario (Alta Tarea / Baja Relación): Este líder se orienta principalmente al cumplimiento de tareas, metas y resultados, con escasa atención a las relaciones interpersonales. Tiende a tomar decisiones de manera unilateral, define claramente los roles y supervisa de cerca el desempeño. No suele confiar en la iniciativa de sus subordinados y puede ser percibido como rígido o controlador. En contextos donde se requiere dirección clara y rapidez de respuesta, puede ser efectivo; sin embargo, a largo plazo puede generar desmotivación y clima laboral deteriorado si no equilibra su estilo.',
     'Integrado': 'Estilo Integrado (Alta Tarea / Alta Relación): Este líder combina un fuerte enfoque en los resultados con un genuino interés por las personas y el trabajo en equipo. Fija normas elevadas, motiva a su equipo, y trata a cada integrante de manera diferenciada según sus necesidades. Es participativo en la toma de decisiones y fomenta el compromiso colectivo. Se adapta con facilidad a distintos contextos y es considerado uno de los estilos más efectivos en entornos complejos y dinámicos. Promueve un clima de confianza y colaboración sin perder de vista los objetivos organizacionales.',
@@ -504,17 +538,32 @@ function enviar(){
     'Separado': 'Estilo Separado (Baja Tarea / Baja Relación): Este líder mantiene una postura distante tanto en lo relativo a las tareas como en las relaciones con su equipo. Delega ampliamente, interviene poco y evita el conflicto. Puede ser percibido como pasivo, poco comprometido o indiferente ante las necesidades del grupo. En equipos altamente autónomos, calificados y con objetivos claros, este estilo puede funcionar como una forma de respetar la autonomía profesional; sin embargo, en la mayoría de los contextos organizacionales su aplicación resulta poco efectiva y puede derivar en desorganización y falta de dirección.'
   };
 
-  let descripcion = DESCRIPCIONES[estilo] || '';
+  let descripcion = (DESCRIPCIONES[estilo] || '') +
+    ' Perfil según efectividad: ' + perfilNombre + ' (' + perfilTipo + '). ' + perfilTexto +
+    (estilosRechazados.length ? ' Estilos que la persona evita: ' + estilosRechazados.join(', ') + '.' : '');
+
+  // Desglose por estilo (para el informe): veces elegido y puntaje acumulado de cada estilo
+  let desglose = ESTILOS.map((e,i) => ({ estilo: e, veces: conteoEstilo[i], puntaje: puntajeEstilo[i] }));
+  let desgloseTxt = desglose
+    .map(d => d.estilo + ': ' + d.veces + (d.veces === 1 ? ' vez' : ' veces') + ' (' + (d.puntaje >= 0 ? '+' : '') + d.puntaje + ')')
+    .join(' · ');
 
   let payload = {
     fecha: new Date().toLocaleString('es-CL'),
-    nombre: document.getElementById('nombre').value.trim(),
+    nombre: (document.getElementById('nombre').value.trim() + ' ' + document.getElementById('apellidos').value.trim()).trim(),
     rut: document.getElementById('rut').value.trim(),
     estilo,
     estilo_secundario: estiloSec,
     descripcion,
     efectividad,
     puntaje: puntajeTotal,
+    perfil_tipo: perfilTipo,
+    perfil_nombre: perfilNombre,
+    amplitud: amplitud,
+    amplitud_txt: amplitudTxt,
+    estilos_rechazados: estilosRechazados.join(', '),
+    desglose: desglose,
+    desglose_txt: desgloseTxt,
     cambios_foco: cambiosFoco
   };
 
