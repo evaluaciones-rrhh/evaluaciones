@@ -1230,14 +1230,58 @@ function construirDashboard(d) {
   var obs = "";
   if (d.motivacion) obs += '<p style="margin:0 0 10px;">'+pulirTexto(d.motivacion)+'</p>';
   if (!obs) obs = '<p style="color:#999;margin:0;">Sin observaciones registradas.</p>';
-  // Experiencia laboral como punteo (cada línea = un trabajo: Cargo en Empresa)
+  // Experiencia laboral como punteo estructurado: CARGO / Empresa · Periodo
   function expPunteo(texto){
     texto = (texto||"").trim();
     if (!texto) return "";
     var l = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
     if (!l.length) return "";
-    return '<ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.7;color:#1c1c1c;">'+
-      l.map(function(b){return '<li style="margin-bottom:5px;">'+b+'</li>';}).join("")+'</ul>';
+
+    // Separa cada línea en cargo, empresa y periodo
+    function partir(linea){
+      var cargo = linea, empresa = "", periodo = "";
+      var MES = "(?:ene|feb|mar|abr|may|jun|jul|ago|sep|sept|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)";
+      // 1) periodo: rango de fechas en cualquier parte de la línea
+      var reRango = new RegExp(
+        "[\\(\\[]?\\s*((?:"+MES+"\\.?\\s*)?(?:\\d{1,2}[\\/-])?\\d{4})" +
+        "\\s*(?:[-–—]|\\ba\\b|\\bhasta\\b)\\s*" +
+        "((?:"+MES+"\\.?\\s*)?(?:\\d{1,2}[\\/-])?(?:\\d{4}|actualidad|presente|actual|hoy|la fecha))\\s*[\\)\\]]?",
+        "i");
+      var m = cargo.match(reRango);
+      if (m) {
+        periodo = (m[1]+" – "+m[2]).replace(/\s+/g," ").trim();
+        cargo = cargo.replace(m[0],"").trim();
+      } else {
+        // año suelto entre paréntesis
+        var m2 = cargo.match(/[\(\[]\s*(\d{4})\s*[\)\]]/);
+        if (m2) { periodo = m2[1]; cargo = cargo.replace(m2[0],"").trim(); }
+      }
+      // limpieza de separadores que quedaron colgando
+      cargo = cargo.replace(/[,;·\-–—|]+\s*$/,"").replace(/^\s*[,;·\-–—|]+/,"").trim();
+
+      // 2) empresa: lo que va después del separador
+      var sep = cargo.match(/\s+en\s+|\s+[—–|·]\s+|\s+-\s+|,\s+/i);
+      if (sep) {
+        var i = cargo.indexOf(sep[0]);
+        empresa = cargo.slice(i + sep[0].length).trim();
+        cargo   = cargo.slice(0, i).trim();
+      }
+      empresa = empresa.replace(/[,;·\-–—|.]+\s*$/,"").trim();
+      cargo   = cargo.replace(/[,;·\-–—|.]+\s*$/,"").trim();
+      return {cargo:cargo, empresa:empresa, periodo:periodo};
+    }
+
+    var items = l.map(partir).filter(function(x){return x.cargo;});
+    if (!items.length) return "";
+
+    return '<ul style="margin:0;padding-left:16px;font-size:12.5px;line-height:1.45;color:#1c1c1c;list-style:none;">'+
+      items.map(function(x){
+        var meta = [x.empresa, x.periodo].filter(Boolean).join(" · ");
+        return '<li style="margin-bottom:10px;padding-left:12px;border-left:2px solid '+C.acento+';">'+
+                 '<div style="font-weight:600;">'+x.cargo+'</div>'+
+                 (meta ? '<div style="font-size:11.5px;color:#6b7680;margin-top:1px;">'+meta+'</div>' : '')+
+               '</li>';
+      }).join("")+'</ul>';
   }
   var expHTML = expPunteo(d.experiencia);
 
