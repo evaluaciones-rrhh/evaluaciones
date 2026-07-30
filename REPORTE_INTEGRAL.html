@@ -980,8 +980,21 @@ function construirInforme(d) {
     ? '<img src="'+LOGO_CYGNUS+'" alt="Grupo Cygnus" style="height:48px;">'
     : '<div><div class="dl">deneb<svg viewBox="0 0 100 100"><path d="M50 4 Q56 40 96 50 Q56 60 50 96 Q44 60 4 50 Q44 40 50 4Z" fill="#e57a5f"/></svg></div><div class="dsub">evaluaciones</div></div>';
 
+  // ── Separa el texto de experiencia en líneas estructuradas y párrafos ──
+  // La IA devuelve por cada trabajo: "Cargo | Empresa | Periodo" y debajo el párrafo.
+  function esLineaEstructurada(linea){
+    // Debe tener al menos una barra y ser corta (un párrafo nunca lleva barras)
+    return linea.indexOf("|") !== -1 && linea.length < 160;
+  }
+  function expSoloParrafos(texto){
+    return (texto||"").split(/\n/)
+      .map(function(b){ return b.trim(); })
+      .filter(function(b){ return b && !esLineaEstructurada(b); })
+      .join("\n\n");
+  }
   // Convierte la experiencia (una línea por trabajo) en un párrafo redactado con conectores
   function expParrafoHTML(texto){
+    texto = expSoloParrafos(texto);
     texto = (texto||"").trim();
     if(!texto) return "";
     // ¿Ya viene redactado como prosa? (tiene oraciones, o es largo)
@@ -1010,7 +1023,7 @@ function construirInforme(d) {
   }
   // Versión original (Informe Extendido): narrativa en un solo párrafo
   function expParrafo(texto){
-    texto = (texto||"").trim();
+    texto = expSoloParrafos(texto).trim();
     if(!texto) return "";
     var l = texto.split(/\n\s*\n|\n/)
       .map(function(b){ return b.trim().replace(/^[-•·*\d.)]+\s*/,"").replace(/[.;]+$/,""); })
@@ -1234,12 +1247,20 @@ function construirDashboard(d) {
   function expPunteo(texto){
     texto = (texto||"").trim();
     if (!texto) return "";
-    var l = texto.split(/\n\s*\n|\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+    var todas = texto.split(/\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
+    // Si la IA entregó líneas estructuradas (Cargo | Empresa | Periodo), usar solo esas
+    var estruct = todas.filter(function(b){ return b.indexOf("|") !== -1 && b.length < 160; });
+    var l = estruct.length ? estruct : todas;
     if (!l.length) return "";
 
     // Separa cada línea en cargo, empresa y periodo
     function partir(linea){
       var cargo = linea, empresa = "", periodo = "";
+      // Formato estructurado: Cargo | Empresa | Periodo
+      if (linea.indexOf("|") !== -1) {
+        var pz = linea.split("|").map(function(x){ return x.trim(); });
+        return { cargo: pz[0]||"", empresa: pz[1]||"", periodo: pz[2]||"" };
+      }
       var MES = "(?:ene|feb|mar|abr|may|jun|jul|ago|sep|sept|oct|nov|dic|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)";
       // 1) periodo: rango de fechas en cualquier parte de la línea
       var reRango = new RegExp(
