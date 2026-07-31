@@ -928,13 +928,13 @@ function capturarFotoCandidato() {
   try {
     const v = document.getElementById('video-live');
     if (!v || !v.videoWidth) return;
-    const w = 320;
+    const w = 240;
     const h = Math.round(w * (v.videoHeight / v.videoWidth));
     const canvas = document.createElement('canvas');
     canvas.width = w;
     canvas.height = h;
     canvas.getContext('2d').drawImage(v, 0, 0, w, h);
-    fotoCandidato = canvas.toDataURL('image/jpeg', 0.7);
+    fotoCandidato = canvas.toDataURL('image/jpeg', 0.6);
   } catch(e) {
     console.log('No se pudo capturar foto:', e.message);
   }
