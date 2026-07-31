@@ -1517,6 +1517,7 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="CEAL"> Test de Estilos de Liderazgo</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="ENTREVISTA"> Entrevista Vendedor Retail</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional</div>
@@ -3034,6 +3035,10 @@ async function enviarEvaluacion() {
   var testsSeleccionados = [];
   document.querySelectorAll(".check-test:checked").forEach(function(cb){ testsSeleccionados.push(cb.value); });
 
+  // La entrevista usa su propio backend y token, se envia aparte
+  var enviaEntrevista = testsSeleccionados.indexOf("ENTREVISTA") > -1;
+  var soloTests = testsSeleccionados.filter(function(t){ return t !== "ENTREVISTA"; });
+
   if (!nombre || !email) {
     errEl.textContent="Por favor completa nombre y email.";
     errEl.style.display="block"; return;
@@ -3048,26 +3053,34 @@ async function enviarEvaluacion() {
   btn.innerHTML="<span class='spinner'></span> Enviando...";
 
   try {
-    // Enviar cada test seleccionado
-    if (testsSeleccionados.length === 1) {
+    // La entrevista se envia a su propio backend (genera su token)
+    if (enviaEntrevista) {
+      await fetch(APPS_URL_ENTREVISTA, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual})
+      });
+    }
+    // Enviar cada test seleccionado (sin contar la entrevista)
+    if (soloTests.length === 1) {
       // Un solo test → correo individual
-      var test = testsSeleccionados[0];
+      var test = soloTests[0];
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({action:"enviarEvaluacion", nombre:nombre, email:email, test:test, cargo:cargo, link:TESTS_LINKS[test], solicitante:usuarioActual})
       });
-    } else {
+    } else if (soloTests.length > 1) {
       // Múltiples tests → un solo correo con todos los botones
       await fetch(APPS_URL, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, cargo:cargo, tests:testsSeleccionados, solicitante:usuarioActual})
+        body:JSON.stringify({action:"enviarMultiples", nombre:nombre, email:email, cargo:cargo, tests:soloTests, solicitante:usuarioActual})
       });
     }
 
     var nombresTests = testsSeleccionados.map(function(t){
-      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC",DISC:"DISC",OPERA:"OPERA",TECNICO_GRUERO:"Téc. Grúa",TECNICO_BODEGA:"Téc. Bodega"};
+      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC",DISC:"DISC",OPERA:"OPERA",TECNICO_GRUERO:"Téc. Grúa",TECNICO_BODEGA:"Téc. Bodega",ENTREVISTA:"Entrevista Vendedor Retail"};
       return nombres[t]||t;
     }).join(", ");
 
