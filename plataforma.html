@@ -1271,6 +1271,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('informes')">
         <span class="nav-icon">🗂️</span> Informes guardados
       </div>
+      <div class="nav-item" onclick="irA('entrevistas')">
+        <span class="nav-icon">🎥</span> Reportes Entrevistas
+      </div>
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
@@ -1461,6 +1464,29 @@ tbody tr:hover td { background: #fdf9f6; }
           <button onclick="cargarInformes()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-informes"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- REPORTES ENTREVISTAS -->
+    <div class="page" id="page-entrevistas">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text" id="buscar-entrevistas" oninput="filtrarEntrevistas()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+          <span id="entrev-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
+          <button onclick="cargarEntrevistas()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+        </div>
+        <div id="lista-entrevistas"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALLE ENTREVISTA -->
+    <div id="modal-entrevista" style="display:none;position:fixed;inset:0;background:rgba(20,28,35,.55);z-index:9999;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;" onclick="if(event.target===this)cerrarEntrevista()">
+      <div style="background:#fff;max-width:720px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
+        <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div id="me-nombre" style="font-size:18px;font-weight:700;"></div><div id="me-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
+          <button onclick="cerrarEntrevista()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="me-cuerpo" style="padding:24px;max-height:72vh;overflow:auto;background:#f7f8fa;"></div>
       </div>
     </div>
 
@@ -2030,12 +2056,12 @@ async function cambiarMiPass() {
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", entrevistas:"Reportes Entrevistas", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  var ordenNav = ["panel","candidatos","reportes","informes","enviar","historial","tests","competencias","usuarios"];
+  var ordenNav = ["panel","candidatos","reportes","informes","entrevistas","enviar","historial","tests","competencias","usuarios"];
   var navIdx = ordenNav.indexOf(pag);
   var navEls = document.querySelectorAll(".nav-item");
   if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
@@ -2045,6 +2071,7 @@ function irA(pag) {
   if (pag === "usuarios") cargarUsuarios();
   if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
   if (pag === "informes") cargarInformes();
+  if (pag === "entrevistas") cargarEntrevistas();
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
@@ -2127,6 +2154,115 @@ function filtrarInformes(){
     return ((inf.nombre||"")+" "+(inf.rut||"")+" "+(inf.cargo||"")).toLowerCase().indexOf(q) > -1;
   });
   renderInformes(f);
+}
+
+// ── REPORTES ENTREVISTAS ──
+var entrevistasData = [];
+
+async function cargarEntrevistas(){
+  var cont = document.getElementById("lista-entrevistas");
+  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  try {
+    var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
+    entrevistasData = (data && data.entrevistas) ? data.entrevistas : [];
+    renderEntrevistas(entrevistasData);
+  } catch(e){
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar las entrevistas. Intenta de nuevo.</div>";
+  }
+}
+
+function recoEntrevista(ent){
+  var inf = ent.informe || {};
+  var reco = (inf.recomendacion || "").toLowerCase();
+  if (reco.indexOf("no avanzar")>-1) return {bg:"#fce8e6", fg:"#b3261e", accent:"#d9463b", label: inf.recomendacion};
+  if (reco.indexOf("reserva")>-1 || reco.indexOf("revisar")>-1) return {bg:"#fdf3dd", fg:"#9a6700", accent:"#e0a100", label: inf.recomendacion};
+  if (reco.indexOf("avanzar")>-1) return {bg:"#e6f4ea", fg:"#1a7f37", accent:"#2e9e54", label: inf.recomendacion};
+  return {bg:"#eef0f2", fg:"#6b7680", accent:"#cfc9bd", label:"Sin categoría"};
+}
+
+function renderEntrevistas(lista){
+  var cont = document.getElementById("lista-entrevistas");
+  var cnt = document.getElementById("entrev-count");
+  if (cnt) cnt.textContent = lista.length + " entrevista(s)";
+  if (!lista.length){
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay entrevistas completadas.</div>";
+    return;
+  }
+  cont.innerHTML = lista.map(function(ent, i){
+    var s = recoEntrevista(ent);
+    var inf = ent.informe || {};
+    var foto = inf.foto || "";
+    var ini = iniciales(ent.nombre);
+    var sub = (ent.cargo||"Sin cargo") + (ent.rut ? " · " + ent.rut : "");
+    var avatar = foto
+      ? "<div style='width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid var(--border);'><img src='"+foto+"' style='width:100%;height:100%;object-fit:cover;' alt='Foto'></div>"
+      : "<div style='width:44px;height:44px;border-radius:50%;background:"+s.bg+";color:"+s.fg+";display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;'>"+ini+"</div>";
+    return "<div onclick='verEntrevista("+i+")' "+
+      "onmouseover='this.style.boxShadow=\"0 6px 18px rgba(0,0,0,.09)\";this.style.borderColor=\""+s.accent+"\"' "+
+      "onmouseout='this.style.boxShadow=\"none\";this.style.borderColor=\"var(--border)\"' "+
+      "style='display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-left:5px solid "+s.accent+";border-radius:12px;padding:13px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s,border-color .15s;'>"+
+        avatar+
+        "<div style='flex:1;min-width:0;'>"+
+          "<div style='font-size:15.5px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'>"+(ent.nombre||"—")+"</div>"+
+          "<div style='font-size:12.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;'>"+sub+"</div>"+
+        "</div>"+
+        "<div style='display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;'>"+
+          "<span style='background:"+s.bg+";color:"+s.fg+";font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;'>"+s.label+"</span>"+
+          "<span style='font-size:11px;color:var(--muted);'>"+(ent.fecha||"")+"</span>"+
+        "</div>"+
+        "<button onclick='event.stopPropagation();verEntrevista("+i+")' title='Ver entrevista' "+
+          "style='background:var(--coral,#e57a5f);border:none;color:#fff;font-size:15px;cursor:pointer;border-radius:9px;padding:10px 13px;flex-shrink:0;align-self:center;'>→</button>"+
+      "</div>";
+  }).join("");
+}
+
+function filtrarEntrevistas(){
+  var q = (document.getElementById("buscar-entrevistas").value||"").toLowerCase().trim();
+  if (!q) { renderEntrevistas(entrevistasData); return; }
+  var f = entrevistasData.filter(function(ent){
+    return ((ent.nombre||"")+" "+(ent.rut||"")+" "+(ent.cargo||"")).toLowerCase().indexOf(q) > -1;
+  });
+  renderEntrevistas(f);
+}
+
+function nivelBadgeEnt(nivel){
+  var n = (nivel||"").toLowerCase();
+  var st = {bg:"#eef0f2", fg:"#6b7680"};
+  if (n === "alto") st = {bg:"#e6f4ea", fg:"#1a7f37"};
+  else if (n === "medio") st = {bg:"#fdf3dd", fg:"#9a6700"};
+  else if (n === "bajo") st = {bg:"#fce8e6", fg:"#b3261e"};
+  return "<span style='background:"+st.bg+";color:"+st.fg+";font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;text-transform:capitalize;'>"+String(nivel||"—").replace(/_/g," ")+"</span>";
+}
+
+function verEntrevista(i){
+  var ent = entrevistasData[i];
+  if (!ent) return;
+  var inf = ent.informe || {};
+  var s = recoEntrevista(ent);
+  document.getElementById("me-nombre").textContent = ent.nombre || "—";
+  document.getElementById("me-sub").textContent = (ent.cargo||"") + (ent.rut? " · "+ent.rut : "") + (ent.fecha? " · "+ent.fecha : "");
+  var comps = (inf.competencias || []).map(function(c){
+    return "<div style='display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eceef0;'><span style='font-size:14px;color:var(--ink);'>"+c.nombre+"</span>"+nivelBadgeEnt(c.nivel)+"</div>";
+  }).join("");
+  var videos = (ent.videos || []).map(function(v, k){
+    var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
+    if (!url) return "";
+    return "<a href='"+url+"' target='_blank' style='display:inline-block;background:#fff;border:1px solid var(--border);border-radius:7px;padding:7px 12px;margin:4px 6px 4px 0;font-size:12.5px;color:var(--ink);text-decoration:none;'>▶ Video "+(k+1)+"</a>";
+  }).join("");
+  var foto = inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='"+inf.foto+"' style='width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "";
+  var reco = inf.recomendacion ? "<div style='text-align:center;background:"+s.bg+";color:"+s.fg+";border-radius:10px;padding:14px;font-size:18px;font-weight:700;margin-bottom:16px;'>"+inf.recomendacion+"</div>" : "";
+  var vision = inf.vision_global ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Visión global</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+inf.vision_global+"</div></div>" : "";
+  var exp = inf.experiencia ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Experiencia detectada</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+String(inf.experiencia).replace(/_/g," ")+(inf.presentacion_resumen? " — "+inf.presentacion_resumen : "")+"</div></div>" : "";
+  var compBox = comps ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Competencias</div>"+comps+"</div>" : "";
+  var vidBox = videos ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;'>Videos de la entrevista</div>"+videos+"</div>" : "";
+  var cuerpo = foto + reco + vision + exp + compBox + vidBox;
+  if (!cuerpo.trim()) cuerpo = "<div style='text-align:center;color:var(--muted);padding:24px;'>Esta entrevista no tiene informe detallado guardado.</div>";
+  document.getElementById("me-cuerpo").innerHTML = cuerpo;
+  document.getElementById("modal-entrevista").style.display = "flex";
+}
+
+function cerrarEntrevista(){
+  document.getElementById("modal-entrevista").style.display = "none";
 }
 
 function verInforme(i){
@@ -3160,75 +3296,6 @@ async function enviarEntrevistaDesdePlataforma() {
 }
 
 // ══ REPORTE ENTREVISTAS ══
-var datosEntrevistas = [];
-
-async function cargarEntrevistas() {
-  try {
-    var r = await fetch(APPS_URL_ENTREVISTA + "?action=getEntrevistas", { redirect:"follow", cache:"no-store", credentials:"omit" });
-    var d = await r.json();
-    datosEntrevistas = (d.entrevistas || []).slice().reverse();
-    renderTablaEntrevistas(datosEntrevistas);
-  } catch(e) {
-    document.getElementById("tabla-entrevistas").innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--accent);'>Error cargando entrevistas.</td></tr>";
-  }
-}
-
-function filtrarEntrevistas() {
-  var q = document.getElementById("filtro-entrevista").value.toLowerCase();
-  var filtrado = datosEntrevistas.filter(function(e) {
-    return String(e.nombre||"").toLowerCase().includes(q) || String(e.rut||"").toLowerCase().includes(q);
-  });
-  renderTablaEntrevistas(filtrado);
-}
-
-function renderTablaEntrevistas(lista) {
-  var tbody = document.getElementById("tabla-entrevistas");
-  if (!lista || lista.length === 0) {
-    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin entrevistas registradas.</td></tr>";
-    return;
-  }
-
-  var GRADO_VAL = { A:4, B:3, C:2, D:1 };
-
-  tbody.innerHTML = lista.map(function(ent) {
-    // Calcular recomendación
-    var analisis = ent.analisis_star || [];
-    var cntA=0, cntB=0, cntC=0, cntD=0;
-    analisis.forEach(function(a) {
-      var g = a.analisis ? a.analisis.grado : 'D';
-      if (g==='A') cntA++; else if (g==='B') cntB++; else if (g==='C') cntC++; else cntD++;
-    });
-    var total = analisis.length;
-    var satisf = cntA + cntB;
-    var rec, recColor, recEmoji;
-
-    if (cntD >= 3 || cntD === total || (satisf === 0 && cntD >= 2)) {
-      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
-    } else if (satisf >= Math.ceil(total * 0.6) && cntD <= 1) {
-      rec = 'Recomendado'; recColor = 'var(--high)'; recEmoji = '🟢';
-    } else if (satisf >= 1 && cntD <= 2) {
-      rec = 'Con reservas'; recColor = 'var(--mid)'; recEmoji = '🟡';
-    } else {
-      rec = 'No recomendado'; recColor = 'var(--low)'; recEmoji = '🔴';
-    }
-
-    if (analisis.length === 0) { rec = 'Sin datos'; recColor = 'var(--muted)'; recEmoji = '⚪'; }
-
-    return '<tr>'
-      + '<td><strong>' + (ent.nombre||'—') + '</strong></td>'
-      + '<td style="color:var(--muted);font-size:12px;">' + (ent.rut||'—') + '</td>'
-      + '<td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px;background:var(--coral-soft);color:var(--coral-dark);">' + (ent.cargo||'—') + '</span></td>'
-      + '<td style="color:var(--muted);font-size:12px;">' + (ent.fecha||'—') + '</td>'
-      + '<td><span style="font-size:12px;font-weight:600;color:' + recColor + ';">' + recEmoji + ' ' + rec + '</span></td>'
-      + '<td><button class="btn btn-ghost btn-sm" onclick="verInformeEntrevista(' + JSON.stringify(ent).replace(/"/g,"&quot;") + ')">Ver informe</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-function verInformeEntrevista(ent) {
-  localStorage.setItem('dash_entrevista', JSON.stringify(ent));
-  window.open(BASE + 'dashboard_entrevista.html', '_blank');
-}
 
 
 // ══════════ INFORME IC ══════════
