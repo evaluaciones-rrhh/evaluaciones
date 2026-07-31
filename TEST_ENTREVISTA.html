@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Entrevista por Competencias — Grupo Cygnus</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Entrevista por Competencias — Deneb Consultores</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f1419;
-  --surface: #1a2230;
-  --surface2: #222d3d;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.15);
-  --text: #f0ece4;
-  --muted: rgba(240,236,228,0.5);
-  --hint: rgba(240,236,228,0.3);
-  --accent: #c4432a;
-  --accent2: #e8593c;
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --surface2: #f2f0ea;
+  --border: #e3e6e2;
+  --border2: #d5d8d3;
+  --text: #1f2a33;
+  --muted: #7a828c;
+  --hint: #a0a6ae;
+  --accent: #e57a5f;
+  --accent2: #c95d43;
   --green: #2a6e47;
-  --green2: #3a9e67;
+  --green2: #2a6e47;
   --amber: #c07a00;
-  --radius: 12px;
-  --font: 'DM Sans', sans-serif;
-  --serif: 'Fraunces', serif;
+  --radius: 10px;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --serif: 'Sora', sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -106,7 +106,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
 .btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
 .btn-record { background: var(--accent); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
-.btn-record.recording { background: #8b1a1a; animation: pulse-btn .8s ease-in-out infinite; }
+.btn-record.recording { background: #c0392b; animation: pulse-btn .8s ease-in-out infinite; }
 .btn-stop { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
 .btn-next { background: var(--green); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
 .btn-next:hover { background: var(--green2); }
@@ -140,7 +140,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .tip-box {
   background: rgba(196,67,42,.08); border: 1px solid rgba(196,67,42,.2);
   border-radius: 10px; padding: 1rem 1.25rem;
-  font-size: 13px; color: rgba(240,236,228,.7);
+  font-size: 13px; color: #45525d;
   line-height: 1.65; text-align: left; margin-bottom: 1.5rem;
 }
 .tip-box strong { color: var(--accent2); }
@@ -210,7 +210,7 @@ video {
 
 .timer-video {
   position: absolute; bottom: 14px; right: 14px;
-  font-family: 'DM Sans', monospace; font-size: 20px; font-weight: 600;
+  font-family: 'Plus Jakarta Sans', monospace; font-size: 20px; font-weight: 600;
   color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6);
   display: none;
 }
@@ -262,7 +262,7 @@ video {
 }
 .avatar-circle {
   width: 80px; height: 80px; border-radius: 50%;
-  background: linear-gradient(135deg, #1a3a5c, #c4432a);
+  background: linear-gradient(135deg, #2b3a47, #e57a5f);
   display: flex; align-items: center; justify-content: center;
   font-size: 36px; margin: 0 auto;
   box-shadow: 0 0 0 0 rgba(196,67,42,0.4);
@@ -334,6 +334,55 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
   .pregunta-texto { font-size: 18px; }
   .countdown-num { font-size: 72px; }
 }
+
+/* ══ PANEL STAR ══ */
+.star-check {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .6rem .75rem; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: all .3s;
+}
+.star-check.completado {
+  background: rgba(42,140,86,0.15); border-color: rgba(42,140,86,0.3);
+}
+.star-check-icon {
+  font-size: 16px; color: var(--hint); flex-shrink: 0; margin-top: 1px;
+  transition: all .3s;
+}
+.star-check.completado .star-check-icon { color: var(--green); }
+.star-check-label {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  line-height: 1.3; transition: color .3s;
+}
+.star-check.completado .star-check-label { color: var(--green); }
+.star-check-hint {
+  font-size: 10px; color: var(--hint); margin-top: 1px;
+  line-height: 1.3;
+}
+
+/* ══ PANTALLA CONTRAPREGUNTA ══ */
+#screen-contrapregunta .wrap { text-align: center; }
+.contra-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent2); background: rgba(232,89,60,0.12);
+  border: 1px solid rgba(232,89,60,0.2); border-radius: 20px;
+  padding: 4px 14px; margin-bottom: 1.5rem;
+}
+.contra-titulo {
+  font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 400;
+  color: var(--text); margin-bottom: 1rem; line-height: 1.4;
+}
+.contra-pregunta {
+  font-size: 15px; color: var(--muted); line-height: 1.7;
+  background: var(--surface2); border-radius: 10px;
+  padding: 1.25rem; border-left: 3px solid var(--accent);
+  text-align: left; margin-bottom: 1.5rem;
+}
+.contra-timer {
+  font-family: var(--mono); font-size: 36px; font-weight: 500;
+  color: var(--accent); margin-bottom: 1.5rem;
+}
 </style>
 </head>
 <body>
@@ -342,13 +391,13 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 <div id="screen-bloqueado">
   <div style="max-width:480px;text-align:center;padding:2rem;">
     <div style="font-size:56px;margin-bottom:1rem;">🔒</div>
-    <h2 style="font-family:'Fraunces',serif;font-size:24px;font-weight:300;margin-bottom:.75rem;">Esta entrevista ya fue completada</h2>
-    <p style="font-size:14px;color:var(--muted);line-height:1.7;">Ya registraste tus respuestas para esta evaluación. No es posible volver a realizarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
+    <h2 id="bloq-titulo" style="font-family:'Sora',sans-serif;font-size:24px;font-weight:300;margin-bottom:.75rem;">Esta entrevista ya fue completada</h2>
+    <p id="bloq-texto" style="font-size:14px;color:var(--muted);line-height:1.7;">Ya registraste tus respuestas para esta evaluación. No es posible volver a realizarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
   </div>
 </div>
 
 <div class="header">
-  <div class="brand">Grupo <span>Cygnus</span></div>
+  <div class="brand">Deneb <span>Consultores</span></div>
   <div class="step-indicator" id="step-indicator">Entrevista por Competencias</div>
 </div>
 
@@ -357,9 +406,9 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
   <div style="min-height:100vh;display:flex;flex-direction:column;">
 
     <!-- Hero superior -->
-    <div style="background:linear-gradient(135deg,#0f1419 0%,#1a2230 100%);padding:3rem 1.5rem 2.5rem;text-align:center;flex-shrink:0;">
-      <div style="font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;">Grupo Cygnus · Evaluaciones</div>
-      <h1 style="font-family:'Fraunces',serif;font-size:36px;font-weight:300;color:#f0ece4;line-height:1.2;margin-bottom:.75rem;">Entrevista por <em style="color:var(--accent2);">Competencias</em></h1>
+    <div style="background:linear-gradient(135deg,#2b3a47 0%,#1f2a33 100%);padding:3rem 1.5rem 2.5rem;text-align:center;flex-shrink:0;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;">Deneb Consultores · Evaluaciones</div>
+      <h1 style="font-family:'Sora',sans-serif;font-size:36px;font-weight:300;color:#f0ece4;line-height:1.2;margin-bottom:.75rem;">Entrevista por <em style="color:var(--accent);">Competencias</em></h1>
       <p style="font-size:14px;color:rgba(240,236,228,0.5);max-width:400px;margin:0 auto;line-height:1.7;">Estás a punto de realizar tu entrevista. Responderás preguntas grabándote en video desde tu computador.</p>
     </div>
 
@@ -443,7 +492,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
           <div class="onda"></div>
         </div>
       </div>
-      <div class="entrevistador-nombre">Asistente de Evaluación · Grupo Cygnus</div>
+      <div class="entrevistador-nombre">Asistente de Evaluación · Deneb Consultores</div>
       <div class="burbuja-texto" id="burbuja-texto">
         <span id="texto-animado"></span><span class="cursor-texto" id="cursor-texto"></span>
       </div>
@@ -503,36 +552,39 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <div class="timer-video" id="timer-video">3:00</div>
     </div>
 
-    <!-- Panel emocional en tiempo real -->
-    <div id="panel-emocional" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;">Análisis en tiempo real</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;">
-        <div style="text-align:center;">
-          <div id="emo-expresion" style="font-size:24px;margin-bottom:4px;">😐</div>
-          <div style="font-size:10px;color:var(--muted);">Expresión</div>
+    <!-- Panel STAR en tiempo real -->
+    <div id="panel-star" style="display:none;background:#f2f0ea;border:1px solid #e3e6e2;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+      <div style="font-size:10px;color:#7a828c;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;">Recuerda incluir en tu respuesta</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;">
+        <div id="check-s" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Situación</div><div class="star-check-hint">¿Cuándo y dónde ocurrió?</div></div>
         </div>
-        <div style="text-align:center;">
-          <div id="emo-contacto" style="font-size:24px;margin-bottom:4px;">👁️</div>
-          <div style="font-size:10px;color:var(--muted);">Contacto visual</div>
+        <div id="check-t" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Tu rol</div><div class="star-check-hint">¿Qué te correspondía hacer?</div></div>
         </div>
-        <div style="text-align:center;">
-          <div id="emo-confianza" style="font-size:24px;margin-bottom:4px;">📊</div>
-          <div style="font-size:10px;color:var(--muted);">Confianza</div>
+        <div id="check-a" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Tus acciones</div><div class="star-check-hint">¿Qué hiciste tú específicamente?</div></div>
+        </div>
+        <div id="check-r" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">El resultado</div><div class="star-check-hint">¿Qué pasó al final?</div></div>
         </div>
       </div>
     </div>
 
-    <!-- Transcripción en tiempo real -->
-    <div id="transcripcion-wrap" style="display:none;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1rem;min-height:60px;">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;">Transcripción en tiempo real</div>
-      <div id="transcripcion-texto" style="font-size:13px;color:rgba(240,236,228,0.7);line-height:1.6;font-style:italic;"></div>
+    <!-- Transcripción oculta -->
+    <div id="transcripcion-wrap" style="display:none;">
+      <div id="transcripcion-texto"></div>
     </div>
 
     <div class="controls" id="controles-grabacion">
       <button class="btn btn-record" id="btn-grabar" onclick="iniciarGrabacion()">
         ● Iniciar grabación
       </button>
-      <p class="control-hint">Cuando estés listo, presiona para grabar</p>
+      <p class="control-hint">Tienes hasta 3 minutos para responder. Cuando estés listo, presiona para grabar.</p>
     </div>
 
     <div class="controls" id="controles-grabando" style="display:none;">
@@ -552,7 +604,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
         <span class="pregunta-badge" id="pv-badge">Pregunta 1</span>
         <span class="competencia-tag" id="pv-competencia"></span>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Revisa tu respuesta. Si estás conforme, continúa. Si no, puedes volver a grabar.</p>
+      <p id="pv-instruccion" style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Revisa tu respuesta. Si estás conforme, continúa. Tienes una única oportunidad de volver a grabarla.</p>
     </div>
 
     <div class="preview-wrap" id="preview-wrap" style="display:block;">
@@ -563,7 +615,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <button class="btn btn-next btn-full" onclick="siguientePregunta()">
         Continuar → <span id="btn-next-label"></span>
       </button>
-
+      <button class="btn btn-full" id="btn-regrabar" onclick="volverAGrabar()" style="background:transparent;border:1px solid var(--border);color:var(--text);margin-top:.5rem;">↺ Volver a grabar (solo una vez)</button>
     </div>
   </div>
 </div>
@@ -595,7 +647,37 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
   </div>
 </div>
 
-<footer>Entrevista por Competencias — Grupo Cygnus · Uso exclusivo de evaluadores certificados</footer>
+<div class="screen" id="screen-informe">
+  <div class="wrap">
+    <div id="informe-contenido"></div>
+  </div>
+</div>
+
+<style>
+#screen-informe .wrap { max-width: 720px; margin: 0 auto; }
+.inf-head { text-align: center; padding: 2rem 1rem 1rem; }
+.inf-head h2 { font-family: var(--serif); font-weight: 300; font-size: 26px; margin-bottom: .3rem; }
+.inf-meta { color: var(--muted); font-size: 13px; }
+.inf-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.15rem 1.35rem; margin-bottom: 1rem; }
+.inf-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .55rem; }
+.inf-text { font-size: 14.5px; line-height: 1.7; color: var(--text); }
+.inf-comp { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--border); }
+.inf-comp:last-child { border-bottom: none; }
+.inf-comp-nombre { font-size: 14.5px; }
+.inf-badge { font-size: 12px; font-weight: 600; padding: .25rem .7rem; border-radius: 999px; text-transform: capitalize; white-space: nowrap; }
+.inf-verde { background: #e8f4ee; color: #2a6e47; }
+.inf-ambar { background: #fef3e0; color: #c07a00; }
+.inf-rojo { background: #fdecea; color: #c0392b; }
+.inf-gris { background: #f2f0ea; color: var(--muted); }
+.inf-reco { text-align: center; padding: 1.4rem; border-radius: var(--radius); margin-bottom: 1rem; font-family: var(--serif); font-size: 22px; font-weight: 400; border: 1px solid var(--border); }
+.inf-reco small { display: block; font-family: var(--font); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+.inf-reco.inf-verde { background: #e8f4ee; color: #2a6e47; }
+.inf-reco.inf-ambar { background: #fef3e0; color: #c07a00; }
+.inf-reco.inf-rojo { background: #fdecea; color: #c0392b; }
+.inf-nota { text-align: center; font-size: 12px; color: var(--hint); margin-top: 1.5rem; padding-bottom: 2rem; }
+</style>
+
+<footer>Entrevista por Competencias — Deneb Consultores · Uso exclusivo de evaluadores certificados</footer>
 
 <script>
 // ══════════════════════════════════════
@@ -616,6 +698,9 @@ let token = '';
 let cargo = '';
 let competencias = [];
 let preguntaActual = 0;
+let finProcesado = false;
+let regrabacionesUsadas = 0;
+let fotoCandidato = null;
 let stream = null;
 let mediaRecorder = null;
 let chunks = [];
@@ -631,6 +716,12 @@ let contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames
 let timerGrabacion = null;
 let timerCountdown = null;
 let segundosRestantes = TIEMPO_GRABACION;
+let timerContrapregunta = null;
+let segundosContra = 60;
+let textoContra = '';
+let intervaloSTAR = null;
+let starActual = { s:0, t:0, a:0, r:0 };
+const TIEMPO_CONTRAPREGUNTA = 60;
 let candidato = { nombre: '', rut: '', email: '' };
 
 // ══════════════════════════════════════
@@ -646,6 +737,10 @@ window.addEventListener('load', async function() {
       const r = await fetch(APPS_URL + '?action=validarToken&token=' + token);
       const d = await r.json();
       if (!d.valido) {
+        if (d.motivo === 'expirado') {
+          document.getElementById('bloq-titulo').textContent = 'El tiempo para responder ha vencido';
+          document.getElementById('bloq-texto').innerHTML = 'Tenías 4 horas para completar la entrevista desde que recibiste el enlace, y ese plazo ya pasó.<br><br>Si necesitas una nueva oportunidad, contacta a tu evaluador.';
+        }
         document.getElementById('screen-bloqueado').classList.add('show');
         return;
       }
@@ -665,24 +760,23 @@ async function cargarGroqKey() {
   } catch(e) { console.log('Groq key error:', e.message); }
 }
 
+// ── Preguntas para el cargo Vendedor(a) Retail ──
+// Redactadas para admitir ejemplos de CUALQUIER contexto (trabajo, estudios,
+// deporte o vida personal), de modo que candidatos sin experiencia en ventas
+// puedan responder con ejemplos transferibles.
+const COMPETENCIAS_VENDEDOR_RETAIL = [
+  { id: 'presentacion', nombre: 'Presentación', tipo: 'presentacion', pregunta: 'Para partir, cuéntame un poco de ti: quién eres, a qué te has dedicado, y si has tenido alguna experiencia en ventas o atención a público. Si no la has tenido, no hay problema, cuéntame igual qué te motiva a postular a este cargo.' },
+  { id: 'dinamica_1', nombre: 'Dinámica · Acercamiento', tipo: 'dinamica', foco: 'atencion_cliente', pregunta: 'Vamos a hacer una dinámica de venta, en partes. Primera parte: imagina que acabo de entrar a la tienda como cliente. Salúdame, recíbeme y averigua en qué te puedo pedir ayuda. ¿Qué me dirías?' },
+  { id: 'dinamica_2', nombre: 'Dinámica · Ofrecer y vender', tipo: 'dinamica', foco: 'orientacion_venta', pregunta: 'Segunda parte: ahora elige un producto que te guste o uses seguido y ofrécemelo. Convénceme de por qué me conviene, contándome para qué me sirve, no solo cómo es.' },
+  { id: 'dinamica_3', nombre: 'Dinámica · Objeción y cierre', tipo: 'dinamica', foco: 'manejo_objeciones', pregunta: 'Última parte: te digo, como cliente, "me gusta, pero está muy caro" o "lo tengo que pensar". Respóndeme a esa objeción e intenta cerrar la venta.' }
+];
+
 async function cargarCompetencias() {
-  try {
-    const r = await fetch(APPS_URL + '?action=getCompetencias&cargo=' + encodeURIComponent(cargo));
-    const d = await r.json();
-    competencias = d.competencias || [];
-    document.getElementById('num-preguntas').textContent = competencias.length;
-    // Mostrar que está listo
-    console.log('Competencias cargadas:', competencias.length);
-  } catch(e) {
-    competencias = [
-      { id: 'comunicacion', nombre: 'Comunicación', pregunta: 'Cuéntame una situación en la que tuviste que comunicar una información difícil o compleja. ¿Cómo lo hiciste y cuál fue el resultado?' },
-      { id: 'trabajo_equipo', nombre: 'Trabajo en equipo', pregunta: 'Cuéntame una experiencia en la que trabajaste en equipo para lograr un objetivo difícil. ¿Cuál fue tu rol?' },
-      { id: 'iniciativa', nombre: 'Iniciativa', pregunta: 'Cuéntame una situación en la que identificaste un problema o mejora sin que nadie te lo pidiera. ¿Qué hiciste?' },
-      { id: 'orientacion_resultados', nombre: 'Orientación a resultados', pregunta: 'Descríbeme una ocasión en que te propusiste una meta ambiciosa. ¿Qué hiciste para lograrla?' },
-      { id: 'responsabilidad', nombre: 'Responsabilidad', pregunta: 'Cuéntame una situación en que cometiste un error o algo salió mal. ¿Cómo lo manejaste y qué aprendiste?' }
-    ];
-    document.getElementById('num-preguntas').textContent = competencias.length;
-  }
+  // Se usan SIEMPRE las preguntas definidas en este archivo (presentacion + dinamica),
+  // ignorando cualquier pregunta antigua que venga del backend.
+  competencias = COMPETENCIAS_VENDEDOR_RETAIL;
+  document.getElementById('num-preguntas').textContent = competencias.length;
+  console.log('Competencias cargadas (del archivo):', competencias.length);
 }
 
 // ══════════════════════════════════════
@@ -719,25 +813,36 @@ let indiceEntrevistador = 0;
 let timeoutEscritura = null;
 let escrituraCompleta = false;
 
-const FRASES_TRANSICION = [
-  // Después de pregunta 1
-  'Bien hecho. Llevas 1 de 5 preguntas. Para la siguiente, recuerda describir una situacion concreta — cuando ocurrio y cual era el contexto.',
-  // Después de pregunta 2
-  'Muy bien. Llevas 2 de 5 preguntas. Esta vez pon enfasis en cual era tu rol especifico y que acciones tomaste tu personalmente.',
-  // Después de pregunta 3
-  'Excelente, vas a la mitad. Llevas 3 de 5 preguntas. Recuerda mencionar el resultado concreto que obtuviste — datos, cifras o impacto si los tienes.',
-  // Después de pregunta 4
-  'Casi terminamos. Llevas 4 de 5 preguntas. Para esta ultima, tomatelo con calma y responde con detalle — lo estas haciendo muy bien.'
+const HINTS_STAR = [
+  'Para la siguiente, recuerda describir una situacion concreta: cuando ocurrio y cual era el contexto.',
+  'Esta vez pon enfasis en cual era tu rol y que acciones tomaste tu personalmente.',
+  'Recuerda mencionar el resultado concreto que obtuviste: datos, cifras o impacto si los tienes.',
+  'Tomate tu tiempo y responde con detalle, lo estas haciendo muy bien.'
 ];
+
+function getTextoTransicion(idx) {
+  const n = competencias.length;
+  const sig = competencias[idx];
+  const cierre = idx === n - 1 ? 'Es lo ultimo. ' : '';
+  if (sig && sig.tipo === 'dinamica') {
+    const prev = competencias[idx - 1];
+    const continua = prev && prev.tipo === 'dinamica';
+    const intro = continua ? 'Muy bien, seguimos con la dinamica de venta. ' : 'Ahora viene una dinamica entretenida de venta, en partes. ';
+    return intro + cierre + 'Relajate y sigue con naturalidad.';
+  }
+  const hint = HINTS_STAR[(idx - 1) % HINTS_STAR.length];
+  return 'Bien hecho. Llevas ' + idx + ' de ' + n + '. ' + cierre + hint;
+}
 
 function getTextoBienvenida() {
   const nombre = candidato.nombre ? candidato.nombre.split(' ')[0] : '';
   const saludo = nombre ? 'Hola, ' + nombre + '.' : 'Hola.';
-  return saludo + ' Bienvenido o bienvenida a tu entrevista por competencias. Te presentare ' + competencias.length + ' preguntas sobre situaciones laborales reales. Recuerda responder con ejemplos concretos de tu experiencia. Cuando estes listo o lista, presiona el boton para comenzar.';
+  return saludo + ' Bienvenido o bienvenida a tu entrevista. Partiremos con una breve presentacion tuya y luego haremos una dinamica de venta entretenida. Es sencillo y rapido, solo se natural y pasalo bien. Tienes hasta 3 minutos para cada respuesta. Cuando estes listo o lista, presiona el boton para comenzar.';
 }
 
 function mostrarPreguntaCountdown(idx) {
   indiceEntrevistador = idx;
+  regrabacionesUsadas = 0;
   escrituraCompleta = false;
 
   // Ocultar botón listo inicialmente
@@ -745,7 +850,7 @@ function mostrarPreguntaCountdown(idx) {
   if (btnListo) btnListo.style.display = 'none';
 
   // Texto según si es intro o transición
-  const texto = idx === 0 ? getTextoBienvenida() : FRASES_TRANSICION[idx - 1] || FRASES_TRANSICION[FRASES_TRANSICION.length - 1];
+  const texto = idx === 0 ? getTextoBienvenida() : getTextoTransicion(idx);
 
   // Limpiar texto animado
   document.getElementById('texto-animado').textContent = '';
@@ -817,7 +922,26 @@ function mostrarGrabacion(idx) {
   mostrarPantalla('screen-grabacion');
 }
 
+function capturarFotoCandidato() {
+  // Toma un cuadro del video que el candidato ya esta grabando. Solo una vez.
+  if (fotoCandidato) return;
+  try {
+    const v = document.getElementById('video-live');
+    if (!v || !v.videoWidth) return;
+    const w = 320;
+    const h = Math.round(w * (v.videoHeight / v.videoWidth));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(v, 0, 0, w, h);
+    fotoCandidato = canvas.toDataURL('image/jpeg', 0.7);
+  } catch(e) {
+    console.log('No se pudo capturar foto:', e.message);
+  }
+}
+
 function iniciarGrabacion() {
+  finProcesado = false;
   chunks = [];
   textoActual = '';
   document.getElementById('transcripcion-texto').textContent = '';
@@ -826,14 +950,15 @@ function iniciarGrabacion() {
   mediaRecorder.ondataavailable = function(e) {
     if (e.data.size > 0) chunks.push(e.data);
   };
-  mediaRecorder.onstop = function() {
-    blobActual = new Blob(chunks, { type: getSupportedMimeType() });
-    detenerTranscripcion();
-    mostrarPreview();
-  };
+  mediaRecorder.onstop = procesarFinGrabacion;
   mediaRecorder.start(1000);
+  setTimeout(capturarFotoCandidato, 3000);
 
   iniciarTranscripcion();
+  const _tipoActual = competencias[preguntaActual] ? competencias[preguntaActual].tipo : '';
+  if (_tipoActual !== 'presentacion' && _tipoActual !== 'dinamica') {
+    iniciarPanelSTAR();
+  }
 
   contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
   if (faceApiCargado) {
@@ -861,14 +986,48 @@ function iniciarGrabacion() {
   }, 1000);
 }
 
+function procesarFinGrabacion() {
+  // Se ejecuta una sola vez por grabacion (bandera finProcesado) y SIEMPRE avanza,
+  // aunque alguna limpieza falle o el evento onstop no se dispare.
+  if (finProcesado) return;
+  finProcesado = true;
+
+  try { blobActual = new Blob(chunks, { type: getSupportedMimeType() }); }
+  catch(e) { try { blobActual = new Blob(chunks); } catch(e2) {} }
+  try { detenerTranscripcion(); } catch(e) {}
+  try { detenerPanelSTAR(); } catch(e) {}
+
+  try {
+    const comp = competencias[preguntaActual];
+    // La presentacion y la dinamica no llevan contrapregunta STAR: pasan directo al preview
+    if (comp && (comp.tipo === 'presentacion' || comp.tipo === 'dinamica')) {
+      mostrarPreview();
+      return;
+    }
+    const faltantes = componentesFaltantes();
+    if (faltantes.length > 0 && textoActual.trim().split(/\s+/).length >= 20) {
+      mostrarContrapregunta(faltantes, comp);
+    } else {
+      mostrarPreview();
+    }
+  } catch(e) {
+    console.error('Error al procesar fin de grabacion:', e);
+    try { mostrarPreview(); } catch(e2) { mostrarPantalla('screen-preview'); }
+  }
+}
+
 function detenerGrabacion() {
   clearInterval(timerGrabacion);
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-  }
   document.getElementById('rec-dot').classList.remove('show');
   document.getElementById('rec-label').classList.remove('show');
   document.getElementById('timer-video').classList.remove('show');
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    // Red de seguridad: si onstop no se dispara, avanzar igual
+    setTimeout(function() { if (!finProcesado) procesarFinGrabacion(); }, 1500);
+  } else {
+    procesarFinGrabacion();
+  }
 }
 
 function actualizarTimerVideo() {
@@ -885,7 +1044,21 @@ function mostrarPreview() {
   document.getElementById('btn-next-label').textContent = isLast ? '(finalizar entrevista)' : '(siguiente pregunta)';
   document.getElementById('pv-badge').textContent = 'Pregunta ' + (preguntaActual+1);
   document.getElementById('pv-competencia').textContent = competencias[preguntaActual].nombre;
+
+  const puedeRegrabar = regrabacionesUsadas < 1;
+  const btnReg = document.getElementById('btn-regrabar');
+  if (btnReg) btnReg.style.display = puedeRegrabar ? '' : 'none';
+  const txt = document.getElementById('pv-instruccion');
+  if (txt) txt.textContent = puedeRegrabar
+    ? 'Revisa tu respuesta. Si estás conforme, continúa. Tienes una única oportunidad de volver a grabarla.'
+    : 'Revisa tu respuesta. Ya usaste tu oportunidad de volver a grabar, así que continúa cuando estés lista o listo.';
+
   mostrarPantalla('screen-preview');
+}
+
+function volverAGrabar() {
+  regrabacionesUsadas++;
+  mostrarGrabacion(preguntaActual);
 }
 
 
@@ -992,6 +1165,91 @@ function blobToBase64(blob) {
 // ══════════════════════════════════════
 // FINALIZAR ENTREVISTA
 // ══════════════════════════════════════
+function nivelBadge(nivel) {
+  const map = { alto:'verde', medio:'ambar', bajo:'rojo', no_evaluado:'gris', no_evaluada:'gris' };
+  const color = map[nivel] || 'gris';
+  const label = (nivel || 'no evaluado').replace(/_/g, ' ');
+  return '<span class="inf-badge inf-' + color + '">' + label + '</span>';
+}
+
+function generarInforme() {
+  const pres = transcripciones.find(function(t){ return t.analisis && t.analisis.esPresentacion; });
+  const dins = transcripciones.filter(function(t){ return t.analisis && t.analisis.esDinamica; });
+  const emo = (typeof generarResumenEmocional === 'function') ? generarResumenEmocional() : null;
+
+  function nivelDe(foco) {
+    const d = dins.find(function(t){ return t.analisis.foco === foco; });
+    return d ? (d.analisis.nivel || 'no_evaluado') : 'no_evaluado';
+  }
+  const nAtencion = nivelDe('atencion_cliente');
+  const nVenta = nivelDe('orientacion_venta');
+  const nObjeciones = nivelDe('manejo_objeciones');
+
+  // Aptitud general = promedio de las 3 etapas evaluadas
+  function nn(x){ return x === 'alto' ? 3 : x === 'medio' ? 2 : x === 'bajo' ? 1 : 0; }
+  const vals = [nAtencion, nVenta, nObjeciones].map(nn).filter(function(v){ return v > 0; });
+  let ap = 'no_evaluado';
+  if (vals.length) {
+    const prom = vals.reduce(function(a,b){ return a + b; }, 0) / vals.length;
+    ap = prom >= 2.5 ? 'alto' : prom >= 1.5 ? 'medio' : 'bajo';
+  }
+
+  let recomendacion, recoColor;
+  if (ap === 'alto') { recomendacion = 'Avanzar'; recoColor = 'verde'; }
+  else if (ap === 'bajo') { recomendacion = 'No avanzar por ahora'; recoColor = 'rojo'; }
+  else if (ap === 'no_evaluado') { recomendacion = 'Revisar manualmente'; recoColor = 'ambar'; }
+  else { recomendacion = 'Avanzar con reservas'; recoColor = 'ambar'; }
+
+  const competencias_eval = [
+    { nombre: 'Atención al cliente', nivel: nAtencion },
+    { nombre: 'Orientación a la venta', nivel: nVenta },
+    { nombre: 'Manejo de objeciones', nivel: nObjeciones }
+  ];
+
+  let vision = '';
+  if (pres && pres.analisis.resumen) vision += pres.analisis.resumen + ' ';
+  dins.forEach(function(t){ if (t.analisis.observacion) vision += t.analisis.observacion + ' '; });
+  if (!vision.trim()) vision = 'No se pudo generar una vision global automatica; revisa los videos y transcripciones.';
+
+  return {
+    candidato: (typeof candidato !== 'undefined' && candidato.nombre) ? candidato.nombre : '',
+    cargo: cargo || 'Vendedor(a) Retail',
+    fecha: new Date().toLocaleDateString('es-CL'),
+    experiencia: pres ? (pres.analisis.experiencia || 'no_evaluada') : 'no_evaluada',
+    presentacion_resumen: pres ? (pres.analisis.resumen || '') : '',
+    foto: fotoCandidato,
+    aptitud_venta: ap,
+    competencias: competencias_eval,
+    vision_global: vision.trim(),
+    recomendacion: recomendacion,
+    recomendacion_color: recoColor,
+    disposicion: emo ? (emo.disposicion || null) : null,
+    contacto_visual: emo ? (emo.pct_contacto_visual != null ? emo.pct_contacto_visual : null) : null
+  };
+}
+
+function renderInforme(inf) {
+  const expMap = { formal:'Con experiencia en ventas o atención', otro_contexto:'Experiencia de otro ámbito', ninguna:'Sin experiencia previa', no_evaluada:'No evaluada', no_evaluado:'No evaluada' };
+  let comps = '';
+  inf.competencias.forEach(function(c){
+    comps += '<div class="inf-comp"><span class="inf-comp-nombre">' + c.nombre + '</span>' + nivelBadge(c.nivel) + '</div>';
+  });
+  let dispo = '';
+  if (inf.disposicion) {
+    dispo = '<div class="inf-card"><div class="inf-label">Disposición durante la entrevista</div><div class="inf-text">' + inf.disposicion + (inf.contacto_visual != null ? ' · Contacto visual: ' + inf.contacto_visual + '%' : '') + '</div></div>';
+  }
+  const html =
+    (inf.foto ? '<div style="text-align:center;margin-bottom:.6rem;"><img src="' + inf.foto + '" alt="Foto del candidato" style="width:96px;height:96px;object-fit:cover;border-radius:50%;border:2px solid var(--border);"/></div>' : '') +
+    '<div class="inf-head"><h2>Informe de entrevista</h2><div class="inf-meta">' + inf.candidato + ' · ' + inf.cargo + ' · ' + inf.fecha + '</div></div>' +
+    '<div class="inf-reco inf-' + inf.recomendacion_color + '"><small>Recomendación</small>' + inf.recomendacion + '</div>' +
+    '<div class="inf-card"><div class="inf-label">Visión global del candidato</div><div class="inf-text">' + inf.vision_global + '</div></div>' +
+    '<div class="inf-card"><div class="inf-label">Experiencia detectada</div><div class="inf-text">' + (expMap[inf.experiencia] || inf.experiencia) + (inf.presentacion_resumen ? ' — ' + inf.presentacion_resumen : '') + '</div></div>' +
+    '<div class="inf-card"><div class="inf-label">Competencias evaluadas en la dinámica</div>' + (comps || '<div class="inf-text">Sin datos.</div>') + '<div class="inf-comp" style="border-top:1px solid var(--border);margin-top:.4rem;padding-top:.7rem;"><span class="inf-comp-nombre" style="font-weight:600;">Aptitud de venta general</span>' + nivelBadge(inf.aptitud_venta) + '</div></div>' +
+    dispo +
+    '<div class="inf-nota">Informe generado automáticamente a partir de la entrevista. Uso exclusivo del evaluador.</div>';
+  document.getElementById('informe-contenido').innerHTML = html;
+}
+
 async function finalizarEntrevista() {
   document.getElementById('upload-text').textContent = 'Finalizando entrevista...';
 
@@ -999,8 +1257,12 @@ async function finalizarEntrevista() {
     stream.getTracks().forEach(function(t) { t.stop(); });
   }
 
+  const informe = generarInforme();
+
   const payload = {
     action: 'finalizarEntrevista',
+    informe: informe,
+    foto: fotoCandidato,
     nombre: candidato.nombre,
     rut: candidato.rut,
     email: candidato.email,
@@ -1022,7 +1284,13 @@ async function finalizarEntrevista() {
     });
   } catch(e) {}
 
-  mostrarPantalla('screen-gracias');
+  const _params = new URLSearchParams(window.location.search);
+  if (_params.get('rev') === '1' || _params.get('informe') === '1') {
+    renderInforme(informe);
+    mostrarPantalla('screen-informe');
+  } else {
+    mostrarPantalla('screen-gracias');
+  }
 }
 
 // ══════════════════════════════════════
@@ -1125,9 +1393,277 @@ function detenerTranscripcion() {
 // ANÁLISIS STAR AUTOMÁTICO
 // ══════════════════════════════════════
 // ══════════════════════════════════════
+// PANEL STAR EN TIEMPO REAL
+// ══════════════════════════════════════
+function iniciarPanelSTAR() {
+  starActual = { s:0, t:0, a:0, r:0 };
+  ['s','t','a','r'].forEach(function(c) {
+    const el = document.getElementById('check-' + c);
+    if (el) { el.classList.remove('completado'); el.querySelector('.star-check-icon').textContent = '○'; }
+  });
+  document.getElementById('panel-star').style.display = 'block';
+
+  // Analizar cada 8 segundos
+  clearInterval(intervaloSTAR);
+  intervaloSTAR = setInterval(function() {
+    const texto = textoActual.trim();
+    if (texto.length < 10) return;
+    const resultado = analizarSTAR(texto, competencias[preguntaActual]);
+    actualizarCheckboxesSTAR(resultado);
+  }, 8000);
+}
+
+function actualizarCheckboxesSTAR(resultado) {
+  const mapa = { s: resultado.s, t: resultado.t, a: resultado.a, r: resultado.r };
+  starActual = mapa;
+  Object.keys(mapa).forEach(function(k) {
+    const el = document.getElementById('check-' + k);
+    if (!el) return;
+    if (mapa[k] > 0) {
+      el.classList.add('completado');
+      el.querySelector('.star-check-icon').textContent = '✓';
+    }
+  });
+}
+
+function detenerPanelSTAR() {
+  clearInterval(intervaloSTAR);
+  document.getElementById('panel-star').style.display = 'none';
+}
+
+function componentesFaltantes() {
+  const faltantes = [];
+  const texto = textoActual.trim();
+  const resultado = analizarSTAR(texto, competencias[preguntaActual]);
+  if (resultado.s === 0) faltantes.push('situacion');
+  if (resultado.t === 0) faltantes.push('tarea');
+  if (resultado.a === 0) faltantes.push('accion');
+  if (resultado.r === 0) faltantes.push('resultado');
+  return faltantes;
+}
+
+// ══════════════════════════════════════
+// CONTRAPREGUNTA AUTOMÁTICA
+// ══════════════════════════════════════
+const CONTRAPREGUNTAS = {
+  situacion: '¿Puedes contarme en qué momento y contexto ocurrió eso? ¿En qué empresa o situación específica estabas?',
+  tarea: '¿Cuál era exactamente tu responsabilidad o rol en esa situación? ¿Qué se esperaba de ti?',
+  accion: '¿Qué hiciste tú específicamente? Cuéntame paso a paso las acciones concretas que tomaste.',
+  resultado: '¿Cuál fue el resultado final de lo que hiciste? ¿Cómo terminó la situación?'
+};
+
+function mostrarContrapregunta(faltantes, comp) {
+  // Priorizar el componente más importante que falta
+  const prioridad = ['resultado', 'accion', 'tarea', 'situacion'];
+  const faltantePrincipal = prioridad.find(function(p) { return faltantes.includes(p); }) || faltantes[0];
+
+  const pregunta = CONTRAPREGUNTAS[faltantePrincipal];
+  document.getElementById('contra-titulo').textContent = 'Una pregunta más sobre ' + comp.nombre;
+  document.getElementById('contra-pregunta').textContent = pregunta;
+  document.getElementById('contra-timer').textContent = '1:00';
+  document.getElementById('contra-controles-grabar').style.display = 'block';
+  document.getElementById('contra-controles-grabando').style.display = 'none';
+
+  mostrarPantalla('screen-contrapregunta');
+
+  // Timer automático — si no inicia en 15 segs, avanza igual
+  setTimeout(function() {
+    if (document.getElementById('screen-contrapregunta').classList.contains('active')) {
+      if (document.getElementById('contra-controles-grabar').style.display !== 'none') {
+        mostrarPreview();
+      }
+    }
+  }, 15000);
+}
+
+function iniciarContrapregunta() {
+  textoContra = '';
+  document.getElementById('contra-controles-grabar').style.display = 'none';
+  document.getElementById('contra-controles-grabando').style.display = 'block';
+
+  // Iniciar nueva grabación sobre el mismo stream
+  const contraChunks = [];
+  const contraRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  contraRecorder.ondataavailable = function(e) { if (e.data.size > 0) contraChunks.push(e.data); };
+  contraRecorder.onstop = function() {
+    // Combinar texto original con contrapregunta
+    const contraBlob = new Blob(contraChunks, { type: getSupportedMimeType() });
+    // Agregar al texto actual
+    if (textoContra.trim()) textoActual = textoActual + ' ' + textoContra;
+    mostrarPreview();
+  };
+  contraRecorder.start(1000);
+
+  // Iniciar reconocimiento de voz para contrapregunta
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recContra = new SR();
+    recContra.lang = 'es-CL'; recContra.continuous = true; recContra.interimResults = true;
+    recContra.onresult = function(e) {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) textoContra += e.results[i][0].transcript + ' ';
+      }
+    };
+    try { recContra.start(); } catch(e) {}
+  }
+
+  // Timer de 1 minuto
+  segundosContra = TIEMPO_CONTRAPREGUNTA;
+  clearInterval(timerContrapregunta);
+  timerContrapregunta = setInterval(function() {
+    segundosContra--;
+    const m = Math.floor(segundosContra / 60);
+    const s = segundosContra % 60;
+    document.getElementById('contra-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    document.getElementById('contra-timer').style.color = segundosContra <= 15 ? '#e8593c' : 'var(--accent)';
+    if (segundosContra <= 0) {
+      clearInterval(timerContrapregunta);
+      contraRecorder.stop();
+    }
+  }, 1000);
+
+  window._contraRecorder = contraRecorder;
+}
+
+function detenerContrapregunta() {
+  clearInterval(timerContrapregunta);
+  if (window._contraRecorder && window._contraRecorder.state !== 'inactive') {
+    window._contraRecorder.stop();
+  }
+}
+
+// ══════════════════════════════════════
 // ANÁLISIS CON GROQ IA
 // ══════════════════════════════════════
+async function resumirPresentacion(texto, competencia) {
+  // La presentacion NO se califica con nota. Se resume para el reclutador.
+  const base = { esPresentacion: true, grado: '—', total: null, s: 0, t: 0, a: 0, r: 0, alertas: [] };
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+
+  if (!texto || palabras < 10) {
+    return Object.assign(base, {
+      experiencia: 'ninguna',
+      resumen: 'El candidato no entrego una presentacion audible o fue demasiado breve.',
+      observacion: 'Presentacion insuficiente.',
+      metodo: 'sin_texto'
+    });
+  }
+
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 600).replace(/[`'"]/g, ' ');
+      const prompt = 'Eres reclutador evaluando la presentacion inicial de un candidato para un cargo de VENDEDOR RETAIL. ' +
+        'Presentacion del candidato: ' + textoLimitado + ' ' +
+        'NO pongas nota ni grado. Solo resume para el reclutador. ' +
+        'Clasifica su experiencia en ventas o atencion a publico como: formal (ha trabajado en ventas o atencion a publico), otro_contexto (tiene experiencia laboral pero no en ventas, o experiencia informal como negocio familiar), o ninguna (sin experiencia laboral relevante). ' +
+        'En resumen escribe 2 o 3 frases claras: quien es, su experiencia, y que lo motiva a postular. ' +
+        'En observacion escribe una frase con tu impresion de como se presenta y comunica. ' +
+        'Responde SOLO JSON valido sin texto extra: {"experiencia":"ninguna","resumen":"...","observacion":"..."}';
+
+      const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.2, max_tokens: 400 };
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const r = JSON.parse(jsonMatch[0]);
+          return Object.assign(base, {
+            experiencia: r.experiencia || 'no_evaluada',
+            resumen: r.resumen || '',
+            observacion: r.observacion || '',
+            metodo: 'groq_ia'
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Resumen de presentacion no disponible:', e.message);
+    }
+  }
+
+  // Fallback sin IA: guardar la transcripcion como resumen
+  return Object.assign(base, {
+    experiencia: 'no_evaluada',
+    resumen: texto.substring(0, 300),
+    observacion: 'Resumen automatico no disponible; se guardo la transcripcion.',
+    metodo: 'sin_ia'
+  });
+}
+
+async function evaluarDinamicaVenta(texto, competencia) {
+  // Cada etapa de la dinamica evalua UNA sola competencia (segun competencia.foco). NO STAR.
+  const foco = competencia.foco || 'orientacion_venta';
+  const base = { esDinamica: true, foco: foco, s: 0, t: 0, a: 0, r: 0, total: null, grado: '—', alertas: [] };
+
+  const focoDesc = {
+    atencion_cliente: 'ATENCION AL CLIENTE: recibir y conectar con el cliente. Se evalua si saluda, es cercano y amable, y si averigua que necesita el cliente.',
+    orientacion_venta: 'ORIENTACION A LA VENTA: ofrecer y convencer. Se evalua si destaca beneficios y no solo caracteristicas, si transmite entusiasmo y si intenta la venta.',
+    manejo_objeciones: 'MANEJO DE OBJECIONES: responder a una objecion (esta caro o lo voy a pensar) con calma, buscando dar vuelta el no e intentar cerrar la venta.'
+  };
+
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 10) {
+    return Object.assign(base, {
+      nivel: 'bajo',
+      observacion: 'El candidato casi no respondio esta parte o fue demasiado breve para evaluar.',
+      metodo: 'sin_texto'
+    });
+  }
+
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 700).replace(/[`'"]/g, ' ');
+      const prompt = 'Eres evaluador experto en seleccion de vendedores retail. El candidato esta haciendo una dinamica de venta por partes. En ESTA parte se evalua solo: ' + (focoDesc[foco] || focoDesc.orientacion_venta) + ' ' +
+        'Transcripcion de lo que dijo el candidato en esta parte: ' + textoLimitado + ' ' +
+        'ESTO NO ES una respuesta STAR. Se aceptan candidatos SIN experiencia previa: valora la actitud y el talento natural, no la tecnica perfecta. ' +
+        'Da el nivel de esta competencia como alto, medio o bajo. ' +
+        'En observacion escribe 1 o 2 frases para el reclutador sobre lo que hizo bien y lo que le falto en esta parte. ' +
+        'Responde SOLO JSON valido sin texto extra: {"nivel":"medio","observacion":"..."}';
+
+      const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.3, max_tokens: 350 };
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const r = JSON.parse(jsonMatch[0]);
+          return Object.assign(base, {
+            nivel: r.nivel || 'medio',
+            observacion: r.observacion || '',
+            metodo: 'groq_ia'
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Evaluacion de etapa no disponible:', e.message);
+    }
+  }
+
+  return Object.assign(base, {
+    nivel: 'no_evaluado',
+    observacion: 'Evaluacion automatica no disponible; se guardo la transcripcion: ' + texto.substring(0, 200),
+    metodo: 'sin_ia'
+  });
+}
+
 async function analizarConIA(texto, competencia) {
+  // La pregunta de presentacion se resume, no se califica con nota STAR
+  if (competencia && competencia.tipo === 'presentacion') {
+    return await resumirPresentacion(texto, competencia);
+  }
+  // La dinamica de venta se evalua con rubrica comercial, no STAR
+  if (competencia && competencia.tipo === 'dinamica') {
+    return await evaluarDinamicaVenta(texto, competencia);
+  }
   // Si no hay texto suficiente, retornar D directo
   const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
   if (!texto || palabras < 30) {
@@ -1139,22 +1675,25 @@ async function analizarConIA(texto, competencia) {
     try {
       const textoLimitado = texto.substring(0, 500).replace(/[`'"]/g, ' ');
       const pregLimitada = competencia.pregunta.substring(0, 150).replace(/[`'"]/g, ' ');
-      const prompt = 'Eres evaluador experto en entrevistas por competencias con metodologia STAR. ' +
-        'Evalua la siguiente respuesta de forma ESTRICTA. ' +
+      const prompt = 'Eres evaluador experto en entrevistas por competencias con metodologia STAR, evaluando a un candidato para un cargo de VENDEDOR RETAIL (atencion a publico y ventas). ' +
         'Competencia evaluada: ' + competencia.nombre + '. ' +
         'Pregunta: ' + pregLimitada + ' ' +
         'Respuesta: ' + textoLimitado + ' ' +
-        'CRITERIOS ESTRICTOS DE EVALUACION: ' +
-        'A=Destacado: El candidato fue protagonista, describe situacion clara, acciones PROPIAS especificas y resultado medible logrado POR EL. ' +
-        'B=Satisfactorio: El candidato tuvo rol activo con acciones propias claras, resultado presente aunque algo vago. ' +
-        'C=Basico: El candidato participo pero no fue protagonista, acciones vagas o resultado dependio de otros. ' +
-        'D=Insuficiente: El resultado lo logro otra persona como supervisor o companero, respuesta vaga sin ejemplo concreto, habla en generico sin situacion real, o no tomo acciones propias efectivas. ' +
-        'REGLA CRITICA: Si el resultado fue logrado principalmente por otra persona y no por el candidato, el grado MAXIMO es D. ' +
-        'REGLA CRITICA: Si el candidato no recuerda un ejemplo concreto o habla en hipotetico, el grado es D. ' +
-        'REGLA CRITICA: Si el candidato reconoce que fallo sin mostrar aprendizaje ni acciones correctivas propias, el grado es D. ' +
-        'Calcula: s=1 si describe situacion concreta propia, t=1 si explica su rol especifico, a=2 si detalla acciones propias efectivas/a=1 si acciones vagas/a=0 si no hay acciones propias, r=2 si resultado concreto logrado por el/r=1 si resultado vago/r=0 si resultado lo logro otro o no hay resultado. ' +
-        'total=suma de s+t+a+r. grado=A si total>=5, B si total>=3 Y hay acciones propias efectivas, C si total=2 Y el candidato tuvo algun rol, D en cualquier otro caso o si aplica alguna regla critica. ' +
-        'Responde SOLO JSON valido sin texto extra: {"s":0,"t":0,"a":0,"r":0,"total":0,"grado":"D","observacion":"observacion breve y especifica sobre la calidad de la respuesta","alertas":["alerta1"],"especificidad":0}';
+        'CONTEXTO CLAVE: Para este cargo se consideran validos los candidatos SIN experiencia previa en ventas, siempre que muestren buena actitud y potencial. ' +
+        'Un ejemplo NO tiene que ser laboral: sirve un ejemplo real de estudios, deporte, vida familiar o cotidiana. NUNCA bajes la nota solo porque el candidato no tiene experiencia laboral, si da un ejemplo real y concreto de otro contexto. ' +
+        'EVALUACION STAR (mide que tan bien demuestra la competencia con un ejemplo real): ' +
+        's=1 si describe una situacion concreta y real de cualquier contexto, 0 si no. ' +
+        't=1 si explica cual era su rol o lo que se esperaba de el, 0 si no. ' +
+        'a=2 si detalla acciones propias concretas y efectivas, a=1 si acciones vagas, a=0 si no hubo accion propia. ' +
+        'r=2 si hay un resultado concreto, r=1 si resultado vago, r=0 si no hay resultado o lo logro otro. ' +
+        'total=s+t+a+r. grado=A si total>=5, B si total>=3, C si total=2, D si total es 1 o 0. ' +
+        'SOLO baja a D en estos casos: respuesta puramente hipotetica sin NINGUN ejemplo real; el candidato se cuelga de un logro que fue de otra persona; respuesta totalmente vaga y generica sin ninguna situacion. La falta de experiencia por si sola NO es motivo de D. ' +
+        'ADEMAS evalua por separado tres cosas: ' +
+        'actitud (alta, media o baja) segun la motivacion, energia, ganas de aprender y orientacion al servicio que muestre. ' +
+        'experiencia (formal si el ejemplo es de trabajo en ventas o atencion, otro_contexto si es un ejemplo real pero no laboral, ninguna si no dio ejemplo real). ' +
+        'potencial (alto, medio o bajo) de llegar a ser buen vendedor retail considerando su actitud y competencias transferibles, aunque no tenga experiencia. ' +
+        'En el campo observacion escribe en lenguaje claro para el reclutador, mencionando SIEMPRE: si tiene experiencia formal o solo de otro contexto, su nivel de actitud, y su potencial para el cargo. ' +
+        'Responde SOLO JSON valido sin texto extra: {"s":0,"t":0,"a":0,"r":0,"total":0,"grado":"D","actitud":"media","experiencia":"ninguna","potencial":"medio","observacion":"observacion breve y especifica","alertas":["alerta1"],"especificidad":0}';
 
       const bodyPayload = {
         model: GROQ_MODEL,
