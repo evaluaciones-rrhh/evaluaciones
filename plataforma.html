@@ -2255,7 +2255,16 @@ function verEntrevista(i){
   var exp = inf.experiencia ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Experiencia detectada</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+String(inf.experiencia).replace(/_/g," ")+(inf.presentacion_resumen? " — "+inf.presentacion_resumen : "")+"</div></div>" : "";
   var compBox = comps ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Competencias</div>"+comps+"</div>" : "";
   var vidBox = videos ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;'>Videos de la entrevista</div>"+videos+"</div>" : "";
-  var cuerpo = foto + reco + vision + exp + compBox + vidBox;
+  var integridad = "";
+  if (inf.cambios_pantalla != null) {
+    var cp = inf.cambios_pantalla;
+    var ist = cp === 0 ? {bg:"#e6f4ea",fg:"#1a7f37"} : (cp <= 2 ? {bg:"#fdf3dd",fg:"#9a6700"} : {bg:"#fce8e6",fg:"#b3261e"});
+    var itxt = cp === 0
+      ? "El candidato no salió de la pantalla durante la entrevista."
+      : "El candidato salió de la pantalla " + cp + (cp === 1 ? " vez" : " veces") + " (posible consulta externa). Conviene revisar el video.";
+    integridad = "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Integridad de la sesión</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>" + itxt + " <span style='background:"+ist.bg+";color:"+ist.fg+";font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;margin-left:4px;'>" + cp + (cp === 1 ? " salida" : " salidas") + "</span></div></div>";
+  }
+  var cuerpo = foto + reco + vision + exp + compBox + integridad + vidBox;
   if (!cuerpo.trim()) cuerpo = "<div style='text-align:center;color:var(--muted);padding:24px;'>Esta entrevista no tiene informe detallado guardado.</div>";
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
   document.getElementById("modal-entrevista").style.display = "flex";
