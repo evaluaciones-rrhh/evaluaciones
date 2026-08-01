@@ -457,17 +457,17 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
         <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Tus datos</div>
         <div class="field-grid" style="margin-bottom:1rem;">
           <div class="field">
-            <label>Nombre completo</label>
-            <input type="text" id="inp-nombre" placeholder="Apellido Nombre">
+            <label>Nombre *</label>
+            <input type="text" id="inp-nombre" placeholder="Ej: Camila">
           </div>
           <div class="field">
-            <label>RUT</label>
-            <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
+            <label>Apellido *</label>
+            <input type="text" id="inp-apellido" placeholder="Ej: Rojas">
           </div>
         </div>
         <div class="field" style="margin-bottom:1.5rem;">
-          <label>Email</label>
-          <input type="email" id="inp-email" placeholder="correo@ejemplo.com">
+          <label>RUT *</label>
+          <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
         </div>
 
         <button class="btn btn-primary" onclick="iniciarEntrevista()" style="width:100%;justify-content:center;padding:16px;font-size:16px;border-radius:10px;">
@@ -616,6 +616,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
         Continuar → <span id="btn-next-label"></span>
       </button>
       <button class="btn btn-full" id="btn-regrabar" onclick="volverAGrabar()" style="background:transparent;border:1px solid var(--border);color:var(--text);margin-top:.5rem;">↺ Volver a grabar (solo una vez)</button>
+      <div id="pv-timer" style="text-align:center;font-size:12px;color:var(--accent);margin-top:.7rem;font-weight:600;"></div>
     </div>
   </div>
 </div>
@@ -701,6 +702,13 @@ let preguntaActual = 0;
 let finProcesado = false;
 let regrabacionesUsadas = 0;
 let fotoCandidato = null;
+let cambiosPantalla = 0;
+let entrevistaEnCurso = false;
+document.addEventListener('visibilitychange', function() {
+  if (entrevistaEnCurso && document.hidden) cambiosPantalla++;
+});
+let timerPreview = null;
+let segundosPreview = 30;
 let stream = null;
 let mediaRecorder = null;
 let chunks = [];
@@ -784,18 +792,20 @@ async function cargarCompetencias() {
 // ══════════════════════════════════════
 async function iniciarEntrevista() {
   const nombre = document.getElementById('inp-nombre').value.trim();
+  const apellido = document.getElementById('inp-apellido').value.trim();
   const rut = document.getElementById('inp-rut').value.trim();
-  const email = document.getElementById('inp-email').value.trim();
 
-  if (!nombre || !rut) {
-    alert('Por favor ingresa tu nombre y RUT.');
+  if (!nombre || !apellido || !rut) {
+    alert('Por favor completa tu nombre, apellido y RUT.');
     return;
   }
 
-  candidato = { nombre, rut, email };
+  candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: rut, email: '' };
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    entrevistaEnCurso = true;
+    cambiosPantalla = 0;
     mostrarPantalla('screen-countdown');
     mostrarPreguntaCountdown(0);
   } catch(err) {
@@ -1050,13 +1060,39 @@ function mostrarPreview() {
   if (btnReg) btnReg.style.display = puedeRegrabar ? '' : 'none';
   const txt = document.getElementById('pv-instruccion');
   if (txt) txt.textContent = puedeRegrabar
-    ? 'Revisa tu respuesta. Si estás conforme, continúa. Tienes una única oportunidad de volver a grabarla.'
-    : 'Revisa tu respuesta. Ya usaste tu oportunidad de volver a grabar, así que continúa cuando estés lista o listo.';
+    ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, se avanza solo.'
+    : 'Revisa tu respuesta. Continúa cuando estés lista o listo (avanza solo si no eliges).';
 
   mostrarPantalla('screen-preview');
+  iniciarTimerPreview();
+}
+
+function iniciarTimerPreview() {
+  clearInterval(timerPreview);
+  segundosPreview = 30;
+  const el = document.getElementById('pv-timer');
+  function pintar(){ if (el) el.textContent = 'Avanza automáticamente en ' + segundosPreview + ' s'; }
+  pintar();
+  timerPreview = setInterval(function() {
+    segundosPreview--;
+    if (segundosPreview <= 0) {
+      clearInterval(timerPreview);
+      if (el) el.textContent = '';
+      siguientePregunta();
+      return;
+    }
+    pintar();
+  }, 1000);
+}
+
+function detenerTimerPreview() {
+  clearInterval(timerPreview);
+  const el = document.getElementById('pv-timer');
+  if (el) el.textContent = '';
 }
 
 function volverAGrabar() {
+  detenerTimerPreview();
   regrabacionesUsadas++;
   mostrarGrabacion(preguntaActual);
 }
@@ -1066,6 +1102,7 @@ function volverAGrabar() {
 // SIGUIENTE PREGUNTA / FINALIZAR
 // ══════════════════════════════════════
 async function siguientePregunta() {
+  detenerTimerPreview();
   mostrarPantalla('screen-subiendo');
   document.getElementById('upload-text').textContent = 'Guardando pregunta ' + (preguntaActual+1) + '...';
 
@@ -1224,7 +1261,8 @@ function generarInforme() {
     recomendacion: recomendacion,
     recomendacion_color: recoColor,
     disposicion: emo ? (emo.disposicion || null) : null,
-    contacto_visual: emo ? (emo.pct_contacto_visual != null ? emo.pct_contacto_visual : null) : null
+    contacto_visual: emo ? (emo.pct_contacto_visual != null ? emo.pct_contacto_visual : null) : null,
+    cambios_pantalla: cambiosPantalla
   };
 }
 
@@ -1238,6 +1276,15 @@ function renderInforme(inf) {
   if (inf.disposicion) {
     dispo = '<div class="inf-card"><div class="inf-label">Disposición durante la entrevista</div><div class="inf-text">' + inf.disposicion + (inf.contacto_visual != null ? ' · Contacto visual: ' + inf.contacto_visual + '%' : '') + '</div></div>';
   }
+  let integridad = '';
+  if (inf.cambios_pantalla != null) {
+    const cp = inf.cambios_pantalla;
+    const clase = cp === 0 ? 'inf-verde' : (cp <= 2 ? 'inf-ambar' : 'inf-rojo');
+    const txt = cp === 0
+      ? 'El candidato no salió de la pantalla durante la entrevista.'
+      : 'El candidato salió de la pantalla ' + cp + (cp === 1 ? ' vez' : ' veces') + ' (posible consulta externa). Conviene revisar el video.';
+    integridad = '<div class="inf-card"><div class="inf-label">Integridad de la sesión</div><div class="inf-text">' + txt + ' <span class="inf-badge ' + clase + '" style="margin-left:4px;">' + cp + (cp === 1 ? ' salida' : ' salidas') + '</span></div></div>';
+  }
   const html =
     (inf.foto ? '<div style="text-align:center;margin-bottom:.6rem;"><img src="' + inf.foto + '" alt="Foto del candidato" style="width:96px;height:96px;object-fit:cover;border-radius:50%;border:2px solid var(--border);"/></div>' : '') +
     '<div class="inf-head"><h2>Informe de entrevista</h2><div class="inf-meta">' + inf.candidato + ' · ' + inf.cargo + ' · ' + inf.fecha + '</div></div>' +
@@ -1246,11 +1293,13 @@ function renderInforme(inf) {
     '<div class="inf-card"><div class="inf-label">Experiencia detectada</div><div class="inf-text">' + (expMap[inf.experiencia] || inf.experiencia) + (inf.presentacion_resumen ? ' — ' + inf.presentacion_resumen : '') + '</div></div>' +
     '<div class="inf-card"><div class="inf-label">Competencias evaluadas en la dinámica</div>' + (comps || '<div class="inf-text">Sin datos.</div>') + '<div class="inf-comp" style="border-top:1px solid var(--border);margin-top:.4rem;padding-top:.7rem;"><span class="inf-comp-nombre" style="font-weight:600;">Aptitud de venta general</span>' + nivelBadge(inf.aptitud_venta) + '</div></div>' +
     dispo +
+    integridad +
     '<div class="inf-nota">Informe generado automáticamente a partir de la entrevista. Uso exclusivo del evaluador.</div>';
   document.getElementById('informe-contenido').innerHTML = html;
 }
 
 async function finalizarEntrevista() {
+  entrevistaEnCurso = false;
   document.getElementById('upload-text').textContent = 'Finalizando entrevista...';
 
   if (stream) {
