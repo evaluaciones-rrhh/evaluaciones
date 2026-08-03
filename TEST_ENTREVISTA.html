@@ -809,7 +809,7 @@ async function iniciarEntrevista() {
   candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: rut, email: '' };
 
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 18 } }, audio: true });
     entrevistaEnCurso = true;
     cambiosPantalla = 0;
     mostrarPantalla('screen-countdown');
@@ -971,7 +971,7 @@ function iniciarGrabacion() {
   textoActual = '';
   document.getElementById('transcripcion-texto').textContent = '';
 
-  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType(), videoBitsPerSecond: 400000, audioBitsPerSecond: 48000 });
   mediaRecorder.ondataavailable = function(e) {
     if (e.data.size > 0) chunks.push(e.data);
   };
@@ -1547,7 +1547,7 @@ function iniciarContrapregunta() {
 
   // Iniciar nueva grabación sobre el mismo stream
   const contraChunks = [];
-  const contraRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType() });
+  const contraRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType(), videoBitsPerSecond: 400000, audioBitsPerSecond: 48000 });
   contraRecorder.ondataavailable = function(e) { if (e.data.size > 0) contraChunks.push(e.data); };
   contraRecorder.onstop = function() {
     // Combinar texto original con contrapregunta
