@@ -1470,6 +1470,7 @@ tbody tr:hover td { background: #fdf9f6; }
     <!-- REPORTES ENTREVISTAS -->
     <div class="page" id="page-entrevistas">
       <div class="card">
+        <div id="entrev-dashboard" style="margin-bottom:18px;"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
           <input type="text" id="buscar-entrevistas" oninput="filtrarEntrevistas()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
           <span id="entrev-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
@@ -1484,7 +1485,10 @@ tbody tr:hover td { background: #fdf9f6; }
       <div style="background:#fff;max-width:720px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.3);overflow:hidden;">
         <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
           <div><div id="me-nombre" style="font-size:18px;font-weight:700;"></div><div id="me-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
-          <button onclick="cerrarEntrevista()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button onclick="descargarInformePDF()" style="background:#e57a5f;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">⤓ Descargar PDF</button>
+            <button onclick="cerrarEntrevista()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
+          </div>
         </div>
         <div id="me-cuerpo" style="padding:24px;max-height:72vh;overflow:auto;background:#f7f8fa;"></div>
       </div>
@@ -2165,6 +2169,7 @@ async function cargarEntrevistas(){
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     entrevistasData = (data && data.entrevistas) ? data.entrevistas : [];
+    renderDashboardEntrevistas(entrevistasData);
     renderEntrevistas(entrevistasData);
   } catch(e){
     if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar las entrevistas. Intenta de nuevo.</div>";
@@ -2237,6 +2242,7 @@ function nivelBadgeEnt(nivel){
 function verEntrevista(i){
   var ent = entrevistasData[i];
   if (!ent) return;
+  entrevistaActualIdx = i;
   var inf = ent.informe || {};
   var s = recoEntrevista(ent);
   document.getElementById("me-nombre").textContent = ent.nombre || "—";
@@ -2272,6 +2278,94 @@ function verEntrevista(i){
 
 function cerrarEntrevista(){
   document.getElementById("modal-entrevista").style.display = "none";
+}
+
+var entrevistaActualIdx = null;
+
+// Convierte "dd-mm-yyyy" (o similar) a Date; null si no se puede
+function parseFechaEnt(str){
+  if (!str) return null;
+  var m = String(str).trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (!m) return null;
+  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+}
+
+function renderDashboardEntrevistas(lista){
+  var cont = document.getElementById("entrev-dashboard");
+  if (!cont) return;
+  var total = lista.length;
+  var avanzar = 0, reservas = 0, noAvanzar = 0;
+  var ahora = new Date();
+  var inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+  var inicioSemana = new Date(ahora); var dia = (ahora.getDay()+6)%7; inicioSemana.setDate(ahora.getDate()-dia); inicioSemana.setHours(0,0,0,0);
+  var semana = 0, mes = 0;
+  var sumaApt = 0, nApt = 0;
+  lista.forEach(function(ent){
+    var inf = ent.informe || {};
+    var reco = (inf.recomendacion || "").toLowerCase();
+    if (reco.indexOf("no avanzar") > -1) noAvanzar++;
+    else if (reco.indexOf("reserva") > -1 || reco.indexOf("revisar") > -1) reservas++;
+    else if (reco.indexOf("avanzar") > -1) avanzar++;
+    var f = parseFechaEnt(ent.fecha);
+    if (f){ if (f >= inicioSemana) semana++; if (f >= inicioMes) mes++; }
+    var ap = (inf.aptitud_venta||"").toLowerCase();
+    var v = ap==="alto"?3:ap==="medio"?2:ap==="bajo"?1:0;
+    if (v>0){ sumaApt += v; nApt++; }
+  });
+  var promLbl = "—";
+  if (nApt>0){ var prom = sumaApt/nApt; promLbl = (prom>=2.5?"Alto":prom>=1.5?"Medio":"Bajo") + " (" + prom.toFixed(1) + "/3)"; }
+
+  function card(titulo, contenido){
+    return "<div style='flex:1;min-width:150px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;'>"+
+      "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px;'>"+titulo+"</div>"+
+      contenido+"</div>";
+  }
+  function mini(n, lbl, color){
+    return "<div style='display:flex;align-items:center;gap:6px;margin-bottom:3px;'><span style='display:inline-block;width:9px;height:9px;border-radius:50%;background:"+color+";'></span><span style='font-size:13px;color:var(--ink);'><strong>"+n+"</strong> "+lbl+"</span></div>";
+  }
+
+  cont.innerHTML =
+    "<div style='display:flex;gap:12px;flex-wrap:wrap;'>"+
+      card("Total de entrevistas", "<div style='font-size:30px;font-weight:800;color:var(--ink);line-height:1;'>"+total+"</div>")+
+      card("Resultado", mini(avanzar,"avanzan","#2e9e54")+mini(reservas,"con reservas","#e0a100")+mini(noAvanzar,"no avanzan","#d9463b"))+
+      card("Este período", "<div style='font-size:13px;color:var(--ink);margin-bottom:3px;'><strong>"+semana+"</strong> esta semana</div><div style='font-size:13px;color:var(--ink);'><strong>"+mes+"</strong> este mes</div>")+
+      card("Aptitud de venta promedio", "<div style='font-size:20px;font-weight:700;color:var(--ink);'>"+promLbl+"</div>")+
+    "</div>";
+}
+
+function descargarInformePDF(){
+  if (entrevistaActualIdx == null) return;
+  var ent = entrevistasData[entrevistaActualIdx];
+  var inf = ent.informe || {};
+  var s = recoEntrevista(ent);
+  function nivColor(n){ n=(n||"").toLowerCase(); return n==="alto"?"#1a7f37":n==="medio"?"#9a6700":n==="bajo"?"#b3261e":"#6b7680"; }
+  var comps = (inf.competencias||[]).map(function(c){
+    return "<tr><td style='padding:7px 0;border-bottom:1px solid #eee;font-size:13px;'>"+c.nombre+"</td><td style='padding:7px 0;border-bottom:1px solid #eee;text-align:right;font-size:13px;font-weight:700;color:"+nivColor(c.nivel)+";text-transform:capitalize;'>"+String(c.nivel||"—").replace(/_/g," ")+"</td></tr>";
+  }).join("");
+  var foto = inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='"+inf.foto+"' style='width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #e3e6e2;'></div>" : "";
+  var integridad = "";
+  if (inf.cambios_pantalla != null){
+    integridad = "<p style='font-size:12px;color:#555;margin-top:14px;'><strong>Integridad de la sesión:</strong> "+(inf.cambios_pantalla===0?"sin salidas de pantalla.":(inf.cambios_pantalla+" salida(s) de pantalla — revisar video."))+"</p>";
+  }
+  var html = "<html><head><meta charset='utf-8'><title>Informe "+(ent.nombre||"")+"</title></head>"+
+    "<body style='font-family:Arial,Helvetica,sans-serif;color:#1f2a33;max-width:640px;margin:24px auto;padding:0 20px;'>"+
+      "<div style='border-bottom:3px solid #e57a5f;padding-bottom:12px;margin-bottom:20px;'><div style='font-size:22px;font-weight:800;'>Deneb Consultores</div><div style='font-size:12px;color:#888;letter-spacing:2px;text-transform:uppercase;'>Informe de entrevista</div></div>"+
+      foto+
+      "<h2 style='margin:0 0 2px;font-size:20px;'>"+(ent.nombre||"—")+"</h2>"+
+      "<div style='color:#777;font-size:13px;margin-bottom:18px;'>"+(ent.cargo||"")+(ent.rut?" · "+ent.rut:"")+(ent.fecha?" · "+ent.fecha:"")+"</div>"+
+      "<div style='background:"+s.bg+";color:"+s.fg+";border-radius:8px;padding:12px;text-align:center;font-size:17px;font-weight:700;margin-bottom:18px;'>Recomendación: "+(inf.recomendacion||"—")+"</div>"+
+      (inf.vision_global?"<p style='font-size:11px;text-transform:uppercase;color:#999;letter-spacing:1px;margin:0 0 4px;'>Visión global</p><p style='font-size:14px;line-height:1.6;margin:0 0 16px;'>"+inf.vision_global+"</p>":"")+
+      (inf.experiencia?"<p style='font-size:11px;text-transform:uppercase;color:#999;letter-spacing:1px;margin:0 0 4px;'>Experiencia detectada</p><p style='font-size:14px;line-height:1.6;margin:0 0 16px;'>"+String(inf.experiencia).replace(/_/g," ")+(inf.presentacion_resumen?" — "+inf.presentacion_resumen:"")+"</p>":"")+
+      (comps?"<p style='font-size:11px;text-transform:uppercase;color:#999;letter-spacing:1px;margin:0 0 4px;'>Competencias</p><table style='width:100%;border-collapse:collapse;margin-bottom:8px;'>"+comps+"</table>":"")+
+      (inf.disposicion?"<p style='font-size:12px;color:#555;margin-top:14px;'><strong>Disposición:</strong> "+inf.disposicion+(inf.contacto_visual!=null?" · Contacto visual: "+inf.contacto_visual+"%":"")+"</p>":"")+
+      integridad+
+      "<p style='font-size:10px;color:#aaa;margin-top:28px;border-top:1px solid #eee;padding-top:10px;'>Informe generado automáticamente. Uso exclusivo del evaluador — Deneb Consultores.</p>"+
+      "<scr"+"ipt>window.onload=function(){window.print();}<\/scr"+"ipt>"+
+    "</body></html>";
+  var win = window.open("", "_blank");
+  if (!win){ alert("Permite las ventanas emergentes para descargar el PDF."); return; }
+  win.document.write(html);
+  win.document.close();
 }
 
 function verInforme(i){
