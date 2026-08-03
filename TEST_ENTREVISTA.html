@@ -591,6 +591,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
         ● Iniciar grabación
       </button>
       <p class="control-hint">Tienes hasta 3 minutos para responder. Cuando estés listo, presiona para grabar.</p>
+      <div id="gr-cuenta-inicio" style="text-align:center;font-size:13px;color:var(--accent);font-weight:600;margin-top:.6rem;"></div>
     </div>
 
     <div class="controls" id="controles-grabando" style="display:none;">
@@ -715,6 +716,30 @@ document.addEventListener('visibilitychange', function() {
 });
 let timerPreview = null;
 let segundosPreview = 30;
+let timerInicio = null;
+let segundosInicio = 15;
+function iniciarCuentaRegresivaInicio() {
+  clearInterval(timerInicio);
+  segundosInicio = 15;
+  const el = document.getElementById('gr-cuenta-inicio');
+  function pintar(){ if (el) el.textContent = 'Empieza a responder en ' + segundosInicio + ' s (si no, la grabación comienza sola)'; }
+  pintar();
+  timerInicio = setInterval(function() {
+    segundosInicio--;
+    if (segundosInicio <= 0) {
+      clearInterval(timerInicio);
+      if (el) el.textContent = '';
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') iniciarGrabacion();
+      return;
+    }
+    pintar();
+  }, 1000);
+}
+function detenerCuentaRegresivaInicio() {
+  clearInterval(timerInicio);
+  const el = document.getElementById('gr-cuenta-inicio');
+  if (el) el.textContent = '';
+}
 let stream = null;
 let mediaRecorder = null;
 let chunks = [];
@@ -779,10 +804,10 @@ async function cargarGroqKey() {
 // deporte o vida personal), de modo que candidatos sin experiencia en ventas
 // puedan responder con ejemplos transferibles.
 const COMPETENCIAS_VENDEDOR_RETAIL = [
-  { id: 'presentacion', nombre: 'Presentación', tipo: 'presentacion', pregunta: 'Para partir, cuéntame un poco de ti: quién eres, a qué te has dedicado, y si has tenido alguna experiencia en ventas o atención a público. Si no la has tenido, no hay problema, cuéntame igual qué te motiva a postular a este cargo.' },
-  { id: 'dinamica_1', nombre: 'Dinámica · Acercamiento', tipo: 'dinamica', foco: 'atencion_cliente', pregunta: 'Vamos a hacer una dinámica de venta, en partes. Primera parte: imagina que acabo de entrar a la tienda como cliente. Salúdame, recíbeme y averigua en qué te puedo pedir ayuda. ¿Qué me dirías?' },
-  { id: 'dinamica_2', nombre: 'Dinámica · Ofrecer y vender', tipo: 'dinamica', foco: 'orientacion_venta', pregunta: 'Segunda parte: ahora elige un producto que te guste o uses seguido y ofrécemelo. Convénceme de por qué me conviene, contándome para qué me sirve, no solo cómo es.' },
-  { id: 'dinamica_3', nombre: 'Dinámica · Objeción y cierre', tipo: 'dinamica', foco: 'manejo_objeciones', pregunta: 'Última parte: te digo, como cliente, "me gusta, pero está muy caro" o "lo tengo que pensar". Respóndeme a esa objeción e intenta cerrar la venta.' }
+  { id: 'presentacion', nombre: 'Presentación', tipo: 'presentacion', pregunta: 'Para partir, cuéntame un poco de ti: quién eres, a qué te has dedicado, y si has tenido alguna experiencia en ventas o atención a público.' },
+  { id: 'dinamica_1', nombre: 'Dinámica · Acercamiento', tipo: 'dinamica', foco: 'atencion_cliente', pregunta: 'Imagina que acabo de entrar a la tienda como cliente. Salúdame, recíbeme y averigua en qué te puedo pedir ayuda. ¿Qué harías? ¿Qué me dirías?' },
+  { id: 'dinamica_2', nombre: 'Dinámica · Ofrecer y vender', tipo: 'dinamica', foco: 'orientacion_venta', pregunta: 'Ahora elige un producto que te guste o uses seguido y ofrécemelo. Convénceme de por qué me conviene, contándome para qué me sirve, no solo cómo es.' },
+  { id: 'dinamica_3', nombre: 'Dinámica · Objeción y cierre', tipo: 'dinamica', foco: 'manejo_objeciones', pregunta: 'Te digo, como cliente, "me gusta, pero está muy caro" o "lo tengo que pensar". Respóndeme a esa objeción e intenta cerrar la venta.' }
 ];
 
 async function cargarCompetencias() {
@@ -843,7 +868,7 @@ function getTextoTransicion(idx) {
   if (sig && sig.tipo === 'dinamica') {
     const prev = competencias[idx - 1];
     const continua = prev && prev.tipo === 'dinamica';
-    const intro = continua ? 'Muy bien, seguimos con la dinamica de venta. ' : 'Ahora viene una dinamica entretenida de venta, en partes. ';
+    const intro = continua ? 'Muy bien, seguimos con la dinamica de venta. ' : 'Ahora viene una dinamica entretenida de venta. ';
     return intro + cierre + 'Relajate y sigue con naturalidad.';
   }
   const hint = HINTS_STAR[(idx - 1) % HINTS_STAR.length];
@@ -945,6 +970,7 @@ function mostrarGrabacion(idx) {
   document.getElementById('timer-video').classList.remove('show');
 
   mostrarPantalla('screen-grabacion');
+  iniciarCuentaRegresivaInicio();
 }
 
 function capturarFotoCandidato() {
@@ -966,6 +992,7 @@ function capturarFotoCandidato() {
 }
 
 function iniciarGrabacion() {
+  detenerCuentaRegresivaInicio();
   finProcesado = false;
   chunks = [];
   textoActual = '';
@@ -1075,8 +1102,8 @@ function mostrarPreview() {
   if (btnReg) btnReg.style.display = puedeRegrabar ? '' : 'none';
   const txt = document.getElementById('pv-instruccion');
   if (txt) txt.textContent = puedeRegrabar
-    ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, se avanza solo.'
-    : 'Revisa tu respuesta. Continúa cuando estés lista o listo (avanza solo si no eliges).';
+    ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, pasa automáticamente a la siguiente pregunta.'
+    : 'Revisa tu respuesta. Continúa cuando estés lista o listo (pasa automáticamente si no eliges).';
 
   mostrarPantalla('screen-preview');
   iniciarTimerPreview();
@@ -1086,7 +1113,11 @@ function iniciarTimerPreview() {
   clearInterval(timerPreview);
   segundosPreview = 30;
   const el = document.getElementById('pv-timer');
-  function pintar(){ if (el) el.textContent = 'Avanza automáticamente en ' + segundosPreview + ' s'; }
+  const btnR = document.getElementById('btn-regrabar');
+  function pintar(){
+    if (btnR && btnR.style.display !== 'none') btnR.textContent = '↺ Volver a grabar · ' + segundosPreview + ' s';
+    if (el) el.textContent = 'Si no eliges, pasa automáticamente a la siguiente pregunta.';
+  }
   pintar();
   timerPreview = setInterval(function() {
     segundosPreview--;
@@ -1104,6 +1135,8 @@ function detenerTimerPreview() {
   clearInterval(timerPreview);
   const el = document.getElementById('pv-timer');
   if (el) el.textContent = '';
+  const btnR = document.getElementById('btn-regrabar');
+  if (btnR) btnR.textContent = '↺ Volver a grabar (solo una vez)';
 }
 
 function volverAGrabar() {
