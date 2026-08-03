@@ -229,9 +229,14 @@ video {
 
 /* ══ PROGRESO ══ */
 .progress-bar-wrap { margin-bottom: 2rem; }
-.progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--hint); margin-bottom: 6px; }
-.progress-track { height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+.progress-labels { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.progress-labels #prog-pct { color: var(--accent); font-weight: 700; }
+.progress-track { height: 8px; background: var(--border2); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+.progress-dots { display: flex; gap: 6px; margin-top: 10px; }
+.progress-dots .dot { flex: 1; height: 6px; border-radius: 999px; background: var(--border2); transition: background .3s, opacity .3s; }
+.progress-dots .dot.done { background: var(--accent); }
+.progress-dots .dot.current { background: var(--accent); opacity: .5; }
 
 /* ══ GRACIAS ══ */
 .gracias-wrap { text-align: center; padding: 4rem 2rem; }
@@ -534,6 +539,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
       <div class="progress-track">
         <div class="progress-fill" id="prog-fill" style="width:20%"></div>
       </div>
+      <div class="progress-dots" id="prog-dots"></div>
     </div>
 
     <div class="card">
@@ -911,7 +917,7 @@ function iniciarGrabacionDirecta(idx) {
 // ══════════════════════════════════════
 function mostrarGrabacion(idx) {
   const comp = competencias[idx];
-  const pct = Math.round(((idx) / competencias.length) * 100);
+  const pct = Math.round(((idx+1) / competencias.length) * 100);
 
   document.getElementById('gr-badge').textContent = 'Pregunta ' + (idx+1);
   document.getElementById('gr-competencia').textContent = comp.nombre;
@@ -919,6 +925,15 @@ function mostrarGrabacion(idx) {
   document.getElementById('prog-label').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
   document.getElementById('prog-pct').textContent = pct + '%';
   document.getElementById('prog-fill').style.width = pct + '%';
+  const dots = document.getElementById('prog-dots');
+  if (dots) {
+    let h = '';
+    for (let k = 0; k < competencias.length; k++) {
+      const cls = k < idx ? 'dot done' : (k === idx ? 'dot current' : 'dot');
+      h += '<div class="' + cls + '"></div>';
+    }
+    dots.innerHTML = h;
+  }
 
   const videoLive = document.getElementById('video-live');
   videoLive.srcObject = stream;
