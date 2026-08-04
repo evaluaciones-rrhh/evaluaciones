@@ -1860,6 +1860,7 @@ var usuarioActual = "";
 var esAdminActual = false;
 var todosLosDatos = [];
 var todosEnvios = [];
+var enviosEntrevista = [];
 
 // Contexto del informe abierto (para nombrar el archivo al descargar)
 var _informeNombre = "";
@@ -3062,15 +3063,21 @@ function procesarEnvios(data) {
   renderHistorial();
 }
 
-function cargarHistorial() {
+async function cargarHistorial() {
+  renderHistorial();
+  try {
+    var d = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEnviosEntrevista&t=" + Date.now());
+    enviosEntrevista = (d && Array.isArray(d.envios)) ? d.envios : [];
+  } catch(e) { enviosEntrevista = []; }
   renderHistorial();
 }
 
 function filtrarHistorial() {
   var q = quitarTildes((document.getElementById("filtro-historial").value || "").toLowerCase().trim());
-  if (!q) { _pintarTablaHistorial(todosEnvios); return; }
+  var _base = todosEnvios.concat(enviosEntrevista);
+  if (!q) { _pintarTablaHistorial(_base); return; }
   var qLimpio = q.replace(/[\.\s-]/g, "");   // para calzar RUT en cualquier formato
-  var filtrado = todosEnvios.filter(function(e) {
+  var filtrado = _base.filter(function(e) {
     var rutCruzado = String(buscarRutCandidato(e.nombre) || "").toLowerCase();
     var rutLimpio = rutCruzado.replace(/[\.\s-]/g, "");
     return quitarTildes(String(e.nombre || "").toLowerCase()).includes(q)
@@ -3096,7 +3103,7 @@ function buscarRutCandidato(nombre) {
 }
 
 function renderHistorial() {
-  _pintarTablaHistorial(todosEnvios);
+  _pintarTablaHistorial(todosEnvios.concat(enviosEntrevista));
 }
 
 // Convierte la fecha del envío ("dd-MM-yyyy[, HH:mm:ss]" o ISO) a timestamp para ordenar
