@@ -1196,44 +1196,98 @@ async function siguientePregunta() {
 // ══════════════════════════════════════
 // SUBIR VIDEO A DRIVE
 // ══════════════════════════════════════
+// El video se corta en trozos y se envían de a uno.
+// 768000 es múltiplo de 3: NO cambiar por un número que no lo sea.
+const CHUNK_SIZE = 768000;
+const MAX_INTENTOS = 3;
+
+function pintarProgreso(pct, texto) {
+  const bar = document.getElementById('upload-bar');
+  const pc  = document.getElementById('upload-pct');
+  const tx  = document.getElementById('upload-text');
+  if (bar) bar.style.width = pct + '%';
+  if (pc)  pc.textContent = Math.round(pct) + '%';
+  if (tx && texto) tx.textContent = texto;
+}
+
+// Convierte un pedazo del video a texto base64
+function trozoABase64(trozo) {
+  return new Promise(function(resolve, reject) {
+    const fr = new FileReader();
+    fr.onload = function() { resolve(fr.result.split(',')[1]); };
+    fr.onerror = function() { reject(fr.error || new Error('Error leyendo el trozo')); };
+    fr.readAsDataURL(trozo);
+  });
+}
+
+// Envío al Apps Script con reintentos. Sin no-cors: ahora sí leemos la respuesta.
+async function postAppsScript(payload) {
+  let ultimoError;
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    try {
+      const resp = await fetch(APPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const json = await resp.json();
+      if (json && json.ok) return json;
+      throw new Error((json && json.error) || 'Respuesta inválida del servidor');
+    } catch (err) {
+      ultimoError = err;
+      if (intento < MAX_INTENTOS) {
+        await new Promise(function(r) { setTimeout(r, 1200 * intento); });
+      }
+    }
+  }
+  throw ultimoError;
+}
+
 async function subirVideo(blob, numeroPregunta) {
   try {
-    // Animar progreso visual
-    let progreso = 0;
-    const intervalo = setInterval(function() {
-      progreso = Math.min(progreso + Math.random() * 15, 90);
-      document.getElementById('upload-bar').style.width = progreso + '%';
-      document.getElementById('upload-pct').textContent = Math.round(progreso) + '%';
-    }, 300);
+    if (!blob || !blob.size) throw new Error('El video está vacío');
 
-    const base64 = await blobToBase64(blob);
-    const payload = {
+    const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    const total = Math.ceil(blob.size / CHUNK_SIZE);
+
+    for (let i = 0; i < total; i++) {
+      const desde = i * CHUNK_SIZE;
+      const hasta = Math.min(desde + CHUNK_SIZE, blob.size);
+      const base64 = await trozoABase64(blob.slice(desde, hasta));
+
+      await postAppsScript({
+        action: 'subirChunk',
+        uploadId: uploadId,
+        indice: i,
+        total: total,
+        chunkBase64: base64
+      });
+
+      // Reservamos el último 10% para el armado del archivo en Drive
+      pintarProgreso(((i + 1) / total) * 90,
+        'Guardando video... ' + Math.round(((i + 1) / total) * 90) + '%');
+    }
+
+    pintarProgreso(95, 'Terminando de guardar...');
+
+    const res = await postAppsScript({
       action: 'guardarRespuesta',
+      uploadId: uploadId,
+      total: total,
+      mimeType: blob.type || 'video/webm',
       nombre: candidato.nombre,
       token: token,
       numeroPregunta: numeroPregunta,
-      competencia: competencias[numeroPregunta - 1]?.id || '',
-      videoBase64: base64.split(',')[1]
-    };
-
-    // Usar no-cors — el video se guarda en Drive aunque no podamos leer la respuesta
-    await fetch(APPS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
+      competencia: competencias[numeroPregunta - 1]?.id || ''
     });
 
-    clearInterval(intervalo);
-    document.getElementById('upload-bar').style.width = '100%';
-    document.getElementById('upload-pct').textContent = '100%';
+    pintarProgreso(100, 'Video guardado ✔');
+    return res.url || '';
 
-    return ''; // Con no-cors no podemos leer la URL — el video queda en Drive
-  } catch(err) {
+  } catch (err) {
     console.error('Error subiendo video:', err);
     // Continuar aunque falle — no bloquear la entrevista
-    document.getElementById('upload-bar').style.width = '100%';
-    document.getElementById('upload-pct').textContent = '100%';
+    pintarProgreso(100, 'No se pudo guardar el video, continuamos.');
     return '';
   }
 }
