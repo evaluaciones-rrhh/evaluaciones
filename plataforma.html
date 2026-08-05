@@ -2670,9 +2670,16 @@ function descargarInformeActual(){
   descargarInforme(informesData[informeAbierto]);
 }
 
-function descargarInforme(inf){
-  // Si el informe trae su HTML original guardado (reporte completo según su tipo), se descarga ese
+async function descargarInforme(inf){
+  // El HTML completo ya no viaja en la lista: se pide solo al abrir este informe
   var htmlGuardado = inf.html || inf.dashboardHTML;
+  if (!htmlGuardado) {
+    try {
+      var rr = await fetchJSON(APPS_URL + "?action=getInformeHtml&rut=" + encodeURIComponent(inf.rut||"")
+        + "&nombre=" + encodeURIComponent(inf.nombre||"") + "&t=" + Date.now());
+      if (rr && rr.html) { htmlGuardado = rr.html; inf.html = rr.html; }
+    } catch(e) { }
+  }
   if (htmlGuardado){
     var wd = window.open("", "_blank");
     if (!wd){ alert("Habilita las ventanas emergentes para descargar el informe."); return; }
@@ -3081,6 +3088,7 @@ function renderTarjetasCandidatos(datos){
   datos.forEach(function(d){
     var k = _claveCandidato(d);
     if (!grupos[k]) { grupos[k] = { nombre: d.nombre || "—", rut: d.rut || "", fecha: d.fecha || "", tests: [] }; orden.push(k); }
+    if (!grupos[k].fecha && d.fecha) grupos[k].fecha = d.fecha;
     if (!grupos[k].rut && d.rut) grupos[k].rut = d.rut;
     grupos[k].tests.push(d);
   });
@@ -3117,6 +3125,7 @@ function renderTarjetasCandidatos(datos){
       + "<div style='min-width:0;flex:1;'>"
       + "<div style='font-size:14.5px;font-weight:600;color:var(--ink);'>" + g.nombre + "</div>"
       + "<div style='font-size:12px;color:var(--muted);margin-top:1px;'>" + (g.rut || "sin RUT") + (cargo ? " · " + cargo : "") + "</div>"
+      + (g.fecha ? "<div style='font-size:11.5px;color:#8a95a0;margin-top:2px;'>Última evaluación: " + g.fecha + "</div>" : "")
       + "<div style='display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;'>" + chips + "</div>"
       + "</div>"
       + "<div style='text-align:right;flex-shrink:0;'>"
@@ -3428,7 +3437,10 @@ async function cargarHistorial() {
     var lista = (d && Array.isArray(d.envios)) ? d.envios : [];
     // Cada evaluador ve solo lo suyo; el admin ve todo
     enviosEntrevista = esAdminActual ? lista : lista.filter(function(e){
-      return String(e.gestionadoPor || "").trim().toLowerCase() === String(usuarioActual || "").trim().toLowerCase();
+      var due = String(e.gestionadoPor || "").trim().toLowerCase();
+      // Sin evaluador asignado (envíos antiguos): visible para todos
+      if (!due) return true;
+      return due === String(usuarioActual || "").trim().toLowerCase();
     });
   } catch(e) { enviosEntrevista = []; }
   renderHistorial();
