@@ -1390,10 +1390,11 @@ tbody tr:hover td { background: #fdf9f6; }
           </div>
         </div>
 
-        <!-- RANKING -->
+        <!-- VENCEN PRONTO -->
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Top candidatos</div>
+            <div class="card-title">Vencen pronto</div>
+            <span id="num-vencen" style="font-size:12px;color:var(--muted);"></span>
           </div>
           <div class="card-body" id="lista-ranking">
             <div style="color:var(--muted);font-size:13px;text-align:center;padding:16px;">Cargando...</div>
@@ -1408,7 +1409,7 @@ tbody tr:hover td { background: #fdf9f6; }
           <div class="card-body">
             <div class="tasa-wrap">
               <div class="tasa-num" id="tasa-pct">—</div>
-              <div class="tasa-desc">de los candidatos invitados<br>completaron su evaluación</div>
+              <div class="tasa-desc"><span id="tasa-periodo" style="font-weight:600;"></span> · de los candidatos invitados<br>completaron su evaluación</div>
             </div>
             <div class="tasa-bar-wrap">
               <div class="tasa-bar" id="tasa-bar" style="width:0%"></div>
@@ -2754,6 +2755,8 @@ function renderPendientes(envios, completados) {
     return false;
   });
 
+  // El más antiguo arriba: es el que más urge perseguir
+  pendientes.sort(function(a, b){ return (_fechaEnvioTs(a) || 0) - (_fechaEnvioTs(b) || 0); });
   document.getElementById("num-pendientes").textContent = pendientes.length + " pendiente(s)";
 
   if (!pendientes.length) {
@@ -2815,13 +2818,73 @@ function renderRanking(datos) {
 }
 
 function renderTasa(completados, enviados) {
-  var totalCompletados = Array.isArray(completados) ? completados.length : 0;
-  var totalEnviados = enviados && enviados.length ? enviados.length : 0;
+  // Solo los últimos 30 días: así se nota si algo dejó de funcionar
+  var corte = Date.now() - (30 * 24 * 60 * 60 * 1000);
+  function dentro(x){ var t = _fechaEnvioTs(x); return !t || t >= corte; }
+  var comp30 = (Array.isArray(completados) ? completados : []).filter(dentro);
+  var env30  = (Array.isArray(enviados) ? enviados : []).filter(dentro);
+  var totalCompletados = comp30.length;
+  var totalEnviados = env30.length;
   var pct = totalEnviados > 0 ? Math.min(100, Math.round(totalCompletados / totalEnviados * 100)) : (totalCompletados > 0 ? 100 : 0);
   document.getElementById("tasa-pct").textContent = pct + "%";
   document.getElementById("tasa-bar").style.width = pct + "%";
   document.getElementById("tasa-completados").textContent = totalCompletados;
   document.getElementById("tasa-enviados").textContent = totalEnviados > 0 ? totalEnviados : totalCompletados;
+  var lblT = document.getElementById("tasa-periodo");
+  if (lblT) lblT.textContent = "últimos 30 días";
+}
+
+// ══════════════════════════════════════
+// VENCEN PRONTO — invitaciones a punto de expirar
+// ══════════════════════════════════════
+function renderVencenPronto(envios, completados){
+  var cont = document.getElementById("lista-ranking");
+  var lbl  = document.getElementById("num-vencen");
+  if (!cont) return;
+
+  var ahora = Date.now();
+  var VALIDEZ_H = 4;   // las entrevistas expiran a las 4 horas
+
+  var lista = (envios || []).filter(function(e){
+    var est = String(e.estado || "").toLowerCase();
+    if (est.indexOf("enviado") < 0) return false;
+    var t = String(e.test || "").toUpperCase();
+    if (t.indexOf("ENTREVISTA") < 0 && t.indexOf("PREFILTRO") < 0) return false;
+
+    var yaLoHizo = (completados || []).some(function(c){
+      return c.nombre && e.nombre && String(c.nombre).toLowerCase() === String(e.nombre).toLowerCase();
+    });
+    if (yaLoHizo) return false;
+
+    var ts = _fechaEnvioTs(e);
+    if (!ts) return false;
+    var horas = (ahora - ts) / 3600000;
+    return horas >= 0 && horas < VALIDEZ_H;      // aún vigente
+  }).map(function(e){
+    var restan = VALIDEZ_H - ((ahora - _fechaEnvioTs(e)) / 3600000);
+    return { e: e, restan: restan };
+  }).sort(function(a,b){ return a.restan - b.restan; });
+
+  if (lbl) lbl.textContent = lista.length ? lista.length + " por vencer" : "";
+
+  if (!lista.length){
+    cont.innerHTML = "<div style='color:var(--muted);font-size:13px;text-align:center;padding:16px;'>Sin invitaciones por vencer</div>";
+    return;
+  }
+
+  cont.innerHTML = lista.slice(0, 5).map(function(x){
+    var h = Math.floor(x.restan);
+    var m = Math.round((x.restan - h) * 60);
+    var txt = h > 0 ? (h + "h " + m + "min") : (m + " min");
+    var urgente = x.restan < 1;
+    return "<div style='display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);'>"
+      + "<div style='min-width:0;'>"
+      + "<div style='font-size:13.5px;font-weight:600;color:var(--ink);'>" + (x.e.nombre || "—") + "</div>"
+      + "<div style='font-size:11.5px;color:var(--muted);'>" + (x.e.cargo || x.e.test || "") + "</div></div>"
+      + "<span style='background:" + (urgente ? "#fce8e6" : "#fdf3dd") + ";color:" + (urgente ? "#b3261e" : "#9a6700")
+      + ";font-size:11.5px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;'>" + txt + "</span>"
+      + "</div>";
+  }).join("");
 }
 // ══ UTILIDAD: buscar fila más reciente de un candidato ══
 function encontrarFilaMasReciente(filas, rutNorm, nomNorm, colRut, colNom, colFecha) {
@@ -2971,7 +3034,7 @@ function pintarTodo() {
   actualizarStats();
   renderRecientes();
   filtrar();
-  renderRanking(todosLosDatos);
+  renderVencenPronto(todosEnvios.concat(enviosEntrevista), todosLosDatos);
   document.getElementById("st-enviados").textContent = todosEnvios.length;
   try { renderPendientes(todosEnvios, todosLosDatos); } catch(x) {}
   try { renderTasa(todosLosDatos, todosEnvios); }      catch(x) {}
