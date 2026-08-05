@@ -432,7 +432,7 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
           </div>
           <div style="display:flex;align-items:center;gap:1rem;">
             <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
-            <div style="font-size:13px;color:var(--text);">Responde con naturalidad, como si conversaras — <strong id="num-preguntas">3</strong> preguntas de hasta <strong>3 minutos</strong> cada una</div>
+            <div style="font-size:13px;color:var(--text);">Responde con naturalidad, como si conversaras — <strong id="num-preguntas">4</strong> preguntas de hasta <strong>3 minutos</strong> cada una</div>
           </div>
         </div>
       </div>
@@ -650,7 +650,13 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
     <div class="gracias-wrap">
       <div class="gracias-icon">✓</div>
       <h2 class="gracias-title">Entrevista completada</h2>
-      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente. Puedes cerrar esta ventana.</p>
+      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente.</p>
+      <div style="background:#f9f6f2;border-radius:10px;padding:18px 20px;margin:18px 0 0;text-align:left;">
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#8a8f96;margin:0 0 10px;font-weight:600;">Qué pasa ahora</p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0 0 10px;">Revisaremos tus respuestas junto al resto de tus antecedentes. <strong>Si tu perfil se ajusta a lo que busca el cargo, te contactaremos para avanzar en el proceso de selección.</strong></p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0;">Si en esta oportunidad no continúas en el proceso, igualmente te enviaremos un correo para avisarte y agradecerte tu participación. En cualquiera de los dos casos vas a tener noticias nuestras.</p>
+      </div>
+      <p style="font-size:13px;color:#8a8f96;margin:16px 0 0;">Ya puedes cerrar esta ventana.</p>
     </div>
   </div>
 </div>
@@ -805,6 +811,7 @@ async function cargarGroqKey() {
 // puedan responder con ejemplos transferibles.
 const PREGUNTAS_PREFILTRO = [
   { id: 'presentacion', nombre: 'Presentación', tipo: 'prefiltro', foco: 'presentacion', pregunta: 'Haz una breve presentación tuya: cuéntanos quién eres y a qué te has dedicado.' },
+  { id: 'experiencia', nombre: 'Experiencia', tipo: 'prefiltro', foco: 'experiencia', pregunta: 'Cuéntanos cuál ha sido tu principal experiencia relacionada con este cargo: dónde fue, qué hacías y por cuánto tiempo.' },
   { id: 'motivacion', nombre: 'Motivación', tipo: 'prefiltro', foco: 'motivacion', pregunta: '¿Por qué postulaste a este cargo y qué te gustaría encontrar en él?' },
   { id: 'con_otros', nombre: 'Trabajo con otros', tipo: 'prefiltro', foco: 'con_otros', pregunta: 'Cuéntanos cómo es trabajar contigo. ¿Qué dirían de ti las personas con las que has trabajado o estudiado?' }
 ];
@@ -1376,11 +1383,12 @@ function generarInforme() {
     return d ? d.analisis : null;
   }
   const pPres = parteDe('presentacion');
+  const pExp  = parteDe('experiencia');
   const pMot  = parteDe('motivacion');
   const pOtros = parteDe('con_otros');
 
   // Semáforo: la señal más baja manda
-  const senales = [pPres, pMot, pOtros].map(function(p){ return p ? p.senal : 'revisar'; });
+  const senales = [pPres, pExp, pMot, pOtros].map(function(p){ return p ? p.senal : 'revisar'; });
   let semaforo, semColor;
   if (senales.indexOf('descartar') !== -1) { semaforo = 'Descartar'; semColor = 'rojo'; }
   else if (senales.indexOf('revisar') !== -1) { semaforo = 'Revisar'; semColor = 'ambar'; }
@@ -1388,7 +1396,7 @@ function generarInforme() {
 
   // Retrato de cómo se expresa, juntando las tres partes
   let expresion = '';
-  [pPres, pMot, pOtros].forEach(function(p){ if (p && p.expresion) expresion += p.expresion + ' '; });
+  [pPres, pExp, pMot, pOtros].forEach(function(p){ if (p && p.expresion) expresion += p.expresion + ' '; });
   if (!expresion.trim()) expresion = 'No se pudo describir automáticamente. Revisa los videos.';
 
   return {
@@ -1399,6 +1407,7 @@ function generarInforme() {
     tipo_informe: 'prefiltro',
     expresion: expresion.trim(),
     presentacion_txt: pPres ? pPres.contenido : '',
+    experiencia_txt: pExp ? pExp.contenido : '',
     motivacion_txt: pMot ? pMot.contenido : '',
     con_otros_txt: pOtros ? pOtros.contenido : '',
     recomendacion: semaforo,
@@ -1436,6 +1445,7 @@ function renderInforme(inf) {
     '<div class="inf-reco inf-' + inf.recomendacion_color + '"><small>Señal</small>' + inf.recomendacion + '</div>' +
     card('Cómo se expresa', inf.expresion) +
     card('Qué contó de sí mismo', inf.presentacion_txt) +
+    card('Experiencia relacionada al cargo', inf.experiencia_txt) +
     card('Motivación', inf.motivacion_txt) +
     card('Cómo se ve trabajando con otros', inf.con_otros_txt) +
     dispo +
@@ -1864,6 +1874,7 @@ async function evaluarDinamicaVenta(texto, competencia) {
 // ══════════════════════════════════════
 const FOCO_PREFILTRO = {
   presentacion: 'El candidato se presenta: quien es, que ha hecho y que sabe hacer. Interesa QUE eligio contar de si mismo y con cuanto detalle concreto (lugares, cargos, fechas, oficios) frente a cuanta generalidad.',
+  experiencia: 'El candidato cuenta su principal experiencia relacionada con el cargo: donde fue, que hacia y cuanto tiempo. Interesa si entrega datos concretos y verificables (lugar, funciones, duracion) o solo generalidades. IMPORTANTE: no tener experiencia previa en el rubro NO es un defecto y no debe describirse en tono negativo; si el candidato no tiene experiencia directa, registra ese hecho de forma neutra y describe la experiencia parecida que si mencione, aunque sea de otro rubro, informal o no remunerada.',
   motivacion: 'El candidato explica por que postulo al cargo y que espera de el. Interesa si menciona razones especificas y ligadas a ese trabajo, o si da razones genericas que servirian para cualquier aviso.',
   con_otros: 'El candidato describe como es trabajar con el y que dirian otros de el. Interesa si se describe con ejemplos y si reconoce algun aspecto propio a mejorar, o si solo entrega cualidades positivas de manual.'
 };
