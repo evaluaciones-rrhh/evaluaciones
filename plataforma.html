@@ -1503,6 +1503,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
           <div><div id="me-nombre" style="font-size:18px;font-weight:700;"></div><div id="me-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
           <div style="display:flex;gap:10px;align-items:center;">
+            <button id="btn-agradecer" onclick="enviarAgradecimiento()" style="display:none;background:#5c6b7a;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">✉ Enviar agradecimiento</button>
             <button id="btn-ver-videos" onclick="abrirVideosEntrevista()" style="display:none;background:#2b3a47;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">▶ Ver videos</button>
             <button onclick="descargarInformePDF()" style="background:#e57a5f;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">⤓ Descargar PDF</button>
             <button onclick="cerrarEntrevista()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
@@ -1584,6 +1585,7 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="ENTREVISTA"> Entrevista Vendedor Retail</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="PREFILTRO"> Entrevista de Prefiltro (3 preguntas)</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional</div>
@@ -1876,6 +1878,7 @@ const TESTS_LINKS = {
   IPV: BASE+"TEST_IPV.html",
   WONDERLIC: BASE+"TEST_WONDERLIC.html",
   ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
+  PREFILTRO:  BASE+"TEST_PREFILTRO.html",
   DISC:       BASE+"TEST_DISC.html",
   OPERA:      BASE+"TEST_OPERA.html",
   TECNICO_GRUERO: BASE+"TEST_TECNICO_GRUERO.html",
@@ -2221,6 +2224,57 @@ function filtrarInformes(){
 var entrevistasData = [];
 
 
+
+// ── CORREO DE AGRADECIMIENTO (descarte) ──
+function candidatoAbierto(){
+  if (prefiltroActualIdx > -1 && prefiltrosData[prefiltroActualIdx]) return prefiltrosData[prefiltroActualIdx];
+  if (entrevistaActualIdx > -1 && entrevistasData[entrevistaActualIdx]) return entrevistasData[entrevistaActualIdx];
+  return null;
+}
+
+async function enviarAgradecimiento(){
+  var c = candidatoAbierto();
+  if (!c) return;
+  if (!c.email) { alert("Este candidato no tiene correo registrado, no se puede enviar."); return; }
+
+  if (!confirm("¿Enviar el correo de agradecimiento a " + c.nombre + " (" + c.email + ")?\n\nEste correo le comunica que no continúa en el proceso. No se puede deshacer.")) return;
+
+  var btn = document.getElementById("btn-agradecer");
+  var txtOriginal = btn.textContent;
+  btn.disabled = true; btn.textContent = "Enviando…";
+
+  try {
+    var resp = await fetch(APPS_URL_ENTREVISTA, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "enviarAgradecimiento",
+        nombre: c.nombre, email: c.email, cargo: c.cargo || "",
+        solicitante: usuarioActual
+      })
+    });
+    var j = await resp.json();
+    if (j && j.ok) {
+      btn.textContent = j.yaEnviado ? "Ya se había enviado" : "Agradecimiento enviado ✓";
+      btn.style.background = "#2e7d32";
+    } else {
+      throw new Error((j && j.error) || "No se pudo enviar");
+    }
+  } catch(e) {
+    alert("No se pudo enviar el correo: " + e.message);
+    btn.disabled = false; btn.textContent = txtOriginal;
+  }
+}
+
+function prepararBotonAgradecer(c){
+  var btn = document.getElementById("btn-agradecer");
+  if (!btn) return;
+  btn.disabled = false;
+  btn.textContent = "✉ Enviar agradecimiento";
+  btn.style.background = "#5c6b7a";
+  btn.style.display = (c && c.email) ? "inline-block" : "none";
+}
+
 // ══════════════════════════════════════
 // REPORTES PREFILTRO (solo admin)
 // ══════════════════════════════════════
@@ -2322,6 +2376,8 @@ function verPrefiltro(i){
 
   var btnVid = document.getElementById("btn-ver-videos");
   if (btnVid) btnVid.style.display = videosEntrevistaActual.length ? "inline-block" : "none";
+  entrevistaActualIdx = -1;
+  prepararBotonAgradecer(p);
   document.getElementById("modal-entrevista").style.display = "flex";
 }
 
@@ -2438,6 +2494,8 @@ function verEntrevista(i){
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
   var btnVid = document.getElementById("btn-ver-videos");
   if (btnVid) btnVid.style.display = videosEntrevistaActual.length ? "inline-block" : "none";
+  prefiltroActualIdx = -1;
+  prepararBotonAgradecer(ent);
   document.getElementById("modal-entrevista").style.display = "flex";
 }
 
@@ -3491,7 +3549,8 @@ async function enviarEvaluacion() {
 
   // La entrevista usa su propio backend y token, se envia aparte
   var enviaEntrevista = testsSeleccionados.indexOf("ENTREVISTA") > -1;
-  var soloTests = testsSeleccionados.filter(function(t){ return t !== "ENTREVISTA"; });
+  var enviaPrefiltro  = testsSeleccionados.indexOf("PREFILTRO") > -1;
+  var soloTests = testsSeleccionados.filter(function(t){ return t !== "ENTREVISTA" && t !== "PREFILTRO"; });
 
   if (!nombre || !email) {
     errEl.textContent="Por favor completa nombre y email.";
@@ -3512,7 +3571,15 @@ async function enviarEvaluacion() {
       await fetch(APPS_URL_ENTREVISTA, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual})
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual})
+      });
+    }
+    // El prefiltro usa el mismo backend, con su propio link y correo
+    if (enviaPrefiltro) {
+      await fetch(APPS_URL_ENTREVISTA, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual})
       });
     }
     // Enviar cada test seleccionado (sin contar la entrevista)
