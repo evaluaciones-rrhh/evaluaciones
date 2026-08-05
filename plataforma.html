@@ -258,34 +258,47 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 .page.activo { display: block; }
 
 /* ══════════ STATS ══════════ */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+/* Bloque único dividido por hairlines, en vez de 4 cajas sueltas */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 22px;
+}
 .stat-card {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 18px 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden;
+  background: var(--white); padding: 15px 18px;
+  position: relative; overflow: hidden; display: flex; flex-direction: column-reverse;
 }
-.stat-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: var(--naranja); opacity: 0;
-}
-.stat-card.accent::before { opacity: 1; }
+.stat-card::before { content: none; }
 .stat-num {
-  font-family: 'Sora', sans-serif; font-size: 36px; font-weight: 700;
-  color: var(--ink); line-height: 1; margin-bottom: 4px;
+  font-family: 'Sora', sans-serif; font-size: 27px; font-weight: 600;
+  color: var(--ink); line-height: 1.05; margin: 6px 0 0;
 }
-.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; }
-.stat-icon { position: absolute; right: 16px; top: 16px; font-size: 22px; opacity: 0.15; }
+.stat-lbl {
+  font-size: 11.5px; color: var(--muted); text-transform: none;
+  letter-spacing: 0; font-weight: 500;
+}
+.stat-icon { display: none; }
+.stat-delta { font-size: 11.5px; font-weight: 600; margin-left: 6px; }
+.stat-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.stat-bar > i { display: block; height: 100%; background: #1d9e75; }
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ══════════ CARDS / SECTIONS ══════════ */
 .card {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  box-shadow: var(--shadow-sm); margin-bottom: 18px;
+  background: var(--white); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: none; margin-bottom: 14px;
 }
 .card-header {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  padding: 13px 17px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
 }
-.card-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 600; color: var(--ink); }
-.card-body { padding: 20px; }
+.card-title { font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.card-body { padding: 15px 17px; }
+
+/* Cabecera de página */
+.page-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; }
+.page-head h1 { font-family:'Sora',sans-serif; font-size:19px; font-weight:600; color:var(--ink); margin:0; }
+.page-head .sub { font-size:12.5px; color:var(--muted); margin-top:3px; }
 
 /* ══════════ TABLA ══════════ */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
@@ -1314,26 +1327,29 @@ tbody tr:hover td { background: #fdf9f6; }
 
     <!-- PANEL -->
     <div class="page activo" id="page-panel">
+      <div class="page-head">
+        <div>
+          <h1>Panel</h1>
+          <div class="sub" id="panel-fecha"></div>
+        </div>
+      </div>
+
       <div class="stats-grid">
-        <div class="stat-card accent">
-          <div class="stat-icon">👥</div>
-          <div class="stat-num" id="st-total">—</div>
+        <div class="stat-card">
           <div class="stat-lbl">Evaluados este mes</div>
+          <div class="stat-num"><span id="st-total">—</span><span class="stat-delta" id="st-delta"></span></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">⏳</div>
-          <div class="stat-num" id="st-hoy" style="color:#9a6700;">—</div>
           <div class="stat-lbl">Pendientes</div>
+          <div class="stat-num"><span id="st-hoy">—</span><span id="pt-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#ef9f27;margin-left:7px;vertical-align:middle;"></span></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">📈</div>
-          <div class="stat-num" id="st-semana">—</div>
           <div class="stat-lbl">Completitud 30 días</div>
+          <div class="stat-num"><span id="st-semana">—</span><div class="stat-bar"><i id="st-bar" style="width:0%"></i></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">📝</div>
-          <div class="stat-num" id="st-enviados" style="color:#185fa5;">—</div>
           <div class="stat-lbl">Por revisar</div>
+          <div class="stat-num"><span id="st-enviados">—</span><span id="rv-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#378add;margin-left:7px;vertical-align:middle;"></span></div>
         </div>
       </div>
 
@@ -2754,7 +2770,7 @@ function renderPendientes(envios, completados) {
       if (completo) return false;
     }
     var t = _fechaEnvioTs(e);
-    return !t || t >= corteP;
+    return !!t && t >= corteP;
   });
 
   // El más antiguo arriba: es el que más urge perseguir
@@ -3073,7 +3089,6 @@ function actualizarStats() {
   var semana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
   semana.setDate(semana.getDate()-7);
 
-  document.getElementById("st-total").textContent = todosLosDatos.length;
 
   // ── Pendientes: invitaciones enviadas que el candidato aún no responde ──
   var _todosEnvios = (todosEnvios || []).concat(enviosEntrevista || []);
@@ -3087,10 +3102,11 @@ function actualizarStats() {
       return c.nombre && e.nombre && quitarTildes(String(c.nombre).toLowerCase().trim()) === quitarTildes(String(e.nombre).toLowerCase().trim());
     })) return false;
     var t = _fechaEnvioTs(e);
-    return !t || t >= corte60;   // solo lo de los últimos 60 días
+    return !!t && t >= corte60;   // solo envíos con fecha válida y recientes
   });
   var nPend = listaPend.length;
   document.getElementById("st-hoy").textContent = nPend;
+  var ptd = document.getElementById("pt-dot"); if (ptd) ptd.style.display = nPend > 0 ? "inline-block" : "none";
 
   // ── Completitud últimos 30 días ──
   var corte30 = Date.now() - (30*24*60*60*1000);
@@ -3098,6 +3114,7 @@ function actualizarStats() {
   var comp30 = todosLosDatos.filter(function(d){ var f=parseFechaCL(d.fecha); return f && f.getTime()>=corte30; });
   var pct30 = env30.length ? Math.round(comp30.length / env30.length * 100) : 0;
   document.getElementById("st-semana").textContent = pct30 + "%";
+  var barEl = document.getElementById("st-bar"); if (barEl) barEl.style.width = pct30 + "%";
 
   // ── Por revisar: completó la evaluación pero aún no tiene informe guardado ──
   function _rutN(s){ return String(s||"").replace(/[\.\s-]/g,"").toLowerCase(); }
@@ -3114,6 +3131,37 @@ function actualizarStats() {
     if (!conInforme[k]) nRevisar++;
   });
   document.getElementById("st-enviados").textContent = nRevisar;
+  var rvd = document.getElementById("rv-dot"); if (rvd) rvd.style.display = nRevisar > 0 ? "inline-block" : "none";
+
+  // Variación respecto al mes anterior
+  (function(){
+    var ahoraD = new Date();
+    var iniMes = new Date(ahoraD.getFullYear(), ahoraD.getMonth(), 1).getTime();
+    var iniMesAnt = new Date(ahoraD.getFullYear(), ahoraD.getMonth()-1, 1).getTime();
+    var esteMes = 0, mesAnt = 0;
+    todosLosDatos.forEach(function(d){
+      var f = parseFechaCL(d.fecha); if (!f) return;
+      var t = f.getTime();
+      if (t >= iniMes) esteMes++;
+      else if (t >= iniMesAnt) mesAnt++;
+    });
+    var stt = document.getElementById("st-total"); if (stt) stt.textContent = esteMes;
+    var dEl = document.getElementById("st-delta"); if (!dEl) return;
+    if (!mesAnt) { dEl.textContent = ""; return; }
+    var pc = Math.round((esteMes - mesAnt) / mesAnt * 100);
+    dEl.textContent = (pc >= 0 ? "+" : "") + pc + "%";
+    dEl.style.color = pc >= 0 ? "#1a7f37" : "#b3261e";
+  })();
+
+  // Fecha y hora de actualización
+  (function(){
+    var fe = document.getElementById("panel-fecha"); if (!fe) return;
+    var n = new Date();
+    var dias = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+    var meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    fe.textContent = dias[n.getDay()] + " " + n.getDate() + " de " + meses[n.getMonth()]
+      + " · actualizado " + String(n.getHours()).padStart(2,"0") + ":" + String(n.getMinutes()).padStart(2,"0");
+  })();
 
   renderActividad(_todosEnvios, todosLosDatos);
   // Gráfico barras — nombres completos
@@ -3196,21 +3244,21 @@ function renderActividad(envios, completados){
   (completados || []).forEach(function(c){
     var f = parseFechaCL(c.fecha);
     if (!f) return;
-    eventos.push({ ts: f.getTime(), icono: "✓", color: "#1a7f37",
+    eventos.push({ ts: f.getTime(), icono: "", color: "#1d9e75",
       txt: (c.nombre || "—") + " completó " + (TEST_NOMBRES_HTML[c.test] || c.test || "una evaluación") });
   });
 
   (envios || []).forEach(function(e){
     var t = _fechaEnvioTs(e);
     if (!t) return;
-    eventos.push({ ts: t, icono: "✉", color: "#5b6b78",
+    eventos.push({ ts: t, icono: "", color: "#b4b2a9",
       txt: "Invitación enviada a " + (e.nombre || "—") });
   });
 
   (informesData || []).forEach(function(i){
     var f = parseFechaCL(i.fecha);
     if (!f) return;
-    eventos.push({ ts: f.getTime(), icono: "📄", color: "#185fa5",
+    eventos.push({ ts: f.getTime(), icono: "", color: "#378add",
       txt: "Informe generado · " + (i.nombre || "—") });
   });
 
@@ -3222,8 +3270,8 @@ function renderActividad(envios, completados){
   }
 
   cont.innerHTML = eventos.slice(0, 6).map(function(ev){
-    return "<div style='display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border);'>"
-      + "<span style='color:" + ev.color + ";font-size:14px;flex-shrink:0;'>" + ev.icono + "</span>"
+    return "<div style='display:flex;align-items:flex-start;gap:9px;padding:7px 0;font-size:12.5px;border-top:1px solid var(--border);'>"
+      + "<span style='width:5px;height:5px;border-radius:50%;background:" + ev.color + ";flex-shrink:0;margin-top:6px;'></span>"
       + "<span style='flex:1;min-width:0;color:var(--ink);'>" + ev.txt + "</span>"
       + "<span style='font-size:11.5px;color:var(--muted);white-space:nowrap;'>" + _haceCuanto(ev.ts) + "</span>"
       + "</div>";
