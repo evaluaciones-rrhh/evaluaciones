@@ -1437,7 +1437,7 @@ tbody tr:hover td { background: #fdf9f6; }
           </div>
         </div>
         <div class="card-body" style="padding-top:4px;">
-          <div id="tarjetas-candidatos"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+          <div id="tarjetas-candidatos" style="background:#f6f7f9;border-radius:10px;padding:10px;"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
         </div>
       </div>
     </div>
@@ -3144,6 +3144,11 @@ function _claveCandidato(d){
   return rut || ("nom:" + String(d.nombre || "").trim().toLowerCase());
 }
 
+var TEST_SIGLA = {
+  IC:"IC", CEAL:"CEAL", "16PF":"16PF", IPV:"IPV", WONDERLIC:"WONDER",
+  DISC:"DISC", OPERA:"OPERA", TECNICO_GRUERO:"GRÚA", TECNICO_BODEGA:"BODEGA"
+};
+
 function _nivelClase(nivel){
   var n = String(nivel || "").toLowerCase();
   if (n.includes("alto") || n.includes("sup") || n.includes("avanza") && !n.includes("no avanza")) return {bg:"#e6f4ea", fg:"#1a7f37"};
@@ -3237,8 +3242,9 @@ function renderTarjetasCandidatos(datos){
 
     var chips = g.tests.map(function(t){
       var c = _nivelClase(t.nivel);
-      return "<span style='background:" + c.bg + ";color:" + c.fg + ";font-size:11.5px;font-weight:600;border-radius:20px;padding:4px 11px;white-space:nowrap;'>"
-        + (TEST_NOMBRES_HTML[t.test] || t.test) + "</span>";
+      return "<span title='" + (TEST_NOMBRES_HTML[t.test] || t.test) + " · " + (t.nivel || "") + "' "
+        + "style='background:" + c.bg + ";color:" + c.fg + ";font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 6px;white-space:nowrap;letter-spacing:.02em;'>"
+        + (TEST_SIGLA[t.test] || t.test) + "</span>";
     }).join("");
 
     var detalle = g.tests.map(function(t){
@@ -3255,20 +3261,20 @@ function renderTarjetasCandidatos(datos){
         + btn + "</div>";
     }).join("");
 
-    return "<div style='border:1px solid var(--border);border-radius:12px;margin-bottom:11px;background:#fff;overflow:hidden;'>"
-      + "<div onclick=\"toggleCandidato('" + k + "')\" style='display:flex;align-items:center;gap:13px;padding:14px 16px;cursor:pointer;'>"
-      + "<div style='width:40px;height:40px;border-radius:50%;background:#2b3a47;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;'>" + iniciales + "</div>"
+    var fechaCorta = String(g.fecha || "").replace(/^(\d{2})-(\d{2})-\d{4}/, "$1-$2").replace(/:\d{2}$/, "");
+    var meta = [ (g.rut || "sin RUT"), cargo, fechaCorta ].filter(Boolean).join(" · ");
+
+    return "<div style='border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:#fff;overflow:hidden;'>"
+      + "<div onclick=\"toggleCandidato('" + k + "')\" style='display:flex;align-items:center;gap:11px;padding:10px 12px;cursor:pointer;'>"
+      + "<div style='width:32px;height:32px;border-radius:50%;background:#e9edf1;color:#2b3a47;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;'>" + iniciales + "</div>"
       + "<div style='min-width:0;flex:1;'>"
-      + "<div style='font-size:14.5px;font-weight:600;color:var(--ink);'>" + g.nombre + "</div>"
-      + "<div style='font-size:12px;color:var(--muted);margin-top:1px;'>" + (g.rut || "sin RUT") + (cargo ? " · " + cargo : "") + "</div>"
-      + (g.fecha ? "<div style='font-size:11.5px;color:#8a95a0;margin-top:2px;'>Última evaluación: " + g.fecha + "</div>" : "")
-      + "<div style='display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;'>" + chips + "</div>"
+      + "<div style='font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.3;'>" + g.nombre + "</div>"
+      + "<div style='font-size:11.5px;color:var(--muted);line-height:1.4;'>" + meta + "</div>"
       + "</div>"
-      + "<div style='text-align:right;flex-shrink:0;'>"
-      + "<div style='font-size:12px;color:var(--muted);'>" + g.tests.length + (g.tests.length === 1 ? " test" : " tests") + "</div>"
-      + "<div style='font-size:16px;color:var(--muted);margin-top:2px;'>" + (abierto ? "▴" : "▾") + "</div>"
-      + "</div></div>"
-      + (abierto ? "<div style='padding:0 16px 12px;'>" + detalle + "</div>" : "")
+      + "<div style='display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:190px;'>" + chips + "</div>"
+      + "<span style='font-size:13px;color:var(--muted);flex-shrink:0;'>" + (abierto ? "▴" : "▾") + "</span>"
+      + "</div>"
+      + (abierto ? "<div style='padding:0 12px 10px;'>" + detalle + "</div>" : "")
       + "</div>";
   }).join("");
 
