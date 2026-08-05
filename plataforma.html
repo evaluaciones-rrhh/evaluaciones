@@ -2153,6 +2153,13 @@ function irA(pag) {
 
 // ── INFORMES GUARDADOS ──
 var informesData = [];
+// La caché anterior no guardaba estadoToken: se descarta una vez
+try {
+  if (!localStorage.getItem("cygnus_cache_v2")) {
+    Object.keys(localStorage).forEach(function(k){ if (k.indexOf("cygnus_cache_") === 0) localStorage.removeItem(k); });
+    localStorage.setItem("cygnus_cache_v2", "1");
+  }
+} catch(e) {}
 var informeAbierto = -1;
 
 
@@ -2760,8 +2767,8 @@ function renderPendientes(envios, completados) {
   var pendientes = envios.filter(function(e) {
     if (String(e.estado || "").toLowerCase().indexOf("error") > -1) return false;
     var et = String(e.estadoToken || "").toLowerCase();
-    if (et) { if (et === "completado") return false; }
-    else {
+    if (et && et !== "pendiente") return false;
+    if (!et) {
       var completo = completados.some(function(c) {
         return c.nombre && e.nombre
           && quitarTildes(String(c.nombre).toLowerCase().trim()) === quitarTildes(String(e.nombre).toLowerCase().trim())
@@ -2869,7 +2876,8 @@ function renderVencenPronto(envios, completados){
     var t = String(e.test || "").toUpperCase();
     if (t.indexOf("ENTREVISTA") < 0 && t.indexOf("PREFILTRO") < 0) return false;
 
-    if (String(e.estadoToken || "").toLowerCase() === "completado") return false;
+    var etv = String(e.estadoToken || "").toLowerCase();
+    if (etv && etv !== "pendiente") return false;
     var yaLoHizo = (completados || []).some(function(c){
       return c.nombre && e.nombre && String(c.nombre).toLowerCase() === String(e.nombre).toLowerCase();
     });
@@ -3097,8 +3105,9 @@ function actualizarStats() {
     if (String(e.estado || "").toLowerCase().indexOf("error") > -1) return false;
     // El estado real está en el token; si no viene, se cruza por nombre
     var et = String(e.estadoToken || "").toLowerCase();
-    if (et) { if (et === "completado") return false; }
-    else if (todosLosDatos.some(function(c){
+    // "completado" ya rindió; "en_uso" lo abrió y lo abandonó. Pendiente = aún sin abrir.
+    if (et && et !== "pendiente") return false;
+    if (!et && todosLosDatos.some(function(c){
       return c.nombre && e.nombre && quitarTildes(String(c.nombre).toLowerCase().trim()) === quitarTildes(String(e.nombre).toLowerCase().trim());
     })) return false;
     var t = _fechaEnvioTs(e);
