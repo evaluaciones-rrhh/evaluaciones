@@ -1274,6 +1274,9 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="nav-item" onclick="irA('entrevistas')">
         <span class="nav-icon">🎥</span> Reportes Entrevistas
       </div>
+      <div class="nav-item" id="nav-prefiltro" onclick="irA('prefiltro')" style="display:none;">
+        <span class="nav-icon">🔎</span> Reportes Prefiltro
+      </div>
       <div class="nav-item" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
@@ -1477,6 +1480,20 @@ tbody tr:hover td { background: #fdf9f6; }
           <button onclick="cargarEntrevistas()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-entrevistas"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-prefiltro">
+      <div class="card">
+        <div style="background:#f7f8fa;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted);">
+          Prefiltros breves de postulantes. El informe es <strong>descriptivo</strong>, no una evaluación psicolaboral.
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text" id="buscar-prefiltro" oninput="filtrarPrefiltros()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+          <span id="prefiltro-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
+          <button onclick="cargarPrefiltros()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+        </div>
+        <div id="lista-prefiltro"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
       </div>
     </div>
 
@@ -1848,6 +1865,9 @@ tbody tr:hover td { background: #fdf9f6; }
 
 <script>
 const APPS_URL = "https://script.google.com/macros/s/AKfycbw1ELpW6hTVPKXn4_0C6rPgTs_YTA7ryoypmS4Sn2o_e1v7Y9ZZGjjDy0KYKIZceAFe9Q/exec";
+// Cuenta madre: única que puede eliminar administradores. No se puede eliminar a sí misma.
+const USUARIO_MADRE = "tarina.franco@cygnus.cl";
+function esMadre(correo){ return String(correo||"").trim().toLowerCase() === USUARIO_MADRE; }
 const BASE = "https://evaluaciones-rrhh.github.io/evaluaciones/";
 const TESTS_LINKS = {
   IC: BASE+"TEST_IC_V1_final.html",
@@ -1972,6 +1992,9 @@ function aplicarVistaRol() {
   // Muestra la columna "Gestionado por" del historial solo al admin
   var thGestor = document.getElementById("th-gestor");
   if (thGestor) thGestor.style.display = esAdminActual ? "" : "none";
+  // Reportes Prefiltro: por ahora solo admin
+  var navPre = document.getElementById("nav-prefiltro");
+  if (navPre) navPre.style.display = esAdminActual ? "" : "none";
 }
 
 async function cargarUsuarios() {
@@ -1988,7 +2011,12 @@ async function cargarUsuarios() {
         + '<div style="flex:1;"><div class="usuario-nom">' + (u.nombre||u.user) + (esAdm?' <span class="usuario-tag">admin</span>':'') + '</div>'
         + '<div class="usuario-meta">' + u.user + (u.correo?' · '+u.correo:'') + '</div></div>'
         + '<button class="usuario-key" onclick="cambiarPass(\'' + u.user + '\')">🔑 Contraseña</button>'
-        + (esAdm ? '' : '<button class="usuario-del" onclick="eliminarUsuario(\'' + u.user + '\')">Eliminar</button>')
+        + (function(){
+            if (esMadre(u.user)) return '';                       // la cuenta madre nunca se elimina
+            if (u.user === usuarioActual) return '';              // nadie se elimina a sí mismo
+            if (esAdm && !esMadre(usuarioActual)) return '';      // solo la madre elimina admins
+            return '<button class="usuario-del" onclick="eliminarUsuario(\'' + u.user + '\', ' + (esAdm?'true':'false') + ')">Eliminar</button>';
+          })()
         + '</div>';
     }).join("");
     cont.innerHTML = html || '<div style="color:var(--muted);padding:16px;">Sin usuarios.</div>';
@@ -2016,8 +2044,16 @@ async function crearUsuario() {
   } catch(e) { msg.textContent = "Error: " + e.message; msg.style.color = "var(--low)"; }
 }
 
-async function eliminarUsuario(user) {
-  if (!confirm("¿Eliminar al usuario \"" + user + "\"? Esta acción no se puede deshacer.")) return;
+async function eliminarUsuario(user, esAdm) {
+  if (esMadre(user)) { alert("La cuenta madre no puede eliminarse."); return; }
+  if (user === usuarioActual) { alert("No puedes eliminar tu propia cuenta."); return; }
+  if (esAdm) {
+    if (!esMadre(usuarioActual)) { alert("Solo la cuenta madre puede eliminar administradores."); return; }
+    var conf = prompt("Vas a eliminar al ADMINISTRADOR \"" + user + "\".\n\nPerderá todo acceso y esta acción no se puede deshacer.\n\nEscribe ELIMINAR para confirmar:");
+    if (String(conf||"").trim().toUpperCase() !== "ELIMINAR") return;
+  } else {
+    if (!confirm("¿Eliminar al usuario \"" + user + "\"? Esta acción no se puede deshacer.")) return;
+  }
   try {
     await fetch(APPS_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ action:"eliminarUsuario", solicitante:usuarioActual, user:user }) });
@@ -2080,12 +2116,12 @@ async function cambiarMiPass() {
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", entrevistas:"Reportes Entrevistas", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", entrevistas:"Reportes Entrevistas", prefiltro:"Reportes Prefiltro", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", competencias:"Marco de competencias", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
   document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  var ordenNav = ["panel","candidatos","reportes","informes","entrevistas","enviar","historial","tests","competencias","usuarios"];
+  var ordenNav = ["panel","candidatos","reportes","informes","entrevistas","prefiltro","enviar","historial","tests","competencias","usuarios"];
   var navIdx = ordenNav.indexOf(pag);
   var navEls = document.querySelectorAll(".nav-item");
   if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
@@ -2096,6 +2132,7 @@ function irA(pag) {
   if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
   if (pag === "informes") cargarInformes();
   if (pag === "entrevistas") cargarEntrevistas();
+  if (pag === "prefiltro") cargarPrefiltros();
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
@@ -2183,12 +2220,118 @@ function filtrarInformes(){
 // ── REPORTES ENTREVISTAS ──
 var entrevistasData = [];
 
+
+// ══════════════════════════════════════
+// REPORTES PREFILTRO (solo admin)
+// ══════════════════════════════════════
+var prefiltrosData = [];
+var prefiltroActualIdx = -1;
+
+// Un registro es prefiltro si su informe lo declara
+function esPrefiltro(ent){
+  var inf = ent.informe || {};
+  if (inf.tipo_informe === "prefiltro") return true;
+  return String(ent.cargo || "").toLowerCase().indexOf("prefiltro") > -1;
+}
+
+async function cargarPrefiltros(){
+  if (!esAdminActual) return;
+  var cont = document.getElementById("lista-prefiltro");
+  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  try {
+    var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
+    var todas = (data && data.entrevistas) ? data.entrevistas : [];
+    prefiltrosData = todas.filter(esPrefiltro);
+    renderPrefiltros(prefiltrosData);
+  } catch(e){
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los prefiltros. Intenta de nuevo.</div>";
+  }
+}
+
+function senalPrefiltro(ent){
+  var s = String((ent.informe || {}).recomendacion || "").toLowerCase();
+  if (s.indexOf("descartar")>-1) return {bg:"#fce8e6", fg:"#b3261e", label:"Descartar"};
+  if (s.indexOf("revisar")>-1)   return {bg:"#fdf3dd", fg:"#9a6700", label:"Revisar"};
+  if (s.indexOf("continuar")>-1) return {bg:"#e6f4ea", fg:"#1a7f37", label:"Continuar"};
+  return {bg:"#eef0f2", fg:"#6b7680", label:"Sin señal"};
+}
+
+function renderPrefiltros(lista){
+  var cont = document.getElementById("lista-prefiltro");
+  var cnt = document.getElementById("prefiltro-count");
+  if (cnt) cnt.textContent = lista.length + " prefiltro(s)";
+  if (!lista.length) {
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay prefiltros registrados.</div>";
+    return;
+  }
+  cont.innerHTML = lista.map(function(p, i){
+    var s = senalPrefiltro(p);
+    var inf = p.informe || {};
+    return "<div onclick='verPrefiltro(" + i + ")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;'>"
+      + "<div style='display:flex;align-items:center;gap:12px;min-width:0;'>"
+      + (inf.foto ? "<img src='" + inf.foto + "' style='width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;'>" : "")
+      + "<div style='min-width:0;'><div style='font-weight:600;font-size:14px;color:var(--ink);'>" + (p.nombre||"—") + "</div>"
+      + "<div style='font-size:12px;color:var(--muted);'>" + (p.cargo||"Prefiltro") + " · " + (p.fecha||"") + "</div></div></div>"
+      + "<span style='background:" + s.bg + ";color:" + s.fg + ";font-size:12px;font-weight:600;border-radius:20px;padding:5px 12px;white-space:nowrap;'>" + s.label + "</span>"
+      + "</div>";
+  }).join("");
+}
+
+function filtrarPrefiltros(){
+  var q = (document.getElementById("buscar-prefiltro").value || "").toLowerCase().trim();
+  if (!q) { renderPrefiltros(prefiltrosData); return; }
+  renderPrefiltros(prefiltrosData.filter(function(p){
+    return ((p.nombre||"") + " " + (p.rut||"") + " " + (p.cargo||"")).toLowerCase().indexOf(q) > -1;
+  }));
+}
+
+function verPrefiltro(i){
+  prefiltroActualIdx = i;
+  var p = prefiltrosData[i]; if (!p) return;
+  var inf = p.informe || {};
+  var s = senalPrefiltro(p);
+
+  function card(label, txt){
+    if (!txt) return "";
+    return "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:10px;'>"
+      + "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;'>" + label + "</div>"
+      + "<div style='font-size:13.5px;line-height:1.6;color:var(--ink);'>" + txt + "</div></div>";
+  }
+
+  document.getElementById("me-nombre").textContent = p.nombre || "—";
+  document.getElementById("me-sub").textContent = (p.cargo || "Prefiltro") + " · " + (p.fecha || "");
+
+  var cuerpo =
+    (inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='" + inf.foto + "' style='width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "")
+    + "<div style='background:" + s.bg + ";color:" + s.fg + ";border-radius:10px;padding:12px;text-align:center;font-weight:700;font-size:15px;margin-bottom:14px;'>"
+    + "<div style='font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:600;'>Señal</div>" + s.label + "</div>"
+    + card("Cómo se expresa", inf.expresion)
+    + card("Qué contó de sí mismo", inf.presentacion_txt)
+    + card("Motivación", inf.motivacion_txt)
+    + card("Cómo se ve trabajando con otros", inf.con_otros_txt)
+    + (inf.disposicion ? card("Disposición durante la sesión", inf.disposicion + (inf.contacto_visual != null ? " · Contacto visual: " + inf.contacto_visual + "%" : "")) : "")
+    + (inf.cambios_pantalla != null ? card("Integridad de la sesión", inf.cambios_pantalla === 0 ? "No salió de la pantalla durante la sesión." : "Salió de la pantalla " + inf.cambios_pantalla + " vez/veces. Conviene revisar el video.") : "")
+    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>";
+
+  document.getElementById("me-cuerpo").innerHTML = cuerpo;
+
+  videosEntrevistaActual = (p.videos || []).map(function(v){
+    var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
+    return { url: url, etiqueta: "" };
+  }).filter(function(v){ return !!v.url; });
+
+  var btnVid = document.getElementById("btn-ver-videos");
+  if (btnVid) btnVid.style.display = videosEntrevistaActual.length ? "inline-block" : "none";
+  document.getElementById("modal-entrevista").style.display = "flex";
+}
+
 async function cargarEntrevistas(){
   var cont = document.getElementById("lista-entrevistas");
   if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
-    entrevistasData = (data && data.entrevistas) ? data.entrevistas : [];
+    var todas = (data && data.entrevistas) ? data.entrevistas : [];
+    entrevistasData = todas.filter(function(e){ return !esPrefiltro(e); });
     renderDashboardEntrevistas(entrevistasData);
     renderEntrevistas(entrevistasData);
   } catch(e){
@@ -2199,9 +2342,9 @@ async function cargarEntrevistas(){
 function recoEntrevista(ent){
   var inf = ent.informe || {};
   var reco = (inf.recomendacion || "").toLowerCase();
-  if (reco.indexOf("no avanzar")>-1) return {bg:"#fce8e6", fg:"#b3261e", accent:"#d9463b", label: inf.recomendacion};
-  if (reco.indexOf("reserva")>-1 || reco.indexOf("revisar")>-1) return {bg:"#fdf3dd", fg:"#9a6700", accent:"#e0a100", label: inf.recomendacion};
-  if (reco.indexOf("avanzar")>-1) return {bg:"#e6f4ea", fg:"#1a7f37", accent:"#2e9e54", label: inf.recomendacion};
+  if (reco.indexOf("no avanzar")>-1 || reco.indexOf("no recomendable")>-1 || reco.indexOf("descartar")>-1) return {bg:"#fce8e6", fg:"#b3261e", accent:"#d9463b", label: inf.recomendacion};
+  if (reco.indexOf("reserva")>-1 || reco.indexOf("revisar")>-1 || reco.indexOf("observacion")>-1 || reco.indexOf("observación")>-1) return {bg:"#fdf3dd", fg:"#9a6700", accent:"#e0a100", label: inf.recomendacion};
+  if (reco.indexOf("avanzar")>-1 || reco.indexOf("recomendable")>-1 || reco.indexOf("continuar")>-1) return {bg:"#e6f4ea", fg:"#1a7f37", accent:"#2e9e54", label: inf.recomendacion};
   return {bg:"#eef0f2", fg:"#6b7680", accent:"#cfc9bd", label:"Sin categoría"};
 }
 
