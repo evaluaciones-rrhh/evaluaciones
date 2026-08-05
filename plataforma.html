@@ -1444,11 +1444,8 @@ tbody tr:hover td { background: #fdf9f6; }
             <input class="filtro-input" type="text" id="filtro-nombre" placeholder="Buscar nombre, RUT o cargo..." oninput="filtrar()">
           </div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Candidato</th><th>RUT</th><th>Cargo</th><th>Test</th><th>Fecha</th><th>Informe</th></tr></thead>
-            <tbody id="tabla-candidatos"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr></tbody>
-          </table>
+        <div class="card-body" style="padding-top:4px;">
+          <div id="tarjetas-candidatos"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
         </div>
       </div>
     </div>
@@ -3052,6 +3049,94 @@ function actualizarStats() {
   if(ctEl) ctEl.innerHTML = "";
 }
 
+
+// ══════════════════════════════════════
+// REPORTE TESTS — tarjetas agrupadas por candidato
+// ══════════════════════════════════════
+var candidatosExpandidos = {};
+
+function _claveCandidato(d){
+  var rut = String(d.rut || "").replace(/[\.\s-]/g, "").toLowerCase();
+  return rut || ("nom:" + String(d.nombre || "").trim().toLowerCase());
+}
+
+function _nivelClase(nivel){
+  var n = String(nivel || "").toLowerCase();
+  if (n.includes("alto") || n.includes("sup") || n.includes("avanza") && !n.includes("no avanza")) return {bg:"#e6f4ea", fg:"#1a7f37"};
+  if (n.includes("bajo") || n.includes("inf") || n.includes("riesgo") || n.includes("no avanza")) return {bg:"#fce8e6", fg:"#b3261e"};
+  if (n.includes("observ") || n.includes("revisar")) return {bg:"#fdf3dd", fg:"#9a6700"};
+  return {bg:"#eef1f4", fg:"#5b6b78"};
+}
+
+function renderTarjetasCandidatos(datos){
+  var cont = document.getElementById("tarjetas-candidatos");
+  if (!cont) return;
+  if (!datos.length){
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Sin evaluaciones registradas</div>";
+    return;
+  }
+
+  // Agrupar por candidato conservando el orden (ya viene por fecha desc)
+  var orden = [], grupos = {};
+  datos.forEach(function(d){
+    var k = _claveCandidato(d);
+    if (!grupos[k]) { grupos[k] = { nombre: d.nombre || "—", rut: d.rut || "", fecha: d.fecha || "", tests: [] }; orden.push(k); }
+    if (!grupos[k].rut && d.rut) grupos[k].rut = d.rut;
+    grupos[k].tests.push(d);
+  });
+
+  var html = orden.map(function(k){
+    var g = grupos[k];
+    var cargo = buscarCargoCandidato(g.rut, g.nombre) || "";
+    var abierto = !!candidatosExpandidos[k];
+    var iniciales = String(g.nombre).trim().split(/\s+/).slice(0,2).map(function(x){ return x.charAt(0).toUpperCase(); }).join("");
+
+    var chips = g.tests.map(function(t){
+      var c = _nivelClase(t.nivel);
+      return "<span style='background:" + c.bg + ";color:" + c.fg + ";font-size:11.5px;font-weight:600;border-radius:20px;padding:4px 11px;white-space:nowrap;'>"
+        + (TEST_NOMBRES_HTML[t.test] || t.test) + "</span>";
+    }).join("");
+
+    var detalle = g.tests.map(function(t){
+      var c = _nivelClase(t.nivel);
+      var dashUrl = DASH_HTML[t.test];
+      var btn = dashUrl
+        ? "<button class='btn btn-ghost btn-sm' onclick=\"event.stopPropagation();abrirDash('" + t.test + "','" + encodeURIComponent(t.rut||"") + "','" + encodeURIComponent(t.nombre||"") + "')\">Ver informe</button>"
+        : "<span style='color:var(--muted);font-size:11px;'>—</span>";
+      return "<div style='display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 4px;border-top:1px solid var(--border);flex-wrap:wrap;'>"
+        + "<div style='min-width:0;flex:1;'>"
+        + "<div style='font-size:13.5px;font-weight:600;color:var(--ink);'>" + (TEST_NOMBRES_HTML[t.test] || t.test) + "</div>"
+        + "<div style='font-size:12px;color:var(--muted);margin-top:2px;'>" + (t.fecha || "") + "</div></div>"
+        + "<span style='background:" + c.bg + ";color:" + c.fg + ";font-size:12px;font-weight:600;border-radius:20px;padding:5px 12px;white-space:nowrap;'>" + (t.nivel || "—") + "</span>"
+        + btn + "</div>";
+    }).join("");
+
+    return "<div style='border:1px solid var(--border);border-radius:12px;margin-bottom:11px;background:#fff;overflow:hidden;'>"
+      + "<div onclick=\"toggleCandidato('" + k + "')\" style='display:flex;align-items:center;gap:13px;padding:14px 16px;cursor:pointer;'>"
+      + "<div style='width:40px;height:40px;border-radius:50%;background:#2b3a47;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;'>" + iniciales + "</div>"
+      + "<div style='min-width:0;flex:1;'>"
+      + "<div style='font-size:14.5px;font-weight:600;color:var(--ink);'>" + g.nombre + "</div>"
+      + "<div style='font-size:12px;color:var(--muted);margin-top:1px;'>" + (g.rut || "sin RUT") + (cargo ? " · " + cargo : "") + "</div>"
+      + "<div style='display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;'>" + chips + "</div>"
+      + "</div>"
+      + "<div style='text-align:right;flex-shrink:0;'>"
+      + "<div style='font-size:12px;color:var(--muted);'>" + g.tests.length + (g.tests.length === 1 ? " test" : " tests") + "</div>"
+      + "<div style='font-size:16px;color:var(--muted);margin-top:2px;'>" + (abierto ? "▴" : "▾") + "</div>"
+      + "</div></div>"
+      + (abierto ? "<div style='padding:0 16px 12px;'>" + detalle + "</div>" : "")
+      + "</div>";
+  }).join("");
+
+  cont.innerHTML = html;
+  var lbl = document.getElementById("count-label");
+  if (lbl) lbl.textContent = orden.length + " candidato(s) · " + datos.length + " evaluación(es)";
+}
+
+function toggleCandidato(k){
+  candidatosExpandidos[k] = !candidatosExpandidos[k];
+  filtrar();
+}
+
 function renderTablaComun(datos, tbodyId, cols) {
   var tbody = document.getElementById(tbodyId);
   if (!datos.length) {
@@ -3301,7 +3386,7 @@ function filtrar() {
     var cargo = quitarTildes(String(buscarCargoCandidato(d.rut, d.nombre) || "").toLowerCase());
     return nom.includes(q) || rut.includes(q) || (qLimpio && rutLimpio.includes(qLimpio)) || cargo.includes(q);
   });
-  document.getElementById("count-label").textContent = filtered.length + " evaluado(s)";
+
   // Ordenar por fecha y hora descendente (más reciente primero)
   var ordenado = filtered.slice().sort(function(a, b) {
     var fa = parseFechaCL(String(a.fecha || ""));
@@ -3311,7 +3396,7 @@ function filtrar() {
     if (!fb) return -1;
     return fb - fa;
   });
-  renderTablaComun(ordenado, "tabla-candidatos", 6);
+  renderTarjetasCandidatos(ordenado);
 }
 
 // HISTORIAL — muestra los envíos de la hoja "Envios" (llegan embebidos en getAllResults)
