@@ -3340,7 +3340,11 @@ async function cargarHistorial() {
   renderHistorial();
   try {
     var d = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEnviosEntrevista&t=" + Date.now());
-    enviosEntrevista = (d && Array.isArray(d.envios)) ? d.envios : [];
+    var lista = (d && Array.isArray(d.envios)) ? d.envios : [];
+    // Cada evaluador ve solo lo suyo; el admin ve todo
+    enviosEntrevista = esAdminActual ? lista : lista.filter(function(e){
+      return String(e.gestionadoPor || "").trim().toLowerCase() === String(usuarioActual || "").trim().toLowerCase();
+    });
   } catch(e) { enviosEntrevista = []; }
   renderHistorial();
 }
