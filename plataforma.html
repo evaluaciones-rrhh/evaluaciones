@@ -2235,9 +2235,15 @@ function candidatoAbierto(){
 async function enviarAgradecimiento(){
   var c = candidatoAbierto();
   if (!c) return;
-  if (!c.email) { alert("Este candidato no tiene correo registrado, no se puede enviar."); return; }
+  var destino = String(c.email || "").trim();
+  if (!destino || destino.indexOf("@") < 0) {
+    destino = prompt("Este candidato no tiene correo guardado (pasa con entrevistas antiguas).\n\nEscribe el correo de " + (c.nombre || "el candidato") + ":", "");
+    if (destino === null) return;
+    destino = destino.trim();
+    if (!destino || destino.indexOf("@") < 0) { alert("El correo no es válido."); return; }
+  }
 
-  if (!confirm("¿Enviar el correo de agradecimiento a " + c.nombre + " (" + c.email + ")?\n\nEste correo le comunica que no continúa en el proceso. No se puede deshacer.")) return;
+  if (!confirm("¿Enviar el correo de agradecimiento a " + c.nombre + " (" + destino + ")?\n\nEste correo le comunica que no continúa en el proceso. No se puede deshacer.")) return;
 
   var btn = document.getElementById("btn-agradecer");
   var txtOriginal = btn.textContent;
@@ -2249,7 +2255,7 @@ async function enviarAgradecimiento(){
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         action: "enviarAgradecimiento",
-        nombre: c.nombre, email: c.email, cargo: c.cargo || "",
+        nombre: c.nombre, email: destino, cargo: c.cargo || "",
         solicitante: usuarioActual
       })
     });
@@ -2272,7 +2278,7 @@ function prepararBotonAgradecer(c){
   btn.disabled = false;
   btn.textContent = "✉ Enviar agradecimiento";
   btn.style.background = "#5c6b7a";
-  btn.style.display = (c && c.email) ? "inline-block" : "none";
+  btn.style.display = c ? "inline-block" : "none";
 }
 
 // ══════════════════════════════════════
