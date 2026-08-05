@@ -1486,11 +1486,30 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
           <div><div id="me-nombre" style="font-size:18px;font-weight:700;"></div><div id="me-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
           <div style="display:flex;gap:10px;align-items:center;">
+            <button id="btn-ver-videos" onclick="abrirVideosEntrevista()" style="display:none;background:#2b3a47;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">▶ Ver videos</button>
             <button onclick="descargarInformePDF()" style="background:#e57a5f;border:none;color:#fff;font-size:12.5px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;">⤓ Descargar PDF</button>
             <button onclick="cerrarEntrevista()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
           </div>
         </div>
         <div id="me-cuerpo" style="padding:24px;max-height:72vh;overflow:auto;background:#f7f8fa;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ REPRODUCTOR DE VIDEOS DE LA ENTREVISTA ═══ -->
+    <div id="modal-videos" style="display:none;position:fixed;inset:0;background:rgba(20,28,35,.75);z-index:10000;align-items:center;justify-content:center;padding:24px 16px;" onclick="if(event.target===this)cerrarVideosEntrevista()">
+      <div style="background:#fff;max-width:860px;width:100%;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.4);overflow:hidden;">
+        <div style="background:var(--ink);color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div id="mv-nombre" style="font-size:16px;font-weight:700;"></div><div style="font-size:12px;opacity:.7;margin-top:2px;">Videos de la entrevista</div></div>
+          <button onclick="cerrarVideosEntrevista()" style="background:none;border:none;color:#fff;font-size:26px;cursor:pointer;line-height:1;">×</button>
+        </div>
+        <div id="mv-tabs" style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 22px;background:#f7f8fa;border-bottom:1px solid var(--border);"></div>
+        <div style="background:#000;">
+          <iframe id="mv-frame" src="" allow="autoplay" allowfullscreen
+                  style="width:100%;height:480px;border:none;display:block;"></iframe>
+        </div>
+        <div style="padding:12px 22px;background:#f7f8fa;font-size:12px;color:var(--muted);">
+          Al terminar una etapa, haz clic en la pestaña siguiente.
+        </div>
       </div>
     </div>
 
@@ -2251,17 +2270,17 @@ function verEntrevista(i){
   var comps = (inf.competencias || []).map(function(c){
     return "<div style='display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eceef0;'><span style='font-size:14px;color:var(--ink);'>"+c.nombre+"</span>"+nivelBadgeEnt(c.nivel)+"</div>";
   }).join("");
-  var videos = (ent.videos || []).map(function(v, k){
+  videosEntrevistaActual = (ent.videos || []).map(function(v){
     var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
-    if (!url) return "";
-    return "<a href='"+url+"' target='_blank' style='display:inline-block;background:#fff;border:1px solid var(--border);border-radius:7px;padding:7px 12px;margin:4px 6px 4px 0;font-size:12.5px;color:var(--ink);text-decoration:none;'>▶ Video "+(k+1)+"</a>";
-  }).join("");
+    var etq = (v && v.competencia) ? String(v.competencia).replace(/_/g," ") : "";
+    return { url: url, etiqueta: etq };
+  }).filter(function(v){ return !!v.url; });
   var foto = inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='"+inf.foto+"' style='width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "";
   var reco = inf.recomendacion ? "<div style='text-align:center;background:"+s.bg+";color:"+s.fg+";border-radius:10px;padding:14px;font-size:18px;font-weight:700;margin-bottom:16px;'>"+inf.recomendacion+"</div>" : "";
   var vision = inf.vision_global ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Visión global</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+inf.vision_global+"</div></div>" : "";
   var exp = inf.experiencia ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Experiencia detectada</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+String(inf.experiencia).replace(/_/g," ")+(inf.presentacion_resumen? " — "+inf.presentacion_resumen : "")+"</div></div>" : "";
   var compBox = comps ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;'>Competencias</div>"+comps+"</div>" : "";
-  var vidBox = videos ? "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;'>Videos de la entrevista</div>"+videos+"</div>" : "";
+  var vidBox = "";
   var integridad = "";
   if (inf.cambios_pantalla != null) {
     var cp = inf.cambios_pantalla;
@@ -2274,7 +2293,53 @@ function verEntrevista(i){
   var cuerpo = foto + reco + vision + exp + compBox + integridad + vidBox;
   if (!cuerpo.trim()) cuerpo = "<div style='text-align:center;color:var(--muted);padding:24px;'>Esta entrevista no tiene informe detallado guardado.</div>";
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
+  var btnVid = document.getElementById("btn-ver-videos");
+  if (btnVid) btnVid.style.display = videosEntrevistaActual.length ? "inline-block" : "none";
   document.getElementById("modal-entrevista").style.display = "flex";
+}
+
+// ═══ REPRODUCTOR DE VIDEOS ═══
+var videosEntrevistaActual = [];
+var ETIQUETAS_VIDEO = ["Presentación", "Etapa 1", "Etapa 2", "Etapa 3", "Etapa 4", "Etapa 5"];
+
+// Convierte un link de Drive en su versión reproducible
+function urlPreviewDrive(url){
+  var m = String(url).match(/\/d\/([a-zA-Z0-9_-]+)/) || String(url).match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  return m ? "https://drive.google.com/file/d/" + m[1] + "/preview" : url;
+}
+
+function abrirVideosEntrevista(){
+  if (!videosEntrevistaActual.length) return;
+  var ent = entrevistasData[entrevistaActualIdx] || {};
+  document.getElementById("mv-nombre").textContent = ent.nombre || "—";
+
+  var tabs = videosEntrevistaActual.map(function(v, k){
+    var nom = v.etiqueta || ETIQUETAS_VIDEO[k] || ("Parte " + (k+1));
+    return "<button id='mv-tab-"+k+"' onclick='verVideoEtapa("+k+")' "+
+      "style='border:1px solid var(--border);background:#fff;color:var(--ink);font-size:13px;font-weight:600;"+
+      "border-radius:7px;padding:8px 14px;cursor:pointer;text-transform:capitalize;'>"+nom+"</button>";
+  }).join("");
+  document.getElementById("mv-tabs").innerHTML = tabs;
+
+  document.getElementById("modal-videos").style.display = "flex";
+  verVideoEtapa(0);
+}
+
+function verVideoEtapa(k){
+  var v = videosEntrevistaActual[k];
+  if (!v) return;
+  document.getElementById("mv-frame").src = urlPreviewDrive(v.url);
+  for (var j = 0; j < videosEntrevistaActual.length; j++) {
+    var b = document.getElementById("mv-tab-" + j);
+    if (!b) continue;
+    if (j === k) { b.style.background = "#e57a5f"; b.style.color = "#fff"; b.style.borderColor = "#e57a5f"; }
+    else { b.style.background = "#fff"; b.style.color = "var(--ink)"; b.style.borderColor = "var(--border)"; }
+  }
+}
+
+function cerrarVideosEntrevista(){
+  document.getElementById("mv-frame").src = "";  // detiene la reproducción
+  document.getElementById("modal-videos").style.display = "none";
 }
 
 function cerrarEntrevista(){
