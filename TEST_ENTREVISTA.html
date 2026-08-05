@@ -821,6 +821,57 @@ async function cargarCompetencias() {
 // ══════════════════════════════════════
 // INICIAR ENTREVISTA
 // ══════════════════════════════════════
+// ══════════════════════════════════════
+// VALIDACIÓN DE RUT (módulo 11)
+// ══════════════════════════════════════
+function limpiarRut(valor) {
+  return String(valor || '').replace(/[^0-9kK]/g, '').toUpperCase();
+}
+
+function formatearRut(valor) {
+  const limpio = limpiarRut(valor);
+  if (limpio.length < 2) return limpio;
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + dv;
+}
+
+function rutEsValido(valor) {
+  const limpio = limpiarRut(valor);
+  if (limpio.length < 8 || limpio.length > 9) return false;
+
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return false;
+
+  const numero = parseInt(cuerpo, 10);
+  if (numero < 1000000) return false;              // RUT demasiado bajo, no existe
+  if (/^(\d)\1+$/.test(cuerpo)) return false;      // 11111111, 22222222, etc.
+
+  // Cálculo del dígito verificador
+  let suma = 0, multiplo = 2;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+
+  return dv === dvEsperado;
+}
+
+// Formatea y valida mientras el candidato escribe
+document.addEventListener('DOMContentLoaded', function() {
+  const campo = document.getElementById('inp-rut');
+  if (!campo) return;
+  campo.addEventListener('blur', function() {
+    if (!campo.value.trim()) { campo.style.borderColor = ''; return; }
+    campo.value = formatearRut(campo.value);
+    campo.style.borderColor = rutEsValido(campo.value) ? '#2e7d32' : '#c0392b';
+  });
+  campo.addEventListener('input', function() { campo.style.borderColor = ''; });
+});
+
 async function iniciarEntrevista() {
   const nombre = document.getElementById('inp-nombre').value.trim();
   const apellido = document.getElementById('inp-apellido').value.trim();
@@ -831,7 +882,14 @@ async function iniciarEntrevista() {
     return;
   }
 
-  candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: rut, email: '' };
+  if (!rutEsValido(rut)) {
+    alert('El RUT ingresado no es válido. Revísalo y vuelve a intentarlo.\n\nEscríbelo con su dígito verificador, por ejemplo: 12.345.678-5');
+    document.getElementById('inp-rut').focus();
+    document.getElementById('inp-rut').style.borderColor = '#c0392b';
+    return;
+  }
+
+  candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: formatearRut(rut), email: '' };
 
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 18 } }, audio: true });
