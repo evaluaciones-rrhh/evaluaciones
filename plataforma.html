@@ -2740,15 +2740,21 @@ async function descargarInforme(inf){
 
 function renderPendientes(envios, completados) {
   var hoy = new Date();
+  var corteP = Date.now() - (60*24*60*60*1000);
   var pendientes = envios.filter(function(e) {
-    if (e.estado === "Enviado" || e.estado === "enviado") {
-      // Verificar si ya completó el test
+    if (String(e.estado || "").toLowerCase().indexOf("error") > -1) return false;
+    var et = String(e.estadoToken || "").toLowerCase();
+    if (et) { if (et === "completado") return false; }
+    else {
       var completo = completados.some(function(c) {
-        return c.nombre && e.nombre && c.nombre.toLowerCase() === e.nombre.toLowerCase() && c.test === e.test;
+        return c.nombre && e.nombre
+          && quitarTildes(String(c.nombre).toLowerCase().trim()) === quitarTildes(String(e.nombre).toLowerCase().trim())
+          && c.test === e.test;
       });
-      return !completo;
+      if (completo) return false;
     }
-    return false;
+    var t = _fechaEnvioTs(e);
+    return !t || t >= corteP;
   });
 
   // El más antiguo arriba: es el que más urge perseguir
@@ -2847,6 +2853,7 @@ function renderVencenPronto(envios, completados){
     var t = String(e.test || "").toUpperCase();
     if (t.indexOf("ENTREVISTA") < 0 && t.indexOf("PREFILTRO") < 0) return false;
 
+    if (String(e.estadoToken || "").toLowerCase() === "completado") return false;
     var yaLoHizo = (completados || []).some(function(c){
       return c.nombre && e.nombre && String(c.nombre).toLowerCase() === String(e.nombre).toLowerCase();
     });
@@ -3070,12 +3077,19 @@ function actualizarStats() {
 
   // ── Pendientes: invitaciones enviadas que el candidato aún no responde ──
   var _todosEnvios = (todosEnvios || []).concat(enviosEntrevista || []);
-  var nPend = _todosEnvios.filter(function(e){
-    if (String(e.estado || "").toLowerCase().indexOf("enviado") < 0) return false;
-    return !todosLosDatos.some(function(c){
-      return c.nombre && e.nombre && String(c.nombre).toLowerCase() === String(e.nombre).toLowerCase();
-    });
-  }).length;
+  var corte60 = Date.now() - (60*24*60*60*1000);
+  var listaPend = _todosEnvios.filter(function(e){
+    if (String(e.estado || "").toLowerCase().indexOf("error") > -1) return false;
+    // El estado real está en el token; si no viene, se cruza por nombre
+    var et = String(e.estadoToken || "").toLowerCase();
+    if (et) { if (et === "completado") return false; }
+    else if (todosLosDatos.some(function(c){
+      return c.nombre && e.nombre && quitarTildes(String(c.nombre).toLowerCase().trim()) === quitarTildes(String(e.nombre).toLowerCase().trim());
+    })) return false;
+    var t = _fechaEnvioTs(e);
+    return !t || t >= corte60;   // solo lo de los últimos 60 días
+  });
+  var nPend = listaPend.length;
   document.getElementById("st-hoy").textContent = nPend;
 
   // ── Completitud últimos 30 días ──
