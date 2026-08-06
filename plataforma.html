@@ -2454,7 +2454,7 @@ function verPrefiltro(i){
 
 async function cargarEntrevistas(silencioso){
   var cont = document.getElementById("lista-entrevistas");
-  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     var todas = (data && data.entrevistas) ? data.entrevistas : [];
