@@ -2113,7 +2113,10 @@ function irA(pag) {
   if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
   document.getElementById("topbar-title").textContent = titulos[pag] || "";
   paginaActual = pag;
-  if (pag === "historial") renderHistorial();
+  if (pag === "historial") {
+    renderHistorial();
+    if (!datosFrescos("historialEnt")) cargarHistorial();
+  }
   if (pag === "usuarios") cargarUsuarios();
   if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
   if (pag === "informes") {
@@ -3883,6 +3886,7 @@ async function cargarHistorial() {
       return due === String(usuarioActual || "").trim().toLowerCase();
     });
   } catch(e) { enviosEntrevista = []; }
+  ultimaCarga["historialEnt"] = Date.now();
   renderHistorial();
 }
 
