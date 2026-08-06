@@ -3435,7 +3435,6 @@ function renderTarjetasCandidatos(datos){
     var g = grupos[k];
     var cargo = buscarCargoCandidato(g.rut, g.nombre) || "";
     var mailK = _emailDeEnvios(g.nombre);
-    candidatosAgrMap[k] = { nombre: g.nombre, rut: g.rut, cargo: cargo, email: mailK, fecha: g.fecha, detalle: detalle, iniciales: iniciales };
     var yaAgr = !!(agradecimientosEnviados && agradecimientosEnviados[String(mailK).toLowerCase() + "|" + String(cargo).toLowerCase()]);
     var iniciales = String(g.nombre).trim().split(/\s+/).slice(0,2).map(function(x){ return x.charAt(0).toUpperCase(); }).join("");
 
@@ -3459,6 +3458,9 @@ function renderTarjetasCandidatos(datos){
         + "<span style='background:" + c.bg + ";color:" + c.fg + ";font-size:12px;font-weight:600;border-radius:20px;padding:5px 12px;white-space:nowrap;'>" + (t.nivel || "—") + "</span>"
         + btn + "</div>";
     }).join("");
+
+    candidatosAgrMap[k] = { nombre: g.nombre, rut: g.rut, cargo: cargo, email: mailK,
+                            fecha: g.fecha, detalle: detalle, iniciales: iniciales };
 
     var fechaCorta = String(g.fecha || "").replace(/^(\d{2})-(\d{2})-\d{4}/, "$1-$2").replace(/:\d{2}$/, "");
     var meta = [ (g.rut || "sin RUT"), cargo, fechaCorta ].filter(Boolean).join(" · ");
