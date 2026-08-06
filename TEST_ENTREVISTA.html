@@ -1238,6 +1238,8 @@ async function siguientePregunta() {
 
   // Análisis con Groq IA (si hay key) o palabras clave como respaldo
   document.getElementById('upload-text').textContent = 'Analizando respuesta con IA...';
+  // Pequeña pausa entre etapas: evita que la IA rechace llamadas consecutivas
+  if (preguntaActual > 0) await new Promise(function(r){ setTimeout(r, 1200); });
   const analisisResultado = await analizarConIA(textoActual.trim(), competencias[preguntaActual]);
 
   transcripciones.push({
@@ -1432,10 +1434,33 @@ function generarInforme() {
     { nombre: 'Manejo de objeciones', nivel: nObjeciones }
   ];
 
+  // La visión global solo junta observaciones reales de la evaluación:
+  // nunca mensajes técnicos ni transcripciones en crudo.
+  function _observacionUtil(t){
+    if (!t || !t.analisis) return '';
+    var o = String(t.analisis.observacion || '').trim();
+    if (!o) return '';
+    var m = String(t.analisis.metodo || '');
+    if (m === 'sin_ia' || m === 'sin_texto') return '';           // no llegó a evaluarse
+    if (o.indexOf('Evaluacion automatica no disponible') > -1) return '';
+    if (o.indexOf('se guardo la transcripcion') > -1) return '';
+    if (o.indexOf('No se pudo evaluar') > -1) return '';
+    return o;
+  }
+
   let vision = '';
   if (pres && pres.analisis.resumen) vision += pres.analisis.resumen + ' ';
-  dins.forEach(function(t){ if (t.analisis.observacion) vision += t.analisis.observacion + ' '; });
-  if (!vision.trim()) vision = 'No se pudo generar una vision global automatica; revisa los videos y transcripciones.';
+  dins.forEach(function(t){
+    var o = _observacionUtil(t);
+    if (o) vision += o + ' ';
+  });
+
+  const etapasSinEvaluar = dins.filter(function(t){ return !_observacionUtil(t); }).length;
+  if (etapasSinEvaluar > 0) {
+    vision += (vision.trim() ? '' : 'Solo se pudo analizar parte de la entrevista. ')
+      + 'Quedaron ' + etapasSinEvaluar + ' etapa(s) sin analizar automáticamente: revisa el video para completar la evaluación.';
+  }
+  if (!vision.trim()) vision = 'No se pudo generar una visión global automática; revisa los videos de la entrevista.';
 
   return {
     candidato: (typeof candidato !== 'undefined' && candidato.nombre) ? candidato.nombre : '',
@@ -1877,12 +1902,29 @@ async function evaluarDinamicaVenta(texto, competencia) {
         'Responde SOLO JSON valido sin texto extra, reemplazando NIVEL por alto, medio o bajo: {"nivel":"NIVEL","observacion":"..."}';
 
       const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 350 };
-      const response = await fetch(GROQ_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
-        body: JSON.stringify(bodyPayload)
-      });
-      if (response.ok) {
+
+      // Hasta 4 intentos: la IA rechaza llamadas muy seguidas y hay que esperar
+      let response = null;
+      for (let intento = 1; intento <= 4; intento++) {
+        response = await fetch(GROQ_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+          body: JSON.stringify(bodyPayload)
+        });
+        if (response.ok) break;
+        // 429 = demasiadas seguidas; 5xx = problema temporal del servidor
+        if (response.status !== 429 && response.status < 500) break;
+        if (intento < 4) {
+          let espera = 1500 * intento;
+          try {
+            const cab = response.headers.get('retry-after');
+            if (cab && !isNaN(parseFloat(cab))) espera = Math.min(parseFloat(cab) * 1000 + 300, 12000);
+          } catch(e) {}
+          await new Promise(function(r){ setTimeout(r, espera); });
+        }
+      }
+
+      if (response && response.ok) {
         const data = await response.json();
         const textoRespuesta = data.choices[0].message.content.trim();
         const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
