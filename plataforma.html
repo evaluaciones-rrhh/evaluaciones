@@ -2287,6 +2287,9 @@ async function enviarAgradecimiento(){
     });
     var j = await resp.json();
     if (j && j.ok) {
+      if (!agradecimientosEnviados) agradecimientosEnviados = {};
+      agradecimientosEnviados[String(destino).trim().toLowerCase() + "|" + String(c.cargo||"").trim().toLowerCase()] = true;
+      btn.disabled = true;
       btn.textContent = j.yaEnviado ? "Ya se había enviado" : "Agradecimiento enviado ✓";
       btn.style.background = "#2e7d32";
     } else {
@@ -2298,13 +2301,48 @@ async function enviarAgradecimiento(){
   }
 }
 
+var agradecimientosEnviados = null;
+
+function _firmaAgr(c){
+  return String(c && c.email || "").trim().toLowerCase() + "|" + String(c && c.cargo || "").trim().toLowerCase();
+}
+
+async function cargarAgradecimientos(){
+  if (agradecimientosEnviados) return agradecimientosEnviados;
+  agradecimientosEnviados = {};
+  try {
+    var d = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getAgradecimientos&t=" + Date.now());
+    (d && d.firmas ? d.firmas : []).forEach(function(f){ agradecimientosEnviados[f] = true; });
+  } catch(e) {}
+  return agradecimientosEnviados;
+}
+
+function _pintarBotonAgr(yaEnviado){
+  var btn = document.getElementById("btn-agradecer");
+  if (!btn) return;
+  if (yaEnviado) {
+    btn.disabled = true;
+    btn.textContent = "Agradecimiento enviado ✓";
+    btn.style.background = "#2e7d32";
+  } else {
+    btn.disabled = false;
+    btn.textContent = "✉ Enviar agradecimiento";
+    btn.style.background = "#5c6b7a";
+  }
+}
+
 function prepararBotonAgradecer(c){
   var btn = document.getElementById("btn-agradecer");
   if (!btn) return;
-  btn.disabled = false;
-  btn.textContent = "✉ Enviar agradecimiento";
-  btn.style.background = "#5c6b7a";
   btn.style.display = c ? "inline-block" : "none";
+  _pintarBotonAgr(false);
+  if (!c) return;
+  cargarAgradecimientos().then(function(mapa){
+    // Puede haber cambiado de ficha mientras cargaba
+    var actual = candidatoAbierto();
+    if (!actual || _firmaAgr(actual) !== _firmaAgr(c)) return;
+    _pintarBotonAgr(!!mapa[_firmaAgr(c)]);
+  });
 }
 
 // ══════════════════════════════════════
