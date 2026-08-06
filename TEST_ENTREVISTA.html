@@ -650,7 +650,13 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
     <div class="gracias-wrap">
       <div class="gracias-icon">✓</div>
       <h2 class="gracias-title">Entrevista completada</h2>
-      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente. Puedes cerrar esta ventana.</p>
+      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente.</p>
+      <div style="background:#f9f6f2;border-radius:10px;padding:18px 20px;margin:18px 0 0;text-align:left;">
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#8a8f96;margin:0 0 10px;font-weight:600;">Qué pasa ahora</p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0 0 10px;">Revisaremos tus respuestas junto al resto de tus antecedentes. <strong>Si tu perfil se ajusta a lo que busca el cargo, te contactaremos para avanzar en el proceso de selección.</strong></p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0;">Si en esta oportunidad no continúas en el proceso, igualmente te enviaremos un correo para avisarte y agradecerte tu participación. En cualquiera de los dos casos vas a tener noticias nuestras.</p>
+      </div>
+      <p style="font-size:13px;color:#8a8f96;margin:16px 0 0;">Ya puedes cerrar esta ventana.</p>
     </div>
   </div>
 </div>
@@ -1399,6 +1405,11 @@ function generarInforme() {
     ap = prom >= 2.5 ? 'alto' : prom >= 1.5 ? 'medio' : 'bajo';
   }
 
+  // ¿Alguna etapa fue breve? Se avisa en el informe
+  const hayBreves = transcripciones.some(function(t){
+    return t.analisis && t.analisis.observacion && t.analisis.observacion.indexOf('Evidencia limitada') > -1;
+  });
+
   let recomendacion, recoColor;
   if (nSinEvaluar > 0) {
     // Con etapas sin evaluar no se puede aplicar la regla: lo decide la evaluadora
@@ -1438,6 +1449,7 @@ function generarInforme() {
     vision_global: vision.trim(),
     recomendacion: recomendacion,
     recomendacion_color: recoColor,
+    nota_evidencia: hayBreves ? 'Algunas respuestas fueron breves. Los niveles reflejan lo observado, pero conviene confirmarlos en la entrevista presencial.' : '',
     disposicion: emo ? (emo.disposicion || null) : null,
     contacto_visual: emo ? (emo.pct_contacto_visual != null ? emo.pct_contacto_visual : null) : null,
     cambios_pantalla: cambiosPantalla
@@ -1467,6 +1479,7 @@ function renderInforme(inf) {
     (inf.foto ? '<div style="text-align:center;margin-bottom:.6rem;"><img src="' + inf.foto + '" alt="Foto del candidato" style="width:96px;height:96px;object-fit:cover;border-radius:50%;border:2px solid var(--border);"/></div>' : '') +
     '<div class="inf-head"><h2>Informe de entrevista</h2><div class="inf-meta">' + inf.candidato + ' · ' + inf.cargo + ' · ' + inf.fecha + '</div></div>' +
     '<div class="inf-reco inf-' + inf.recomendacion_color + '"><small>Recomendación</small>' + inf.recomendacion + '</div>' +
+    (inf.nota_evidencia ? '<div style="background:#f4f6f8;border-left:3px solid #8a95a0;border-radius:6px;padding:10px 14px;margin-bottom:1rem;font-size:12.5px;line-height:1.55;color:#4a5560;">' + inf.nota_evidencia + '</div>' : '') +
     '<div class="inf-card"><div class="inf-label">Visión global del candidato</div><div class="inf-text">' + inf.vision_global + '</div></div>' +
     '<div class="inf-card"><div class="inf-label">Experiencia detectada</div><div class="inf-text">' + (expMap[inf.experiencia] || inf.experiencia) + (inf.presentacion_resumen ? ' — ' + inf.presentacion_resumen : '') + '</div></div>' +
     '<div class="inf-card"><div class="inf-label">Competencias evaluadas en la dinámica</div>' + (comps || '<div class="inf-text">Sin datos.</div>') + '<div class="inf-comp" style="border-top:1px solid var(--border);margin-top:.4rem;padding-top:.7rem;"><span class="inf-comp-nombre" style="font-weight:600;">Aptitud de venta general</span>' + nivelBadge(inf.aptitud_venta) + '</div></div>' +
@@ -1833,19 +1846,21 @@ async function evaluarDinamicaVenta(texto, competencia) {
   };
 
   const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
-  if (!texto || palabras < 10) {
+  if (!texto || palabras < 4) {
     return Object.assign(base, {
-      nivel: 'bajo',
-      observacion: 'El candidato casi no respondio esta parte o fue demasiado breve para evaluar.',
+      nivel: 'no_evaluado',
+      observacion: 'No hubo respuesta audible en esta parte. Revisar el video antes de decidir.',
       metodo: 'sin_texto'
     });
   }
+  const respuestaBreve = palabras < 25;
 
   if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
     try {
       const textoLimitado = texto.substring(0, 700).replace(/[`'"]/g, ' ');
       const prompt = 'Eres evaluador experto en seleccion de vendedores retail, riguroso y honesto. El candidato esta haciendo una dinamica de venta por partes. En ESTA parte se evalua solo: ' + (focoDesc[foco] || focoDesc.orientacion_venta) + ' ' +
         'Transcripcion de lo que dijo el candidato en esta parte: ' + textoLimitado + ' ' +
+        (respuestaBreve ? 'AVISO: esta respuesta es breve. Evaluala por lo que dice, no por su extension. ' : '') +
         'ESTO NO ES una respuesta STAR. Se aceptan candidatos SIN experiencia previa: no exijas tecnica de venta perfecta ni vocabulario comercial. ' +
         'PRIMERO decide si la respuesta corresponde o no a la tarea pedida. ' +
         'Si el candidato hablo de otra cosa, dijo frases sin sentido, hizo una prueba de sonido, se quedo callado, leyo algo ajeno o no intento en absoluto la tarea, entonces nivel es bajo y lo dices claramente en la observacion. NO inventes merito donde no lo hubo. ' +
@@ -1853,7 +1868,11 @@ async function evaluarDinamicaVenta(texto, competencia) {
         'alto = cumple lo esencial de la competencia y ademas lo hace bien (por ejemplo conecta, indaga, argumenta o responde la objecion con calma e intenta cerrar). ' +
         'medio = intenta la tarea y cumple algo, pero de forma incompleta, superficial o sin cerrar. ' +
         'bajo = no intenta la tarea, se va de tema, o lo que dice no tiene relacion con la competencia evaluada. ' +
-        'No uses medio como punto intermedio comodo: si dudas entre bajo y medio, elige bajo. Este informe se usa para decidir contrataciones. ' +
+        'REGLA SOBRE LA EXTENSION: la cantidad de palabras NO es criterio de evaluacion. Evalua UNICAMENTE lo que el candidato demostro, no cuanto hablo. ' +
+        'Una respuesta corta que resuelve la tarea es un buen desempeno: por ejemplo, responder a la objecion de precio con un argumento de valor e intentar cerrar, aunque sea en una sola frase, es nivel alto. ' +
+        'Y una respuesta corta que NO resuelve la tarea es bajo: por ejemplo, ceder de inmediato al descuento o derivar a un jefe sin argumentar. ' +
+        'Hay personas que se expresan de forma breve y directa, y eso no es un defecto en un cargo de atencion: no bajes el nivel por brevedad ni lo subas por hablar mucho. ' +
+        'No uses medio como punto intermedio comodo: si dudas entre bajo y medio, decide por lo que el candidato realmente hizo. Este informe se usa para decidir contrataciones. ' +
         'En observacion escribe 1 o 2 frases para el reclutador, describiendo lo que realmente dijo el candidato. Si la respuesta fue irrelevante o vacia, dilo de forma directa. ' +
         'Responde SOLO JSON valido sin texto extra, reemplazando NIVEL por alto, medio o bajo: {"nivel":"NIVEL","observacion":"..."}';
 
@@ -1873,7 +1892,8 @@ async function evaluarDinamicaVenta(texto, competencia) {
           if (['alto','medio','bajo'].indexOf(nivelLimpio) === -1) nivelLimpio = 'no_evaluado';
           return Object.assign(base, {
             nivel: nivelLimpio,
-            observacion: r.observacion || (nivelLimpio === 'no_evaluado' ? 'No se pudo evaluar esta etapa automaticamente. Revisar el video.' : ''),
+            observacion: (r.observacion || (nivelLimpio === 'no_evaluado' ? 'No se pudo evaluar esta etapa automaticamente. Revisar el video.' : ''))
+              + (respuestaBreve ? ' [Evidencia limitada: respuesta breve, conviene confirmar en entrevista.]' : ''),
             metodo: 'groq_ia'
           });
         }
