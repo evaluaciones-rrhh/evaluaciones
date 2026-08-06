@@ -2283,7 +2283,7 @@ async function enviarAgradecimiento(){
     var j = await resp.json();
     if (j && j.ok) {
       if (!agradecimientosEnviados) agradecimientosEnviados = {};
-      agradecimientosEnviados[String(destino).trim().toLowerCase() + "|" + String(c.cargo||"").trim().toLowerCase()] = true;
+      agradecimientosEnviados[String(destino).trim().toLowerCase()] = true;
       btn.disabled = true;
       btn.textContent = j.yaEnviado ? "Ya se había enviado" : "Agradecimiento enviado ✓";
       btn.style.background = "#2e7d32";
@@ -2299,7 +2299,13 @@ async function enviarAgradecimiento(){
 var agradecimientosEnviados = null;
 
 function _firmaAgr(c){
-  return String(c && c.email || "").trim().toLowerCase() + "|" + String(c && c.cargo || "").trim().toLowerCase();
+  return String(c && c.email || "").trim().toLowerCase();
+}
+
+// ¿A este correo ya se le envió el agradecimiento?
+function yaAgradecido(email){
+  var e = String(email || "").trim().toLowerCase();
+  return !!(e && agradecimientosEnviados && agradecimientosEnviados[e]);
 }
 
 async function cargarAgradecimientos(){
@@ -2307,7 +2313,10 @@ async function cargarAgradecimientos(){
   agradecimientosEnviados = {};
   try {
     var d = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getAgradecimientos&t=" + Date.now());
-    (d && d.firmas ? d.firmas : []).forEach(function(f){ agradecimientosEnviados[f] = true; });
+    (d && d.firmas ? d.firmas : []).forEach(function(f){
+      agradecimientosEnviados[f] = true;                       // correo|cargo (compatibilidad)
+      agradecimientosEnviados[String(f).split("|")[0]] = true; // solo correo
+    });
   } catch(e) {}
   return agradecimientosEnviados;
 }
@@ -2337,7 +2346,7 @@ function prepararBotonAgradecer(c){
     // Puede haber cambiado de ficha mientras cargaba
     var actual = candidatoAbierto();
     if (!actual || _firmaAgr(actual) !== _firmaAgr(c)) return;
-    _pintarBotonAgr(!!mapa[_firmaAgr(c)]);
+    _pintarBotonAgr(yaAgradecido(c.email));
   });
 }
 
@@ -2670,9 +2679,65 @@ function renderDashboardEntrevistas(lista){
     "</div>";
 }
 
+
+function descargarPrefiltroPDF(){
+  var p = prefiltrosData[prefiltroActualIdx];
+  if (!p) return;
+  var inf = p.informe || {};
+  var s = senalPrefiltro(p);
+
+  function bloque(label, txt){
+    if (!txt) return "";
+    return "<div style='margin-bottom:14px;'>"
+      + "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:4px;'>" + label + "</div>"
+      + "<div style='font-size:13.5px;line-height:1.65;'>" + txt + "</div></div>";
+  }
+
+  var foto = inf.foto
+    ? "<div style='text-align:center;margin-bottom:14px;'><img src='" + inf.foto + "' style='width:90px;height:90px;border-radius:50%;object-fit:cover;border:2px solid #e3e6e2;'></div>"
+    : "";
+
+  var integridad = "";
+  if (inf.cambios_pantalla != null){
+    integridad = "<p style='font-size:12px;color:#555;margin-top:14px;'><strong>Integridad de la sesión:</strong> "
+      + (inf.cambios_pantalla === 0 ? "sin salidas de pantalla." : inf.cambios_pantalla + " salida(s) de pantalla — revisar video.") + "</p>";
+  }
+
+  var html = "<html><head><meta charset='utf-8'><title>Prefiltro " + (p.nombre||"") + "</title></head>"
+    + "<body style='font-family:Arial,Helvetica,sans-serif;color:#1f2a33;max-width:640px;margin:24px auto;padding:0 20px;'>"
+    + "<div style='border-bottom:3px solid #e57a5f;padding-bottom:12px;margin-bottom:20px;'>"
+    + "<div style='font-size:22px;font-weight:800;'>Deneb Consultores</div>"
+    + "<div style='font-size:12px;color:#888;letter-spacing:2px;text-transform:uppercase;'>Prefiltro de postulante</div></div>"
+    + foto
+    + "<h2 style='margin:0 0 4px;font-size:19px;'>" + (p.nombre||"—") + "</h2>"
+    + "<div style='font-size:12.5px;color:#777;margin-bottom:16px;'>"
+    + [(p.rut||""), (p.cargo||""), (p.fecha||"")].filter(Boolean).join(" · ") + "</div>"
+    + "<div style='background:" + s.bg + ";color:" + s.fg + ";border-radius:8px;padding:11px;text-align:center;font-weight:700;font-size:15px;margin-bottom:18px;'>"
+    + "<div style='font-size:10px;letter-spacing:.08em;text-transform:uppercase;opacity:.8;font-weight:600;'>Señal</div>" + s.label + "</div>"
+    + bloque("Cómo se expresa", inf.expresion)
+    + bloque("Qué contó de sí mismo", inf.presentacion_txt)
+    + bloque("Experiencia relacionada al cargo", inf.experiencia_txt)
+    + bloque("Motivación", inf.motivacion_txt)
+    + bloque("Cómo se ve trabajando con otros", inf.con_otros_txt)
+    + (inf.disposicion ? bloque("Disposición durante la sesión", inf.disposicion + (inf.contacto_visual != null ? " · Contacto visual: " + inf.contacto_visual + "%" : "")) : "")
+    + integridad
+    + "<p style='font-size:11px;color:#999;border-top:1px solid #e7e3da;padding-top:12px;margin-top:22px;line-height:1.5;'>"
+    + "Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista. Uso exclusivo del evaluador.</p>"
+    + "</body></html>";
+
+  var w = window.open("", "_blank");
+  if (!w) { alert("El navegador bloqueó la ventana. Permite las ventanas emergentes para descargar el informe."); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 400);
+}
+
 function descargarInformePDF(){
-  if (entrevistaActualIdx == null) return;
+  // Si lo abierto es un prefiltro, se usa su propio formato
+  if (prefiltroActualIdx > -1 && prefiltrosData[prefiltroActualIdx]) { descargarPrefiltroPDF(); return; }
+  if (entrevistaActualIdx == null || entrevistaActualIdx < 0) return;
   var ent = entrevistasData[entrevistaActualIdx];
+  if (!ent) return;
   var inf = ent.informe || {};
   var s = recoEntrevista(ent);
   function nivColor(n){ n=(n||"").toLowerCase(); return n==="alto"?"#1a7f37":n==="medio"?"#9a6700":n==="bajo"?"#b3261e":"#6b7680"; }
@@ -3390,7 +3455,7 @@ function abrirFichaTests(k){
   if (btnAgr) {
     btnAgr.style.display = "inline-block";
     btnAgr.onclick = function(){ agradecerCandidato(k); };
-    var ya = !!(agradecimientosEnviados && agradecimientosEnviados[String(c.email||"").toLowerCase() + "|" + String(c.cargo||"").toLowerCase()]);
+    var ya = yaAgradecido(c.email);
     btnAgr.disabled = ya;
     btnAgr.textContent = ya ? "Agradecimiento enviado ✓" : "✉ Enviar agradecimiento";
     btnAgr.style.background = ya ? "#2e7d32" : "#5c6b7a";
@@ -3425,7 +3490,7 @@ async function agradecerCandidato(k){
     var j = await resp.json();
     if (j && j.ok) {
       if (!agradecimientosEnviados) agradecimientosEnviados = {};
-      agradecimientosEnviados[destino.toLowerCase() + "|" + String(c.cargo||"").trim().toLowerCase()] = true;
+      agradecimientosEnviados[destino.toLowerCase()] = true;
       if (btn) {
         btn.textContent = "✓";
         btn.title = j.yaEnviado ? "El agradecimiento ya se había enviado" : "Agradecimiento enviado";
@@ -3468,7 +3533,7 @@ function renderTarjetasCandidatos(datos){
     var g = grupos[k];
     var cargo = buscarCargoCandidato(g.rut, g.nombre) || "";
     var mailK = _emailPorRut(g.rut) || _emailDeEnvios(g.nombre);
-    var yaAgr = !!(agradecimientosEnviados && agradecimientosEnviados[String(mailK).toLowerCase() + "|" + String(cargo).toLowerCase()]);
+    var yaAgr = yaAgradecido(mailK);
     var iniciales = String(g.nombre).trim().split(/\s+/).slice(0,2).map(function(x){ return x.charAt(0).toUpperCase(); }).join("");
 
     var chips = g.tests.map(function(t){
