@@ -1324,8 +1324,6 @@ tbody tr:hover td { background: #fdf9f6; }
 
     <!-- PANEL -->
     <div class="page activo" id="page-panel">
-      <div class="sub" id="panel-fecha" style="margin:-4px 0 16px;"></div>
-
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-lbl">Evaluados este mes</div>
@@ -1340,8 +1338,8 @@ tbody tr:hover td { background: #fdf9f6; }
           <div class="stat-num"><span id="st-semana">—</span><div class="stat-bar"><i id="st-bar" style="width:0%"></i></div></div>
         </div>
         <div class="stat-card">
-          <div class="stat-lbl">Por revisar</div>
-          <div class="stat-num"><span id="st-enviados">—</span><span id="rv-dot" style="display:none;width:6px;height:6px;border-radius:50%;background:#378add;margin-left:7px;vertical-align:middle;"></span></div>
+          <div class="stat-lbl">Enviadas este mes</div>
+          <div class="stat-num"><span id="st-enviados">—</span></div>
         </div>
       </div>
 
@@ -2884,9 +2882,12 @@ function renderRanking(datos) {
 function renderTasa(completados, enviados) {
   // Solo los últimos 30 días: así se nota si algo dejó de funcionar
   var corte = Date.now() - (30 * 24 * 60 * 60 * 1000);
-  function dentro(x){ var t = _fechaEnvioTs(x); return !t || t >= corte; }
-  var comp30 = (Array.isArray(completados) ? completados : []).filter(dentro);
-  var env30  = (Array.isArray(enviados) ? enviados : []).filter(dentro);
+  var comp30 = (Array.isArray(completados) ? completados : []).filter(function(d){
+    var f = parseFechaCL(d.fecha); return f && f.getTime() >= corte;
+  });
+  var env30 = (Array.isArray(enviados) ? enviados : []).filter(function(x){
+    var t = _fechaEnvioTs(x); return !t || t >= corte;
+  });
   var totalCompletados = comp30.length;
   var totalEnviados = env30.length;
   var pct = totalEnviados > 0 ? Math.min(100, Math.round(totalCompletados / totalEnviados * 100)) : (totalCompletados > 0 ? 100 : 0);
@@ -3161,59 +3162,20 @@ function actualizarStats() {
   document.getElementById("st-hoy").textContent = nPend;
   var ptd = document.getElementById("pt-dot"); if (ptd) ptd.style.display = nPend > 0 ? "inline-block" : "none";
 
-  // ── Completitud últimos 30 días ──
+  // ── Completitud: mismo cálculo que la tarjeta "Tasa de completitud" ──
   var corte30 = Date.now() - (30*24*60*60*1000);
-  var env30 = _todosEnvios.filter(function(e){ var t=_fechaEnvioTs(e); return t && t>=corte30; });
-  var comp30 = todosLosDatos.filter(function(d){ var f=parseFechaCL(d.fecha); return f && f.getTime()>=corte30; });
+  function _dentro30(x){ var t = _fechaEnvioTs(x); return !t || t >= corte30; }
+  var comp30 = (todosLosDatos || []).filter(function(d){ var f = parseFechaCL(d.fecha); return f && f.getTime() >= corte30; });
+  var env30  = (todosEnvios || []).filter(_dentro30);
   var pct30 = env30.length ? Math.round(comp30.length / env30.length * 100) : 0;
   document.getElementById("st-semana").textContent = pct30 + "%";
   var barEl = document.getElementById("st-bar"); if (barEl) barEl.style.width = pct30 + "%";
 
-  // ── Por revisar: completó la evaluación pero aún no tiene informe guardado ──
-  function _rutN(s){ return String(s||"").replace(/[\.\s-]/g,"").toLowerCase(); }
-  var conInforme = {};
-  (informesData || []).forEach(function(i){
-    var k = _rutN(i.rut) || ("nom:" + String(i.nombre||"").trim().toLowerCase());
-    conInforme[k] = true;
-  });
-  var vistos = {}, nRevisar = 0;
-  todosLosDatos.forEach(function(d){
-    var k = _rutN(d.rut) || ("nom:" + String(d.nombre||"").trim().toLowerCase());
-    if (vistos[k]) return;
-    vistos[k] = true;
-    if (!conInforme[k]) nRevisar++;
-  });
-  document.getElementById("st-enviados").textContent = nRevisar;
-  var rvd = document.getElementById("rv-dot"); if (rvd) rvd.style.display = nRevisar > 0 ? "inline-block" : "none";
-
-  // Variación respecto al mes anterior
+  // ── Evaluaciones enviadas este mes ──
   (function(){
-    var ahoraD = new Date();
-    var iniMes = new Date(ahoraD.getFullYear(), ahoraD.getMonth(), 1).getTime();
-    var iniMesAnt = new Date(ahoraD.getFullYear(), ahoraD.getMonth()-1, 1).getTime();
-    var esteMes = 0, mesAnt = 0;
-    todosLosDatos.forEach(function(d){
-      var f = parseFechaCL(d.fecha); if (!f) return;
-      var t = f.getTime();
-      if (t >= iniMes) esteMes++;
-      else if (t >= iniMesAnt) mesAnt++;
-    });
-    var stt = document.getElementById("st-total"); if (stt) stt.textContent = esteMes;
-    var dEl = document.getElementById("st-delta"); if (!dEl) return;
-    if (!mesAnt) { dEl.textContent = ""; return; }
-    var pc = Math.round((esteMes - mesAnt) / mesAnt * 100);
-    dEl.textContent = (pc >= 0 ? "+" : "") + pc + "%";
-    dEl.style.color = pc >= 0 ? "#1a7f37" : "#b3261e";
-  })();
-
-  // Fecha y hora de actualización
-  (function(){
-    var fe = document.getElementById("panel-fecha"); if (!fe) return;
-    var n = new Date();
-    var dias = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
-    var meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-    fe.textContent = dias[n.getDay()] + " " + n.getDate() + " de " + meses[n.getMonth()]
-      + " · actualizado " + String(n.getHours()).padStart(2,"0") + ":" + String(n.getMinutes()).padStart(2,"0");
+    var ini = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+    var n = _todosEnvios.filter(function(e){ var t = _fechaEnvioTs(e); return t && t >= ini; }).length;
+    var el = document.getElementById("st-enviados"); if (el) el.textContent = n;
   })();
 
   renderActividad(_todosEnvios, todosLosDatos);
