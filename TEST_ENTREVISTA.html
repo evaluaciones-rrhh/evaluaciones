@@ -897,6 +897,18 @@ async function iniciarEntrevista() {
 
   candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: formatearRut(rut), email: '' };
 
+  // Aviso si el navegador no transcribe: la entrevista igual se graba, pero conviene Chrome
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    var seguir = confirm(
+      'Tu navegador no permite transcribir automáticamente tus respuestas.\n\n' +
+      'La entrevista se grabará en video igual, pero para que quede completa te recomendamos:\n\n' +
+      '• Usar Google Chrome (en computador o celular Android)\n' +
+      '• En iPhone, abrir el enlace en Chrome\n\n' +
+      '¿Deseas continuar de todas formas?'
+    );
+    if (!seguir) return;
+  }
+
   try {
     stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 18 } }, audio: true });
     entrevistaEnCurso = true;
@@ -1164,18 +1176,31 @@ function mostrarPreview() {
   const puedeRegrabar = regrabacionesUsadas < 1;
   const btnReg = document.getElementById('btn-regrabar');
   if (btnReg) btnReg.style.display = puedeRegrabar ? '' : 'none';
+
+  // ¿Se captó texto de esta respuesta? Si no, avisar y sugerir regrabar
+  var palabrasCaptadas = textoActual.trim() ? textoActual.trim().split(/\s+/).length : 0;
+  var sinAudio = palabrasCaptadas < 3;
+
   const txt = document.getElementById('pv-instruccion');
-  if (txt) txt.textContent = puedeRegrabar
-    ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, pasa automáticamente a la siguiente pregunta.'
-    : 'Revisa tu respuesta. Continúa cuando estés lista o listo (pasa automáticamente si no eliges).';
+  if (txt) {
+    if (sinAudio && puedeRegrabar) {
+      txt.innerHTML = '<span style="color:#c0392b;font-weight:600;">No alcanzamos a captar tu voz en esta respuesta.</span> '
+        + 'Te recomendamos volver a grabarla hablando claro y cerca del micrófono. Si no decides, pasa automáticamente a la siguiente.';
+    } else {
+      txt.textContent = puedeRegrabar
+        ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, pasa automáticamente a la siguiente pregunta.'
+        : 'Revisa tu respuesta. Continúa cuando estés lista o listo (pasa automáticamente si no eliges).';
+    }
+  }
 
   mostrarPantalla('screen-preview');
-  iniciarTimerPreview();
+  // Si no se captó voz y puede regrabar, dar más tiempo para que lea el aviso
+  iniciarTimerPreview(sinAudio && puedeRegrabar ? 60 : 30);
 }
 
-function iniciarTimerPreview() {
+function iniciarTimerPreview(segundos) {
   clearInterval(timerPreview);
-  segundosPreview = 30;
+  segundosPreview = segundos || 30;
   const el = document.getElementById('pv-timer');
   const btnR = document.getElementById('btn-regrabar');
   function pintar(){
@@ -1632,16 +1657,28 @@ function iniciarTranscripcion() {
   };
 
   recognition.onerror = function(e) {
-    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
+    // "no-speech" y "aborted" son normales; el resto se reintenta al reiniciar
+    if (e.error !== 'no-speech' && e.error !== 'aborted') console.log('Speech error:', e.error);
   };
 
   recognition.onend = function() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      try { recognition.start(); } catch(e) {}
+    // Mientras se esté grabando, mantener vivo el reconocimiento pase lo que pase
+    if (mediaRecorder && mediaRecorder.state === 'recording' && recognition) {
+      try { recognition.start(); }
+      catch(e) {
+        // Si falla el reinicio inmediato, esperar un momento y volver a intentar
+        setTimeout(function(){
+          if (mediaRecorder && mediaRecorder.state === 'recording' && recognition) {
+            try { recognition.start(); } catch(e2) {}
+          }
+        }, 400);
+      }
     }
   };
 
-  try { recognition.start(); } catch(e) {}
+  try { recognition.start(); } catch(e) {
+    setTimeout(function(){ try { if (recognition) recognition.start(); } catch(e2) {} }, 500);
+  }
 }
 
 function detenerTranscripcion() {
