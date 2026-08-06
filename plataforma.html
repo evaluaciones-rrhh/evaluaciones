@@ -2138,9 +2138,18 @@ function irA(pag) {
   if (pag === "historial") renderHistorial();
   if (pag === "usuarios") cargarUsuarios();
   if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
-  if (pag === "informes") cargarInformes();
-  if (pag === "entrevistas") cargarEntrevistas();
-  if (pag === "prefiltro") cargarPrefiltros();
+  if (pag === "informes") {
+    if (informesData.length) { renderInformes(informesData); cargarInformes(true); }
+    else cargarInformes();
+  }
+  if (pag === "entrevistas") {
+    if (entrevistasData.length) { renderDashboardEntrevistas(entrevistasData); renderEntrevistas(entrevistasData); cargarEntrevistas(true); }
+    else cargarEntrevistas();
+  }
+  if (pag === "prefiltro") {
+    if (prefiltrosData.length) { renderPrefiltros(prefiltrosData); cargarPrefiltros(true); }
+    else cargarPrefiltros();
+  }
   if (pag === "panel" && !informesData.length) {
     cargarInformes().then(function(){
       try { renderActividad((todosEnvios||[]).concat(enviosEntrevista||[]), todosLosDatos); } catch(x){}
@@ -2163,9 +2172,9 @@ try {
 var informeAbierto = -1;
 
 
-async function cargarInformes(){
+async function cargarInformes(silencioso){
   var cont = document.getElementById("lista-informes");
-  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
     informesData = (data && data.informes) ? data.informes : [];
@@ -2311,10 +2320,10 @@ function esPrefiltro(ent){
   return String(ent.cargo || "").toLowerCase().indexOf("prefiltro") > -1;
 }
 
-async function cargarPrefiltros(){
+async function cargarPrefiltros(silencioso){
   if (!esAdminActual) return;
   var cont = document.getElementById("lista-prefiltro");
-  if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     var todas = (data && data.entrevistas) ? data.entrevistas : [];
@@ -2405,7 +2414,7 @@ function verPrefiltro(i){
   document.getElementById("modal-entrevista").style.display = "flex";
 }
 
-async function cargarEntrevistas(){
+async function cargarEntrevistas(silencioso){
   var cont = document.getElementById("lista-entrevistas");
   if (cont) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
