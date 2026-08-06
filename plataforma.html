@@ -1466,7 +1466,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
           <input type="text" id="buscar-informes" oninput="filtrarInformes()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
           <span id="info-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
-          <button onclick="cargarInformes()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+          <button onclick="ultimaCarga['informes']=0;cargarInformes()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-informes"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
       </div>
@@ -1479,7 +1479,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
           <input type="text" id="buscar-entrevistas" oninput="filtrarEntrevistas()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
           <span id="entrev-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
-          <button onclick="cargarEntrevistas()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+          <button onclick="ultimaCarga['entrevistas']=0;cargarEntrevistas()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-entrevistas"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
       </div>
@@ -1493,7 +1493,7 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
           <input type="text" id="buscar-prefiltro" oninput="filtrarPrefiltros()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
           <span id="prefiltro-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
-          <button onclick="cargarPrefiltros()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+          <button onclick="ultimaCarga['prefiltro']=0;cargarPrefiltros()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-prefiltro"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
       </div>
@@ -2124,16 +2124,22 @@ function irA(pag) {
   if (pag === "usuarios") cargarUsuarios();
   if (pag === "reportes") { var ifr = document.getElementById("iframe-reportes"); if (ifr && !ifr.src) ifr.src = ifr.getAttribute("data-src") + "&_=" + Date.now(); }
   if (pag === "informes") {
-    if (informesData.length) { renderInformes(informesData); cargarInformes(true); }
-    else cargarInformes();
+    if (informesData.length) {
+      renderInformes(informesData);
+      if (!datosFrescos("informes")) cargarInformes(true);
+    } else cargarInformes();
   }
   if (pag === "entrevistas") {
-    if (entrevistasData.length) { renderDashboardEntrevistas(entrevistasData); renderEntrevistas(entrevistasData); cargarEntrevistas(true); }
-    else cargarEntrevistas();
+    if (entrevistasData.length) {
+      renderDashboardEntrevistas(entrevistasData); renderEntrevistas(entrevistasData);
+      if (!datosFrescos("entrevistas")) cargarEntrevistas(true);
+    } else cargarEntrevistas();
   }
   if (pag === "prefiltro") {
-    if (prefiltrosData.length) { renderPrefiltros(prefiltrosData); cargarPrefiltros(true); }
-    else cargarPrefiltros();
+    if (prefiltrosData.length) {
+      renderPrefiltros(prefiltrosData);
+      if (!datosFrescos("prefiltro")) cargarPrefiltros(true);
+    } else cargarPrefiltros();
   }
   if (pag === "panel" && !informesData.length) {
     cargarInformes().then(function(){
@@ -2147,6 +2153,11 @@ function irA(pag) {
 
 // ── INFORMES GUARDADOS ──
 var informesData = [];
+// Evita reconsultar el servidor al cambiar de sección: 3 minutos de vigencia
+var ultimaCarga = {};
+function datosFrescos(clave){
+  return ultimaCarga[clave] && (Date.now() - ultimaCarga[clave]) < 180000;
+}
 // La caché anterior no guardaba estadoToken: se descarta una vez
 try {
   if (!localStorage.getItem("cygnus_cache_v2")) {
@@ -2163,6 +2174,7 @@ async function cargarInformes(silencioso){
   try {
     var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
     informesData = (data && data.informes) ? data.informes : [];
+    ultimaCarga["informes"] = Date.now();
     renderInformes(informesData);
   } catch(e){
     if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los informes. Intenta de nuevo.</div>";
@@ -2351,6 +2363,7 @@ async function cargarPrefiltros(silencioso){
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     var todas = (data && data.entrevistas) ? data.entrevistas : [];
     prefiltrosData = todas.filter(esPrefiltro);
+    ultimaCarga["prefiltro"] = Date.now();
     renderPrefiltros(prefiltrosData);
   } catch(e){
     if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los prefiltros. Intenta de nuevo.</div>";
@@ -2444,6 +2457,7 @@ async function cargarEntrevistas(silencioso){
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     var todas = (data && data.entrevistas) ? data.entrevistas : [];
     entrevistasData = todas.filter(function(e){ return !esPrefiltro(e); });
+    ultimaCarga["entrevistas"] = Date.now();
     renderDashboardEntrevistas(entrevistasData);
     renderEntrevistas(entrevistasData);
   } catch(e){
@@ -3336,7 +3350,7 @@ async function agradecerCandidato(k){
   if (!confirm("¿Enviar el correo de agradecimiento a " + c.nombre + " (" + destino + ")?\n\nEste correo le comunica que no continúa en el proceso. No se puede deshacer.")) return;
 
   var btn = document.getElementById("agr-" + k);
-  if (btn) { btn.disabled = true; btn.textContent = "Enviando…"; }
+  if (btn) { btn.disabled = true; btn.textContent = "…"; }
 
   try {
     var resp = await fetch(APPS_URL_ENTREVISTA, {
@@ -3349,17 +3363,27 @@ async function agradecerCandidato(k){
     if (j && j.ok) {
       if (!agradecimientosEnviados) agradecimientosEnviados = {};
       agradecimientosEnviados[destino.toLowerCase() + "|" + String(c.cargo||"").trim().toLowerCase()] = true;
-      if (btn) { btn.textContent = j.yaEnviado ? "Ya se había enviado" : "Agradecimiento enviado ✓"; btn.style.color = "#2e7d32"; }
+      if (btn) {
+        btn.textContent = "✓";
+        btn.title = j.yaEnviado ? "El agradecimiento ya se había enviado" : "Agradecimiento enviado";
+        btn.style.color = "#2e7d32";
+        btn.style.borderColor = "#bcd9c4";
+        btn.style.background = "#eef7f0";
+      }
     } else { throw new Error((j && j.error) || "No se pudo enviar"); }
   } catch(e) {
     alert("No se pudo enviar el correo: " + e.message);
-    if (btn) { btn.disabled = false; btn.textContent = "✉ Enviar agradecimiento"; }
+    if (btn) { btn.disabled = false; btn.textContent = "✉"; }
   }
 }
 
 function renderTarjetasCandidatos(datos){
   var cont = document.getElementById("tarjetas-candidatos");
   if (!cont) return;
+  // Si aún no sabemos a quién se le envió, lo consultamos y repintamos
+  if (agradecimientosEnviados === null) {
+    cargarAgradecimientos().then(function(){ renderTarjetasCandidatos(datos); });
+  }
   if (!datos.length){
     cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Sin evaluaciones registradas</div>";
     return;
@@ -3379,7 +3403,9 @@ function renderTarjetasCandidatos(datos){
   var html = orden.map(function(k){
     var g = grupos[k];
     var cargo = buscarCargoCandidato(g.rut, g.nombre) || "";
-    candidatosAgrMap[k] = { nombre: g.nombre, rut: g.rut, cargo: cargo, email: _emailDeEnvios(g.nombre) };
+    var mailK = _emailDeEnvios(g.nombre);
+    candidatosAgrMap[k] = { nombre: g.nombre, rut: g.rut, cargo: cargo, email: mailK };
+    var yaAgr = !!(agradecimientosEnviados && agradecimientosEnviados[String(mailK).toLowerCase() + "|" + String(cargo).toLowerCase()]);
     var abierto = !!candidatosExpandidos[k];
     var iniciales = String(g.nombre).trim().split(/\s+/).slice(0,2).map(function(x){ return x.charAt(0).toUpperCase(); }).join("");
 
@@ -3414,13 +3440,13 @@ function renderTarjetasCandidatos(datos){
       + "<div style='font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.3;'>" + g.nombre + "</div>"
       + "<div style='font-size:11.5px;color:var(--muted);line-height:1.4;'>" + meta + "</div>"
       + "</div>"
-      + "<div style='display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:190px;'>" + chips + "</div>"
+      + "<div style='display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:170px;'>" + chips + "</div>"
+      + "<button id='agr-" + k + "' title='" + (yaAgr ? "Agradecimiento ya enviado" : "Enviar correo de agradecimiento") + "' "
+      + "onclick=\"event.stopPropagation();agradecerCandidato('" + k + "')\" "
+      + "style='background:none;border:1px solid var(--border);border-radius:6px;color:#5c6b7a;font-size:13px;line-height:1;padding:5px 8px;cursor:pointer;flex-shrink:0;" + (yaAgr ? "color:#2e7d32;border-color:#bcd9c4;background:#eef7f0;" : "") + "'>" + (yaAgr ? "✓" : "✉") + "</button>"
       + "<span style='font-size:13px;color:var(--muted);flex-shrink:0;'>" + (abierto ? "▴" : "▾") + "</span>"
       + "</div>"
-      + (abierto ? "<div style='padding:0 12px 10px;'>" + detalle
-           + "<div style='display:flex;justify-content:flex-end;padding-top:10px;'>"
-           + "<button id='agr-" + k + "' class='btn btn-ghost btn-sm' onclick=\"event.stopPropagation();agradecerCandidato('" + k + "')\">✉ Enviar agradecimiento</button>"
-           + "</div></div>" : "")
+      + (abierto ? "<div style='padding:0 12px 10px;'>" + detalle + "</div>" : "")
       + "</div>";
   }).join("");
 
