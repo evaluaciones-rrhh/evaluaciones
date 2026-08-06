@@ -3076,6 +3076,26 @@ async function fetchJSON(url, intentos) {
   throw ultimoError || new Error("no se pudo consultar");
 }
 
+
+// Trae entrevistas, prefiltros e informes por adelantado, de a uno,
+// mientras el usuario mira el panel. Silencioso: no molesta si algo falla.
+var precargaHecha = false;
+function precargarSecciones() {
+  if (precargaHecha) return;
+  precargaHecha = true;
+  var pasos = [];
+  if (typeof cargarEntrevistas === "function") pasos.push(function(){ return cargarEntrevistas(true); });
+  if (typeof cargarInformes === "function")    pasos.push(function(){ return cargarInformes(true); });
+  if (esAdminActual && typeof cargarPrefiltros === "function") pasos.push(function(){ return cargarPrefiltros(true); });
+
+  (function siguiente(i){
+    if (i >= pasos.length) return;
+    Promise.resolve().then(pasos[i]).catch(function(){}).then(function(){
+      setTimeout(function(){ siguiente(i + 1); }, 1200);  // espaciados para no saturar
+    });
+  })(0);
+}
+
 async function cargarDatos() {
   // ── 1. Mostrar caché al instante (caché POR USUARIO, nunca el de otro) ──
   try {
@@ -3121,6 +3141,9 @@ async function cargarDatos() {
 
       pintarTodo();   // repintar con datos frescos (aquí aparece lo recién contestado)
     }
+
+    // Precargar el resto en segundo plano: al entrar a cada sección ya estará listo
+    setTimeout(function(){ precargarSecciones(); }, 1500);
 
   } catch(e) {
     console.error("cargarDatos:", e.message);
