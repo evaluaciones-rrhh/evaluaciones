@@ -2173,11 +2173,16 @@ async function cargarInformes(silencioso){
   if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
-    informesData = (data && data.informes) ? data.informes : [];
+    if (!data || !Array.isArray(data.informes)) throw new Error("respuesta incompleta");
+    informesData = data.informes;
     ultimaCarga["informes"] = Date.now();
     renderInformes(informesData);
   } catch(e){
-    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar los informes. Intenta de nuevo.</div>";
+    // Si ya había informes en pantalla, se dejan: es mejor dato viejo que decir que no hay
+    if (informesData.length) { renderInformes(informesData); return; }
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>"
+      + "No se pudo conectar con el servidor.<br><button onclick=\"ultimaCarga['informes']=0;cargarInformes()\" "
+      + "style='margin-top:10px;background:none;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:13px;cursor:pointer;'>Reintentar</button></div>";
   }
 }
 
@@ -2362,8 +2367,8 @@ async function cargarPrefiltros(silencioso){
   if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
-    var todas = (data && data.entrevistas) ? data.entrevistas : [];
-    prefiltrosData = todas.filter(esPrefiltro);
+    if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
+    prefiltrosData = data.entrevistas.filter(esPrefiltro);
     ultimaCarga["prefiltro"] = Date.now();
     renderPrefiltros(prefiltrosData);
   } catch(e){
@@ -2456,7 +2461,8 @@ async function cargarEntrevistas(silencioso){
   if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
   try {
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
-    var todas = (data && data.entrevistas) ? data.entrevistas : [];
+    if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
+    var todas = data.entrevistas;
     entrevistasData = todas.filter(function(e){ return !esPrefiltro(e); });
     ultimaCarga["entrevistas"] = Date.now();
     renderDashboardEntrevistas(entrevistasData);
@@ -2986,15 +2992,24 @@ function encontrarFilaMasReciente(filas, rutNorm, nomNorm, colRut, colNom, colFe
   return candidatas[0];
 }
 
-async function fetchJSON(url) {
-  var resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store", credentials: "omit" });
-  var texto = await resp.text();
-  // Buscar inicio de JSON: puede ser objeto {} o array []
-  var jObj = texto.indexOf("{");
-  var jArr = texto.indexOf("[");
-  var j = (jArr > -1 && (jObj === -1 || jArr < jObj)) ? jArr : jObj;
-  if (j > -1) { try { return JSON.parse(texto.slice(j)); } catch(e) {} }
-  return {};
+async function fetchJSON(url, intentos) {
+  intentos = intentos || 2;
+  var ultimoError;
+  for (var n = 1; n <= intentos; n++) {
+    try {
+      var resp = await fetch(url, { method: "GET", redirect: "follow", cache: "no-store", credentials: "omit" });
+      var texto = await resp.text();
+      var jObj = texto.indexOf("{");
+      var jArr = texto.indexOf("[");
+      var j = (jArr > -1 && (jObj === -1 || jArr < jObj)) ? jArr : jObj;
+      if (j > -1) { return JSON.parse(texto.slice(j)); }
+      throw new Error("respuesta vacía del servidor");
+    } catch(e) {
+      ultimoError = e;
+      if (n < intentos) await new Promise(function(r){ setTimeout(r, 900 * n); });
+    }
+  }
+  throw ultimoError || new Error("no se pudo consultar");
 }
 
 async function cargarDatos() {
@@ -3325,15 +3340,55 @@ function renderActividad(envios, completados){
 // ── Agradecimiento desde Reporte Tests ──
 var candidatosAgrMap = {};
 
+var contactosPorRut = null;
+
+async function cargarContactos(){
+  if (contactosPorRut) return contactosPorRut;
+  contactosPorRut = {};
+  try {
+    var d = await fetchJSON(APPS_URL + "?action=getContactos&t=" + Date.now());
+    (d && d.contactos ? d.contactos : []).forEach(function(c){
+      var r = String(c.rut || "").replace(/[\.\s-]/g, "").toLowerCase();
+      if (r && c.email) contactosPorRut[r] = c.email;
+    });
+  } catch(e) {}
+  return contactosPorRut;
+}
+
+function _emailPorRut(rut){
+  var r = String(rut || "").replace(/[\.\s-]/g, "").toLowerCase();
+  if (!r || !contactosPorRut) return "";
+  return contactosPorRut[r] || "";
+}
+
+function _palabrasNombre(s){
+  return quitarTildes(String(s || "").toLowerCase().trim())
+    .replace(/\s+/g, " ").split(" ").filter(function(p){ return p.length >= 3; });
+}
+
+// Busca el correo cruzando por palabras del nombre: tolera nombres incompletos
+// ("Luis Rojo" vs "Luis Alejandro Rojo Venegas") sin confundir personas distintas.
 function _emailDeEnvios(nombre){
-  var n = quitarTildes(String(nombre || "").toLowerCase().trim());
-  if (!n) return "";
+  var pal = _palabrasNombre(nombre);
+  if (!pal.length) return "";
   var todos = (todosEnvios || []).concat(enviosEntrevista || []);
+
+  var mejor = "", mejorPuntaje = 0, empate = false;
   for (var i = 0; i < todos.length; i++){
-    var en = quitarTildes(String(todos[i].nombre || "").toLowerCase().trim());
-    if (en && en === n && todos[i].email) return String(todos[i].email).trim();
+    var mail = String(todos[i].email || "").trim();
+    if (!mail || mail.indexOf("@") < 0) continue;
+    var pe = _palabrasNombre(todos[i].nombre);
+    if (!pe.length) continue;
+
+    var coinciden = 0;
+    pal.forEach(function(x){ if (pe.indexOf(x) > -1) coinciden++; });
+    if (coinciden < 2) continue;   // con una sola palabra no basta
+
+    if (coinciden > mejorPuntaje) { mejorPuntaje = coinciden; mejor = mail; empate = false; }
+    else if (coinciden === mejorPuntaje && mail.toLowerCase() !== mejor.toLowerCase()) { empate = true; }
   }
-  return "";
+  // Si dos personas distintas empatan, mejor preguntar que arriesgar
+  return empate ? "" : mejor;
 }
 
 
@@ -3412,8 +3467,9 @@ function renderTarjetasCandidatos(datos){
   var cont = document.getElementById("tarjetas-candidatos");
   if (!cont) return;
   // Si aún no sabemos a quién se le envió, lo consultamos y repintamos
-  if (agradecimientosEnviados === null) {
-    cargarAgradecimientos().then(function(){ renderTarjetasCandidatos(datos); });
+  if (agradecimientosEnviados === null || contactosPorRut === null) {
+    Promise.all([cargarAgradecimientos(), cargarContactos()])
+      .then(function(){ renderTarjetasCandidatos(datos); });
   }
   if (!datos.length){
     cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Sin evaluaciones registradas</div>";
@@ -3434,7 +3490,7 @@ function renderTarjetasCandidatos(datos){
   var html = orden.map(function(k){
     var g = grupos[k];
     var cargo = buscarCargoCandidato(g.rut, g.nombre) || "";
-    var mailK = _emailDeEnvios(g.nombre);
+    var mailK = _emailPorRut(g.rut) || _emailDeEnvios(g.nombre);
     var yaAgr = !!(agradecimientosEnviados && agradecimientosEnviados[String(mailK).toLowerCase() + "|" + String(cargo).toLowerCase()]);
     var iniciales = String(g.nombre).trim().split(/\s+/).slice(0,2).map(function(x){ return x.charAt(0).toUpperCase(); }).join("");
 
