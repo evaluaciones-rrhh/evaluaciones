@@ -3171,6 +3171,26 @@ function actualizarStats() {
   document.getElementById("st-semana").textContent = pct30 + "%";
   var barEl = document.getElementById("st-bar"); if (barEl) barEl.style.width = pct30 + "%";
 
+  // ── Evaluados este mes, con variación respecto al mes anterior ──
+  (function(){
+    var hoyD = new Date();
+    var iniMes = new Date(hoyD.getFullYear(), hoyD.getMonth(), 1).getTime();
+    var iniMesAnt = new Date(hoyD.getFullYear(), hoyD.getMonth()-1, 1).getTime();
+    var esteMes = 0, mesAnt = 0;
+    (todosLosDatos || []).forEach(function(d){
+      var f = parseFechaCL(d.fecha); if (!f) return;
+      var t = f.getTime();
+      if (t >= iniMes) esteMes++;
+      else if (t >= iniMesAnt) mesAnt++;
+    });
+    var stt = document.getElementById("st-total"); if (stt) stt.textContent = esteMes;
+    var dEl = document.getElementById("st-delta"); if (!dEl) return;
+    if (!mesAnt) { dEl.textContent = ""; return; }
+    var pc = Math.round((esteMes - mesAnt) / mesAnt * 100);
+    dEl.textContent = (pc >= 0 ? "+" : "") + pc + "%";
+    dEl.style.color = pc >= 0 ? "#1a7f37" : "#b3261e";
+  })();
+
   // ── Evaluaciones enviadas este mes ──
   (function(){
     var ini = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
