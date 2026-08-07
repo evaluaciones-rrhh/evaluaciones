@@ -2500,6 +2500,7 @@ async function cargarEntrevistas(silencioso){
     if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
     var todas = data.entrevistas;
     entrevistasData = todas.filter(function(e){ return !esPrefiltro(e); });
+    entrevistasData.sort(function(a, b){ return _tsEntrevista(b) - _tsEntrevista(a); });
     ultimaCarga["entrevistas"] = Date.now();
     renderDashboardEntrevistas(entrevistasData);
     renderEntrevistas(entrevistasData);
@@ -2546,7 +2547,7 @@ function renderEntrevistas(lista){
         "</div>"+
         "<div style='display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;'>"+
           "<span style='background:"+s.bg+";color:"+s.fg+";font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;'>"+s.label+"</span>"+
-          "<span style='font-size:11px;color:var(--muted);'>"+(ent.fecha||"")+"</span>"+
+          "<span style='font-size:11px;color:var(--muted);'>"+fechaConHora(ent.fecha)+"</span>"+
         "</div>"+
         "<button onclick='event.stopPropagation();verEntrevista("+realIdx+")' title='Ver entrevista' "+
           "style='background:var(--coral,#e57a5f);border:none;color:#fff;font-size:15px;cursor:pointer;border-radius:9px;padding:10px 13px;flex-shrink:0;align-self:center;'>→</button>"+
@@ -3238,6 +3239,24 @@ function pintarTodo() {
   renderHistorial();
 }
 
+
+// Timestamp de una entrevista/prefiltro para ordenar (usa su fecha)
+function _tsEntrevista(e){
+  var f = parseFechaCL(e && e.fecha);
+  return f ? f.getTime() : 0;
+}
+
+// Fecha con hora para mostrar: "04-08-2026, 15:32"
+function fechaConHora(str){
+  var f = parseFechaCL(str);
+  if (!f) return String(str || "");
+  var dd = String(f.getDate()).padStart(2,"0");
+  var mm = String(f.getMonth()+1).padStart(2,"0");
+  var yy = f.getFullYear();
+  var hh = String(f.getHours()).padStart(2,"0");
+  var mi = String(f.getMinutes()).padStart(2,"0");
+  return dd + "-" + mm + "-" + yy + ", " + hh + ":" + mi;
+}
 
 function parseFechaCL(str) {
   // Acepta "21-05-2026", "21/05/2026", "25-05-2026, 10:42:47 a. m.", ISO y Date nativa
