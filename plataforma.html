@@ -1601,9 +1601,14 @@ tbody tr:hover td { background: #fdf9f6; }
 
 <!-- HISTORIAL -->
     <div class="page" id="page-historial">
-      <div class="card">
+      <div style="display:flex;gap:8px;margin-bottom:14px;">
+        <button id="tab-hist-envios" onclick="tabHistorial('envios')" style="background:#2b3a47;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;">Envíos</button>
+        <button id="tab-hist-agr" onclick="tabHistorial('agr')" style="background:#fff;color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;">Agradecimientos</button>
+      </div>
+
+      <div class="card" id="bloque-hist-envios">
         <div class="card-header">
-          <div class="card-title">📋 Historial de envíos</div>
+          <div class="card-title">Historial de envíos</div>
           <div style="display:flex;align-items:center;gap:10px;">
             <input class="filtro-input" id="filtro-historial" placeholder="Buscar por nombre o email..." oninput="filtrarHistorial()" style="max-width:260px;">
           </div>
@@ -1623,6 +1628,26 @@ tbody tr:hover td { background: #fdf9f6; }
             </thead>
             <tbody id="tabla-historial">
               <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="bloque-hist-agr" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">Agradecimientos enviados</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="agr-count" style="font-size:13px;color:var(--muted);"></span>
+            <input class="filtro-input" id="filtro-agr" placeholder="Buscar por nombre o correo..." oninput="renderTablaAgr()" style="max-width:260px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Candidato</th><th>Correo</th><th>Cargo</th><th>Enviado por</th></tr>
+            </thead>
+            <tbody id="tabla-agr">
+              <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -2346,10 +2371,15 @@ function prepararBotonAgradecer(c){
   _pintarBotonAgr(false);
   if (!c) return;
   cargarAgradecimientos().then(function(mapa){
-    // Puede haber cambiado de ficha mientras cargaba
     var actual = candidatoAbierto();
-    if (!actual || _firmaAgr(actual) !== _firmaAgr(c)) return;
-    _pintarBotonAgr(yaAgradecido(c.email));
+    if (!actual) return;
+    // Resolver el correo aunque la ficha no lo traiga directo
+    var mail = String(c.email || "").trim();
+    if (!mail || mail.indexOf("@") < 0) {
+      mail = _emailPorRut(c.rut) || _emailDeEnvios(c.nombre);
+      c.email = mail;
+    }
+    _pintarBotonAgr(yaAgradecido(mail));
   });
 }
 
@@ -3941,6 +3971,75 @@ function buscarRutCandidato(nombre) {
     }
   }
   return "";
+}
+
+
+// ══════════════════════════════════════
+// HISTORIAL: pestaña de agradecimientos
+// ══════════════════════════════════════
+var agradecimientosData = null;
+
+function tabHistorial(cual){
+  var esEnvios = (cual === 'envios');
+  document.getElementById('bloque-hist-envios').style.display = esEnvios ? '' : 'none';
+  document.getElementById('bloque-hist-agr').style.display = esEnvios ? 'none' : '';
+
+  var tE = document.getElementById('tab-hist-envios');
+  var tA = document.getElementById('tab-hist-agr');
+  tE.style.background = esEnvios ? '#2b3a47' : '#fff';
+  tE.style.color = esEnvios ? '#fff' : 'var(--ink)';
+  tE.style.border = esEnvios ? 'none' : '1px solid var(--border)';
+  tA.style.background = esEnvios ? '#fff' : '#2b3a47';
+  tA.style.color = esEnvios ? 'var(--ink)' : '#fff';
+  tA.style.border = esEnvios ? '1px solid var(--border)' : 'none';
+
+  if (!esEnvios && agradecimientosData === null) cargarTablaAgr();
+}
+
+async function cargarTablaAgr(){
+  var tbody = document.getElementById('tabla-agr');
+  tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Cargando…</td></tr>";
+  try {
+    var d = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getAgradecimientosDetalle&t=" + Date.now());
+    agradecimientosData = (d && Array.isArray(d.registros)) ? d.registros : [];
+  } catch(e) {
+    agradecimientosData = [];
+  }
+  // El admin ve todo; cada evaluador solo lo suyo
+  if (!esAdminActual) {
+    var yo = String(usuarioActual || "").trim().toLowerCase();
+    agradecimientosData = agradecimientosData.filter(function(r){
+      return String(r.enviadoPor || "").trim().toLowerCase() === yo;
+    });
+  }
+  renderTablaAgr();
+}
+
+function renderTablaAgr(){
+  var tbody = document.getElementById('tabla-agr');
+  var cnt = document.getElementById('agr-count');
+  var lista = agradecimientosData || [];
+
+  var q = (document.getElementById('filtro-agr').value || "").toLowerCase().trim();
+  if (q) lista = lista.filter(function(r){
+    return ((r.nombre||"") + " " + (r.email||"") + " " + (r.cargo||"")).toLowerCase().indexOf(q) > -1;
+  });
+
+  if (cnt) cnt.textContent = lista.length + " enviado(s)";
+
+  if (!lista.length){
+    tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;padding:32px;color:var(--muted);'>Sin agradecimientos registrados</td></tr>";
+    return;
+  }
+  tbody.innerHTML = lista.map(function(r){
+    return "<tr>"
+      + "<td>" + (r.fecha || "") + "</td>"
+      + "<td>" + (r.nombre || "—") + "</td>"
+      + "<td>" + (r.email || "") + "</td>"
+      + "<td>" + (r.cargo || "") + "</td>"
+      + "<td>" + (r.enviadoPorNombre || r.enviadoPor || "") + "</td>"
+      + "</tr>";
+  }).join("");
 }
 
 function renderHistorial() {
