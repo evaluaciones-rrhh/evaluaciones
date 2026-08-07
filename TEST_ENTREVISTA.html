@@ -1640,7 +1640,7 @@ function iniciarTranscripcion() {
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SpeechRecognition();
-  recognition.lang = 'es-CL';
+  recognition.lang = 'es-419';  // español de Latinoamérica: más compatible que es-CL
   recognition.continuous = true;
   recognition.interimResults = true;
 
@@ -1659,6 +1659,16 @@ function iniciarTranscripcion() {
   recognition.onerror = function(e) {
     // "no-speech" y "aborted" son normales; el resto se reintenta al reiniciar
     if (e.error !== 'no-speech' && e.error !== 'aborted') console.log('Speech error:', e.error);
+    // Si el idioma no está soportado en el dispositivo, probar con otro código de español
+    if (e.error === 'language-not-supported' && recognition) {
+      var alternativos = ['es-ES', 'es-419', 'es-MX', 'es'];
+      var actual = recognition.lang;
+      var idx = alternativos.indexOf(actual);
+      var siguiente = alternativos[idx + 1] || 'es';
+      if (actual !== 'es') {
+        try { recognition.lang = siguiente; } catch(x) {}
+      }
+    }
   };
 
   recognition.onend = function() {
