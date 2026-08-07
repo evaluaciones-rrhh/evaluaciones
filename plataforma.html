@@ -2428,9 +2428,10 @@ function renderPrefiltros(lista){
     return;
   }
   cont.innerHTML = lista.map(function(p, i){
+    var realIdx = prefiltrosData.indexOf(p);
     var s = senalPrefiltro(p);
     var inf = p.informe || {};
-    return "<div onclick='verPrefiltro(" + i + ")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;'>"
+    return "<div onclick='verPrefiltro(" + realIdx + ")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;'>"
       + "<div style='display:flex;align-items:center;gap:12px;min-width:0;'>"
       + (inf.foto ? "<img src='" + inf.foto + "' style='width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;'>" : "")
       + "<div style='min-width:0;'><div style='font-weight:600;font-size:14px;color:var(--ink);'>" + (p.nombre||"—") + "</div>"
@@ -2525,6 +2526,7 @@ function renderEntrevistas(lista){
     return;
   }
   cont.innerHTML = lista.map(function(ent, i){
+    var realIdx = entrevistasData.indexOf(ent);   // posición en la lista completa
     var s = recoEntrevista(ent);
     var inf = ent.informe || {};
     var foto = inf.foto || "";
@@ -2533,7 +2535,7 @@ function renderEntrevistas(lista){
     var avatar = foto
       ? "<div style='width:44px;height:44px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid var(--border);'><img src='"+foto+"' style='width:100%;height:100%;object-fit:cover;' alt='Foto'></div>"
       : "<div style='width:44px;height:44px;border-radius:50%;background:"+s.bg+";color:"+s.fg+";display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;'>"+ini+"</div>";
-    return "<div onclick='verEntrevista("+i+")' "+
+    return "<div onclick='verEntrevista("+realIdx+")' "+
       "onmouseover='this.style.boxShadow=\"0 6px 18px rgba(0,0,0,.09)\";this.style.borderColor=\""+s.accent+"\"' "+
       "onmouseout='this.style.boxShadow=\"none\";this.style.borderColor=\"var(--border)\"' "+
       "style='display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-left:5px solid "+s.accent+";border-radius:12px;padding:13px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s,border-color .15s;'>"+
@@ -2546,7 +2548,7 @@ function renderEntrevistas(lista){
           "<span style='background:"+s.bg+";color:"+s.fg+";font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;'>"+s.label+"</span>"+
           "<span style='font-size:11px;color:var(--muted);'>"+(ent.fecha||"")+"</span>"+
         "</div>"+
-        "<button onclick='event.stopPropagation();verEntrevista("+i+")' title='Ver entrevista' "+
+        "<button onclick='event.stopPropagation();verEntrevista("+realIdx+")' title='Ver entrevista' "+
           "style='background:var(--coral,#e57a5f);border:none;color:#fff;font-size:15px;cursor:pointer;border-radius:9px;padding:10px 13px;flex-shrink:0;align-self:center;'>→</button>"+
       "</div>";
   }).join("");
