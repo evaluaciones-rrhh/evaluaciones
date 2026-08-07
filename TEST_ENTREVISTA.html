@@ -531,6 +531,13 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
 <!-- ══ PANTALLA 3: GRABACIÓN ══ -->
 <div class="screen" id="screen-grabacion">
   <div class="wrap">
+    <div id="recordatorio-pantalla" style="background:#fff4e5;border:1px solid #f0c890;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:12.5px;color:#8a5a00;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:15px;">⚠️</span>
+      <span>No salgas de esta pantalla ni cambies de aplicación mientras grabas, o tu respuesta podría no registrarse.</span>
+    </div>
+    <div id="aviso-salida" style="display:none;position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:#c0392b;color:#fff;border-radius:10px;padding:12px 18px;font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:90%;align-items:center;gap:8px;">
+      Saliste de la pantalla. Tu respuesta pudo no registrarse — te recomendamos volver a grabarla.
+    </div>
     <div class="progress-bar-wrap">
       <div class="progress-labels">
         <span id="prog-label">Pregunta 1 de 5</span>
@@ -719,6 +726,15 @@ let cambiosPantalla = 0;
 let entrevistaEnCurso = false;
 document.addEventListener('visibilitychange', function() {
   if (entrevistaEnCurso && document.hidden) cambiosPantalla++;
+  // Al volver a la pantalla durante una grabación, avisar que la respuesta pudo cortarse
+  if (entrevistaEnCurso && !document.hidden && cambiosPantalla > 0) {
+    var av = document.getElementById('aviso-salida');
+    if (av) {
+      av.style.display = 'flex';
+      clearTimeout(window._avisoTimer);
+      window._avisoTimer = setTimeout(function(){ av.style.display = 'none'; }, 6000);
+    }
+  }
 });
 let timerPreview = null;
 let segundosPreview = 30;
