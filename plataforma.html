@@ -2486,9 +2486,9 @@ function verPrefiltro(i){
 
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
 
-  videosEntrevistaActual = (p.videos || []).map(function(v){
+  videosEntrevistaActual = ((p.videos && p.videos.length ? p.videos : inf.videos) || []).map(function(v){
     var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
-    return { url: url, etiqueta: "" };
+    return { url: url, etiqueta: (v && v.competencia) ? v.competencia : "" };
   }).filter(function(v){ return !!v.url; });
 
   var btnVid = document.getElementById("btn-ver-videos");
@@ -2590,7 +2590,7 @@ function verEntrevista(i){
   var comps = (inf.competencias || []).map(function(c){
     return "<div style='display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #eceef0;'><span style='font-size:14px;color:var(--ink);'>"+c.nombre+"</span>"+nivelBadgeEnt(c.nivel)+"</div>";
   }).join("");
-  videosEntrevistaActual = (ent.videos || []).map(function(v){
+  videosEntrevistaActual = ((ent.videos && ent.videos.length ? ent.videos : inf.videos) || []).map(function(v){
     var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
     var etq = (v && v.competencia) ? String(v.competencia).replace(/_/g," ") : "";
     return { url: url, etiqueta: etq };
