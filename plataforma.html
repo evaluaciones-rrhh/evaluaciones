@@ -2196,6 +2196,11 @@ async function cargarInformes(silencioso){
     var data = await fetchJSON(APPS_URL + "?action=getInformes&solicitante=" + encodeURIComponent(usuarioActual) + "&t=" + Date.now());
     if (!data || !Array.isArray(data.informes)) throw new Error("respuesta incompleta");
     informesData = data.informes;
+    // Ordenar del más reciente al más antiguo por fecha del informe
+    informesData.sort(function(a, b){
+      var fa = parseFechaCL(a && a.fecha); var fb = parseFechaCL(b && b.fecha);
+      return (fb ? fb.getTime() : 0) - (fa ? fa.getTime() : 0);
+    });
     ultimaCarga["informes"] = Date.now();
     renderInformes(informesData);
   } catch(e){
@@ -2237,10 +2242,11 @@ function renderInformes(lista){
     return;
   }
   cont.innerHTML = lista.map(function(inf, i){
+    var realIdx = informesData.indexOf(inf);
     var s = catStyle(inf.categoria);
     var ini = iniciales(inf.nombre);
     var sub = (inf.cargo||"Sin cargo") + (inf.rut ? " · " + inf.rut : "");
-    return "<div onclick='verInforme("+i+")' "+
+    return "<div onclick='verInforme("+realIdx+")' "+
       "onmouseover='this.style.boxShadow=\"0 6px 18px rgba(0,0,0,.09)\";this.style.borderColor=\""+s.accent+"\"' "+
       "onmouseout='this.style.boxShadow=\"none\";this.style.borderColor=\"var(--border)\"' "+
       "style='display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-left:5px solid "+s.accent+";border-radius:12px;padding:13px 16px;margin-bottom:10px;cursor:pointer;transition:box-shadow .15s,border-color .15s;'>"+
@@ -2253,7 +2259,7 @@ function renderInformes(lista){
           "<span style='background:"+s.bg+";color:"+s.fg+";font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap;'>"+s.label+"</span>"+
           "<span style='font-size:11px;color:var(--muted);'>"+(inf.fecha||"")+"</span>"+
         "</div>"+
-        "<button onclick='event.stopPropagation();descargarInforme(informesData["+i+"])' title='Descargar informe' "+
+        "<button onclick='event.stopPropagation();descargarInforme(informesData["+realIdx+"])' title='Descargar informe' "+
           "onmouseover='this.style.opacity=\"0.85\"' onmouseout='this.style.opacity=\"1\"' "+
           "style='background:var(--coral,#e57a5f);border:none;color:#fff;font-size:15px;cursor:pointer;border-radius:9px;padding:10px 13px;flex-shrink:0;align-self:center;'>⬇</button>"+
       "</div>";
