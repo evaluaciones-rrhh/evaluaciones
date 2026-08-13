@@ -1246,9 +1246,11 @@ function construirDashboard(d) {
     texto = (texto||"").trim();
     if (!texto) return "";
     var todas = texto.split(/\n/).map(function(b){return b.trim().replace(/^[-•·\d.)]+\s*/,"");}).filter(Boolean);
-    // Si la IA entregó líneas estructuradas (Cargo | Empresa | Periodo), usar solo esas
-    var estruct = todas.filter(function(b){ return b.indexOf("|") !== -1 && b.length < 160; });
-    var l = estruct.length ? estruct : todas;
+    // Solo las líneas de cargo (formato "Cargo | Empresa | Periodo"), sin los párrafos descriptivos.
+    var estruct = todas.filter(function(b){ return b.indexOf("|") !== -1; });
+    // Si hay líneas con "|", usar SOLO esas (se omiten los párrafos de descripción).
+    // Si no hay ninguna, caer a las líneas que no sean párrafos largos.
+    var l = estruct.length ? estruct : todas.filter(function(b){ return b.length < 90; });
     if (!l.length) return "";
 
     // Separa cada línea en cargo, empresa y periodo
