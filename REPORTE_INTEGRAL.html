@@ -824,6 +824,7 @@ function guardarInformeAuto(htmlReporte){
     var g = function(id){ var el = document.getElementById(id); return el ? (el.value || "") : ""; };
     var nombre = g("d-nombre").trim();
     if (!nombre) return;   // sin nombre no guarda
+    if (!htmlReporte) return;   // solo guarda cuando ya existe el HTML completo del informe
     var solicitante = "";
     try { solicitante = sessionStorage.getItem("cygnus_user") || ""; } catch(e){}
     var tipoActual = (typeof tipoReporteActual !== "undefined" ? tipoReporteActual : "");
