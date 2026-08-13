@@ -1094,7 +1094,7 @@ function construirInforme(d) {
     '@page{margin:14mm 12mm;}'+
     '@media print{body{background:#fff;padding:0;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
     '</style></head><body>'+
-    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
+    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+'<script>if(window.self!==window.top){var b=document.currentScript&&document.currentScript.previousElementSibling;var bp=document.querySelector(".btn-pdf");if(bp)bp.style.display="none";}<\/script>'+
     '<div class="doc">'+
     '<div class="header">'+logoHTML+
     (esCygnus
@@ -1345,7 +1345,7 @@ function construirDashboard(d) {
     '@page{margin:14mm 12mm;}'+
     '@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
     '</style></head><body>'+
-    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+
+    '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+'<script>if(window.self!==window.top){var b=document.currentScript&&document.currentScript.previousElementSibling;var bp=document.querySelector(".btn-pdf");if(bp)bp.style.display="none";}<\/script>'+
     '<div class="dash">'+
     '<div class="dhead">'+logoHTML+'<div style="text-align:right;"><div class="dhead-t">Reporte de Candidato</div><div class="dhead-d">'+(d.fecha||"")+'</div></div></div>'+
     '<div class="dcand">'+
