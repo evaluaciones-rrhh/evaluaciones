@@ -2852,7 +2852,9 @@ function verInforme(i){
     cont.innerHTML = "<iframe id='mi-iframe' style='width:100%;height:70vh;border:none;background:#fff;border-radius:8px;'></iframe>";
     var ifr = document.getElementById("mi-iframe");
     var doc = ifr.contentWindow.document;
-    doc.open(); doc.write(htmlDoc); doc.close();
+    // Ocultar el botón "Descargar PDF" que trae el propio informe (ya hay uno arriba en el modal)
+    var htmlSinBoton = htmlDoc.replace("</head>", "<style>.btn-pdf{display:none !important;}</style></head>");
+    doc.open(); doc.write(htmlSinBoton); doc.close();
   }
 
   var htmlReal = inf.html || inf.dashboardHTML;
