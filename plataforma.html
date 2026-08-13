@@ -1581,7 +1581,7 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="16PF"> Evaluación de Personalidad</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="ENTREVISTA"> Entrevista Vendedor Retail</div>
-                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="PREFILTRO"> Entrevista de Prefiltro (3 preguntas)</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="PREFILTRO"> Entrevista de Prefiltro (4 preguntas)</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional</div>
@@ -1589,6 +1589,17 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="TECNICO_BODEGA"> Prueba Técnica - Operario de Bodega</div>
                 </div>
               </div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:14px;background:#f7f9fb;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
+              <input type="checkbox" id="env-programar-check" onchange="togglePrograma()" style="width:16px;height:16px;cursor:pointer;">
+              Programar envío para más tarde
+            </label>
+            <div id="env-programar-campos" style="display:none;margin-top:12px;">
+              <label style="font-size:12px;color:var(--muted);">FECHA Y HORA DE ENVÍO</label>
+              <input type="datetime-local" id="env-fecha-hora" style="margin-top:4px;">
+              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">Solo aplica a Entrevista Retail y Prefiltro. A la fecha y hora indicada, la invitación se enviará automáticamente.</div>
             </div>
           </div>
           <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
@@ -4287,6 +4298,12 @@ function cerrarModalDuplicado(cancelar) {
   }
 }
 
+function togglePrograma() {
+  var check = document.getElementById("env-programar-check");
+  var campos = document.getElementById("env-programar-campos");
+  campos.style.display = check.checked ? "block" : "none";
+}
+
 async function enviarEvaluacion() {
   var nombre = document.getElementById("env-nombre").value.trim();
   var email  = document.getElementById("env-email").value.trim();
@@ -4294,6 +4311,14 @@ async function enviarEvaluacion() {
   var okEl   = document.getElementById("env-ok");
   var errEl  = document.getElementById("env-err");
   okEl.style.display="none"; errEl.style.display="none";
+
+  // ¿Envío programado?
+  var programar = document.getElementById("env-programar-check") && document.getElementById("env-programar-check").checked;
+  var fechaHora = programar ? document.getElementById("env-fecha-hora").value : "";
+  if (programar && !fechaHora) {
+    errEl.textContent="Selecciona la fecha y hora de envío, o desmarca 'Programar'.";
+    errEl.style.display="block"; return;
+  }
 
   // Recoger tests seleccionados
   var testsSeleccionados = [];
@@ -4320,18 +4345,24 @@ async function enviarEvaluacion() {
   try {
     // La entrevista se envia a su propio backend (genera su token)
     if (enviaEntrevista) {
+      var accionEnt = programar ? "programarEntrevista" : "enviarEntrevista";
+      var bodyEnt = {action:accionEnt, nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual};
+      if (programar) bodyEnt.fechaEnvio = new Date(fechaHora).toISOString();
       await fetch(APPS_URL_ENTREVISTA, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual})
+        body:JSON.stringify(bodyEnt)
       });
     }
     // El prefiltro usa el mismo backend, con su propio link y correo
     if (enviaPrefiltro) {
+      var accionPre = programar ? "programarEntrevista" : "enviarEntrevista";
+      var bodyPre = {action:accionPre, nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual};
+      if (programar) bodyPre.fechaEnvio = new Date(fechaHora).toISOString();
       await fetch(APPS_URL_ENTREVISTA, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual})
+        body:JSON.stringify(bodyPre)
       });
     }
     // Enviar cada test seleccionado (sin contar la entrevista)
@@ -4357,7 +4388,12 @@ async function enviarEvaluacion() {
       return nombres[t]||t;
     }).join(", ");
 
-    okEl.textContent="✓ " + testsSeleccionados.length + " invitación(es) enviada(s) a " + email + " — Tests: " + nombresTests;
+    if (programar) {
+      var fechaLegible = new Date(fechaHora).toLocaleString("es-CL", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      okEl.textContent="✓ Programado para el " + fechaLegible + " → " + email + " (" + nombresTests + ")";
+    } else {
+      okEl.textContent="✓ " + testsSeleccionados.length + " invitación(es) enviada(s) a " + email + " — Tests: " + nombresTests;
+    }
     okEl.style.display="block";
     document.getElementById("env-nombre").value="";
     document.getElementById("env-email").value="";
