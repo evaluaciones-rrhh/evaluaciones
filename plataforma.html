@@ -1591,19 +1591,15 @@ tbody tr:hover td { background: #fdf9f6; }
               </div>
             </div>
           </div>
-          <div class="form-group" style="margin-top:14px;background:#f7f9fb;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;">
-              <input type="checkbox" id="env-programar-check" onchange="togglePrograma()" style="width:16px;height:16px;cursor:pointer;">
-              Programar envío para más tarde
-            </label>
-            <div id="env-programar-campos" style="display:none;margin-top:12px;">
-              <label style="font-size:12px;color:var(--muted);">FECHA Y HORA DE ENVÍO</label>
-              <input type="datetime-local" id="env-fecha-hora" style="margin-top:4px;">
-              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">Solo aplica a Entrevista Retail y Prefiltro. A la fecha y hora indicada, la invitación se enviará automáticamente.</div>
-            </div>
-          </div>
-          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;">
+          <div style="margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="enviarEvaluacion()" id="btn-env">📧 Enviar invitación</button>
+            <button class="btn" onclick="programarEntrevista()" id="btn-prog" style="background:#5c6b7a;color:#fff;">🗓️ Programar entrevista</button>
+          </div>
+          <div id="env-programar-campos" style="display:none;margin-top:14px;background:#f7f9fb;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+            <label style="font-size:12px;color:var(--muted);font-weight:600;">FECHA Y HORA DE ENVÍO</label>
+            <input type="datetime-local" id="env-fecha-hora" style="margin-top:4px;display:block;">
+            <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">Solo se programan la Entrevista Retail y el Prefiltro. A la fecha y hora indicada, la invitación se enviará automáticamente.</div>
+            <button class="btn btn-primary" onclick="confirmarPrograma()" id="btn-prog-confirmar" style="margin-top:12px;">Confirmar programación</button>
           </div>
           <div class="alert alert-ok" id="env-ok"></div>
           <div class="alert alert-err" id="env-err"></div>
@@ -4298,10 +4294,68 @@ function cerrarModalDuplicado(cancelar) {
   }
 }
 
-function togglePrograma() {
-  var check = document.getElementById("env-programar-check");
+// Muestra/oculta el panel de fecha para programar
+function programarEntrevista() {
   var campos = document.getElementById("env-programar-campos");
-  campos.style.display = check.checked ? "block" : "none";
+  campos.style.display = (campos.style.display === "none" || !campos.style.display) ? "block" : "none";
+}
+
+// Confirma la programación: valida y envía solo entrevista/prefiltro con fecha
+async function confirmarPrograma() {
+  var nombre = document.getElementById("env-nombre").value.trim();
+  var email  = document.getElementById("env-email").value.trim();
+  var cargo  = document.getElementById("env-cargo").value.trim();
+  var okEl   = document.getElementById("env-ok");
+  var errEl  = document.getElementById("env-err");
+  okEl.style.display="none"; errEl.style.display="none";
+
+  var fechaHora = document.getElementById("env-fecha-hora").value;
+
+  var testsSeleccionados = [];
+  document.querySelectorAll(".check-test:checked").forEach(function(cb){ testsSeleccionados.push(cb.value); });
+  var enviaEntrevista = testsSeleccionados.indexOf("ENTREVISTA") > -1;
+  var enviaPrefiltro  = testsSeleccionados.indexOf("PREFILTRO") > -1;
+
+  if (!nombre || !email) {
+    errEl.textContent="Completa nombre y email antes de programar.";
+    errEl.style.display="block"; return;
+  }
+  if (!enviaEntrevista && !enviaPrefiltro) {
+    errEl.textContent="Para programar, marca Entrevista Retail o Prefiltro en la lista.";
+    errEl.style.display="block"; return;
+  }
+  if (!fechaHora) {
+    errEl.textContent="Selecciona la fecha y hora de envío.";
+    errEl.style.display="block"; return;
+  }
+  if (new Date(fechaHora).getTime() <= Date.now()) {
+    errEl.textContent="La fecha y hora deben ser futuras.";
+    errEl.style.display="block"; return;
+  }
+
+  var btn = document.getElementById("btn-prog-confirmar");
+  btn.disabled = true; btn.innerHTML = "<span class='spinner'></span> Programando...";
+
+  try {
+    var fechaISO = new Date(fechaHora).toISOString();
+    if (enviaEntrevista) {
+      await fetch(APPS_URL_ENTREVISTA, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"programarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual, fechaEnvio:fechaISO}) });
+    }
+    if (enviaPrefiltro) {
+      await fetch(APPS_URL_ENTREVISTA, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"programarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual, fechaEnvio:fechaISO}) });
+    }
+    var fechaLegible = new Date(fechaHora).toLocaleString("es-CL", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+    var qué = (enviaEntrevista && enviaPrefiltro) ? "Entrevista y Prefiltro" : (enviaEntrevista ? "Entrevista" : "Prefiltro");
+    okEl.textContent = "🗓️ " + qué + " programada para el " + fechaLegible + " → " + email;
+    okEl.style.display = "block";
+    document.getElementById("env-programar-campos").style.display = "none";
+  } catch(e) {
+    errEl.textContent = "Error al programar: " + e.message;
+    errEl.style.display = "block";
+  }
+  btn.disabled = false; btn.innerHTML = "Confirmar programación";
 }
 
 async function enviarEvaluacion() {
@@ -4311,14 +4365,6 @@ async function enviarEvaluacion() {
   var okEl   = document.getElementById("env-ok");
   var errEl  = document.getElementById("env-err");
   okEl.style.display="none"; errEl.style.display="none";
-
-  // ¿Envío programado?
-  var programar = document.getElementById("env-programar-check") && document.getElementById("env-programar-check").checked;
-  var fechaHora = programar ? document.getElementById("env-fecha-hora").value : "";
-  if (programar && !fechaHora) {
-    errEl.textContent="Selecciona la fecha y hora de envío, o desmarca 'Programar'.";
-    errEl.style.display="block"; return;
-  }
 
   // Recoger tests seleccionados
   var testsSeleccionados = [];
@@ -4345,24 +4391,18 @@ async function enviarEvaluacion() {
   try {
     // La entrevista se envia a su propio backend (genera su token)
     if (enviaEntrevista) {
-      var accionEnt = programar ? "programarEntrevista" : "enviarEntrevista";
-      var bodyEnt = {action:accionEnt, nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual};
-      if (programar) bodyEnt.fechaEnvio = new Date(fechaHora).toISOString();
       await fetch(APPS_URL_ENTREVISTA, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(bodyEnt)
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"entrevista", link:TESTS_LINKS["ENTREVISTA"], solicitante:usuarioActual})
       });
     }
     // El prefiltro usa el mismo backend, con su propio link y correo
     if (enviaPrefiltro) {
-      var accionPre = programar ? "programarEntrevista" : "enviarEntrevista";
-      var bodyPre = {action:accionPre, nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual};
-      if (programar) bodyPre.fechaEnvio = new Date(fechaHora).toISOString();
       await fetch(APPS_URL_ENTREVISTA, {
         method:"POST", mode:"no-cors",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify(bodyPre)
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual})
       });
     }
     // Enviar cada test seleccionado (sin contar la entrevista)
@@ -4388,12 +4428,7 @@ async function enviarEvaluacion() {
       return nombres[t]||t;
     }).join(", ");
 
-    if (programar) {
-      var fechaLegible = new Date(fechaHora).toLocaleString("es-CL", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
-      okEl.textContent="✓ Programado para el " + fechaLegible + " → " + email + " (" + nombresTests + ")";
-    } else {
-      okEl.textContent="✓ " + testsSeleccionados.length + " invitación(es) enviada(s) a " + email + " — Tests: " + nombresTests;
-    }
+    okEl.textContent="✓ " + testsSeleccionados.length + " invitación(es) enviada(s) a " + email + " — Tests: " + nombresTests;
     okEl.style.display="block";
     document.getElementById("env-nombre").value="";
     document.getElementById("env-email").value="";
