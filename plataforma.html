@@ -2827,19 +2827,45 @@ function verInforme(i){
   document.getElementById("mi-nombre").textContent = inf.nombre || "—";
   var tipo = inf.tipo === "transitorio" ? "Servicios transitorios" : (inf.tipo === "dashboard" ? "Cargos internos" : "Informe extendido");
   document.getElementById("mi-sub").textContent = (inf.cargo||"sin cargo") + (inf.rut?" · "+inf.rut:"") + " · " + tipo + (inf.fecha?" · "+inf.fecha:"");
+
+  // Respaldo: vista de texto (Conclusión/Fortalezas/Áreas) si no hay HTML real
   function bloque(titulo, texto){
     if (!texto || !texto.trim()) return "";
     var html = texto.split(/\n+/).map(function(p){ return "<p style='margin:0 0 8px;'>"+p+"</p>"; }).join("");
     return "<div style='margin-bottom:18px;'><div style='font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral-dark);font-weight:700;margin-bottom:6px;'>"+titulo+"</div><div style='font-size:14px;line-height:1.6;color:var(--ink);'>"+html+"</div></div>";
   }
-  var col = colorCat(inf.categoria);
-  var cuerpo = "<div style='display:inline-block;font-size:13px;font-weight:700;color:"+col+";border:1px solid "+col+";border-radius:20px;padding:4px 14px;margin-bottom:18px;'>"+(inf.categoria||"—")+"</div>";
-  cuerpo += bloque("Conclusión", inf.conclusion);
-  cuerpo += bloque("Fortalezas", inf.fortalezas);
-  cuerpo += bloque("Áreas de desarrollo", inf.areas);
-  if (inf.evaluador) cuerpo += "<div style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:6px;'>Evaluador: "+inf.evaluador+"</div>";
-  document.getElementById("mi-cuerpo").innerHTML = cuerpo;
+  function vistaTexto(){
+    var col = colorCat(inf.categoria);
+    var cuerpo = "<div style='display:inline-block;font-size:13px;font-weight:700;color:"+col+";border:1px solid "+col+";border-radius:20px;padding:4px 14px;margin-bottom:18px;'>"+(inf.categoria||"—")+"</div>";
+    cuerpo += bloque("Conclusión", inf.conclusion);
+    cuerpo += bloque("Fortalezas", inf.fortalezas);
+    cuerpo += bloque("Áreas de desarrollo", inf.areas);
+    if (inf.evaluador) cuerpo += "<div style='font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:12px;margin-top:6px;'>Evaluador: "+inf.evaluador+"</div>";
+    return cuerpo;
+  }
+
+  var cont = document.getElementById("mi-cuerpo");
   document.getElementById("modal-informe").style.display = "flex";
+
+  // Mostrar el MISMO informe que se descarga (HTML real guardado), dentro de un iframe
+  function pintarHTML(htmlDoc){
+    cont.innerHTML = "<iframe id='mi-iframe' style='width:100%;height:70vh;border:none;background:#fff;border-radius:8px;'></iframe>";
+    var ifr = document.getElementById("mi-iframe");
+    var doc = ifr.contentWindow.document;
+    doc.open(); doc.write(htmlDoc); doc.close();
+  }
+
+  var htmlReal = inf.html || inf.dashboardHTML;
+  if (htmlReal) { pintarHTML(htmlReal); return; }
+
+  // Si no está en memoria, pedirlo al backend (igual que la descarga)
+  cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando informe…</div>";
+  fetchJSON(APPS_URL + "?action=getInformeHtml&rut=" + encodeURIComponent(inf.rut||"") + "&nombre=" + encodeURIComponent(inf.nombre||"") + "&t=" + Date.now())
+    .then(function(rr){
+      if (rr && rr.html) { inf.html = rr.html; pintarHTML(rr.html); }
+      else { cont.innerHTML = vistaTexto(); }
+    })
+    .catch(function(){ cont.innerHTML = vistaTexto(); });
 }
 
 function cerrarInforme(){
