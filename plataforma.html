@@ -2890,9 +2890,13 @@ async function descargarInforme(inf){
     } catch(e) { }
   }
   if (htmlGuardado){
+    // Abrir en una ventana e ir directo al diálogo de guardar como PDF (imprimir),
+    // sin dejar el HTML abierto: tras imprimir/cancelar, la ventana se cierra sola.
     var wd = window.open("", "_blank");
     if (!wd){ alert("Habilita las ventanas emergentes para descargar el informe."); return; }
-    wd.document.write(htmlGuardado);
+    var htmlAuto = htmlGuardado.replace("</body>",
+      "<script>window.onload=function(){setTimeout(function(){window.focus();window.print();},400);};window.onafterprint=function(){window.close();};<\/script></body>");
+    wd.document.write(htmlAuto);
     wd.document.close();
     return;
   }
