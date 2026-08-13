@@ -1107,11 +1107,9 @@ function construirInforme(d) {
     fila("Nombre", d.nombre)+fila("Cargo postulado", d.cargo)+fila("RUT", d.rut)+
     fila("Estudios", d.estudios)+fila("Fecha de entrevista", d.fecha)+fila("Entrevistador", d.entrevistador)+((d.tipo === "transitorio" && d.incluirRenta === false) ? "" : fila("Pretensiones de renta", d.renta))+
     '</table>'+
-    (d.tipo === "transitorio" ? "" :
+    ((d.tipo === "transitorio" || !(d.tests && d.tests.length)) ? "" :
       '<div class="st">Test aplicados</div>'+
-      (d.tests && d.tests.length
-        ? '<table>'+d.tests.map(function(t){ return '<tr><td>'+t.nombre+(t.fecha?' <span style="color:#999;font-size:11px;">('+t.fecha+')</span>':'')+'</td></tr>'; }).join("")+'</table>'
-        : '<div class="box" style="color:#999;font-size:13px;">No se aplicaron evaluaciones.</div>'))+
+      '<table>'+d.tests.map(function(t){ return '<tr><td>'+t.nombre+(t.fecha?' <span style="color:#999;font-size:11px;">('+t.fecha+')</span>':'')+'</td></tr>'; }).join("")+'</table>')+
     '<div class="st">Observaciones de la Entrevista</div><div class="box">'+obsParr()+'</div>'+
     (d.tipo === "transitorio" ? "" :
       '<div class="st">Aspectos a considerar</div><div class="box box-a">'+aParrafos(d.aspectos)+'</div>'+
@@ -1359,8 +1357,7 @@ function construirDashboard(d) {
         '<div><span class="k">Entrevistador:</span> '+(d.entrevistador||"—")+'</div>'+
         '<div><span class="k">Fecha:</span> '+(d.fecha||"—")+'</div>'+
       '</div>'+
-      '<div class="dst">Test aplicados</div>'+
-      '<div class="dcards">'+testCards+'</div>'+
+      ((d.tests && d.tests.length) ? '<div class="dst">Test aplicados</div>'+'<div class="dcards">'+testCards+'</div>' : '')+
       (expHTML ? '<div class="dst">Experiencia laboral</div><div class="dbox" style="margin-bottom:20px;">'+expHTML+'</div>' : '')+
       '<div class="dst">Observaciones de la entrevista</div>'+
       '<div class="dbox">'+obs+'</div>'+
