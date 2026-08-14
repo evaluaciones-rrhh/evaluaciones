@@ -832,7 +832,7 @@ function guardarInformeAuto(htmlReporte){
     var rawFort = g("txt-fortalezas");
     var fortFinal;
     try {
-      fortFinal = (tipoActual === "transitorio") ? expandirFortalezasExt(rawFort, nombre) : expandirFortalezas(rawFort, nombre);
+      fortFinal = (tipoActual === "dashboard") ? expandirFortalezas(rawFort, nombre) : expandirFortalezasExt(rawFort, nombre);
     } catch(e){ fortFinal = rawFort; }
     // Categoría: guardar la etiqueta legible, no el código interno
     var catMap = { "recomendable":"Recomendable", "recomendable_obs":"Recomendable con observaciones", "no_recomendable":"No recomendable" };
@@ -1088,7 +1088,7 @@ function construirInforme(d) {
       else p += expPunteoExtendido(d.experiencia);
     }
     // Fortalezas integradas dentro de las observaciones (sin recuadro aparte)
-    var fort = (d.tipo === "transitorio") ? expandirFortalezasExt(d.fortalezas, d.nombre) : expandirFortalezas(d.fortalezas, d.nombre);
+    var fort = (d.tipo === "dashboard") ? expandirFortalezas(d.fortalezas, d.nombre) : expandirFortalezasExt(d.fortalezas, d.nombre);
     if (fort && fort.trim()) p += aParrafos(fort);
     return p || "<p style='color:#999;'>Sin observaciones registradas.</p>";
   }
