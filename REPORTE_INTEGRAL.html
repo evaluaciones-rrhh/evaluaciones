@@ -1023,6 +1023,40 @@ function construirInforme(d) {
     return "<p style='margin:0 0 9px;'>"+out+"</p>";
   }
   // Versión original (Informe Extendido): narrativa en un solo párrafo
+  // Experiencia como punteo: cada cargo (línea con |) en negrita y su descripción debajo
+  function expPunteoExtendido(texto){
+    texto = expSoloParrafos(texto).trim();
+    if(!texto) return "";
+    var lineas = texto.split(/\n/).map(function(b){ return b.trim().replace(/^[-•·*]+\s*/,""); }).filter(Boolean);
+    if(!lineas.length) return "";
+    var bloques = [];
+    var actual = null;
+    lineas.forEach(function(ln){
+      if (ln.indexOf("|") !== -1) {
+        // Es una línea de cargo → nuevo bloque
+        if (actual) bloques.push(actual);
+        actual = { cargo: ln, desc: "" };
+      } else {
+        // Es descripción → se adjunta al bloque actual
+        if (actual) actual.desc += (actual.desc ? " " : "") + ln;
+        else actual = { cargo: "", desc: ln };
+      }
+    });
+    if (actual) bloques.push(actual);
+    if (!bloques.length) return "";
+    // Si no hay ninguna línea de cargo (sin |), caer al párrafo normal
+    var hayCargos = bloques.some(function(b){ return b.cargo; });
+    if (!hayCargos) return "<p>"+expParrafo(texto)+"</p>";
+
+    return bloques.map(function(b){
+      var out = "<div style='margin:0 0 12px;'>";
+      if (b.cargo) out += "<div style='font-weight:700;color:#2b3a47;margin-bottom:2px;'>"+pulirTexto(b.cargo)+"</div>";
+      if (b.desc)  out += "<div style='line-height:1.6;'>"+pulirTexto(b.desc)+"</div>";
+      out += "</div>";
+      return out;
+    }).join("");
+  }
+
   function expParrafo(texto){
     texto = expSoloParrafos(texto).trim();
     if(!texto) return "";
@@ -1051,7 +1085,7 @@ function construirInforme(d) {
     if (d.motivacion && mostrarMotiv) p += "<p>"+d.motivacion+"</p>";
     if (d.experiencia) {
       if (d.tipo === "transitorio") p += expParrafoHTML(d.experiencia);
-      else p += "<p>"+expParrafo(d.experiencia)+"</p>";
+      else p += expPunteoExtendido(d.experiencia);
     }
     // Fortalezas integradas dentro de las observaciones (sin recuadro aparte)
     var fort = (d.tipo === "transitorio") ? expandirFortalezasExt(d.fortalezas, d.nombre) : expandirFortalezas(d.fortalezas, d.nombre);
