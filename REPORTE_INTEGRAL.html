@@ -1092,7 +1092,7 @@ function construirInforme(d) {
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px '+C.btnSombra+';z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnHover+';}'+
     '@page{margin:14mm 12mm;}'+
-    '@media print{body{background:#fff;padding:0;}.doc{box-shadow:none;border:none;}.btn-pdf{display:none;}}'+
+    '@media print{'+'body{background:#fff;padding:0;}'+'.doc{box-shadow:none;border:none;}'+'.btn-pdf{display:none;}'+'.box{break-inside:avoid;page-break-inside:avoid;}'+'.st{break-after:avoid;page-break-after:avoid;break-inside:avoid;}'+'p{orphans:3;widows:3;}'+'}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+'<script>if(window.self!==window.top){var b=document.currentScript&&document.currentScript.previousElementSibling;var bp=document.querySelector(".btn-pdf");if(bp)bp.style.display="none";}<\/script>'+
     '<div class="doc">'+
@@ -1343,7 +1343,7 @@ function construirDashboard(d) {
     '.btn-pdf{position:fixed;top:20px;right:20px;background:'+C.btn+';color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;z-index:999;}'+
     '.btn-pdf:hover{background:'+C.btnH+';}'+
     '@page{margin:14mm 12mm;}'+
-    '@media print{body{background:#fff;padding:0;}.dash{box-shadow:none;border:none;}.btn-pdf{display:none;}.dcols,.dcards{break-inside:avoid;}}'+
+    '@media print{'+'body{background:#fff;padding:0;}'+'.dash{box-shadow:none;border:none;}'+'.btn-pdf{display:none;}'+'.dcols,.dcards{break-inside:avoid;page-break-inside:avoid;}'+'.dbox{break-inside:avoid;page-break-inside:avoid;}'+'.dst{break-after:avoid;page-break-after:avoid;}'+'p{orphans:3;widows:3;}'+'}'+
     '</style></head><body>'+
     '<button class="btn-pdf" onclick="window.print()">⬇ Descargar PDF</button>'+'<script>if(window.self!==window.top){var b=document.currentScript&&document.currentScript.previousElementSibling;var bp=document.querySelector(".btn-pdf");if(bp)bp.style.display="none";}<\/script>'+
     '<div class="dash">'+
