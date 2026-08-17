@@ -511,6 +511,40 @@ footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3r
   </div>
 </div>
 
+
+<!-- ══ PANTALLA: PRUEBA DE MICRÓFONO ══ -->
+<div class="screen" id="screen-mictest">
+  <div class="wrap">
+    <div class="card" style="text-align:center;max-width:480px;margin:0 auto;">
+      <div style="font-size:44px;margin-bottom:.5rem;">🎤</div>
+      <h2 style="font-size:20px;margin:0 0 .5rem;color:var(--ink,#2b3a47);">Probemos tu micrófono</h2>
+      <p style="font-size:14px;color:var(--hint,#777);line-height:1.5;margin:0 0 1.25rem;">
+        Antes de comenzar, di algo en voz alta (por ejemplo, tu nombre) para confirmar que te escuchamos bien.
+      </p>
+
+      <!-- Barra de nivel de audio -->
+      <div style="background:#e8ecf0;border-radius:12px;height:22px;overflow:hidden;margin-bottom:.5rem;">
+        <div id="mic-nivel-barra" style="height:100%;width:0%;background:linear-gradient(90deg,#7cc47f,#4caf50);transition:width .08s;border-radius:12px;"></div>
+      </div>
+      <div id="mic-estado" style="font-size:13px;color:#999;min-height:20px;margin-bottom:1.25rem;">Esperando tu voz…</div>
+
+      <button class="btn btn-primary" id="btn-mic-ok" onclick="continuarDesdeMicTest()" disabled
+        style="width:100%;justify-content:center;padding:14px;font-size:15px;border-radius:10px;opacity:.5;">
+        Habla para continuar
+      </button>
+      <div id="mic-ayuda" style="display:none;margin-top:1rem;background:#fff4e5;border:1px solid #f0c890;border-radius:10px;padding:12px 14px;font-size:12.5px;color:#8a5a00;line-height:1.6;text-align:left;">
+        <strong>⚠️ No estamos captando tu voz.</strong> Para poder continuar, revisa:
+        <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+          <li>Que le hayas dado permiso al micrófono en el navegador (ícono 🎤 en la barra de dirección).</li>
+          <li>Que no esté silenciado o usado por otra app (Zoom, Meet, etc.).</li>
+          <li>Si usas audífonos, que estén bien conectados.</li>
+          <li>Prueba hablar más fuerte y cerca del micrófono.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══ PANTALLA 2: CUENTA REGRESIVA ══ -->
 <div class="screen" id="screen-countdown" style="display:none!important;">
   <div class="wrap">
@@ -929,11 +963,104 @@ async function iniciarEntrevista() {
     stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 18 } }, audio: true });
     entrevistaEnCurso = true;
     cambiosPantalla = 0;
-    mostrarPantalla('screen-countdown');
-    mostrarPreguntaCountdown(0);
+    // Antes de comenzar, probar que el micrófono capta voz
+    mostrarPantalla('screen-mictest');
+    iniciarPruebaMicrofono();
   } catch(err) {
     alert('No se pudo acceder a tu cámara o micrófono. Por favor permite el acceso e intenta de nuevo.');
   }
+}
+
+
+// ══════════════════════════════════════
+// PRUEBA DE MICRÓFONO (antes de comenzar)
+// ══════════════════════════════════════
+let micTestAudioCtx = null;
+let micTestRAF = null;
+let micTestDetectado = false;
+
+function iniciarPruebaMicrofono() {
+  micTestDetectado = false;
+  var barra = document.getElementById('mic-nivel-barra');
+  var estado = document.getElementById('mic-estado');
+  var btnOk = document.getElementById('btn-mic-ok');
+
+  btnOk.disabled = true;
+  btnOk.style.opacity = '.5';
+  btnOk.textContent = 'Habla para continuar';
+  estado.textContent = 'Esperando tu voz…';
+  estado.style.color = '#999';
+
+  // Si tras 6 segundos no hay voz, mostrar ayuda para resolver el problema del micrófono
+  setTimeout(function(){
+    if (!micTestDetectado) {
+      var ayuda = document.getElementById('mic-ayuda');
+      if (ayuda) ayuda.style.display = 'block';
+      estado.textContent = 'No detectamos sonido. Revisa las indicaciones de abajo.';
+      estado.style.color = '#c0392b';
+    }
+  }, 6000);
+
+  try {
+    micTestAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var source = micTestAudioCtx.createMediaStreamSource(stream);
+    var analyser = micTestAudioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    source.connect(analyser);
+    var datos = new Uint8Array(analyser.frequencyBinCount);
+    var vecesConVoz = 0;
+
+    function medir() {
+      analyser.getByteFrequencyData(datos);
+      // Nivel promedio de energía
+      var suma = 0;
+      for (var i = 0; i < datos.length; i++) suma += datos[i];
+      var nivel = suma / datos.length;  // 0-255 aprox
+
+      // Mover la barra (escalar para que se vea bien)
+      var pct = Math.min(100, Math.round(nivel * 3));
+      barra.style.width = pct + '%';
+
+      // Detectar voz sostenida (nivel sobre umbral varias veces)
+      if (nivel > 12) {
+        vecesConVoz++;
+        if (vecesConVoz >= 5 && !micTestDetectado) {
+          micTestDetectado = true;
+          estado.textContent = '✓ ¡Te escuchamos perfecto!';
+          estado.style.color = '#2e7d32';
+          btnOk.disabled = false;
+          btnOk.style.opacity = '1';
+          btnOk.textContent = 'Comenzar entrevista →';
+          var ayudaEl = document.getElementById('mic-ayuda');
+          if (ayudaEl) ayudaEl.style.display = 'none';
+        }
+      }
+
+      micTestRAF = requestAnimationFrame(medir);
+    }
+    medir();
+  } catch(e) {
+    // Si algo falla con el AudioContext, permitir continuar igual
+    estado.textContent = 'No pudimos medir el nivel, pero puedes continuar.';
+    document.getElementById('btn-mic-ok').disabled = false;
+    document.getElementById('btn-mic-ok').style.opacity = '1';
+    document.getElementById('btn-mic-ok').textContent = 'Comenzar entrevista →';
+  }
+}
+
+function detenerPruebaMicrofono() {
+  if (micTestRAF) cancelAnimationFrame(micTestRAF);
+  micTestRAF = null;
+  if (micTestAudioCtx) {
+    try { micTestAudioCtx.close(); } catch(e){}
+    micTestAudioCtx = null;
+  }
+}
+
+function continuarDesdeMicTest() {
+  detenerPruebaMicrofono();
+  mostrarPantalla('screen-countdown');
+  mostrarPreguntaCountdown(0);
 }
 
 // ══════════════════════════════════════
