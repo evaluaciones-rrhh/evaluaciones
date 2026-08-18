@@ -629,6 +629,66 @@ async function generarConclusion() {
 
 // ── Generar informe final ──
 // ── Tipo de reporte (pestañas) ──
+
+// ══════════════════════════════════════════════
+// RECIBIR DATOS PARA EDITAR UN INFORME GUARDADO
+// (los envía la plataforma al apretar "Editar")
+// ══════════════════════════════════════════════
+window.addEventListener("message", function(ev){
+  var msg = ev.data;
+  if (!msg || msg.tipo !== "cargarInformeParaEditar" || !msg.datos) return;
+  var d = msg.datos;
+
+  function set(id, val){ var el = document.getElementById(id); if (el) el.value = (val || ""); }
+  function setChk(id, val){ var el = document.getElementById(id); if (el) el.checked = (val === "1" || val === 1 || val === true); }
+
+  // 1) Poner el tipo de reporte correcto (completo / dashboard / transitorio)
+  var tipo = d.tipo || "completo";
+  if (typeof cambiarTipoReporte === "function") cambiarTipoReporte(tipo);
+
+  // 2) Llenar los datos del candidato
+  set("d-nombre", d.nombre);
+  set("d-cargo", d.cargo);
+  set("d-rut", d.rut);
+  set("d-estudios", d.estudios);
+  set("d-fecha", d.fecha);
+  set("d-entrevistador", d.evaluador);
+  set("d-renta", d.renta);
+
+  // 3) Llenar los textos (usar el texto ORIGINAL que se escribió, no el expandido)
+  set("txt-actitud", d.actitud);
+  set("txt-motivacion", d.motivacion);
+  set("txt-experiencia", d.experiencia);
+  set("txt-fortalezas", d.fortalezas_raw || d.fortalezas);
+  set("txt-aspectos", d.areas);
+  set("txt-conclusion", d.conclusion);
+
+  // 4) Categoría (convertir la etiqueta legible al valor del select si hace falta)
+  var catInv = { "Recomendable":"recomendable", "Recomendable con observaciones":"recomendable_obs", "No recomendable":"no_recomendable" };
+  var catSel = document.getElementById("d-categoria");
+  if (catSel) {
+    var val = catInv[d.categoria] || d.categoria || "";
+    catSel.value = val;
+  }
+
+  // 5) Opciones de incluir
+  setChk("opt-renta", d.opt_renta);
+  setChk("opt-motivacion", d.opt_motivacion);
+
+  // Aviso visual
+  try {
+    var aviso = document.createElement("div");
+    aviso.textContent = "✏️ Informe cargado para editar. Corrige lo necesario y vuelve a generarlo.";
+    aviso.style.cssText = "position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#2b3a47;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 14px rgba(0,0,0,.2);";
+    document.body.appendChild(aviso);
+    setTimeout(function(){ aviso.style.opacity="0"; aviso.style.transition="opacity .5s"; }, 4000);
+    setTimeout(function(){ if(aviso.parentNode) aviso.parentNode.removeChild(aviso); }, 4600);
+  } catch(e){}
+
+  // Subir al inicio del formulario
+  try { window.scrollTo(0, 0); } catch(e){}
+});
+
 var tipoReporteActual = "completo";
 function cambiarTipoReporte(tipo){
   tipoReporteActual = tipo;
@@ -837,6 +897,7 @@ function guardarInformeAuto(htmlReporte){
     // Categoría: guardar la etiqueta legible, no el código interno
     var catMap = { "recomendable":"Recomendable", "recomendable_obs":"Recomendable con observaciones", "no_recomendable":"No recomendable" };
     var catRaw = g("d-categoria");
+    var gc = function(id){ var el = document.getElementById(id); return el ? (el.checked ? "1" : "0") : ""; };
     var payload = {
       action: "guardarInforme",
       nombre: nombre,
@@ -849,7 +910,17 @@ function guardarInformeAuto(htmlReporte){
       evaluador: g("d-entrevistador"),
       tipo: tipoActual,
       solicitante: solicitante,
-      html: (htmlReporte || "")
+      html: (htmlReporte || ""),
+      // Campos adicionales para poder EDITAR el informe después (Camino 1)
+      estudios: g("d-estudios"),
+      fecha: g("d-fecha"),
+      renta: g("d-renta"),
+      fortalezas_raw: rawFort,
+      actitud: g("txt-actitud"),
+      motivacion: g("txt-motivacion"),
+      experiencia: g("txt-experiencia"),
+      opt_renta: gc("opt-renta"),
+      opt_motivacion: gc("opt-motivacion")
     };
     fetch(APPS_TESTS_URL, {
       method: "POST",
