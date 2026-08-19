@@ -1531,7 +1531,6 @@ tbody tr:hover td { background: #fdf9f6; }
         <div style="background:var(--ink);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
           <div><div id="mi-nombre" style="font-size:18px;font-weight:700;"></div><div id="mi-sub" style="font-size:12px;opacity:.7;margin-top:2px;"></div></div>
           <div style="display:flex;align-items:center;gap:10px;">
-            <button onclick="editarInformeActual()" style="background:#5c6b7a;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;padding:8px 14px;">✏️ Editar</button>
             <button onclick="descargarInformeActual()" style="background:var(--coral);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;padding:8px 14px;">⬇ Descargar</button>
             <button onclick="cerrarInforme()" style="background:none;border:none;color:#fff;font-size:24px;cursor:pointer;line-height:1;">×</button>
           </div>
@@ -2406,6 +2405,10 @@ var prefiltroActualIdx = -1;
 
 // Un registro es prefiltro si su informe lo declara
 function esPrefiltro(ent){
+  // Fuente confiable: el backend ya consultó Envios por el token
+  if (ent.tipo_real === "prefiltro") return true;
+  if (ent.tipo_real === "entrevista") return false;
+  // Respaldo (por si el backend aún no envía tipo_real)
   var inf = ent.informe || {};
   if (inf.tipo_informe === "prefiltro") return true;
   return String(ent.cargo || "").toLowerCase().indexOf("prefiltro") > -1;
@@ -2873,37 +2876,6 @@ function verInforme(i){
 
 function cerrarInforme(){
   document.getElementById("modal-informe").style.display = "none";
-}
-
-// ── EDITAR informe: trae todos los campos y los carga en "Generar informe" ──
-async function editarInformeActual(){
-  if (informeAbierto < 0 || !informesData[informeAbierto]) return;
-  var inf = informesData[informeAbierto];
-  var btnMsg = "Cargando datos del informe...";
-  try {
-    var d = await fetchJSON(APPS_URL + "?action=getInformeCompleto&rut=" + encodeURIComponent(inf.rut||"") + "&nombre=" + encodeURIComponent(inf.nombre||"") + "&t=" + Date.now());
-    if (!d || !d.informe) {
-      alert("No se pudieron cargar los datos para editar este informe. Es posible que sea un informe antiguo, generado antes de esta función.");
-      return;
-    }
-    // Cerrar el modal e ir a la sección Generar informe
-    cerrarInforme();
-    irA("reportes");
-    // Esperar a que el iframe del reporte esté listo y enviarle los datos
-    var ifr = document.getElementById("iframe-reportes");
-    var intentos = 0;
-    var enviar = function(){
-      intentos++;
-      try {
-        ifr.contentWindow.postMessage({ tipo: "cargarInformeParaEditar", datos: d.informe }, "*");
-      } catch(e){}
-      if (intentos < 8) setTimeout(enviar, 500);
-    };
-    // Darle un momento al iframe para cargar, luego enviar (repite por si aún no cargaba)
-    setTimeout(enviar, 600);
-  } catch(e) {
-    alert("Error al cargar el informe para editar: " + e.message);
-  }
 }
 
 function descargarInformeActual(){
