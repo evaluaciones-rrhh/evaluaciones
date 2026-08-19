@@ -2423,6 +2423,10 @@ async function cargarPrefiltros(silencioso){
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
     prefiltrosData = data.entrevistas.filter(esPrefiltro);
+    // Ordenar del más nuevo al más antiguo (por fecha y hora en que se rindió)
+    prefiltrosData.sort(function(a,b){
+      return parseFechaHoraEnt(b && b.fecha) - parseFechaHoraEnt(a && a.fecha);
+    });
     ultimaCarga["prefiltro"] = Date.now();
     renderPrefiltros(prefiltrosData);
   } catch(e){
@@ -2689,6 +2693,15 @@ function parseFechaEnt(str){
   var m = String(str).trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
   if (!m) return null;
   return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+}
+
+// Igual que parseFechaEnt pero incluye hora y minuto (para ordenar por más reciente)
+function parseFechaHoraEnt(str){
+  if (!str) return 0;
+  var m = String(str).trim().match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})(?:[ ,]+(\d{1,2}):(\d{2}))?/);
+  if (!m) return 0;
+  return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]),
+                  m[4]?parseInt(m[4]):0, m[5]?parseInt(m[5]):0).getTime();
 }
 
 function renderDashboardEntrevistas(lista){
