@@ -2442,6 +2442,19 @@ function senalPrefiltro(ent){
   return {bg:"#eef0f2", fg:"#6b7680", label:"Sin señal"};
 }
 
+// Distintivo visual de MI decisión, para verlo en la tarjeta de la lista
+function badgeDecision(dec){
+  if (!dec) return "";
+  var mapa = {
+    avanza:    { txt:"Avanza",    bg:"#1a7f37", fg:"#fff" },
+    revisar:   { txt:"Revisar",   bg:"#e0a100", fg:"#fff" },
+    no_avanza: { txt:"No avanza", bg:"#d9463b", fg:"#fff" }
+  };
+  var m = mapa[dec];
+  if (!m) return "";
+  return "<span title='Mi decisión' style='background:" + m.bg + ";color:" + m.fg + ";font-size:11px;font-weight:700;border-radius:20px;padding:5px 11px;white-space:nowrap;'>" + m.txt + "</span>";
+}
+
 function renderPrefiltros(lista){
   var cont = document.getElementById("lista-prefiltro");
   var cnt = document.getElementById("prefiltro-count");
@@ -2459,8 +2472,10 @@ function renderPrefiltros(lista){
       + (inf.foto ? "<img src='" + inf.foto + "' style='width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;'>" : "")
       + "<div style='min-width:0;'><div style='font-weight:600;font-size:14px;color:var(--ink);'>" + (p.nombre||"—") + "</div>"
       + "<div style='font-size:12px;color:var(--muted);'>" + (p.cargo||"Prefiltro") + " · " + (p.fecha||"") + "</div></div></div>"
+      + "<div style='display:flex;align-items:center;gap:7px;flex-shrink:0;'>"
+      + badgeDecision(p.decision)
       + "<span style='background:" + s.bg + ";color:" + s.fg + ";font-size:12px;font-weight:600;border-radius:20px;padding:5px 12px;white-space:nowrap;'>" + s.label + "</span>"
-      + "</div>";
+      + "</div></div>";
   }).join("");
 }
 
@@ -2540,6 +2555,7 @@ function verPrefiltro(i){
     (inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='" + inf.foto + "' style='width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "")
     + "<div style='background:" + s.bg + ";color:" + s.fg + ";border-radius:10px;padding:12px;text-align:center;font-weight:700;font-size:15px;margin-bottom:14px;'>"
     + "<div style='font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:600;'>Señal</div>" + s.label + "</div>"
+    + bloqueDecision(p)
     + card("Cómo se expresa", inf.expresion)
     + card("Qué contó de sí mismo", inf.presentacion_txt)
     + card("Experiencia relacionada al cargo", inf.experiencia_txt)
@@ -2547,8 +2563,7 @@ function verPrefiltro(i){
     + card("Cómo se ve trabajando con otros", inf.con_otros_txt)
     + (inf.disposicion ? card("Disposición durante la sesión", inf.disposicion + (inf.contacto_visual != null ? " · Contacto visual: " + inf.contacto_visual + "%" : "")) : "")
     + (inf.cambios_pantalla != null ? card("Integridad de la sesión", inf.cambios_pantalla === 0 ? "No salió de la pantalla durante la sesión." : "Salió de la pantalla " + inf.cambios_pantalla + " vez/veces. Conviene revisar el video.") : "")
-    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>"
-    + bloqueDecision(p);
+    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>";
 
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
 
