@@ -2472,6 +2472,54 @@ function filtrarPrefiltros(){
   }));
 }
 
+// ── Mi decisión: Avanza / Revisar / No avanza (registro personal del analista) ──
+function bloqueDecision(p){
+  var actual = (p.decision || "");
+  var opciones = [
+    { val: "avanza",    label: "✓ Avanza",    on:"#e6f4ea", onFg:"#1a7f37", onBd:"#2e9e54" },
+    { val: "revisar",   label: "◐ Revisar",   on:"#fdf3dd", onFg:"#9a6700", onBd:"#e0a100" },
+    { val: "no_avanza", label: "✕ No avanza", on:"#fce8e6", onFg:"#b3261e", onBd:"#d9463b" }
+  ];
+  var botones = opciones.map(function(o){
+    var activo = (actual === o.val);
+    var bg = activo ? o.on : "#fff";
+    var fg = activo ? o.onFg : "#6b7680";
+    var bd = activo ? o.onBd : "var(--border)";
+    var peso = activo ? "700" : "500";
+    return "<button onclick='marcarDecision(\"" + o.val + "\")' "
+      + "style='flex:1;background:" + bg + ";color:" + fg + ";border:1.5px solid " + bd + ";"
+      + "border-radius:9px;padding:11px 8px;font-size:13px;font-weight:" + peso + ";cursor:pointer;transition:all .15s;'>"
+      + o.label + "</button>";
+  }).join("");
+  return "<div style='margin-top:16px;border-top:1px solid var(--border);padding-top:14px;'>"
+    + "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:9px;'>Mi decisión (registro personal)</div>"
+    + "<div id='decision-botones' style='display:flex;gap:8px;'>" + botones + "</div>"
+    + "<div id='decision-msg' style='font-size:12px;color:#1a7f37;margin-top:8px;height:16px;'></div></div>";
+}
+
+async function marcarDecision(valor){
+  var p = prefiltrosData[prefiltroActualIdx];
+  if (!p) return;
+  var msg = document.getElementById("decision-msg");
+  if (msg) msg.textContent = "Guardando...";
+  // Actualizar en memoria y repintar los botones al instante
+  p.decision = valor;
+  var cont = document.getElementById("me-cuerpo");
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ action:"guardarDecision", token: p.token || "", decision: valor })
+    });
+    // Refrescar el detalle para mostrar el botón activo
+    verPrefiltro(prefiltroActualIdx);
+    var msg2 = document.getElementById("decision-msg");
+    if (msg2) { msg2.textContent = "✓ Decisión guardada"; setTimeout(function(){ if(msg2) msg2.textContent=""; }, 2500); }
+  } catch(e){
+    if (msg) msg.textContent = "No se pudo guardar. Intenta de nuevo.";
+  }
+}
+
 function verPrefiltro(i){
   prefiltroActualIdx = i;
   var p = prefiltrosData[i]; if (!p) return;
@@ -2499,7 +2547,8 @@ function verPrefiltro(i){
     + card("Cómo se ve trabajando con otros", inf.con_otros_txt)
     + (inf.disposicion ? card("Disposición durante la sesión", inf.disposicion + (inf.contacto_visual != null ? " · Contacto visual: " + inf.contacto_visual + "%" : "")) : "")
     + (inf.cambios_pantalla != null ? card("Integridad de la sesión", inf.cambios_pantalla === 0 ? "No salió de la pantalla durante la sesión." : "Salió de la pantalla " + inf.cambios_pantalla + " vez/veces. Conviene revisar el video.") : "")
-    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>";
+    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de prefiltro. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>"
+    + bloqueDecision(p);
 
   document.getElementById("me-cuerpo").innerHTML = cuerpo;
 
