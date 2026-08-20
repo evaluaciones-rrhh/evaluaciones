@@ -2515,7 +2515,6 @@ function renderPrefiltros(lista){
       + "<div style='font-size:12px;color:var(--muted);'>" + (p.cargo||"Prefiltro") + " · " + (p.fecha||"") + "</div></div></div>"
       + "<div style='display:flex;align-items:center;gap:7px;flex-shrink:0;'>"
       + badgeDecision(p.decision)
-      + "<span style='background:" + s.bg + ";color:" + s.fg + ";font-size:12px;font-weight:600;border-radius:20px;padding:5px 12px;white-space:nowrap;'>" + s.label + "</span>"
       + "</div></div>";
   }).join("");
 }
@@ -2595,8 +2594,6 @@ function verPrefiltro(i){
 
   var cuerpo =
     (inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='" + inf.foto + "' style='width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "")
-    + "<div style='background:" + s.bg + ";color:" + s.fg + ";border-radius:10px;padding:12px;text-align:center;font-weight:700;font-size:15px;margin-bottom:14px;'>"
-    + "<div style='font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.75;font-weight:600;'>Señal</div>" + s.label + "</div>"
     + bloqueDecision(p)
     + card("Cómo se expresa", inf.expresion)
     + card("Qué contó de sí mismo", inf.presentacion_txt)
