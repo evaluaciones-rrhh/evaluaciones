@@ -4250,9 +4250,13 @@ function renderTablaProgramadas(){
       return ((p.nombre||"") + " " + (p.cargo||"") + " " + (p.email||"")).toLowerCase().indexOf(q) > -1;
     });
   }
-  // Ordenar por fecha programada más próxima primero
+  // Ordenar: primero las PENDIENTES de envío, luego el resto.
+  // Dentro de cada grupo, de la más reciente a la más antigua.
   lista = lista.slice().sort(function(a,b){
-    return parseFechaHoraEnt(a.fechaProg) - parseFechaHoraEnt(b.fechaProg);
+    var pa = (String(a.estado||"Pendiente").toLowerCase().indexOf("enviad") === -1) ? 0 : 1;
+    var pb = (String(b.estado||"Pendiente").toLowerCase().indexOf("enviad") === -1) ? 0 : 1;
+    if (pa !== pb) return pa - pb;  // 0 (pendiente) va antes que 1 (enviada)
+    return parseFechaHoraEnt(b.fechaProg) - parseFechaHoraEnt(a.fechaProg);  // más reciente primero
   });
   if (cnt) cnt.textContent = (programadasData ? programadasData.length : 0) + " programada(s)";
   if (!lista.length) {
