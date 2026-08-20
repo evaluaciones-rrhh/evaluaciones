@@ -2528,6 +2528,7 @@ async function marcarDecision(valor){
     });
     // Refrescar el detalle para mostrar el botón activo
     verPrefiltro(prefiltroActualIdx);
+    renderPrefiltros(prefiltrosData);
     var msg2 = document.getElementById("decision-msg");
     if (msg2) { msg2.textContent = "✓ Decisión guardada"; setTimeout(function(){ if(msg2) msg2.textContent=""; }, 2500); }
   } catch(e){
@@ -2747,6 +2748,15 @@ function cerrarVideosEntrevista(){
 
 function cerrarEntrevista(){
   document.getElementById("modal-entrevista").style.display = "none";
+  // Refrescar la lista para que se vea la decisión marcada en la tarjeta
+  try {
+    if (typeof prefiltroActualIdx !== "undefined" && prefiltroActualIdx > -1 && typeof renderPrefiltros === "function") {
+      renderPrefiltros(prefiltrosData);
+    }
+    if (typeof entrevistaActualIdx !== "undefined" && entrevistaActualIdx !== null && typeof renderEntrevistas === "function") {
+      renderEntrevistas(entrevistasData);
+    }
+  } catch(e){}
 }
 
 var entrevistaActualIdx = null;
