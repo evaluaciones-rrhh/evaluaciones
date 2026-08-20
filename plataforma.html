@@ -1613,6 +1613,7 @@ tbody tr:hover td { background: #fdf9f6; }
       <div style="display:flex;gap:8px;margin-bottom:14px;">
         <button id="tab-hist-envios" onclick="tabHistorial('envios')" style="background:#2b3a47;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;">Envíos</button>
         <button id="tab-hist-agr" onclick="tabHistorial('agr')" style="background:#fff;color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;">Agradecimientos</button>
+        <button id="tab-hist-prog" onclick="tabHistorial('prog')" style="background:#fff;color:var(--ink);border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;">🗓️ Programadas</button>
       </div>
 
       <div class="card" id="bloque-hist-envios">
@@ -1642,6 +1643,26 @@ tbody tr:hover td { background: #fdf9f6; }
         </div>
       </div>
 
+      <div class="card" id="bloque-hist-prog" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">Entrevistas programadas</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="prog-count" style="font-size:13px;color:var(--muted);"></span>
+            <input class="filtro-input" id="filtro-prog" placeholder="Buscar por nombre o correo..." oninput="renderTablaProg()" style="max-width:260px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha programada</th><th>Nombre</th><th>Correo</th><th>Cargo</th><th>Tipo</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="tabla-prog">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card" id="bloque-hist-agr" style="display:none;">
         <div class="card-header">
           <div class="card-title">Agradecimientos enviados</div>
@@ -1657,6 +1678,26 @@ tbody tr:hover td { background: #fdf9f6; }
             </thead>
             <tbody id="tabla-agr">
               <tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="bloque-hist-prog" style="display:none;">
+        <div class="card-header">
+          <div class="card-title">🗓️ Entrevistas programadas</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span id="prog-count" style="font-size:13px;color:var(--muted);"></span>
+            <input class="filtro-input" id="filtro-prog" placeholder="Buscar por nombre o cargo..." oninput="renderTablaProgramadas()" style="max-width:260px;">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha programada</th><th>Candidato</th><th>Correo</th><th>Cargo</th><th>Tipo</th><th>Estado</th></tr>
+            </thead>
+            <tbody id="tabla-prog">
+              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -4163,20 +4204,73 @@ function buscarRutCandidato(nombre) {
 var agradecimientosData = null;
 
 function tabHistorial(cual){
-  var esEnvios = (cual === 'envios');
-  document.getElementById('bloque-hist-envios').style.display = esEnvios ? '' : 'none';
-  document.getElementById('bloque-hist-agr').style.display = esEnvios ? 'none' : '';
+  var bloques = { envios:'bloque-hist-envios', agr:'bloque-hist-agr', prog:'bloque-hist-prog' };
+  var tabs = { envios:'tab-hist-envios', agr:'tab-hist-agr', prog:'tab-hist-prog' };
+  Object.keys(bloques).forEach(function(k){
+    var b = document.getElementById(bloques[k]);
+    if (b) b.style.display = (k === cual) ? '' : 'none';
+    var t = document.getElementById(tabs[k]);
+    if (t) {
+      var activo = (k === cual);
+      t.style.background = activo ? '#2b3a47' : '#fff';
+      t.style.color = activo ? '#fff' : 'var(--ink)';
+      t.style.border = activo ? 'none' : '1px solid var(--border)';
+    }
+  });
+  if (cual === 'agr' && agradecimientosData === null) cargarTablaAgr();
+  if (cual === 'prog') cargarProgramadas();
+}
 
-  var tE = document.getElementById('tab-hist-envios');
-  var tA = document.getElementById('tab-hist-agr');
-  tE.style.background = esEnvios ? '#2b3a47' : '#fff';
-  tE.style.color = esEnvios ? '#fff' : 'var(--ink)';
-  tE.style.border = esEnvios ? 'none' : '1px solid var(--border)';
-  tA.style.background = esEnvios ? '#fff' : '#2b3a47';
-  tA.style.color = esEnvios ? 'var(--ink)' : '#fff';
-  tA.style.border = esEnvios ? '1px solid var(--border)' : 'none';
+// ── ENTREVISTAS PROGRAMADAS ──
+var programadasData = null;
+async function cargarProgramadas(){
+  var tbody = document.getElementById('tabla-prog');
+  try {
+    var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getProgramadas&t=" + Date.now());
+    programadasData = (data && data.programadas) ? data.programadas : [];
+    renderTablaProgramadas();
+  } catch(e){
+    if (tbody) tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No se pudieron cargar las programadas.</td></tr>";
+  }
+}
 
-  if (!esEnvios && agradecimientosData === null) cargarTablaAgr();
+function renderTablaProgramadas(){
+  var tbody = document.getElementById('tabla-prog');
+  var cnt = document.getElementById('prog-count');
+  if (!tbody) return;
+  var lista = programadasData || [];
+  var q = (document.getElementById('filtro-prog') ? document.getElementById('filtro-prog').value : "").trim().toLowerCase();
+  if (q) {
+    lista = lista.filter(function(p){
+      return ((p.nombre||"") + " " + (p.cargo||"") + " " + (p.email||"")).toLowerCase().indexOf(q) > -1;
+    });
+  }
+  // Ordenar por fecha programada más próxima primero
+  lista = lista.slice().sort(function(a,b){
+    return parseFechaHoraEnt(a.fechaProg) - parseFechaHoraEnt(b.fechaProg);
+  });
+  if (cnt) cnt.textContent = (programadasData ? programadasData.length : 0) + " programada(s)";
+  if (!lista.length) {
+    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No hay entrevistas programadas.</td></tr>";
+    return;
+  }
+  tbody.innerHTML = lista.map(function(p){
+    var est = String(p.estado || "Pendiente");
+    var estBg = "#eef2f6", estFg = "#5c6b7a";
+    var el = est.toLowerCase();
+    if (el.indexOf("enviad") > -1) { estBg = "#e6f4ea"; estFg = "#1a7f37"; }
+    else if (el.indexOf("error") > -1 || el.indexOf("cancel") > -1) { estBg = "#fce8e6"; estFg = "#b3261e"; }
+    else { estBg = "#fdf3dd"; estFg = "#9a6700"; }
+    var tipo = String(p.tipo || "").toLowerCase().indexOf("pref") > -1 ? "Prefiltro" : "Entrevista";
+    return "<tr>"
+      + "<td style='white-space:nowrap;'>" + (p.fechaProg || "—") + "</td>"
+      + "<td>" + (p.nombre || "—") + "</td>"
+      + "<td style='color:var(--muted);'>" + (p.email || "—") + "</td>"
+      + "<td>" + (p.cargo || "—") + "</td>"
+      + "<td>" + tipo + "</td>"
+      + "<td><span style='background:" + estBg + ";color:" + estFg + ";font-size:12px;font-weight:600;border-radius:20px;padding:4px 11px;white-space:nowrap;'>" + est + "</span></td>"
+      + "</tr>";
+  }).join("");
 }
 
 async function cargarTablaAgr(){
