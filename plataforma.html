@@ -2755,11 +2755,19 @@ function urlPreviewDrive(url){
 
 function abrirVideosEntrevista(){
   if (!videosEntrevistaActual.length) return;
-  var ent = entrevistasData[entrevistaActualIdx] || {};
-  document.getElementById("mv-nombre").textContent = ent.nombre || "—";
+  // Tomar el candidato del lugar correcto: prefiltro o entrevista
+  var cand = {};
+  var esPref = (typeof prefiltroActualIdx !== "undefined" && prefiltroActualIdx > -1);
+  if (esPref) cand = prefiltrosData[prefiltroActualIdx] || {};
+  else cand = entrevistasData[entrevistaActualIdx] || {};
+  document.getElementById("mv-nombre").textContent = cand.nombre || "—";
 
+  // Etiquetas de etapa según el tipo
+  var ETAPAS_PREF = ["Presentación", "Experiencia", "Motivación", "Con otros"];
   var tabs = videosEntrevistaActual.map(function(v, k){
-    var nom = v.etiqueta || ETIQUETAS_VIDEO[k] || ("Parte " + (k+1));
+    var nom;
+    if (esPref) nom = ETAPAS_PREF[k] || v.etiqueta || ("Parte " + (k+1));
+    else nom = v.etiqueta || ETIQUETAS_VIDEO[k] || ("Parte " + (k+1));
     return "<button id='mv-tab-"+k+"' onclick='verVideoEtapa("+k+")' "+
       "style='border:1px solid var(--border);background:#fff;color:var(--ink);font-size:13px;font-weight:600;"+
       "border-radius:7px;padding:8px 14px;cursor:pointer;text-transform:capitalize;'>"+nom+"</button>";
