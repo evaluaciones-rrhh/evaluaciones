@@ -139,9 +139,9 @@ var PREGUNTAS = [
     o:["Lentes de sol","Guantes, casco y calzado de seguridad","Uniforme formal","Protector solar"] },
   { t:"¿Quién tiene prioridad al circular en la bodega/planta/patio?", punt:true, crit:true, correcta:0,
     o:["Los peatones","Los jefes","Los clientes","La máquina en circulación"] },
-  { t:"Si la máquina presenta una falla, ¿qué haces?", punt:true, crit:true, correcta:0,
+  { t:"Si la máquina presenta una falla, ¿qué haces?", punt:false,
     o:["Detener y avisar a prevención","Seguir trabajando","Ignorar si es leve","Esperar al supervisor"] },
-  { t:"¿En qué lugares suele operar una grúa horquilla?", punt:true, crit:false, correcta:1,
+  { t:"¿En qué lugares suele operar una grúa horquilla?", punt:true, crit:false, correctas:[0,1],
     o:["Patio exterior","Bodega y patio","Oficina","Solo containers"] },
   { t:"¿Qué es lo primero que revisas al subir a la grúa?", punt:true, crit:false, correcta:0,
     o:["Check list de seguridad","Encender la radio","Revisar neumáticos","Nada, ya está revisada"] },
@@ -149,7 +149,7 @@ var PREGUNTAS = [
     o:["Seguir trabajando","Ignorar y mover la carga","Pedir ayuda a los compañeros","Avisar a prevención"] },
   { t:"¿Cuál es la velocidad máxima recomendada en bodega?", punt:true, crit:true, correcta:2,
     o:["La que permite la máquina","50 km/h si no hay gente","15 a 20 km/h","La más rápida posible"] },
-  { t:"¿Cómo debe circular una grúa en un pasillo estrecho?", punt:true, crit:false, correcta:1,
+  { t:"¿Cómo debe circular una grúa en un pasillo estrecho?", punt:true, crit:false, correctas:[1,3],
     o:["De lado","De frente","Con carga elevada","En reversa"] },
   { t:"¿Qué valoras más en un equipo de trabajo?", punt:false,
     o:["El sueldo","El liderazgo autoritario","Colaboración y responsabilidad","Trabajar sin supervisión"] }
@@ -265,7 +265,8 @@ function finalizar(){
     var r=respuestas[i];
     if(q.punt){
       puntuables++;
-      if(r===q.correcta){ correctas++; }
+      var esCorrecta = (q.correctas ? (q.correctas.indexOf(r) > -1) : (r === q.correcta));
+      if(esCorrecta){ correctas++; }
       else {
         falladas.push((i+1)+". "+q.t+(q.crit?" [CRÍTICA]":""));
         if(q.crit) falloCritica=true;
