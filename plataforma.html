@@ -213,6 +213,27 @@ h1,h2,h3 { font-family: 'Sora', sans-serif; }
 .nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
 .nav-item.activo { background: var(--naranja); color: var(--lima-ink); font-weight: 700; }
 .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+/* ── Grupo desplegable Videoentrevistas ── */
+.nav-group-header {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.5);
+}
+.nav-group-header:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-group.abierto > .nav-group-header { color: rgba(255,255,255,0.85); }
+.nav-group-header .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-group-caret { margin-left: auto; font-size: 10px; transition: transform 0.2s; opacity: 0.6; }
+.nav-group.abierto .nav-group-caret { transform: rotate(90deg); }
+.nav-group-items { display: none; flex-direction: column; gap: 2px; margin: 2px 0; padding-left: 8px; }
+.nav-group.abierto .nav-group-items { display: flex; }
+.nav-subitem {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px 9px 14px;
+  border-radius: 8px; cursor: pointer; transition: all 0.15s;
+  font-size: 12.5px; font-weight: 500; color: rgba(255,255,255,0.5);
+}
+.nav-subitem:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.nav-subitem.activo { background: var(--naranja); color: var(--lima-ink); font-weight: 700; }
+.nav-subdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .usuario-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
 .usuario-row:last-child { border-bottom:none; }
 .usuario-avatar { width:38px; height:38px; border-radius:50%; background:var(--coral-soft); color:var(--coral-dark); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0; }
@@ -1272,34 +1293,45 @@ tbody tr:hover td { background: #fdf9f6; }
       <div class="sidebar-brand-sub">Evaluaciones Psicolaborales</div>
     </div>
     <nav class="sidebar-nav">
-      <div class="nav-item activo" onclick="irA('panel')">
+      <div class="nav-item activo" data-pag="panel" onclick="irA('panel')">
         <span class="nav-icon">📊</span> Panel
       </div>
-      <div class="nav-item" onclick="irA('candidatos')">
+      <div class="nav-item" data-pag="candidatos" onclick="irA('candidatos')">
         <span class="nav-icon">📁</span> Reporte Tests
       </div>
-      <div class="nav-item" onclick="irA('reportes')">
+      <div class="nav-item" data-pag="reportes" onclick="irA('reportes')">
         <span class="nav-icon">📝</span> Generar informe
       </div>
-      <div class="nav-item" onclick="irA('informes')">
+      <div class="nav-item" data-pag="informes" onclick="irA('informes')">
         <span class="nav-icon">🗂️</span> Informes guardados
       </div>
-      <div class="nav-item" onclick="irA('entrevistas')">
-        <span class="nav-icon">🎥</span> Reportes Entrevistas
+      <div class="nav-group" id="nav-group-video">
+        <div class="nav-group-header" onclick="toggleVideoentrevistas()">
+          <span class="nav-icon">🎥</span> Videoentrevistas
+          <span class="nav-group-caret">▸</span>
+        </div>
+        <div class="nav-group-items">
+          <div class="nav-subitem" data-pag="entrevistas" onclick="irA('entrevistas')">
+            <span class="nav-subdot" style="background:#D85A30;"></span> Vendedor Retail
+          </div>
+          <div class="nav-subitem" data-pag="penguin" onclick="irA('penguin')">
+            <span class="nav-subdot" style="background:#1D9E75;"></span> Operario Penguin
+          </div>
+          <div class="nav-subitem" data-pag="prefiltro" onclick="irA('prefiltro')">
+            <span class="nav-subdot" style="background:#378ADD;"></span> Prefiltro
+          </div>
+        </div>
       </div>
-      <div class="nav-item" id="nav-prefiltro" onclick="irA('prefiltro')" style="display:none;">
-        <span class="nav-icon">🔎</span> Reportes Prefiltro
-      </div>
-      <div class="nav-item" onclick="irA('enviar')">
+      <div class="nav-item" data-pag="enviar" onclick="irA('enviar')">
         <span class="nav-icon">📧</span> Enviar evaluación
       </div>
-      <div class="nav-item" onclick="irA('historial')">
+      <div class="nav-item" data-pag="historial" onclick="irA('historial')">
         <span class="nav-icon">📋</span> Historial
       </div>
-      <div class="nav-item" onclick="irA('tests')">
+      <div class="nav-item" data-pag="tests" onclick="irA('tests')">
         <span class="nav-icon">🧠</span> Tests disponibles
       </div>
-      <div class="nav-item" id="nav-usuarios" onclick="irA('usuarios')" style="display:none;">
+      <div class="nav-item" id="nav-usuarios" data-pag="usuarios" onclick="irA('usuarios')" style="display:none;">
         <span class="nav-icon">👥</span> Usuarios
       </div>
     </nav>
@@ -1489,6 +1521,21 @@ tbody tr:hover td { background: #fdf9f6; }
           <button onclick="ultimaCarga['prefiltro']=0;cargarPrefiltros()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
         </div>
         <div id="lista-prefiltro"><div style="text-align:center;color:var(--muted);padding:34px;">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- REPORTES OPERARIO PENGUIN -->
+    <div class="page" id="page-penguin">
+      <div class="card">
+        <div style="background:#f7f8fa;border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--muted);">
+          Videoentrevistas de <strong>Operario Penguin</strong> (2 preguntas). <span style="color:#1D9E75;font-weight:600;">Módulo en preparación.</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <input type="text" id="buscar-penguin" oninput="filtrarPenguin()" placeholder="Buscar por nombre, RUT o cargo…" style="flex:1;min-width:220px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;">
+          <span id="penguin-count" style="font-size:13px;color:var(--muted);white-space:nowrap;"></span>
+          <button onclick="ultimaCarga['penguin']=0;cargarPenguin()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--ink);">↻ Actualizar</button>
+        </div>
+        <div id="lista-penguin"><div style="text-align:center;color:var(--muted);padding:34px;">Aún no hay entrevistas de Operario Penguin.</div></div>
       </div>
     </div>
 
@@ -2177,15 +2224,19 @@ async function cambiarMiPass() {
 
 // NAVEGACION
 var paginaActual = "panel";
-var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", entrevistas:"Reportes Entrevistas", prefiltro:"Reportes Prefiltro", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", usuarios:"Gestión de usuarios" };
+var titulos = { panel:"Panel principal", candidatos:"Reporte Tests", reportes:"Generar informe", informes:"Informes guardados", entrevistas:"Reportes Entrevistas", penguin:"Reportes Operario Penguin", prefiltro:"Reportes Prefiltro", enviar:"Enviar evaluación", historial:"Historial de envíos", tests:"Tests disponibles", usuarios:"Gestión de usuarios" };
 function irA(pag) {
   document.querySelectorAll(".page").forEach(function(el){ el.classList.remove("activo"); });
-  document.querySelectorAll(".nav-item").forEach(function(el){ el.classList.remove("activo"); });
+  document.querySelectorAll(".nav-item, .nav-subitem").forEach(function(el){ el.classList.remove("activo"); });
   document.getElementById("page-"+pag).classList.add("activo");
-  var ordenNav = ["panel","candidatos","reportes","informes","entrevistas","prefiltro","enviar","historial","tests","usuarios"];
-  var navIdx = ordenNav.indexOf(pag);
-  var navEls = document.querySelectorAll(".nav-item");
-  if (navIdx > -1 && navEls[navIdx]) navEls[navIdx].classList.add("activo");
+  // Resaltar el ítem de menú por su atributo data-pag (robusto ante sub-items del acordeón)
+  var navActivo = document.querySelector('[data-pag="'+pag+'"]');
+  if (navActivo) navActivo.classList.add("activo");
+  // Si el ítem pertenece al grupo Videoentrevistas, mantener el acordeón desplegado
+  var grupoVideo = document.getElementById("nav-group-video");
+  if (grupoVideo && (pag === "entrevistas" || pag === "penguin" || pag === "prefiltro")) {
+    grupoVideo.classList.add("abierto");
+  }
   document.getElementById("topbar-title").textContent = titulos[pag] || "";
   paginaActual = pag;
   if (pag === "historial") {
@@ -2212,6 +2263,12 @@ function irA(pag) {
       if (!datosFrescos("prefiltro")) cargarPrefiltros(true);
     } else cargarPrefiltros();
   }
+  if (pag === "penguin") {
+    if (penguinData.length) {
+      renderPenguin(penguinData);
+      if (!datosFrescos("penguin")) cargarPenguin(true);
+    } else cargarPenguin();
+  }
   if (pag === "panel" && !informesData.length) {
     cargarInformes().then(function(){
       try { renderActividad((todosEnvios||[]).concat(enviosEntrevista||[]), todosLosDatos); } catch(x){}
@@ -2220,6 +2277,12 @@ function irA(pag) {
   window.scrollTo(0, 0);
   var el = document.getElementById("page-"+pag);
   if (el) { el.style.display = "none"; el.offsetHeight; el.style.display = ""; }
+}
+
+// Abrir/cerrar el acordeón "Videoentrevistas" al hacer click en su encabezado
+function toggleVideoentrevistas(){
+  var g = document.getElementById("nav-group-video");
+  if (g) g.classList.toggle("abierto");
 }
 
 // ── INFORMES GUARDADOS ──
@@ -2624,6 +2687,36 @@ function verPrefiltro(i){
   entrevistaActualIdx = -1;
   prepararBotonAgradecer(p);
   document.getElementById("modal-entrevista").style.display = "flex";
+}
+
+// ── OPERARIO PENGUIN (módulo en preparación) ──
+// Cuando el backend distinga el tipo "penguin", cargarPenguin se conectará
+// al servidor igual que cargarEntrevistas/cargarPrefiltros y renderPenguin
+// dibujará las tarjetas. Por ahora la lista queda vacía a propósito.
+var penguinData = [];
+function cargarPenguin(silencioso){
+  penguinData = [];
+  ultimaCarga["penguin"] = Date.now();
+  renderPenguin(penguinData);
+}
+function renderPenguin(lista){
+  var cont = document.getElementById("lista-penguin");
+  var cnt = document.getElementById("penguin-count");
+  if (cnt) cnt.textContent = lista.length + " entrevista(s)";
+  if (!cont) return;
+  if (!lista.length){
+    cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay entrevistas de Operario Penguin.</div>";
+    return;
+  }
+  // (Cuando haya datos, aquí se dibujarán las tarjetas como en renderEntrevistas.)
+}
+function filtrarPenguin(){
+  var q = (document.getElementById("buscar-penguin").value||"").toLowerCase().trim();
+  if (!q) { renderPenguin(penguinData); return; }
+  var f = penguinData.filter(function(ent){
+    return ((ent.nombre||"")+" "+(ent.rut||"")+" "+(ent.cargo||"")).toLowerCase().indexOf(q) > -1;
+  });
+  renderPenguin(f);
 }
 
 async function cargarEntrevistas(silencioso){
