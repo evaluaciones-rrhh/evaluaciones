@@ -1,0 +1,2179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrevista Operario Penguin — Deneb Consultores</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf9f5;
+  --surface: #ffffff;
+  --surface2: #f2f0ea;
+  --border: #e3e6e2;
+  --border2: #d5d8d3;
+  --text: #1f2a33;
+  --muted: #7a828c;
+  --hint: #a0a6ae;
+  --accent: #e57a5f;
+  --accent2: #c95d43;
+  --green: #2a6e47;
+  --green2: #2a6e47;
+  --amber: #c07a00;
+  --radius: 10px;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --serif: 'Sora', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  user-select: none;
+  -webkit-user-select: none;
+}
+input, textarea { user-select: text; -webkit-user-select: text; }
+
+/* ══ LAYOUT ══ */
+.wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ══ HEADER ══ */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+.brand { font-family: var(--serif); font-size: 18px; color: var(--text); font-weight: 400; }
+.brand span { color: var(--accent); font-style: italic; }
+.step-indicator { font-size: 12px; color: var(--muted); letter-spacing: .08em; }
+
+/* ══ SCREENS ══ */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ══ BLOQUEADO ══ */
+#screen-bloqueado {
+  display: none; position: fixed; inset: 0;
+  background: var(--bg); z-index: 9999;
+  align-items: center; justify-content: center;
+}
+#screen-bloqueado.show { display: flex; }
+
+/* ══ CARD ══ */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 1.25rem;
+}
+.card-title {
+  font-family: var(--serif);
+  font-size: 11px; font-weight: 400;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: .75rem;
+}
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ══ FORM ══ */
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: .05em; text-transform: uppercase; }
+.field input {
+  width: 100%; padding: 10px 14px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 8px; color: var(--text);
+  font-family: var(--font); font-size: 14px;
+  outline: none; transition: border-color .15s;
+}
+.field input:focus { border-color: var(--accent); }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* ══ BOTONES ══ */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border-radius: 8px;
+  font-family: var(--font); font-size: 14px; font-weight: 600;
+  cursor: pointer; border: none; transition: all .15s;
+  letter-spacing: .02em;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+.btn-record { background: var(--accent); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-record.recording { background: #c0392b; animation: pulse-btn .8s ease-in-out infinite; }
+.btn-stop { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-next { background: var(--green); color: #fff; width: 100%; justify-content: center; padding: 16px; font-size: 15px; border-radius: 10px; }
+.btn-next:hover { background: var(--green2); }
+.btn-full { width: 100%; justify-content: center; margin-top: .5rem; }
+
+@keyframes pulse-btn {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .8; }
+}
+
+/* ══ BIENVENIDA ══ */
+.welcome-hero {
+  text-align: center; padding: 3rem 2rem;
+}
+.welcome-icon { font-size: 52px; margin-bottom: 1.5rem; }
+.welcome-title {
+  font-family: var(--serif); font-size: 32px; font-weight: 300;
+  margin-bottom: .75rem; line-height: 1.2;
+}
+.welcome-title span { color: var(--accent); font-style: italic; }
+.welcome-sub { font-size: 15px; color: var(--muted); max-width: 480px; margin: 0 auto 2rem; line-height: 1.7; }
+
+.info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+.info-item {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 1.25rem; text-align: center;
+}
+.info-num { font-family: var(--serif); font-size: 28px; color: var(--accent); font-weight: 400; }
+.info-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+
+.tip-box {
+  background: rgba(196,67,42,.08); border: 1px solid rgba(196,67,42,.2);
+  border-radius: 10px; padding: 1rem 1.25rem;
+  font-size: 13px; color: #45525d;
+  line-height: 1.65; text-align: left; margin-bottom: 1.5rem;
+}
+.tip-box strong { color: var(--accent2); }
+
+/* ══ PREGUNTA / VIDEO ══ */
+.pregunta-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.pregunta-badge {
+  background: var(--accent); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 4px 12px; border-radius: 20px;
+}
+.competencia-tag {
+  font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border2); border-radius: 20px;
+  padding: 4px 12px; letter-spacing: .05em;
+}
+
+.pregunta-texto {
+  font-family: var(--serif); font-size: 22px; font-weight: 300;
+  line-height: 1.5; color: var(--text);
+  margin-bottom: 2rem; font-style: italic;
+}
+
+/* ══ CUENTA REGRESIVA ══ */
+.countdown-wrap {
+  text-align: center; padding: 3rem 2rem;
+}
+.countdown-num {
+  font-family: var(--serif); font-size: 96px; font-weight: 300;
+  color: var(--accent); line-height: 1; margin-bottom: .5rem;
+  animation: count-pulse 1s ease-in-out infinite;
+}
+@keyframes count-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.countdown-lbl { font-size: 13px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+
+/* ══ VIDEO ══ */
+.video-wrap {
+  position: relative; border-radius: 12px; overflow: hidden;
+  background: #000; margin-bottom: 1.25rem;
+  aspect-ratio: 16/9;
+}
+video {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.rec-dot {
+  position: absolute; top: 14px; right: 14px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--accent); display: none;
+  animation: blink 1s ease-in-out infinite;
+}
+.rec-dot.show { display: block; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+.rec-label {
+  position: absolute; top: 12px; left: 14px;
+  background: rgba(139,26,26,.85); color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  padding: 3px 10px; border-radius: 20px; display: none;
+}
+.rec-label.show { display: block; }
+
+.timer-video {
+  position: absolute; bottom: 14px; right: 14px;
+  font-family: 'Plus Jakarta Sans', monospace; font-size: 20px; font-weight: 600;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6);
+  display: none;
+}
+.timer-video.show { display: block; }
+
+/* ══ CONTROLES GRABACIÓN ══ */
+.controls { display: flex; flex-direction: column; gap: .75rem; margin-top: 1rem; }
+.control-hint { font-size: 12px; color: var(--hint); text-align: center; margin-top: .25rem; }
+
+/* ══ PREVIEW ══ */
+.preview-wrap {
+  background: #000; border-radius: 12px; overflow: hidden;
+  margin-bottom: 1rem; aspect-ratio: 16/9; display: none;
+}
+.preview-wrap video { width: 100%; height: 100%; object-fit: cover; }
+
+/* ══ PROGRESO ══ */
+.progress-bar-wrap { margin-bottom: 2rem; }
+.progress-labels { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.progress-labels #prog-pct { color: var(--accent); font-weight: 700; }
+.progress-track { height: 8px; background: var(--border2); border-radius: 999px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 999px; transition: width .4s ease; }
+.progress-dots { display: flex; gap: 6px; margin-top: 10px; }
+.progress-dots .dot { flex: 1; height: 6px; border-radius: 999px; background: var(--border2); transition: background .3s, opacity .3s; }
+.progress-dots .dot.done { background: var(--accent); }
+.progress-dots .dot.current { background: var(--accent); opacity: .5; }
+
+/* ══ GRACIAS ══ */
+.gracias-wrap { text-align: center; padding: 4rem 2rem; }
+.gracias-icon { font-size: 56px; margin-bottom: 1.5rem; }
+.gracias-title { font-family: var(--serif); font-size: 30px; font-weight: 300; margin-bottom: .75rem; }
+.gracias-sub { font-size: 15px; color: var(--muted); max-width: 420px; margin: 0 auto; line-height: 1.7; }
+
+/* ══ UPLOAD PROGRESS ══ */
+.upload-wrap { text-align: center; padding: 3rem 2rem; }
+.upload-spinner {
+  width: 48px; height: 48px; border: 3px solid var(--border2);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin .7s linear infinite; margin: 0 auto 1.5rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.upload-text { font-size: 15px; color: var(--muted); }
+.upload-progress { margin-top: 1rem; }
+.upload-bar-track { height: 4px; background: var(--border2); border-radius: 2px; overflow: hidden; margin-top: .5rem; }
+.upload-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s; }
+
+/* ══ ENTREVISTADOR VIRTUAL ══ */
+.entrevistador-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 2rem 1rem 1rem; text-align: center;
+}
+.avatar-wrap {
+  position: relative; margin-bottom: 1.5rem;
+}
+.avatar-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #2b3a47, #e57a5f);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto;
+  box-shadow: 0 0 0 0 rgba(196,67,42,0.4);
+  animation: avatar-pulse 2s ease-in-out infinite;
+}
+.avatar-circle.hablando {
+  animation: avatar-pulse-fast 0.6s ease-in-out infinite;
+  box-shadow: 0 0 0 8px rgba(196,67,42,0.2);
+}
+@keyframes avatar-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196,67,42,0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(196,67,42,0.0); }
+}
+@keyframes avatar-pulse-fast {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(196,67,42,0.3); transform: scale(1); }
+  50% { box-shadow: 0 0 0 12px rgba(196,67,42,0.0); transform: scale(1.04); }
+}
+.avatar-ondas {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px; height: 80px;
+}
+.onda {
+  position: absolute; inset: 0; border-radius: 50%;
+  border: 2px solid rgba(196,67,42,0.3);
+  animation: onda-expand 2s ease-out infinite;
+  opacity: 0;
+}
+.onda:nth-child(2) { animation-delay: 0.6s; }
+.onda:nth-child(3) { animation-delay: 1.2s; }
+@keyframes onda-expand {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.entrevistador-nombre {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: .5rem;
+}
+.burbuja-texto {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 0 12px 12px 12px;
+  padding: 1rem 1.25rem; max-width: 480px;
+  font-size: 15px; line-height: 1.7; color: var(--text);
+  text-align: left; margin-bottom: 1.5rem;
+  min-height: 60px;
+}
+.cursor-texto {
+  display: inline-block; width: 2px; height: 16px;
+  background: var(--accent); margin-left: 2px;
+  vertical-align: middle;
+  animation: cursor-blink 0.7s ease-in-out infinite;
+}
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.btn-saltar {
+  font-size: 11px; color: var(--hint); background: none;
+  border: none; cursor: pointer; text-decoration: underline;
+  font-family: var(--font); padding: 0;
+}
+.btn-saltar:hover { color: var(--muted); }
+
+footer { text-align: center; font-size: 11px; color: var(--hint); margin-top: 3rem; padding-bottom: 2rem; letter-spacing: .05em; }
+
+@media (max-width: 600px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .pregunta-texto { font-size: 18px; }
+  .countdown-num { font-size: 72px; }
+}
+
+/* ══ PANEL STAR ══ */
+.star-check {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .6rem .75rem; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: all .3s;
+}
+.star-check.completado {
+  background: rgba(42,140,86,0.15); border-color: rgba(42,140,86,0.3);
+}
+.star-check-icon {
+  font-size: 16px; color: var(--hint); flex-shrink: 0; margin-top: 1px;
+  transition: all .3s;
+}
+.star-check.completado .star-check-icon { color: var(--green); }
+.star-check-label {
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  line-height: 1.3; transition: color .3s;
+}
+.star-check.completado .star-check-label { color: var(--green); }
+.star-check-hint {
+  font-size: 10px; color: var(--hint); margin-top: 1px;
+  line-height: 1.3;
+}
+
+/* ══ PANTALLA CONTRAPREGUNTA ══ */
+#screen-contrapregunta .wrap { text-align: center; }
+.contra-badge {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--accent2); background: rgba(232,89,60,0.12);
+  border: 1px solid rgba(232,89,60,0.2); border-radius: 20px;
+  padding: 4px 14px; margin-bottom: 1.5rem;
+}
+.contra-titulo {
+  font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 400;
+  color: var(--text); margin-bottom: 1rem; line-height: 1.4;
+}
+.contra-pregunta {
+  font-size: 15px; color: var(--muted); line-height: 1.7;
+  background: var(--surface2); border-radius: 10px;
+  padding: 1.25rem; border-left: 3px solid var(--accent);
+  text-align: left; margin-bottom: 1.5rem;
+}
+.contra-timer {
+  font-family: var(--mono); font-size: 36px; font-weight: 500;
+  color: var(--accent); margin-bottom: 1.5rem;
+}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA BLOQUEADA -->
+<div id="screen-bloqueado">
+  <div style="max-width:480px;text-align:center;padding:2rem;">
+    <div style="font-size:56px;margin-bottom:1rem;">🔒</div>
+    <h2 id="bloq-titulo" style="font-family:'Sora',sans-serif;font-size:24px;font-weight:300;margin-bottom:.75rem;">Esta entrevista ya fue completada</h2>
+    <p id="bloq-texto" style="font-size:14px;color:var(--muted);line-height:1.7;">Ya registraste tus respuestas para esta evaluación. No es posible volver a realizarla.<br><br>Si crees que esto es un error, contacta a tu evaluador.</p>
+  </div>
+</div>
+
+<div class="header">
+  <div class="brand">Deneb <span>Consultores</span></div>
+  <div class="step-indicator" id="step-indicator">Entrevista por Competencias</div>
+</div>
+
+<!-- ══ PANTALLA 1: BIENVENIDA ══ -->
+<div class="screen active" id="screen-bienvenida">
+  <div style="min-height:100vh;display:flex;flex-direction:column;">
+
+    <!-- Hero superior -->
+    <div style="background:linear-gradient(135deg,#2b3a47 0%,#1f2a33 100%);padding:3rem 1.5rem 2.5rem;text-align:center;flex-shrink:0;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:1.5rem;">Deneb Consultores · Evaluaciones</div>
+      <h1 style="font-family:'Sora',sans-serif;font-size:36px;font-weight:300;color:#f0ece4;line-height:1.2;margin-bottom:.75rem;">Entrevista por <em style="color:var(--accent);">Competencias</em></h1>
+      <p style="font-size:14px;color:rgba(240,236,228,0.5);max-width:400px;margin:0 auto;line-height:1.7;">Estás a punto de realizar tu entrevista. Responderás preguntas grabándote en video desde tu computador.</p>
+    </div>
+
+    <!-- Pasos -->
+    <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:1.5rem;">
+      <div style="max-width:560px;margin:0 auto;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Cómo funciona</div>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+            <div style="font-size:13px;color:var(--text);">Ingresa tus datos y haz clic en <strong>Comenzar</strong></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+            <div style="font-size:13px;color:var(--text);">Lee cada pregunta con atención antes de grabar</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+            <div style="font-size:13px;color:var(--text);">Responde con naturalidad, como si conversaras — <strong id="num-preguntas">2</strong> preguntas de hasta <strong>3 minutos</strong> cada una</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist técnico -->
+    <div style="background:var(--surface2);border-bottom:1px solid var(--border);padding:1rem 1.5rem;">
+      <div style="max-width:560px;margin:0 auto;display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+          <span style="color:var(--green2);">✓</span> Cámara web
+        </div>
+        <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+          <span style="color:var(--green2);">✓</span> Micrófono
+        </div>
+        <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+          <span style="color:var(--green2);">✓</span> Google Chrome o Edge
+        </div>
+        <div style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;">
+          <span style="color:var(--green2);">✓</span> Lugar tranquilo con buena luz
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <div style="flex:1;padding:2rem 1.5rem;">
+      <div style="max-width:560px;margin:0 auto;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;">Tus datos</div>
+        <div class="field-grid" style="margin-bottom:1rem;">
+          <div class="field">
+            <label>Nombre *</label>
+            <input type="text" id="inp-nombre" placeholder="Ej: Camila">
+          </div>
+          <div class="field">
+            <label>Apellido *</label>
+            <input type="text" id="inp-apellido" placeholder="Ej: Rojas">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:1.5rem;">
+          <label>RUT *</label>
+          <input type="text" id="inp-rut" placeholder="Ej: 12.345.678-9">
+        </div>
+
+        <button class="btn btn-primary" onclick="iniciarEntrevista()" style="width:100%;justify-content:center;padding:16px;font-size:16px;border-radius:10px;">
+          Comenzar entrevista →
+        </button>
+        <p style="text-align:center;font-size:11px;color:var(--hint);margin-top:.75rem;">Al iniciar se solicitará acceso a tu cámara y micrófono</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PANTALLA 1B: ENTREVISTADOR VIRTUAL ══ -->
+<div class="screen" id="screen-entrevistador">
+  <div class="wrap">
+    <div class="entrevistador-wrap">
+      <div class="avatar-wrap">
+        <div class="avatar-circle" id="avatar-circle">🎙️</div>
+        <div class="avatar-ondas">
+          <div class="onda"></div>
+          <div class="onda"></div>
+          <div class="onda"></div>
+        </div>
+      </div>
+      <div class="entrevistador-nombre">Asistente de Evaluación · Deneb Consultores</div>
+      <div class="burbuja-texto" id="burbuja-texto">
+        <span id="texto-animado"></span><span class="cursor-texto" id="cursor-texto"></span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.75rem;margin-top:.5rem;">
+        <button class="btn btn-primary" id="btn-listo" onclick="continuarDesdeEntrevistador()" style="display:none;min-width:200px;justify-content:center;">
+          Estoy listo/a →
+        </button>
+        <button class="btn-saltar" id="btn-saltar" onclick="continuarDesdeEntrevistador()">Saltar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 2: CUENTA REGRESIVA ══ -->
+<div class="screen" id="screen-countdown" style="display:none!important;">
+  <div class="wrap">
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="cd-badge">Pregunta 1 de 5</span>
+        <span class="competencia-tag" id="cd-competencia"></span>
+      </div>
+      <div class="pregunta-texto" id="cd-pregunta"></div>
+    </div>
+    <div class="countdown-wrap">
+      <div class="countdown-num" id="countdown-num">10</div>
+      <div class="countdown-lbl">segundos para prepararte</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 3: GRABACIÓN ══ -->
+<div class="screen" id="screen-grabacion">
+  <div class="wrap">
+    <div class="progress-bar-wrap">
+      <div class="progress-labels">
+        <span id="prog-label">Pregunta 1 de 5</span>
+        <span id="prog-pct">20%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:20%"></div>
+      </div>
+      <div class="progress-dots" id="prog-dots"></div>
+    </div>
+
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="gr-badge">Pregunta 1</span>
+        <span class="competencia-tag" id="gr-competencia"></span>
+      </div>
+      <div class="pregunta-texto" id="gr-pregunta"></div>
+    </div>
+
+    <div class="video-wrap" style="position:relative;">
+      <video id="video-live" autoplay muted playsinline></video>
+      <canvas id="canvas-facial" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;opacity:0;"></canvas>
+      <div class="rec-dot" id="rec-dot"></div>
+      <div class="rec-label" id="rec-label">● REC</div>
+      <div class="timer-video" id="timer-video">3:00</div>
+    </div>
+
+    <!-- Panel STAR en tiempo real -->
+    <div id="panel-star" style="display:none;background:#f2f0ea;border:1px solid #e3e6e2;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+      <div style="font-size:10px;color:#7a828c;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem;">Recuerda incluir en tu respuesta</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;">
+        <div id="check-s" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Situación</div><div class="star-check-hint">¿Cuándo y dónde ocurrió?</div></div>
+        </div>
+        <div id="check-t" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Tu rol</div><div class="star-check-hint">¿Qué te correspondía hacer?</div></div>
+        </div>
+        <div id="check-a" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">Tus acciones</div><div class="star-check-hint">¿Qué hiciste tú específicamente?</div></div>
+        </div>
+        <div id="check-r" class="star-check">
+          <span class="star-check-icon">○</span>
+          <div><div class="star-check-label">El resultado</div><div class="star-check-hint">¿Qué pasó al final?</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcripción oculta -->
+    <div id="transcripcion-wrap" style="display:none;">
+      <div id="transcripcion-texto"></div>
+    </div>
+
+    <div class="controls" id="controles-grabacion">
+      <button class="btn btn-record" id="btn-grabar" onclick="iniciarGrabacion()">
+        ● Iniciar grabación
+      </button>
+      <p class="control-hint">Tienes hasta 3 minutos para responder. Cuando estés listo, presiona para grabar.</p>
+      <div id="gr-cuenta-inicio" style="text-align:center;font-size:13px;color:var(--accent);font-weight:600;margin-top:.6rem;"></div>
+    </div>
+
+    <div class="controls" id="controles-grabando" style="display:none;">
+      <button class="btn btn-stop" onclick="detenerGrabacion()">
+        ■ Detener grabación
+      </button>
+      <p class="control-hint" id="hint-grabando">Grabando... presiona para detener antes del tiempo</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 4: PREVIEW ══ -->
+<div class="screen" id="screen-preview">
+  <div class="wrap">
+    <div class="card">
+      <div class="pregunta-header">
+        <span class="pregunta-badge" id="pv-badge">Pregunta 1</span>
+        <span class="competencia-tag" id="pv-competencia"></span>
+      </div>
+      <p id="pv-instruccion" style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Revisa tu respuesta. Si estás conforme, continúa. Tienes una única oportunidad de volver a grabarla.</p>
+    </div>
+
+    <div class="preview-wrap" id="preview-wrap" style="display:block;">
+      <video id="video-preview" controls playsinline></video>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-next btn-full" onclick="siguientePregunta()">
+        Continuar → <span id="btn-next-label"></span>
+      </button>
+      <button class="btn btn-full" id="btn-regrabar" onclick="volverAGrabar()" style="background:transparent;border:1px solid var(--border);color:var(--text);margin-top:.5rem;">↺ Volver a grabar (solo una vez)</button>
+      <div id="pv-timer" style="text-align:center;font-size:12px;color:var(--accent);margin-top:.7rem;font-weight:600;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 5: SUBIENDO ══ -->
+<div class="screen" id="screen-subiendo">
+  <div class="wrap">
+    <div class="upload-wrap">
+      <div class="upload-spinner"></div>
+      <div class="upload-text" id="upload-text">Guardando tu respuesta...</div>
+      <div class="upload-progress">
+        <div style="font-size:12px;color:var(--hint);" id="upload-pct">0%</div>
+        <div class="upload-bar-track">
+          <div class="upload-bar-fill" id="upload-bar" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PANTALLA 6: GRACIAS ══ -->
+<div class="screen" id="screen-gracias">
+  <div class="wrap">
+    <div class="gracias-wrap">
+      <div class="gracias-icon">✓</div>
+      <h2 class="gracias-title">Entrevista completada</h2>
+      <p class="gracias-sub">Gracias por tu tiempo. Tus respuestas han sido registradas correctamente.</p>
+      <div style="background:#f9f6f2;border-radius:10px;padding:18px 20px;margin:18px 0 0;text-align:left;">
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#8a8f96;margin:0 0 10px;font-weight:600;">Qué pasa ahora</p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0 0 10px;">Revisaremos tus respuestas junto al resto de tus antecedentes. <strong>Si tu perfil se ajusta a lo que busca el cargo, te contactaremos para avanzar en el proceso de selección.</strong></p>
+        <p style="font-size:14px;line-height:1.7;color:#444;margin:0;">Si en esta oportunidad no continúas en el proceso, igualmente te enviaremos un correo para avisarte y agradecerte tu participación. En cualquiera de los dos casos vas a tener noticias nuestras.</p>
+      </div>
+      <p style="font-size:13px;color:#8a8f96;margin:16px 0 0;">Ya puedes cerrar esta ventana.</p>
+      <div style="margin-top:26px;padding-top:18px;border-top:1px solid #ececec;">
+        <div style="font-size:15px;font-weight:800;color:#2b3a47;letter-spacing:-0.3px;">deneb <span style="font-weight:400;color:#8a8f96;">evaluaciones</span></div>
+        <div style="font-size:11px;color:#a0a5ab;letter-spacing:2px;text-transform:uppercase;margin-top:3px;">Grupo Cygnus</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="screen-informe">
+  <div class="wrap">
+    <div id="informe-contenido"></div>
+  </div>
+</div>
+
+<style>
+#screen-informe .wrap { max-width: 720px; margin: 0 auto; }
+.inf-head { text-align: center; padding: 2rem 1rem 1rem; }
+.inf-head h2 { font-family: var(--serif); font-weight: 300; font-size: 26px; margin-bottom: .3rem; }
+.inf-meta { color: var(--muted); font-size: 13px; }
+.inf-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.15rem 1.35rem; margin-bottom: 1rem; }
+.inf-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .55rem; }
+.inf-text { font-size: 14.5px; line-height: 1.7; color: var(--text); }
+.inf-comp { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid var(--border); }
+.inf-comp:last-child { border-bottom: none; }
+.inf-comp-nombre { font-size: 14.5px; }
+.inf-badge { font-size: 12px; font-weight: 600; padding: .25rem .7rem; border-radius: 999px; text-transform: capitalize; white-space: nowrap; }
+.inf-verde { background: #e8f4ee; color: #2a6e47; }
+.inf-ambar { background: #fef3e0; color: #c07a00; }
+.inf-rojo { background: #fdecea; color: #c0392b; }
+.inf-gris { background: #f2f0ea; color: var(--muted); }
+.inf-reco { text-align: center; padding: 1.4rem; border-radius: var(--radius); margin-bottom: 1rem; font-family: var(--serif); font-size: 22px; font-weight: 400; border: 1px solid var(--border); }
+.inf-reco small { display: block; font-family: var(--font); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+.inf-reco.inf-verde { background: #e8f4ee; color: #2a6e47; }
+.inf-reco.inf-ambar { background: #fef3e0; color: #c07a00; }
+.inf-reco.inf-rojo { background: #fdecea; color: #c0392b; }
+.inf-nota { text-align: center; font-size: 12px; color: var(--hint); margin-top: 1.5rem; padding-bottom: 2rem; }
+</style>
+
+<footer>Entrevista Operario Penguin — Deneb Consultores · Uso exclusivo de evaluadores certificados</footer>
+
+<script>
+// ══════════════════════════════════════
+// CONFIGURACIÓN
+// ══════════════════════════════════════
+const APPS_URL = 'https://script.google.com/macros/s/AKfycbx1uyYc_qkW2HIdF1U_ta7ljST0dL1o-86gu38AXE-tpW7v2RpwPkrrnynNC3AqIQMu/exec';
+// ── GROQ API KEY — reemplaza TU_API_KEY_AQUI con tu key de groq.com ──
+let GROQ_API_KEY = '';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.1-8b-instant';
+const TIEMPO_GRABACION = 180;
+const TIEMPO_COUNTDOWN = 10;
+
+// ══════════════════════════════════════
+// ESTADO
+// ══════════════════════════════════════
+let token = '';
+let cargo = '';
+let competencias = [];
+let preguntaActual = 0;
+let finProcesado = false;
+let regrabacionesUsadas = 0;
+let fotoCandidato = null;
+let cambiosPantalla = 0;
+let entrevistaEnCurso = false;
+document.addEventListener('visibilitychange', function() {
+  if (entrevistaEnCurso && document.hidden) cambiosPantalla++;
+});
+let timerPreview = null;
+let segundosPreview = 30;
+let timerInicio = null;
+let segundosInicio = 15;
+function iniciarCuentaRegresivaInicio() {
+  clearInterval(timerInicio);
+  segundosInicio = 15;
+  const el = document.getElementById('gr-cuenta-inicio');
+  function pintar(){ if (el) el.textContent = 'Empieza a responder en ' + segundosInicio + ' s (si no, la grabación comienza sola)'; }
+  pintar();
+  timerInicio = setInterval(function() {
+    segundosInicio--;
+    if (segundosInicio <= 0) {
+      clearInterval(timerInicio);
+      if (el) el.textContent = '';
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') iniciarGrabacion();
+      return;
+    }
+    pintar();
+  }, 1000);
+}
+function detenerCuentaRegresivaInicio() {
+  clearInterval(timerInicio);
+  const el = document.getElementById('gr-cuenta-inicio');
+  if (el) el.textContent = '';
+}
+let stream = null;
+let mediaRecorder = null;
+let chunks = [];
+let blobActual = null;
+let videosGuardados = [];
+let transcripciones = [];
+let datosEmocionales = [];
+let recognition = null;
+let textoActual = '';
+let intervaloFacial = null;
+let faceApiCargado = false;
+let contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
+let timerGrabacion = null;
+let timerCountdown = null;
+let segundosRestantes = TIEMPO_GRABACION;
+let timerContrapregunta = null;
+let segundosContra = 60;
+let textoContra = '';
+let intervaloSTAR = null;
+let starActual = { s:0, t:0, a:0, r:0 };
+const TIEMPO_CONTRAPREGUNTA = 60;
+let candidato = { nombre: '', rut: '', email: '' };
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('load', async function() {
+  const params = new URLSearchParams(window.location.search);
+  token = params.get('token') || '';
+  cargo = decodeURIComponent(params.get('cargo') || 'Otro');
+
+  if (token) {
+    try {
+      const r = await fetch(APPS_URL + '?action=validarToken&token=' + token);
+      const d = await r.json();
+      if (!d.valido) {
+        if (d.motivo === 'expirado') {
+          document.getElementById('bloq-titulo').textContent = 'El tiempo para responder ha vencido';
+          document.getElementById('bloq-texto').innerHTML = 'Tenías 4 horas para completar la entrevista desde que recibiste el enlace, y ese plazo ya pasó.<br><br>Si necesitas una nueva oportunidad, contacta a tu evaluador.';
+        }
+        document.getElementById('screen-bloqueado').classList.add('show');
+        return;
+      }
+      if (d.nombre) document.getElementById('inp-nombre').value = d.nombre;
+    } catch(e) {}
+  }
+
+  await cargarGroqKey();
+  await cargarCompetencias();
+});
+
+async function cargarGroqKey() {
+  try {
+    const r = await fetch(APPS_URL + '?action=getGroqKey');
+    const d = await r.json();
+    if (d.key) { GROQ_API_KEY = d.key; console.log('Groq key OK:', d.key.substring(0,10)+'...'); }
+  } catch(e) { console.log('Groq key error:', e.message); }
+}
+
+// ── Preguntas para el cargo Operario Penguin (2 preguntas) ──
+// Se reusa la ruta de "prefiltro" (describir, NO calificar). El tipo:'prefiltro'
+// es intencional: hace que analizarConIA describa la respuesta en vez de ponerle nota.
+// Lo que distingue a Penguin del prefiltro real es el ENVÍO (tipo PENGUIN en Envios)
+// y el procesamiento del backend (generarInformePenguin).
+const PREGUNTAS_PENGUIN = [
+  { id: 'presentacion', nombre: 'Presentación', tipo: 'prefiltro', foco: 'presentacion', pregunta: 'Haz una breve presentación tuya: cuéntanos quién eres y algo de ti.' },
+  { id: 'sistema_pedido', nombre: 'Sistema de preparación de pedidos', tipo: 'prefiltro', foco: 'sistema_pedido', pregunta: '¿Con qué sistema de preparación de pedidos has trabajado? Detállanos tu respuesta: qué sistema usaste, dónde y qué hacías con él.' }
+];
+
+async function cargarCompetencias() {
+  // Se usan SIEMPRE las preguntas definidas en este archivo.
+  competencias = PREGUNTAS_PENGUIN;
+  document.getElementById('num-preguntas').textContent = competencias.length;
+  console.log('Competencias cargadas (del archivo):', competencias.length);
+}
+
+// ══════════════════════════════════════
+// INICIAR ENTREVISTA
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// VALIDACIÓN DE RUT (módulo 11)
+// ══════════════════════════════════════
+function limpiarRut(valor) {
+  return String(valor || '').replace(/[^0-9kK]/g, '').toUpperCase();
+}
+
+function formatearRut(valor) {
+  const limpio = limpiarRut(valor);
+  if (limpio.length < 2) return limpio;
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  return cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + dv;
+}
+
+function rutEsValido(valor) {
+  const limpio = limpiarRut(valor);
+  if (limpio.length < 8 || limpio.length > 9) return false;
+
+  const cuerpo = limpio.slice(0, -1);
+  const dv = limpio.slice(-1);
+  if (!/^\d+$/.test(cuerpo)) return false;
+
+  const numero = parseInt(cuerpo, 10);
+  if (numero < 1000000) return false;              // RUT demasiado bajo, no existe
+  if (/^(\d)\1+$/.test(cuerpo)) return false;      // 11111111, 22222222, etc.
+
+  // Cálculo del dígito verificador
+  let suma = 0, multiplo = 2;
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo.charAt(i), 10) * multiplo;
+    multiplo = multiplo === 7 ? 2 : multiplo + 1;
+  }
+  const resto = 11 - (suma % 11);
+  const dvEsperado = resto === 11 ? '0' : resto === 10 ? 'K' : String(resto);
+
+  return dv === dvEsperado;
+}
+
+// Formatea y valida mientras el candidato escribe
+document.addEventListener('DOMContentLoaded', function() {
+  const campo = document.getElementById('inp-rut');
+  if (!campo) return;
+  campo.addEventListener('blur', function() {
+    if (!campo.value.trim()) { campo.style.borderColor = ''; return; }
+    campo.value = formatearRut(campo.value);
+    campo.style.borderColor = rutEsValido(campo.value) ? '#2e7d32' : '#c0392b';
+  });
+  campo.addEventListener('input', function() { campo.style.borderColor = ''; });
+});
+
+async function iniciarEntrevista() {
+  const nombre = document.getElementById('inp-nombre').value.trim();
+  const apellido = document.getElementById('inp-apellido').value.trim();
+  const rut = document.getElementById('inp-rut').value.trim();
+
+  if (!nombre || !apellido || !rut) {
+    alert('Por favor completa tu nombre, apellido y RUT.');
+    return;
+  }
+
+  if (!rutEsValido(rut)) {
+    alert('El RUT ingresado no es válido. Revísalo y vuelve a intentarlo.\n\nEscríbelo con su dígito verificador, por ejemplo: 12.345.678-5');
+    document.getElementById('inp-rut').focus();
+    document.getElementById('inp-rut').style.borderColor = '#c0392b';
+    return;
+  }
+
+  candidato = { nombre: (nombre + ' ' + apellido).trim(), apellido: apellido, rut: formatearRut(rut), email: '' };
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 480 }, height: { ideal: 360 }, frameRate: { ideal: 18 } }, audio: true });
+    entrevistaEnCurso = true;
+    cambiosPantalla = 0;
+    mostrarPantalla('screen-countdown');
+    mostrarPreguntaCountdown(0);
+  } catch(err) {
+    alert('No se pudo acceder a tu cámara o micrófono. Por favor permite el acceso e intenta de nuevo.');
+  }
+}
+
+// ══════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// ENTREVISTADOR VIRTUAL
+// ══════════════════════════════════════
+let indiceEntrevistador = 0;
+let timeoutEscritura = null;
+let escrituraCompleta = false;
+
+const HINTS_STAR = [
+  'Para la siguiente, recuerda describir una situacion concreta: cuando ocurrio y cual era el contexto.',
+  'Esta vez pon enfasis en cual era tu rol y que acciones tomaste tu personalmente.',
+  'Recuerda mencionar el resultado concreto que obtuviste: datos, cifras o impacto si los tienes.',
+  'Tomate tu tiempo y responde con detalle, lo estas haciendo muy bien.'
+];
+
+function getTextoTransicion(idx) {
+  const n = competencias.length;
+  const sig = competencias[idx];
+  const cierre = idx === n - 1 ? 'Es lo ultimo. ' : '';
+  if (sig && sig.tipo === 'dinamica') {
+    const prev = competencias[idx - 1];
+    const continua = prev && prev.tipo === 'dinamica';
+    const intro = continua ? 'Muy bien, seguimos con la dinamica de venta. ' : 'Ahora viene una dinamica entretenida de venta. ';
+    return intro + cierre + 'Relajate y sigue con naturalidad.';
+  }
+  const hint = HINTS_STAR[(idx - 1) % HINTS_STAR.length];
+  return 'Bien hecho. Llevas ' + idx + ' de ' + n + '. ' + cierre + hint;
+}
+
+function getTextoBienvenida() {
+  const nombre = candidato.nombre ? candidato.nombre.split(' ')[0] : '';
+  const saludo = nombre ? 'Hola, ' + nombre + '.' : 'Hola.';
+  return saludo + ' Bienvenido o bienvenida a tu entrevista. Partiremos con una breve presentacion tuya y luego haremos una dinamica de venta entretenida. Es sencillo y rapido, solo se natural y pasalo bien. Tienes hasta 3 minutos para cada respuesta. Cuando estes listo o lista, presiona el boton para comenzar.';
+}
+
+function mostrarPreguntaCountdown(idx) {
+  indiceEntrevistador = idx;
+  regrabacionesUsadas = 0;
+  escrituraCompleta = false;
+
+  // Ocultar botón listo inicialmente
+  const btnListo = document.getElementById('btn-listo');
+  if (btnListo) btnListo.style.display = 'none';
+
+  // Texto según si es intro o transición
+  const texto = idx === 0 ? getTextoBienvenida() : getTextoTransicion(idx);
+
+  // Limpiar texto animado
+  document.getElementById('texto-animado').textContent = '';
+  document.getElementById('cursor-texto').style.display = 'inline-block';
+  document.getElementById('avatar-circle').classList.add('hablando');
+
+  mostrarPantalla('screen-entrevistador');
+
+  // Animar texto letra por letra
+  let charIdx = 0;
+  clearTimeout(timeoutEscritura);
+
+  function escribirLetra() {
+    if (charIdx < texto.length) {
+      document.getElementById('texto-animado').textContent += texto[charIdx];
+      charIdx++;
+      timeoutEscritura = setTimeout(escribirLetra, 25);
+    } else {
+      // Terminó de escribir
+      document.getElementById('cursor-texto').style.display = 'none';
+      document.getElementById('avatar-circle').classList.remove('hablando');
+      escrituraCompleta = true;
+      // Mostrar botón listo
+      if (btnListo) btnListo.style.display = 'flex';
+    }
+  }
+  escribirLetra();
+}
+
+function continuarDesdeEntrevistador() {
+  clearTimeout(timeoutEscritura);
+  document.getElementById('cursor-texto').style.display = 'none';
+  document.getElementById('avatar-circle').classList.remove('hablando');
+  // Verificar que las competencias estén cargadas
+  if (!competencias || competencias.length === 0) {
+    alert('Cargando preguntas, por favor espera un momento...');
+    return;
+  }
+  iniciarGrabacionDirecta(indiceEntrevistador);
+}
+
+function iniciarGrabacionDirecta(idx) {
+  mostrarGrabacion(idx);
+}
+
+// ══════════════════════════════════════
+// GRABACIÓN
+// ══════════════════════════════════════
+function mostrarGrabacion(idx) {
+  const comp = competencias[idx];
+  const pct = Math.round(((idx+1) / competencias.length) * 100);
+
+  document.getElementById('gr-badge').textContent = 'Pregunta ' + (idx+1);
+  document.getElementById('gr-competencia').textContent = comp.nombre;
+  document.getElementById('gr-pregunta').textContent = comp.pregunta;
+  document.getElementById('prog-label').textContent = 'Pregunta ' + (idx+1) + ' de ' + competencias.length;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  const dots = document.getElementById('prog-dots');
+  if (dots) {
+    let h = '';
+    for (let k = 0; k < competencias.length; k++) {
+      const cls = k < idx ? 'dot done' : (k === idx ? 'dot current' : 'dot');
+      h += '<div class="' + cls + '"></div>';
+    }
+    dots.innerHTML = h;
+  }
+
+  const videoLive = document.getElementById('video-live');
+  videoLive.srcObject = stream;
+
+  document.getElementById('controles-grabacion').style.display = 'flex';
+  document.getElementById('controles-grabando').style.display = 'none';
+  document.getElementById('rec-dot').classList.remove('show');
+  document.getElementById('rec-label').classList.remove('show');
+  document.getElementById('timer-video').classList.remove('show');
+
+  mostrarPantalla('screen-grabacion');
+  iniciarCuentaRegresivaInicio();
+}
+
+function capturarFotoCandidato() {
+  // Toma un cuadro del video que el candidato ya esta grabando. Solo una vez.
+  if (fotoCandidato) return;
+  try {
+    const v = document.getElementById('video-live');
+    if (!v || !v.videoWidth) return;
+    const w = 240;
+    const h = Math.round(w * (v.videoHeight / v.videoWidth));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(v, 0, 0, w, h);
+    fotoCandidato = canvas.toDataURL('image/jpeg', 0.6);
+  } catch(e) {
+    console.log('No se pudo capturar foto:', e.message);
+  }
+}
+
+function iniciarGrabacion() {
+  detenerCuentaRegresivaInicio();
+  finProcesado = false;
+  chunks = [];
+  textoActual = '';
+  document.getElementById('transcripcion-texto').textContent = '';
+
+  mediaRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType(), videoBitsPerSecond: 400000, audioBitsPerSecond: 48000 });
+  mediaRecorder.ondataavailable = function(e) {
+    if (e.data.size > 0) chunks.push(e.data);
+  };
+  mediaRecorder.onstop = procesarFinGrabacion;
+  mediaRecorder.start(1000);
+  setTimeout(capturarFotoCandidato, 3000);
+
+  iniciarTranscripcion();
+  const _tipoActual = competencias[preguntaActual] ? competencias[preguntaActual].tipo : '';
+  if (_tipoActual !== 'presentacion' && _tipoActual !== 'dinamica') {
+    // Panel STAR desactivado: el prefiltro no usa metodologia STAR
+  }
+
+  contadorFrames = { positivo:0, neutro:0, negativo:0, contacto:0, totalFrames:0 };
+  if (faceApiCargado) {
+    document.getElementById('panel-emocional').style.display = 'block';
+    iniciarAnalisisFacial();
+  }
+
+  // transcripcion oculta al candidato
+  document.getElementById('controles-grabacion').style.display = 'none';
+  document.getElementById('controles-grabando').style.display = 'flex';
+  document.getElementById('rec-dot').classList.add('show');
+  document.getElementById('rec-label').classList.add('show');
+  document.getElementById('timer-video').classList.add('show');
+
+  segundosRestantes = TIEMPO_GRABACION;
+  actualizarTimerVideo();
+
+  timerGrabacion = setInterval(function() {
+    segundosRestantes--;
+    actualizarTimerVideo();
+    if (segundosRestantes <= 0) {
+      clearInterval(timerGrabacion);
+      detenerGrabacion();
+    }
+  }, 1000);
+}
+
+function procesarFinGrabacion() {
+  // Se ejecuta una sola vez por grabacion (bandera finProcesado) y SIEMPRE avanza,
+  // aunque alguna limpieza falle o el evento onstop no se dispare.
+  if (finProcesado) return;
+  finProcesado = true;
+
+  try { blobActual = new Blob(chunks, { type: getSupportedMimeType() }); }
+  catch(e) { try { blobActual = new Blob(chunks); } catch(e2) {} }
+  try { detenerTranscripcion(); } catch(e) {}
+  try { detenerPanelSTAR(); } catch(e) {}
+
+  try {
+    const comp = competencias[preguntaActual];
+    // La presentacion y la dinamica no llevan contrapregunta STAR: pasan directo al preview
+    if (comp && (comp.tipo === 'presentacion' || comp.tipo === 'dinamica')) {
+      mostrarPreview();
+      return;
+    }
+    const faltantes = componentesFaltantes();
+    if (faltantes.length > 0 && textoActual.trim().split(/\s+/).length >= 20) {
+      mostrarContrapregunta(faltantes, comp);
+    } else {
+      mostrarPreview();
+    }
+  } catch(e) {
+    console.error('Error al procesar fin de grabacion:', e);
+    try { mostrarPreview(); } catch(e2) { mostrarPantalla('screen-preview'); }
+  }
+}
+
+function detenerGrabacion() {
+  clearInterval(timerGrabacion);
+  document.getElementById('rec-dot').classList.remove('show');
+  document.getElementById('rec-label').classList.remove('show');
+  document.getElementById('timer-video').classList.remove('show');
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+    // Red de seguridad: si onstop no se dispara, avanzar igual
+    setTimeout(function() { if (!finProcesado) procesarFinGrabacion(); }, 1500);
+  } else {
+    procesarFinGrabacion();
+  }
+}
+
+function actualizarTimerVideo() {
+  const m = Math.floor(segundosRestantes / 60);
+  const s = segundosRestantes % 60;
+  document.getElementById('timer-video').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  document.getElementById('timer-video').style.color = segundosRestantes <= 30 ? '#e8593c' : '#fff';
+}
+
+function mostrarPreview() {
+  const videoPreview = document.getElementById('video-preview');
+  videoPreview.src = URL.createObjectURL(blobActual);
+  const isLast = preguntaActual === competencias.length - 1;
+  document.getElementById('btn-next-label').textContent = isLast ? '(finalizar entrevista)' : '(siguiente pregunta)';
+  document.getElementById('pv-badge').textContent = 'Pregunta ' + (preguntaActual+1);
+  document.getElementById('pv-competencia').textContent = competencias[preguntaActual].nombre;
+
+  const puedeRegrabar = regrabacionesUsadas < 1;
+  const btnReg = document.getElementById('btn-regrabar');
+  if (btnReg) btnReg.style.display = puedeRegrabar ? '' : 'none';
+  const txt = document.getElementById('pv-instruccion');
+  if (txt) txt.textContent = puedeRegrabar
+    ? 'Revisa tu respuesta. Tienes una única oportunidad de volver a grabarla. Si no decides, pasa automáticamente a la siguiente pregunta.'
+    : 'Revisa tu respuesta. Continúa cuando estés lista o listo (pasa automáticamente si no eliges).';
+
+  mostrarPantalla('screen-preview');
+  iniciarTimerPreview();
+}
+
+function iniciarTimerPreview() {
+  clearInterval(timerPreview);
+  segundosPreview = 30;
+  const el = document.getElementById('pv-timer');
+  const btnR = document.getElementById('btn-regrabar');
+  function pintar(){
+    if (btnR && btnR.style.display !== 'none') btnR.textContent = '↺ Volver a grabar · ' + segundosPreview + ' s';
+    if (el) el.textContent = 'Si no eliges, pasa automáticamente a la siguiente pregunta.';
+  }
+  pintar();
+  timerPreview = setInterval(function() {
+    segundosPreview--;
+    if (segundosPreview <= 0) {
+      clearInterval(timerPreview);
+      if (el) el.textContent = '';
+      siguientePregunta();
+      return;
+    }
+    pintar();
+  }, 1000);
+}
+
+function detenerTimerPreview() {
+  clearInterval(timerPreview);
+  const el = document.getElementById('pv-timer');
+  if (el) el.textContent = '';
+  const btnR = document.getElementById('btn-regrabar');
+  if (btnR) btnR.textContent = '↺ Volver a grabar (solo una vez)';
+}
+
+function volverAGrabar() {
+  detenerTimerPreview();
+  regrabacionesUsadas++;
+  mostrarGrabacion(preguntaActual);
+}
+
+
+// ══════════════════════════════════════
+// SIGUIENTE PREGUNTA / FINALIZAR
+// ══════════════════════════════════════
+async function siguientePregunta() {
+  detenerTimerPreview();
+  mostrarPantalla('screen-subiendo');
+  document.getElementById('upload-text').textContent = 'Guardando pregunta ' + (preguntaActual+1) + '...';
+
+  const urlVideo = await subirVideo(blobActual, preguntaActual + 1);
+
+  const resumenEmo = generarResumenEmocional();
+  if (resumenEmo) datosEmocionales.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    competencia_id: competencias[preguntaActual].id,
+    ...resumenEmo
+  });
+
+  videosGuardados.push({
+    pregunta: preguntaActual + 1,
+    competencia: competencias[preguntaActual].nombre,
+    competencia_id: competencias[preguntaActual].id,
+    url: urlVideo,
+    transcripcion: textoActual.trim()
+  });
+
+  // Análisis con Groq IA (si hay key) o palabras clave como respaldo
+  document.getElementById('upload-text').textContent = 'Analizando respuesta con IA...';
+  const analisisResultado = await analizarConIA(textoActual.trim(), competencias[preguntaActual]);
+
+  transcripciones.push({
+    pregunta: preguntaActual + 1,
+    competencia_id: competencias[preguntaActual].id,
+    competencia: competencias[preguntaActual].nombre,
+    texto: textoActual.trim(),
+    analisis: analisisResultado
+  });
+
+  preguntaActual++;
+
+  if (preguntaActual < competencias.length) {
+    mostrarPreguntaCountdown(preguntaActual);
+  } else {
+    await finalizarEntrevista();
+  }
+}
+
+// ══════════════════════════════════════
+// SUBIR VIDEO A DRIVE
+// ══════════════════════════════════════
+// El video se corta en trozos y se envían de a uno.
+// 768000 es múltiplo de 3: NO cambiar por un número que no lo sea.
+const CHUNK_SIZE = 768000;
+const MAX_INTENTOS = 3;
+
+function pintarProgreso(pct, texto) {
+  const bar = document.getElementById('upload-bar');
+  const pc  = document.getElementById('upload-pct');
+  const tx  = document.getElementById('upload-text');
+  if (bar) bar.style.width = pct + '%';
+  if (pc)  pc.textContent = Math.round(pct) + '%';
+  if (tx && texto) tx.textContent = texto;
+}
+
+// Convierte un pedazo del video a texto base64
+function trozoABase64(trozo) {
+  return new Promise(function(resolve, reject) {
+    const fr = new FileReader();
+    fr.onload = function() { resolve(fr.result.split(',')[1]); };
+    fr.onerror = function() { reject(fr.error || new Error('Error leyendo el trozo')); };
+    fr.readAsDataURL(trozo);
+  });
+}
+
+// Envío al Apps Script con reintentos. Sin no-cors: ahora sí leemos la respuesta.
+async function postAppsScript(payload) {
+  let ultimoError;
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    try {
+      const resp = await fetch(APPS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      const json = await resp.json();
+      if (json && json.ok) return json;
+      throw new Error((json && json.error) || 'Respuesta inválida del servidor');
+    } catch (err) {
+      ultimoError = err;
+      if (intento < MAX_INTENTOS) {
+        await new Promise(function(r) { setTimeout(r, 1200 * intento); });
+      }
+    }
+  }
+  throw ultimoError;
+}
+
+async function subirVideo(blob, numeroPregunta) {
+  try {
+    if (!blob || !blob.size) throw new Error('El video está vacío');
+
+    const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    const total = Math.ceil(blob.size / CHUNK_SIZE);
+
+    for (let i = 0; i < total; i++) {
+      const desde = i * CHUNK_SIZE;
+      const hasta = Math.min(desde + CHUNK_SIZE, blob.size);
+      const base64 = await trozoABase64(blob.slice(desde, hasta));
+
+      await postAppsScript({
+        action: 'subirChunk',
+        uploadId: uploadId,
+        indice: i,
+        total: total,
+        chunkBase64: base64
+      });
+
+      // Reservamos el último 10% para el armado del archivo en Drive
+      pintarProgreso(((i + 1) / total) * 90,
+        'Guardando video... ' + Math.round(((i + 1) / total) * 90) + '%');
+    }
+
+    pintarProgreso(95, 'Terminando de guardar...');
+
+    const res = await postAppsScript({
+      action: 'guardarRespuesta',
+      uploadId: uploadId,
+      total: total,
+      mimeType: blob.type || 'video/webm',
+      nombre: candidato.nombre,
+      token: token,
+      numeroPregunta: numeroPregunta,
+      competencia: competencias[numeroPregunta - 1]?.id || ''
+    });
+
+    pintarProgreso(100, 'Video guardado ✔');
+    return res.url || '';
+
+  } catch (err) {
+    console.error('Error subiendo video:', err);
+    // Continuar aunque falle — no bloquear la entrevista
+    pintarProgreso(100, 'No se pudo guardar el video, continuamos.');
+    return '';
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onloadend = function() { resolve(reader.result); };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+// ══════════════════════════════════════
+// FINALIZAR ENTREVISTA
+// ══════════════════════════════════════
+function nivelBadge(nivel) {
+  const map = { alto:'verde', medio:'ambar', bajo:'rojo', no_evaluado:'gris', no_evaluada:'gris' };
+  const color = map[nivel] || 'gris';
+  const label = (nivel || 'no evaluado').replace(/_/g, ' ');
+  return '<span class="inf-badge inf-' + color + '">' + label + '</span>';
+}
+
+function generarInforme() {
+  const partes = transcripciones.filter(function(t){ return t.analisis && t.analisis.esPrefiltro; });
+
+  function parteDe(foco) {
+    const d = partes.find(function(t){ return t.analisis.foco === foco; });
+    return d ? d.analisis : null;
+  }
+  const pPres = parteDe('presentacion');
+  const pSist = parteDe('sistema_pedido');
+
+  // Penguin NO usa semáforo: la IA solo describe lo que dijo el candidato.
+  // Retrato de cómo se expresa, juntando las dos partes.
+  let expresion = '';
+  [pPres, pSist].forEach(function(p){ if (p && p.expresion) expresion += p.expresion + ' '; });
+  if (!expresion.trim()) expresion = 'No se pudo describir automáticamente. Revisa los videos.';
+
+  return {
+    candidato: (typeof candidato !== 'undefined' && candidato.nombre) ? candidato.nombre : '',
+    cargo: cargo || 'Operario Penguin',
+    fecha: new Date().toLocaleDateString('es-CL'),
+    foto: fotoCandidato,
+    tipo_informe: 'penguin',
+    expresion: expresion.trim(),
+    presentacion_txt: pPres ? pPres.contenido : '',
+    sistema_pedido_txt: pSist ? pSist.contenido : '',
+    disposicion: (typeof generarResumenEmocional === 'function' && generarResumenEmocional()) ? generarResumenEmocional().disposicion : null,
+    contacto_visual: (typeof generarResumenEmocional === 'function' && generarResumenEmocional()) ? generarResumenEmocional().contacto_visual : null,
+    cambios_pantalla: (typeof cambiosPantalla !== 'undefined') ? cambiosPantalla : null
+  };
+}
+
+function renderInforme(inf) {
+  function card(label, txt) {
+    if (!txt) return '';
+    return '<div class="inf-card"><div class="inf-label">' + label + '</div><div class="inf-text">' + txt + '</div></div>';
+  }
+
+  let dispo = '';
+  if (inf.disposicion) {
+    dispo = card('Disposición durante la sesión', inf.disposicion + (inf.contacto_visual != null ? ' · Contacto visual: ' + inf.contacto_visual + '%' : ''));
+  }
+
+  let integridad = '';
+  if (inf.cambios_pantalla != null) {
+    const cp = inf.cambios_pantalla;
+    const clase = cp === 0 ? 'inf-verde' : (cp <= 2 ? 'inf-ambar' : 'inf-rojo');
+    const txt = cp === 0
+      ? 'El candidato no salió de la pantalla durante la sesión.'
+      : 'El candidato salió de la pantalla ' + cp + (cp === 1 ? ' vez' : ' veces') + '. Conviene revisar el video.';
+    integridad = '<div class="inf-card"><div class="inf-label">Integridad de la sesión</div><div class="inf-text">' + txt + ' <span class="inf-badge ' + clase + '" style="margin-left:4px;">' + cp + (cp === 1 ? ' salida' : ' salidas') + '</span></div></div>';
+  }
+
+  const html =
+    (inf.foto ? '<div style="text-align:center;margin-bottom:.6rem;"><img src="' + inf.foto + '" alt="Foto del candidato" style="width:96px;height:96px;object-fit:cover;border-radius:50%;border:2px solid var(--border);"/></div>' : '') +
+    '<div class="inf-head"><h2>Entrevista Operario Penguin</h2><div class="inf-meta">' + inf.candidato + ' · ' + inf.cargo + ' · ' + inf.fecha + '</div></div>' +
+    card('Cómo se expresa', inf.expresion) +
+    card('Qué contó de sí mismo', inf.presentacion_txt) +
+    card('Sistema de preparación de pedidos', inf.sistema_pedido_txt) +
+    dispo +
+    integridad +
+    '<div class="inf-nota">Este informe describe lo observado en una entrevista breve. No constituye una evaluación psicolaboral ni reemplaza la entrevista. Uso exclusivo del evaluador.</div>';
+  document.getElementById('informe-contenido').innerHTML = html;
+}
+
+async function finalizarEntrevista() {
+  entrevistaEnCurso = false;
+  document.getElementById('upload-text').textContent = 'Finalizando entrevista...';
+
+  if (stream) {
+    stream.getTracks().forEach(function(t) { t.stop(); });
+  }
+
+  const informe = generarInforme();
+
+  const payload = {
+    action: 'finalizarEntrevista',
+    informe: informe,
+    foto: fotoCandidato,
+    nombre: candidato.nombre,
+    rut: candidato.rut,
+    email: candidato.email,
+    cargo: cargo,
+    competencias: competencias.map(function(c) { return c.nombre; }),
+    videos: videosGuardados,
+    transcripciones: transcripciones,
+    emociones: datosEmocionales,
+    respuestas: videosGuardados.map(function(v) { return { competencia: v.competencia, url: v.url, transcripcion: v.transcripcion }; }),
+    token: token
+  };
+
+  try {
+    await fetch(APPS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {}
+
+  const _params = new URLSearchParams(window.location.search);
+  if (_params.get('rev') === '1' || _params.get('informe') === '1') {
+    renderInforme(informe);
+    mostrarPantalla('screen-informe');
+  } else {
+    mostrarPantalla('screen-gracias');
+  }
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS FACIAL
+// ══════════════════════════════════════
+function iniciarAnalisisFacial() {
+  const video = document.getElementById('video-live');
+  clearInterval(intervaloFacial);
+  intervaloFacial = setInterval(async function() {
+    if (!faceApiCargado || !video || video.paused) return;
+    try {
+      const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:0.4})).withFaceLandmarks(true).withFaceExpressions();
+      if (!det) return;
+      const exp = det.expressions;
+      contadorFrames.totalFrames++;
+      const positivo = (exp.happy||0) + (exp.surprised||0)*0.3;
+      const negativo = (exp.sad||0) + (exp.angry||0) + (exp.fearful||0) + (exp.disgusted||0);
+      if (positivo > 0.3) { contadorFrames.positivo++; document.getElementById('emo-expresion').textContent='😊'; }
+      else if (negativo > 0.3) { contadorFrames.negativo++; document.getElementById('emo-expresion').textContent='😟'; }
+      else { contadorFrames.neutro++; document.getElementById('emo-expresion').textContent='😐'; }
+      const lm = det.landmarks;
+      const le = lm.getLeftEye(), re = lm.getRightEye();
+      if (le && re) {
+        const cx = video.videoWidth / 2;
+        const ex = (le[0].x + re[0].x) / 2;
+        if (Math.abs(ex - cx) / cx < 0.25) { contadorFrames.contacto++; document.getElementById('emo-contacto').textContent='👁️'; }
+        else { document.getElementById('emo-contacto').textContent='👀'; }
+      }
+      document.getElementById('emo-confianza').textContent = det.detection.score > 0.8 ? '💪' : det.detection.score > 0.5 ? '📊' : '🔍';
+    } catch(e) {}
+  }, 1500);
+}
+
+function detenerAnalisisFacial() {
+  clearInterval(intervaloFacial);
+  intervaloFacial = null;
+}
+
+function generarResumenEmocional() {
+  if (contadorFrames.totalFrames === 0) return null;
+  const total = contadorFrames.totalFrames;
+  const pp = Math.round((contadorFrames.positivo/total)*100);
+  const pn = Math.round((contadorFrames.negativo/total)*100);
+  const pu = Math.round((contadorFrames.neutro/total)*100);
+  const pc = Math.round((contadorFrames.contacto/total)*100);
+  let disposicion, emoji;
+  if (pp >= 40) { disposicion='Positiva'; emoji='😊'; }
+  else if (pn >= 40) { disposicion='Tensa / Ansiosa'; emoji='😟'; }
+  else { disposicion='Neutral / Serena'; emoji='😐'; }
+  return { disposicion, emoji, pct_positivo:pp, pct_negativo:pn, pct_neutro:pu, pct_contacto_visual:pc, alerta_tension:pn>=50, alerta_sin_contacto:pc<30, frames_analizados:total };
+}
+
+// ══════════════════════════════════════
+// WEB SPEECH API — TRANSCRIPCIÓN
+// ══════════════════════════════════════
+function iniciarTranscripcion() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return;
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'es-CL';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = function(e) {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        textoActual += e.results[i][0].transcript + ' ';
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    document.getElementById('transcripcion-texto').textContent = textoActual + interim;
+  };
+
+  recognition.onerror = function(e) {
+    if (e.error !== 'no-speech') console.log('Speech error:', e.error);
+  };
+
+  recognition.onend = function() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try { recognition.start(); } catch(e) {}
+    }
+  };
+
+  try { recognition.start(); } catch(e) {}
+}
+
+function detenerTranscripcion() {
+  if (recognition) {
+    try { recognition.stop(); } catch(e) {}
+    recognition = null;
+  }
+  document.getElementById('transcripcion-wrap').style.display = 'none';
+  detenerAnalisisFacial();
+  document.getElementById('panel-emocional').style.display = 'none';
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS STAR AUTOMÁTICO
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// PANEL STAR EN TIEMPO REAL
+// ══════════════════════════════════════
+function iniciarPanelSTAR_DESACTIVADO() {
+  starActual = { s:0, t:0, a:0, r:0 };
+  ['s','t','a','r'].forEach(function(c) {
+    const el = document.getElementById('check-' + c);
+    if (el) { el.classList.remove('completado'); el.querySelector('.star-check-icon').textContent = '○'; }
+  });
+  document.getElementById('panel-star').style.display = 'block';
+
+  // Analizar cada 8 segundos
+  clearInterval(intervaloSTAR);
+  intervaloSTAR = setInterval(function() {
+    const texto = textoActual.trim();
+    if (texto.length < 10) return;
+    const resultado = analizarSTAR(texto, competencias[preguntaActual]);
+    actualizarCheckboxesSTAR(resultado);
+  }, 8000);
+}
+
+function actualizarCheckboxesSTAR(resultado) {
+  const mapa = { s: resultado.s, t: resultado.t, a: resultado.a, r: resultado.r };
+  starActual = mapa;
+  Object.keys(mapa).forEach(function(k) {
+    const el = document.getElementById('check-' + k);
+    if (!el) return;
+    if (mapa[k] > 0) {
+      el.classList.add('completado');
+      el.querySelector('.star-check-icon').textContent = '✓';
+    }
+  });
+}
+
+function detenerPanelSTAR() {
+  clearInterval(intervaloSTAR);
+  document.getElementById('panel-star').style.display = 'none';
+}
+
+function componentesFaltantes() {
+  const faltantes = [];
+  const texto = textoActual.trim();
+  const resultado = analizarSTAR(texto, competencias[preguntaActual]);
+  if (resultado.s === 0) faltantes.push('situacion');
+  if (resultado.t === 0) faltantes.push('tarea');
+  if (resultado.a === 0) faltantes.push('accion');
+  if (resultado.r === 0) faltantes.push('resultado');
+  return faltantes;
+}
+
+// ══════════════════════════════════════
+// CONTRAPREGUNTA AUTOMÁTICA
+// ══════════════════════════════════════
+const CONTRAPREGUNTAS = {
+  situacion: '¿Puedes contarme en qué momento y contexto ocurrió eso? ¿En qué empresa o situación específica estabas?',
+  tarea: '¿Cuál era exactamente tu responsabilidad o rol en esa situación? ¿Qué se esperaba de ti?',
+  accion: '¿Qué hiciste tú específicamente? Cuéntame paso a paso las acciones concretas que tomaste.',
+  resultado: '¿Cuál fue el resultado final de lo que hiciste? ¿Cómo terminó la situación?'
+};
+
+function mostrarContrapregunta(faltantes, comp) {
+  // Priorizar el componente más importante que falta
+  const prioridad = ['resultado', 'accion', 'tarea', 'situacion'];
+  const faltantePrincipal = prioridad.find(function(p) { return faltantes.includes(p); }) || faltantes[0];
+
+  const pregunta = CONTRAPREGUNTAS[faltantePrincipal];
+  document.getElementById('contra-titulo').textContent = 'Una pregunta más sobre ' + comp.nombre;
+  document.getElementById('contra-pregunta').textContent = pregunta;
+  document.getElementById('contra-timer').textContent = '1:00';
+  document.getElementById('contra-controles-grabar').style.display = 'block';
+  document.getElementById('contra-controles-grabando').style.display = 'none';
+
+  mostrarPantalla('screen-contrapregunta');
+
+  // Timer automático — si no inicia en 15 segs, avanza igual
+  setTimeout(function() {
+    if (document.getElementById('screen-contrapregunta').classList.contains('active')) {
+      if (document.getElementById('contra-controles-grabar').style.display !== 'none') {
+        mostrarPreview();
+      }
+    }
+  }, 15000);
+}
+
+function iniciarContrapregunta() {
+  textoContra = '';
+  document.getElementById('contra-controles-grabar').style.display = 'none';
+  document.getElementById('contra-controles-grabando').style.display = 'block';
+
+  // Iniciar nueva grabación sobre el mismo stream
+  const contraChunks = [];
+  const contraRecorder = new MediaRecorder(stream, { mimeType: getSupportedMimeType(), videoBitsPerSecond: 400000, audioBitsPerSecond: 48000 });
+  contraRecorder.ondataavailable = function(e) { if (e.data.size > 0) contraChunks.push(e.data); };
+  contraRecorder.onstop = function() {
+    // Combinar texto original con contrapregunta
+    const contraBlob = new Blob(contraChunks, { type: getSupportedMimeType() });
+    // Agregar al texto actual
+    if (textoContra.trim()) textoActual = textoActual + ' ' + textoContra;
+    mostrarPreview();
+  };
+  contraRecorder.start(1000);
+
+  // Iniciar reconocimiento de voz para contrapregunta
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recContra = new SR();
+    recContra.lang = 'es-CL'; recContra.continuous = true; recContra.interimResults = true;
+    recContra.onresult = function(e) {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) textoContra += e.results[i][0].transcript + ' ';
+      }
+    };
+    try { recContra.start(); } catch(e) {}
+  }
+
+  // Timer de 1 minuto
+  segundosContra = TIEMPO_CONTRAPREGUNTA;
+  clearInterval(timerContrapregunta);
+  timerContrapregunta = setInterval(function() {
+    segundosContra--;
+    const m = Math.floor(segundosContra / 60);
+    const s = segundosContra % 60;
+    document.getElementById('contra-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    document.getElementById('contra-timer').style.color = segundosContra <= 15 ? '#e8593c' : 'var(--accent)';
+    if (segundosContra <= 0) {
+      clearInterval(timerContrapregunta);
+      contraRecorder.stop();
+    }
+  }, 1000);
+
+  window._contraRecorder = contraRecorder;
+}
+
+function detenerContrapregunta() {
+  clearInterval(timerContrapregunta);
+  if (window._contraRecorder && window._contraRecorder.state !== 'inactive') {
+    window._contraRecorder.stop();
+  }
+}
+
+// ══════════════════════════════════════
+// ANÁLISIS CON GROQ IA
+// ══════════════════════════════════════
+async function resumirPresentacion(texto, competencia) {
+  // La presentacion NO se califica con nota. Se resume para el reclutador.
+  const base = { esPresentacion: true, grado: '—', total: null, s: 0, t: 0, a: 0, r: 0, alertas: [] };
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+
+  if (!texto || palabras < 10) {
+    return Object.assign(base, {
+      experiencia: 'ninguna',
+      resumen: 'El candidato no entrego una presentacion audible o fue demasiado breve.',
+      observacion: 'Presentacion insuficiente.',
+      metodo: 'sin_texto'
+    });
+  }
+
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 600).replace(/[`'"]/g, ' ');
+      const prompt = 'Eres reclutador evaluando la presentacion inicial de un candidato para un cargo de VENDEDOR RETAIL. ' +
+        'Presentacion del candidato: ' + textoLimitado + ' ' +
+        'NO pongas nota ni grado. Solo resume para el reclutador. ' +
+        'Clasifica su experiencia en ventas o atencion a publico como: formal (ha trabajado en ventas o atencion a publico), otro_contexto (tiene experiencia laboral pero no en ventas, o experiencia informal como negocio familiar), o ninguna (sin experiencia laboral relevante). ' +
+        'En resumen escribe 2 o 3 frases claras: quien es, su experiencia, y que lo motiva a postular. ' +
+        'En observacion escribe una frase con tu impresion de como se presenta y comunica. ' +
+        'Responde SOLO JSON valido sin texto extra: {"experiencia":"ninguna","resumen":"...","observacion":"..."}';
+
+      const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.2, max_tokens: 400 };
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const r = JSON.parse(jsonMatch[0]);
+          return Object.assign(base, {
+            experiencia: r.experiencia || 'no_evaluada',
+            resumen: r.resumen || '',
+            observacion: r.observacion || '',
+            metodo: 'groq_ia'
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Resumen de presentacion no disponible:', e.message);
+    }
+  }
+
+  // Fallback sin IA: guardar la transcripcion como resumen
+  return Object.assign(base, {
+    experiencia: 'no_evaluada',
+    resumen: texto.substring(0, 300),
+    observacion: 'Resumen automatico no disponible; se guardo la transcripcion.',
+    metodo: 'sin_ia'
+  });
+}
+
+async function evaluarDinamicaVenta(texto, competencia) {
+  // Cada etapa de la dinamica evalua UNA sola competencia (segun competencia.foco). NO STAR.
+  const foco = competencia.foco || 'orientacion_venta';
+  const base = { esDinamica: true, foco: foco, s: 0, t: 0, a: 0, r: 0, total: null, grado: '—', alertas: [] };
+
+  const focoDesc = {
+    atencion_cliente: 'ATENCION AL CLIENTE: recibir y conectar con el cliente. Se evalua si saluda, es cercano y amable, y si averigua que necesita el cliente.',
+    orientacion_venta: 'ORIENTACION A LA VENTA: ofrecer y convencer. Se evalua si destaca beneficios y no solo caracteristicas, si transmite entusiasmo y si intenta la venta.',
+    manejo_objeciones: 'MANEJO DE OBJECIONES: responder a una objecion (esta caro o lo voy a pensar) con calma, buscando dar vuelta el no e intentar cerrar la venta.'
+  };
+
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 10) {
+    return Object.assign(base, {
+      nivel: 'bajo',
+      observacion: 'El candidato casi no respondio esta parte o fue demasiado breve para evaluar.',
+      metodo: 'sin_texto'
+    });
+  }
+
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 700).replace(/[`'"]/g, ' ');
+      const prompt = 'Eres evaluador experto en seleccion de vendedores retail, riguroso y honesto. El candidato esta haciendo una dinamica de venta por partes. En ESTA parte se evalua solo: ' + (focoDesc[foco] || focoDesc.orientacion_venta) + ' ' +
+        'Transcripcion de lo que dijo el candidato en esta parte: ' + textoLimitado + ' ' +
+        'ESTO NO ES una respuesta STAR. Se aceptan candidatos SIN experiencia previa: no exijas tecnica de venta perfecta ni vocabulario comercial. ' +
+        'PRIMERO decide si la respuesta corresponde o no a la tarea pedida. ' +
+        'Si el candidato hablo de otra cosa, dijo frases sin sentido, hizo una prueba de sonido, se quedo callado, leyo algo ajeno o no intento en absoluto la tarea, entonces nivel es bajo y lo dices claramente en la observacion. NO inventes merito donde no lo hubo. ' +
+        'Si SI intento la tarea, asigna el nivel asi: ' +
+        'alto = cumple lo esencial de la competencia y ademas lo hace bien (por ejemplo conecta, indaga, argumenta o responde la objecion con calma e intenta cerrar). ' +
+        'medio = intenta la tarea y cumple algo, pero de forma incompleta, superficial o sin cerrar. ' +
+        'bajo = no intenta la tarea, se va de tema, o lo que dice no tiene relacion con la competencia evaluada. ' +
+        'No uses medio como punto intermedio comodo: si dudas entre bajo y medio, elige bajo. Este informe se usa para decidir contrataciones. ' +
+        'En observacion escribe 1 o 2 frases para el reclutador, describiendo lo que realmente dijo el candidato. Si la respuesta fue irrelevante o vacia, dilo de forma directa. ' +
+        'Responde SOLO JSON valido sin texto extra, reemplazando NIVEL por alto, medio o bajo: {"nivel":"NIVEL","observacion":"..."}';
+
+      const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 350 };
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const r = JSON.parse(jsonMatch[0]);
+          var nivelLimpio = String(r.nivel || '').toLowerCase().trim();
+          if (['alto','medio','bajo'].indexOf(nivelLimpio) === -1) nivelLimpio = 'no_evaluado';
+          return Object.assign(base, {
+            nivel: nivelLimpio,
+            observacion: r.observacion || (nivelLimpio === 'no_evaluado' ? 'No se pudo evaluar esta etapa automaticamente. Revisar el video.' : ''),
+            metodo: 'groq_ia'
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Evaluacion de etapa no disponible:', e.message);
+    }
+  }
+
+  return Object.assign(base, {
+    nivel: 'no_evaluado',
+    observacion: 'Evaluacion automatica no disponible; se guardo la transcripcion: ' + texto.substring(0, 200),
+    metodo: 'sin_ia'
+  });
+}
+
+
+// ══════════════════════════════════════
+// PREFILTRO: descripción, no calificación
+// ══════════════════════════════════════
+const FOCO_PREFILTRO = {
+  presentacion: 'El candidato se presenta: quien es, que ha hecho y que sabe hacer. Interesa QUE eligio contar de si mismo y con cuanto detalle concreto (lugares, cargos, fechas, oficios) frente a cuanta generalidad.',
+  experiencia: 'El candidato cuenta su principal experiencia relacionada con el cargo: donde fue, que hacia y cuanto tiempo. Interesa si entrega datos concretos y verificables (lugar, funciones, duracion) o solo generalidades. IMPORTANTE: no tener experiencia previa en el rubro NO es un defecto y no debe describirse en tono negativo; si el candidato no tiene experiencia directa, registra ese hecho de forma neutra y describe la experiencia parecida que si mencione, aunque sea de otro rubro, informal o no remunerada.',
+  motivacion: 'El candidato explica por que postulo al cargo y que espera de el. Interesa si menciona razones especificas y ligadas a ese trabajo, o si da razones genericas que servirian para cualquier aviso.',
+  con_otros: 'El candidato describe como es trabajar con el y que dirian otros de el. Interesa si se describe con ejemplos y si reconoce algun aspecto propio a mejorar, o si solo entrega cualidades positivas de manual.',
+  sistema_pedido: 'El candidato cuenta con que sistema(s) de preparacion de pedidos ha trabajado (por ejemplo voice picking, pistola o lector RF, WMS, pick to light, SAP u otro sistema de gestion, o de forma manual en papel) y describe su experiencia. Interesa registrar de forma concreta QUE sistema(s) menciona, DONDE los uso y QUE hacia con ellos, y con cuanto detalle lo explica. No evalues si un sistema es mejor o peor ni si la experiencia es suficiente; solo describe lo que dijo. Si no menciona ningun sistema o dice no haber trabajado con ninguno, registralo de forma neutra.'
+};
+
+async function describirPrefiltro(texto, competencia) {
+  const foco = competencia.foco || 'presentacion';
+  const base = { esPrefiltro: true, foco: foco, s: 0, t: 0, a: 0, r: 0, total: null, grado: '—', alertas: [] };
+
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 10) {
+    return Object.assign(base, {
+      expresion: 'Sin material suficiente para describir.',
+      contenido: 'El candidato casi no respondió esta pregunta o el audio no se registró.',
+      senal: 'revisar',
+      metodo: 'sin_texto'
+    });
+  }
+
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 900).replace(/[`'\"]/g, ' ');
+      const prompt = 'Eres un asistente que ayuda a una psicologa laboral a prefiltrar postulantes. Tu tarea NO es calificar ni poner notas: es DESCRIBIR de forma neutra lo que el candidato dijo, para que ella decida. ' +
+        'Pregunta de esta parte: ' + FOCO_PREFILTRO[foco] + ' ' +
+        'Transcripcion de lo que dijo el candidato: ' + textoLimitado + ' ' +
+        'REGLAS IMPORTANTES: ' +
+        'NO evalues la calidad del lenguaje, ni el acento, ni el nivel educacional, ni el vocabulario culto. Hablar de forma sencilla o coloquial NO es un defecto y no debe aparecer como algo negativo. ' +
+        'NO uses adjetivos de valor como bueno, malo, excelente, deficiente, pobre, limitado. Describe hechos observables. ' +
+        'NO inventes nada que no este en la transcripcion. Si algo no se puede saber, dilo. ' +
+        'En el campo expresion describe COMO se expreso en terminos observables: si se entiende bien, si ordena sus ideas o salta de un tema a otro, si responde lo que se le pregunto o se desvia, si da detalles concretos o se queda en generalidades. Maximo 2 frases. ' +
+        'En el campo contenido resume QUE dijo, con los datos concretos que menciono. Maximo 3 frases. ' +
+        'En el campo senal responde solo una de estas tres palabras: continuar si respondio la pregunta con contenido propio y concreto; revisar si respondio pero de forma muy general o quedan dudas; descartar solo si no respondio la pregunta, hablo de otra cosa o dijo cosas sin sentido. ' +
+        'Responde SOLO JSON valido sin texto extra, reemplazando SENAL por continuar, revisar o descartar: {\"expresion\":\"...\",\"contenido\":\"...\",\"senal\":\"SENAL\"}';
+
+      const bodyPayload = { model: GROQ_MODEL, messages: [{ role: 'user', content: prompt }], temperature: 0.2, max_tokens: 400 };
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_API_KEY },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const r = JSON.parse(jsonMatch[0]);
+          let senal = String(r.senal || '').toLowerCase().trim();
+          if (['continuar','revisar','descartar'].indexOf(senal) === -1) senal = 'revisar';
+          return Object.assign(base, {
+            expresion: r.expresion || '',
+            contenido: r.contenido || '',
+            senal: senal,
+            metodo: 'groq_ia'
+          });
+        }
+      }
+    } catch(e) {
+      console.log('Groq no disponible en prefiltro:', e.message);
+    }
+  }
+
+  return Object.assign(base, {
+    expresion: 'No se pudo describir automáticamente.',
+    contenido: 'Revisa el video de esta parte.',
+    senal: 'revisar',
+    metodo: 'sin_ia'
+  });
+}
+
+async function analizarConIA(texto, competencia) {
+  // Prefiltro: se DESCRIBE lo que dijo el candidato, no se califica
+  if (competencia && competencia.tipo === 'prefiltro') {
+    return await describirPrefiltro(texto, competencia);
+  }
+  // La pregunta de presentacion se resume, no se califica con nota STAR
+  if (competencia && competencia.tipo === 'presentacion') {
+    return await resumirPresentacion(texto, competencia);
+  }
+  // La dinamica de venta se evalua con rubrica comercial, no STAR
+  if (competencia && competencia.tipo === 'dinamica') {
+    return await evaluarDinamicaVenta(texto, competencia);
+  }
+  // Si no hay texto suficiente, retornar D directo
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 30) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa.', alertas:['Respuesta muy breve'], metodo:'palabras_clave' };
+  }
+
+  // Si hay API key de Groq, usar IA
+  if (GROQ_API_KEY && GROQ_API_KEY !== 'TU_API_KEY_AQUI') {
+    try {
+      const textoLimitado = texto.substring(0, 500).replace(/[`'"]/g, ' ');
+      const pregLimitada = competencia.pregunta.substring(0, 150).replace(/[`'"]/g, ' ');
+      const prompt = 'Eres evaluador experto en entrevistas por competencias con metodologia STAR, evaluando a un candidato para un cargo de VENDEDOR RETAIL (atencion a publico y ventas). ' +
+        'Competencia evaluada: ' + competencia.nombre + '. ' +
+        'Pregunta: ' + pregLimitada + ' ' +
+        'Respuesta: ' + textoLimitado + ' ' +
+        'CONTEXTO CLAVE: Para este cargo se consideran validos los candidatos SIN experiencia previa en ventas, siempre que muestren buena actitud y potencial. ' +
+        'Un ejemplo NO tiene que ser laboral: sirve un ejemplo real de estudios, deporte, vida familiar o cotidiana. NUNCA bajes la nota solo porque el candidato no tiene experiencia laboral, si da un ejemplo real y concreto de otro contexto. ' +
+        'EVALUACION STAR (mide que tan bien demuestra la competencia con un ejemplo real): ' +
+        's=1 si describe una situacion concreta y real de cualquier contexto, 0 si no. ' +
+        't=1 si explica cual era su rol o lo que se esperaba de el, 0 si no. ' +
+        'a=2 si detalla acciones propias concretas y efectivas, a=1 si acciones vagas, a=0 si no hubo accion propia. ' +
+        'r=2 si hay un resultado concreto, r=1 si resultado vago, r=0 si no hay resultado o lo logro otro. ' +
+        'total=s+t+a+r. grado=A si total>=5, B si total>=3, C si total=2, D si total es 1 o 0. ' +
+        'SOLO baja a D en estos casos: respuesta puramente hipotetica sin NINGUN ejemplo real; el candidato se cuelga de un logro que fue de otra persona; respuesta totalmente vaga y generica sin ninguna situacion. La falta de experiencia por si sola NO es motivo de D. ' +
+        'ADEMAS evalua por separado tres cosas: ' +
+        'actitud (alta, media o baja) segun la motivacion, energia, ganas de aprender y orientacion al servicio que muestre. ' +
+        'experiencia (formal si el ejemplo es de trabajo en ventas o atencion, otro_contexto si es un ejemplo real pero no laboral, ninguna si no dio ejemplo real). ' +
+        'potencial (alto, medio o bajo) de llegar a ser buen vendedor retail considerando su actitud y competencias transferibles, aunque no tenga experiencia. ' +
+        'En el campo observacion escribe en lenguaje claro para el reclutador, mencionando SIEMPRE: si tiene experiencia formal o solo de otro contexto, su nivel de actitud, y su potencial para el cargo. ' +
+        'Responde SOLO JSON valido sin texto extra: {"s":0,"t":0,"a":0,"r":0,"total":0,"grado":"D","actitud":"media","experiencia":"ninguna","potencial":"medio","observacion":"observacion breve y especifica","alertas":["alerta1"],"especificidad":0}';
+
+      const bodyPayload = {
+        model: GROQ_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 500
+      };
+      console.log('Enviando a Groq, prompt:', prompt.substring(0, 100));
+      console.log('Modelo:', GROQ_MODEL);
+      const response = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_API_KEY
+        },
+        body: JSON.stringify(bodyPayload)
+      });
+      if (!response.ok) {
+        const errText = await response.text();
+        console.log('Groq error detalle:', errText);
+      }
+
+      if (response.ok) {
+        const data = await response.json();
+        const textoRespuesta = data.choices[0].message.content.trim();
+        // Extraer JSON de la respuesta
+        const jsonMatch = textoRespuesta.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const resultado = JSON.parse(jsonMatch[0]);
+          resultado.metodo = 'groq_ia';
+          return resultado;
+        }
+      }
+    } catch(e) {
+      console.log('Groq no disponible, usando análisis de palabras clave:', e.message);
+    }
+  }
+
+  // Fallback: análisis por palabras clave
+  const resultado = analizarSTAR(texto, competencia);
+  resultado.metodo = 'palabras_clave';
+  return resultado;
+}
+
+function analizarSTAR(texto, competencia) {
+  const palabras = texto ? texto.trim().split(/\s+/).filter(function(w) { return w.length > 1; }).length : 0;
+  if (!texto || palabras < 50) {
+    return { s:0, t:0, a:0, r:0, total:0, grado:'D', observacion:'Respuesta insuficiente. Se requiere una respuesta más completa y detallada.', alertas:[] };
+  }
+  const t = texto.toLowerCase();
+
+  // ── DETECCIÓN DE NEGACIONES ──
+  // Si una palabra clave aparece precedida de negación, no cuenta
+  function noNegada(palabra) {
+    const negaciones = ['no ','nunca ','jamás ','sin ','tampoco ','ni '];
+    const idx = t.indexOf(palabra);
+    if (idx === -1) return false;
+    const contexto = t.substring(Math.max(0, idx - 15), idx);
+    return !negaciones.some(function(n) { return contexto.includes(n); });
+  }
+
+  // ── DETECCIÓN DE FRASES GENÉRICAS (penalizar) ──
+  const frasesGenericas = [
+    'siempre trato de','en general yo','normalmente hago','siempre intento',
+    'por lo general','suelo hacer','acostumbro a','tiendo a','me gusta',
+    'creo que es importante','considero que','pienso que','en mi opinión',
+    'lo que haría es','haría lo siguiente','intentaría','trataría de'
+  ];
+  const genericasEncontradas = frasesGenericas.filter(function(f) { return t.includes(f); }).length;
+
+  // ── DETECCIÓN DE ESPECIFICIDAD (bonus) ──
+  // Números, fechas, porcentajes, nombres de empresas
+  const tieneNumeros = /\d+/.test(texto);
+  const tienePorcentaje = /\d+\s*%/.test(texto) || t.includes('porciento') || t.includes('por ciento');
+  const tieneFechas = /\b(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre|\d{4}|lunes|martes|miércoles|jueves|viernes)\b/.test(t);
+  const especificidad = (tieneNumeros ? 1 : 0) + (tienePorcentaje ? 1 : 0) + (tieneFechas ? 1 : 0);
+
+  // ── S: SITUACIÓN — contexto temporal y espacial ──
+  const palabrasS = [
+    'cuando','en ese momento','en esa época','trabajaba','el contexto',
+    'la situación','ocurrió','sucedió','me encontraba','en mi trabajo','en la empresa',
+    'en el área','en el equipo','me pasó','en ese entonces','en aquel momento',
+    'en ese trabajo','en esa empresa','en ese proyecto','en ese cargo','en esa oportunidad',
+    'hace años','hace meses','el año pasado','un día','una vez','cierta vez',
+    'me enfrenté','surgió','se presentó','en ese periodo','en esa etapa'
+  ];
+  const matchesS = palabrasS.filter(function(p) { return noNegada(p); }).length;
+  const s = matchesS >= 2 ? 1 : 0;
+
+  // ── T: TAREA — rol y responsabilidad específica ──
+  const palabrasT = [
+    'mi rol','mi responsabilidad','me encargué','estaba a cargo','era mi tarea',
+    'me correspondía','mi función','me pidieron','me asignaron',
+    'era responsable','fui el encargado','yo debía',
+    'mi trabajo era','mi objetivo era','me encargaron',
+    'me designaron','fui designado','como encargado','como líder',
+    'tomé la responsabilidad','me propuse','quería lograr','debía lograr'
+  ];
+  const matchesT = palabrasT.filter(function(p) { return noNegada(p); }).length;
+  const tarea = matchesT >= 2 ? 1 : 0;
+
+  // ── A: ACCIÓN — verbos concretos en primera persona ──
+  const palabrasA = [
+    'hice','tomé','decidí','implementé','propuse','gestioné','coordiné','contacté',
+    'llamé','reuní','organizé','planifiqué','desarrollé','resolví','presenté',
+    'negocié','expliqué','trabajé','ayudé','apoyé','lideré','diseñé',
+    'ejecuté','apliqué','busqué','establecí','definí','creé','construí',
+    'generé','elaboré','preparé','realicé','llevé','conversé',
+    'escuché','identifiqué','detecté','encontré','analicé',
+    'revisé','cambié','modifiqué','ajusté','adapté','mejoré',
+    'empecé','comencé','inicié','terminé','completé','concluí','logré','conseguí',
+    'convencí','motivé','capacité','solicité','pedí',
+    'investigué','consulté','verifiqué','controlé','supervisé','asumí'
+  ];
+  const accionesEncontradas = palabrasA.filter(function(p) { return noNegada(p); }).length;
+  const a = accionesEncontradas >= 5 ? 2 : accionesEncontradas >= 3 ? 1 : 0;
+
+  // ── R: RESULTADO — impacto concreto y medible ──
+  const palabrasR = [
+    'resultado','logramos','conseguimos','mejoró','aumentó','redujo',
+    'bajó','subió','se solucionó','se resolvió','finalmente','al final',
+    'como resultado','el impacto','se cumplió','se alcanzó',
+    'aprendimos','salió bien','salió mejor',
+    'terminamos','concluimos','completamos','entregamos',
+    'superamos','superé','cumplimos','cumplí','alcanzamos','alcancé','funcionó',
+    'tuvo éxito','fue exitoso','fue positivo',
+    'se logró','cliente satisfecho','quedó conforme','quedó contento',
+    'valió la pena','fue un éxito','impacto positivo','beneficio',
+    'reconocieron','felicitaron','agradecieron',
+    'de esa experiencia','lo que aprendí','me enseñó'
+  ];
+  const resultadoEncontrado = palabrasR.filter(function(p) { return noNegada(p); }).length;
+  const r = resultadoEncontrado >= 3 ? 2 : resultadoEncontrado >= 2 ? 1 : 0;
+
+  // ── CALCULAR TOTAL ──
+  let total = s + tarea + a + r;
+
+  // Penalizar frases genéricas
+  if (genericasEncontradas >= 3) total = Math.max(0, total - 1);
+  if (genericasEncontradas >= 5) total = Math.max(0, total - 1);
+
+  // Bonus por especificidad (números, fechas, porcentajes)
+  const bonusEspecificidad = especificidad >= 2 ? 1 : 0;
+
+  // Bonus por longitud solo con 120+ palabras
+  const bonusLongitud = palabras >= 120 ? 1 : 0;
+
+  const totalFinal = Math.min(total + bonusEspecificidad + bonusLongitud, 6);
+
+  // ── ALERTAS ──
+  const alertas = [];
+  if (genericasEncontradas >= 3) alertas.push('Respuesta con lenguaje genérico — no describe una situación específica.');
+  if (!tieneNumeros && !tieneFechas) alertas.push('Sin datos concretos — falta especificidad en fechas, cifras o nombres.');
+  if (accionesEncontradas < 3) alertas.push('Pocas acciones propias descritas.');
+  if (resultadoEncontrado < 2) alertas.push('El resultado no queda claro o es muy vago.');
+
+  // ── GRADO FINAL ──
+  let grado, observacion;
+  if (totalFinal >= 5) {
+    grado = 'A';
+    observacion = 'Respuesta completa y específica. Se identifican claramente situación, rol, acciones concretas y resultados medibles.';
+  } else if (totalFinal >= 3) {
+    grado = 'B';
+    observacion = 'Respuesta sólida. Describe la situación y acciones tomadas. El resultado podría ser más específico o medible.';
+  } else if (totalFinal === 2) {
+    grado = 'C';
+    observacion = 'Respuesta básica. Falta especificar mejor el rol propio o el resultado concreto obtenido.';
+  } else {
+    grado = 'D';
+    observacion = 'Respuesta incompleta. No se identifican claramente los componentes STAR (situación, tarea, acción, resultado).';
+  }
+
+  if (alertas.length > 0) observacion += ' Alertas: ' + alertas.join(' | ');
+
+  return { s, t: tarea, a, r, total: totalFinal, grado, observacion, alertas, especificidad, genericasEncontradas };
+}
+
+// ══════════════════════════════════════
+// UTILIDADES
+// ══════════════════════════════════════
+function mostrarPantalla(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function getSupportedMimeType() {
+  const tipos = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  for (const t of tipos) {
+    if (MediaRecorder.isTypeSupported(t)) return t;
+  }
+  return 'video/webm';
+}
+
+// Protecciones anti-trampa
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+document.addEventListener('keydown', function(e) {
+  if (e.ctrlKey && ['c','a','u','s','p'].indexOf(e.key.toLowerCase()) > -1) e.preventDefault();
+  if (e.key === 'F12') e.preventDefault();
+});
+</script>
+</body>
+</html>
