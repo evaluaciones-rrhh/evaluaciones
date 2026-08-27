@@ -946,7 +946,7 @@ function getTextoTransicion(idx) {
 function getTextoBienvenida() {
   const nombre = candidato.nombre ? candidato.nombre.split(' ')[0] : '';
   const saludo = nombre ? 'Hola, ' + nombre + '.' : 'Hola.';
-  return saludo + ' Bienvenido o bienvenida a tu entrevista. Partiremos con una breve presentacion tuya y luego haremos una dinamica de venta entretenida. Es sencillo y rapido, solo se natural y pasalo bien. Tienes hasta 3 minutos para cada respuesta. Cuando estes listo o lista, presiona el boton para comenzar.';
+  return saludo + ' Bienvenido o bienvenida a tu entrevista. Te haremos ' + competencias.length + ' preguntas cortas para conocerte un poco mejor. Es sencillo y rapido, solo se natural. Tienes hasta 3 minutos para cada respuesta. Cuando estes listo o lista, presiona el boton para comenzar.';
 }
 
 function mostrarPreguntaCountdown(idx) {
