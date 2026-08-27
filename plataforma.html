@@ -1630,6 +1630,7 @@ tbody tr:hover td { background: #fdf9f6; }
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="IPV"> Perfil de Personalidad Comercial</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="ENTREVISTA"> Entrevista Vendedor Retail</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="PREFILTRO"> Entrevista de Prefiltro (4 preguntas)</div>
+                  <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="PENGUIN"> Entrevista Operario Penguin (2 preguntas)</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="WONDERLIC"> Test de Habilidad Cognitiva General</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="DISC"> Análisis de Estilo Conductual</div>
                   <div class="multi-select-option" onclick="toggleTest(this)"><input type="checkbox" class="check-test" value="OPERA"> Evaluación de Conducta Operacional</div>
@@ -1984,6 +1985,7 @@ const TESTS_LINKS = {
   WONDERLIC: BASE+"TEST_WONDERLIC.html",
   ENTREVISTA: BASE+"TEST_ENTREVISTA.html",
   PREFILTRO:  BASE+"TEST_PREFILTRO.html",
+  PENGUIN:    BASE+"TEST_PENGUIN.html",
   DISC:       BASE+"TEST_DISC.html",
   OPERA:      BASE+"TEST_OPERA.html",
   TECNICO_GRUERO: BASE+"TEST_TECNICO_GRUERO.html",
@@ -4667,13 +4669,14 @@ async function confirmarPrograma() {
   document.querySelectorAll(".check-test:checked").forEach(function(cb){ testsSeleccionados.push(cb.value); });
   var enviaEntrevista = testsSeleccionados.indexOf("ENTREVISTA") > -1;
   var enviaPrefiltro  = testsSeleccionados.indexOf("PREFILTRO") > -1;
+  var enviaPenguin    = testsSeleccionados.indexOf("PENGUIN") > -1;
 
   if (!nombre || !email) {
     errEl.textContent="Completa nombre y email antes de programar.";
     errEl.style.display="block"; return;
   }
-  if (!enviaEntrevista && !enviaPrefiltro) {
-    errEl.textContent="Para programar, marca Entrevista Retail o Prefiltro en la lista.";
+  if (!enviaEntrevista && !enviaPrefiltro && !enviaPenguin) {
+    errEl.textContent="Para programar, marca Entrevista Retail, Prefiltro o Penguin en la lista.";
     errEl.style.display="block"; return;
   }
   if (!fechaHora) {
@@ -4698,8 +4701,13 @@ async function confirmarPrograma() {
       await fetch(APPS_URL_ENTREVISTA, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({action:"programarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual, fechaEnvio:fechaISO}) });
     }
+    if (enviaPenguin) {
+      await fetch(APPS_URL_ENTREVISTA, { method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"programarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"penguin", link:TESTS_LINKS["PENGUIN"], solicitante:usuarioActual, fechaEnvio:fechaISO}) });
+    }
     var fechaLegible = new Date(fechaHora).toLocaleString("es-CL", {day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
-    var qué = (enviaEntrevista && enviaPrefiltro) ? "Entrevista y Prefiltro" : (enviaEntrevista ? "Entrevista" : "Prefiltro");
+    var partesQ = []; if (enviaEntrevista) partesQ.push("Entrevista"); if (enviaPrefiltro) partesQ.push("Prefiltro"); if (enviaPenguin) partesQ.push("Penguin");
+    var qué = partesQ.join(" y ");
     okEl.textContent = "🗓️ " + qué + " programada para el " + fechaLegible + " → " + email;
     okEl.style.display = "block";
     document.getElementById("env-programar-campos").style.display = "none";
@@ -4725,7 +4733,8 @@ async function enviarEvaluacion() {
   // La entrevista usa su propio backend y token, se envia aparte
   var enviaEntrevista = testsSeleccionados.indexOf("ENTREVISTA") > -1;
   var enviaPrefiltro  = testsSeleccionados.indexOf("PREFILTRO") > -1;
-  var soloTests = testsSeleccionados.filter(function(t){ return t !== "ENTREVISTA" && t !== "PREFILTRO"; });
+  var enviaPenguin    = testsSeleccionados.indexOf("PENGUIN") > -1;
+  var soloTests = testsSeleccionados.filter(function(t){ return t !== "ENTREVISTA" && t !== "PREFILTRO" && t !== "PENGUIN"; });
 
   if (!nombre || !email) {
     errEl.textContent="Por favor completa nombre y email.";
@@ -4757,6 +4766,14 @@ async function enviarEvaluacion() {
         body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"prefiltro", link:TESTS_LINKS["PREFILTRO"], solicitante:usuarioActual})
       });
     }
+    // Penguin (Operario): mismo backend, tipo "penguin", 2 preguntas
+    if (enviaPenguin) {
+      await fetch(APPS_URL_ENTREVISTA, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({action:"enviarEntrevista", nombre:nombre, email:email, cargo:cargo, tipo:"penguin", link:TESTS_LINKS["PENGUIN"], solicitante:usuarioActual})
+      });
+    }
     // Enviar cada test seleccionado (sin contar la entrevista)
     if (soloTests.length === 1) {
       // Un solo test → correo individual
@@ -4776,7 +4793,7 @@ async function enviarEvaluacion() {
     }
 
     var nombresTests = testsSeleccionados.map(function(t){
-      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC",DISC:"DISC",OPERA:"OPERA",TECNICO_GRUERO:"Téc. Grúa",TECNICO_BODEGA:"Téc. Bodega",ENTREVISTA:"Entrevista Vendedor Retail"};
+      var nombres = {IC:"IC",CEAL:"CEAL","16PF":"16PF",IPV:"IPV",WONDERLIC:"WONDERLIC",DISC:"DISC",OPERA:"OPERA",TECNICO_GRUERO:"Téc. Grúa",TECNICO_BODEGA:"Téc. Bodega",ENTREVISTA:"Entrevista Vendedor Retail",PREFILTRO:"Entrevista de Prefiltro",PENGUIN:"Entrevista Operario Penguin"};
       return nombres[t]||t;
     }).join(", ");
 
