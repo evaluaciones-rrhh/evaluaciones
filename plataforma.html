@@ -2691,16 +2691,45 @@ function verPrefiltro(i){
   document.getElementById("modal-entrevista").style.display = "flex";
 }
 
-// ── OPERARIO PENGUIN (módulo en preparación) ──
-// Cuando el backend distinga el tipo "penguin", cargarPenguin se conectará
-// al servidor igual que cargarEntrevistas/cargarPrefiltros y renderPenguin
-// dibujará las tarjetas. Por ahora la lista queda vacía a propósito.
+// ── OPERARIO PENGUIN ──
 var penguinData = [];
-function cargarPenguin(silencioso){
-  penguinData = [];
-  ultimaCarga["penguin"] = Date.now();
-  renderPenguin(penguinData);
+var penguinActualIdx = -1;
+
+function esPenguin(ent){
+  if (ent.tipo_real === "penguin") return true;
+  if (ent.tipo_real === "prefiltro" || ent.tipo_real === "entrevista") return false;
+  // Respaldo por si el backend no envía tipo_real
+  var inf = ent.informe || {};
+  if (inf.tipo_informe === "penguin") return true;
+  return false;
 }
+
+async function cargarPenguin(silencioso){
+  var cont = document.getElementById("lista-penguin");
+  if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
+  try {
+    var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
+    if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
+    penguinData = data.entrevistas.filter(esPenguin);
+    // Cada evaluador ve solo los que él envió; el admin ve todos.
+    if (!esAdminActual) {
+      var yo = String(usuarioActual || "").trim().toLowerCase();
+      penguinData = penguinData.filter(function(p){
+        var due = String(p.evaluador || "").trim().toLowerCase();
+        if (!due) return false;
+        return due === yo;
+      });
+    }
+    penguinData.sort(function(a,b){
+      return parseFechaHoraEnt(b && b.fecha) - parseFechaHoraEnt(a && a.fecha);
+    });
+    ultimaCarga["penguin"] = Date.now();
+    renderPenguin(penguinData);
+  } catch(e){
+    if (cont) cont.innerHTML = "<div style='text-align:center;color:#b3261e;padding:34px;'>No se pudieron cargar las entrevistas. Intenta de nuevo.</div>";
+  }
+}
+
 function renderPenguin(lista){
   var cont = document.getElementById("lista-penguin");
   var cnt = document.getElementById("penguin-count");
@@ -2710,8 +2739,20 @@ function renderPenguin(lista){
     cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Aún no hay entrevistas de Operario Penguin.</div>";
     return;
   }
-  // (Cuando haya datos, aquí se dibujarán las tarjetas como en renderEntrevistas.)
+  cont.innerHTML = lista.map(function(p, i){
+    var realIdx = penguinData.indexOf(p);
+    var inf = p.informe || {};
+    return "<div onclick='verPenguin(" + realIdx + ")' style='border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;'>"
+      + "<div style='display:flex;align-items:center;gap:12px;min-width:0;'>"
+      + (inf.foto ? "<img src='" + inf.foto + "' style='width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;'>" : "")
+      + "<div style='min-width:0;'><div style='font-weight:600;font-size:14px;color:var(--ink);'>" + (p.nombre||"—") + "</div>"
+      + "<div style='font-size:12px;color:var(--muted);'>" + (p.cargo||"Operario Penguin") + " · " + (p.fecha||"") + "</div></div></div>"
+      + "<div style='display:flex;align-items:center;gap:7px;flex-shrink:0;'>"
+      + badgeDecision(p.decision)
+      + "</div></div>";
+  }).join("");
 }
+
 function filtrarPenguin(){
   var q = (document.getElementById("buscar-penguin").value||"").toLowerCase().trim();
   if (!q) { renderPenguin(penguinData); return; }
@@ -2721,6 +2762,90 @@ function filtrarPenguin(){
   renderPenguin(f);
 }
 
+// Mi decisión para Penguin (usa el mismo backend guardarDecision)
+function bloqueDecisionPenguin(p){
+  var actual = (p.decision || "");
+  var opciones = [
+    { val: "avanza",    label: "✓ Avanza",    on:"#e6f4ea", onFg:"#1a7f37", onBd:"#2e9e54" },
+    { val: "revisar",   label: "◐ Revisar",   on:"#fdf3dd", onFg:"#9a6700", onBd:"#e0a100" },
+    { val: "no_avanza", label: "✕ No avanza", on:"#fce8e6", onFg:"#b3261e", onBd:"#d9463b" }
+  ];
+  var botones = opciones.map(function(o){
+    var activo = (actual === o.val);
+    var bg = activo ? o.on : "#fff";
+    var fg = activo ? o.onFg : "#6b7680";
+    var bd = activo ? o.onBd : "var(--border)";
+    var peso = activo ? "700" : "500";
+    return "<button onclick='marcarDecisionPenguin(\"" + o.val + "\")' "
+      + "style='flex:1;background:" + bg + ";color:" + fg + ";border:1.5px solid " + bd + ";"
+      + "border-radius:9px;padding:11px 8px;font-size:13px;font-weight:" + peso + ";cursor:pointer;transition:all .15s;'>"
+      + o.label + "</button>";
+  }).join("");
+  return "<div style='margin-top:16px;border-top:1px solid var(--border);padding-top:14px;'>"
+    + "<div id='decision-botones' style='display:flex;gap:8px;'>" + botones + "</div>"
+    + "<div id='decision-msg' style='font-size:12px;color:#1a7f37;margin-top:8px;height:16px;'></div></div>";
+}
+
+async function marcarDecisionPenguin(valor){
+  var p = penguinData[penguinActualIdx];
+  if (!p) return;
+  var msg = document.getElementById("decision-msg");
+  if (msg) msg.textContent = "Guardando...";
+  p.decision = valor;
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ action:"guardarDecision", token: p.token || "", decision: valor })
+    });
+    verPenguin(penguinActualIdx);
+    renderPenguin(penguinData);
+    var msg2 = document.getElementById("decision-msg");
+    if (msg2) { msg2.textContent = "✓ Decisión guardada"; setTimeout(function(){ if(msg2) msg2.textContent=""; }, 2500); }
+  } catch(e){
+    if (msg) msg.textContent = "No se pudo guardar. Intenta de nuevo.";
+  }
+}
+
+function verPenguin(i){
+  penguinActualIdx = i;
+  var p = penguinData[i]; if (!p) return;
+  var inf = p.informe || {};
+
+  function card(label, txt){
+    if (!txt) return "";
+    return "<div style='background:#fff;border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:10px;'>"
+      + "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px;'>" + label + "</div>"
+      + "<div style='font-size:13.5px;line-height:1.6;color:var(--ink);'>" + txt + "</div></div>";
+  }
+
+  document.getElementById("me-nombre").textContent = p.nombre || "—";
+  document.getElementById("me-sub").textContent = (p.cargo || "Operario Penguin") + " · " + (p.fecha || "");
+
+  var cuerpo =
+    (inf.foto ? "<div style='text-align:center;margin-bottom:14px;'><img src='" + inf.foto + "' style='width:88px;height:88px;border-radius:50%;object-fit:cover;border:2px solid var(--border);'></div>" : "")
+    + bloqueDecisionPenguin(p)
+    + card("Cómo se expresa", inf.expresion)
+    + card("Qué contó de sí mismo", inf.presentacion_txt)
+    + card("Sistema de preparación de pedidos", inf.sistema_pedido_txt)
+    + (inf.disposicion ? card("Disposición durante la sesión", inf.disposicion + (inf.contacto_visual != null ? " · Contacto visual: " + inf.contacto_visual + "%" : "")) : "")
+    + (inf.cambios_pantalla != null ? card("Integridad de la sesión", inf.cambios_pantalla === 0 ? "No salió de la pantalla durante la sesión." : "Salió de la pantalla " + inf.cambios_pantalla + " vez/veces. Conviene revisar el video.") : "")
+    + "<div style='font-size:11px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:6px;line-height:1.5;'>Informe descriptivo de entrevista Operario Penguin. No constituye una evaluación psicolaboral ni reemplaza la entrevista.</div>";
+
+  document.getElementById("me-cuerpo").innerHTML = cuerpo;
+
+  videosEntrevistaActual = ((p.videos && p.videos.length ? p.videos : inf.videos) || []).map(function(v){
+    var url = (typeof v === "string") ? v : (v && v.url ? v.url : "");
+    return { url: url, etiqueta: (v && v.competencia) ? v.competencia : "" };
+  }).filter(function(v){ return !!v.url; });
+
+  var btnVid = document.getElementById("btn-ver-videos");
+  if (btnVid) btnVid.style.display = videosEntrevistaActual.length ? "inline-block" : "none";
+  entrevistaActualIdx = -1;
+  prepararBotonAgradecer(p);
+  document.getElementById("modal-entrevista").style.display = "flex";
+}
+
 async function cargarEntrevistas(silencioso){
   var cont = document.getElementById("lista-entrevistas");
   if (cont && !silencioso) cont.innerHTML = "<div style='text-align:center;color:var(--muted);padding:34px;'>Cargando…</div>";
@@ -2728,7 +2853,7 @@ async function cargarEntrevistas(silencioso){
     var data = await fetchJSON(APPS_URL_ENTREVISTA + "?action=getEntrevistas&t=" + Date.now());
     if (!data || !Array.isArray(data.entrevistas)) throw new Error("respuesta incompleta");
     var todas = data.entrevistas;
-    entrevistasData = todas.filter(function(e){ return !esPrefiltro(e); });
+    entrevistasData = todas.filter(function(e){ return !esPrefiltro(e) && !esPenguin(e); });
     entrevistasData.sort(function(a, b){ return _tsEntrevista(b) - _tsEntrevista(a); });
     ultimaCarga["entrevistas"] = Date.now();
     renderDashboardEntrevistas(entrevistasData);
