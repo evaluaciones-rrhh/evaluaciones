@@ -1742,10 +1742,10 @@ tbody tr:hover td { background: #fdf9f6; }
         <div class="table-wrap">
           <table>
             <thead>
-              <tr><th>Fecha programada</th><th>Candidato</th><th>Correo</th><th>Cargo</th><th>Tipo</th><th>Estado</th></tr>
+              <tr><th>Fecha programada</th><th>Candidato</th><th>Correo</th><th>Cargo</th><th>Tipo</th><th>Estado</th><th>Acción</th></tr>
             </thead>
             <tbody id="tabla-prog">
-              <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
+              <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--muted);">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -4488,17 +4488,27 @@ function renderTablaProgramadas(){
   });
   if (cnt) cnt.textContent = (programadasData ? programadasData.length : 0) + " programada(s)";
   if (!lista.length) {
-    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:32px;color:var(--muted);'>No hay entrevistas programadas.</td></tr>";
+    tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;padding:32px;color:var(--muted);'>No hay entrevistas programadas.</td></tr>";
     return;
   }
   tbody.innerHTML = lista.map(function(p){
     var est = String(p.estado || "Pendiente");
     var estBg = "#eef2f6", estFg = "#5c6b7a";
     var el = est.toLowerCase();
-    if (el.indexOf("enviad") > -1) { estBg = "#e6f4ea"; estFg = "#1a7f37"; }
-    else if (el.indexOf("error") > -1 || el.indexOf("cancel") > -1) { estBg = "#fce8e6"; estFg = "#b3261e"; }
+    var enviada = el.indexOf("enviad") > -1;
+    var cancelada = el.indexOf("cancel") > -1;
+    if (enviada) { estBg = "#e6f4ea"; estFg = "#1a7f37"; }
+    else if (el.indexOf("error") > -1 || cancelada) { estBg = "#fce8e6"; estFg = "#b3261e"; }
     else { estBg = "#fdf3dd"; estFg = "#9a6700"; }
-    var tipo = String(p.tipo || "").toLowerCase().indexOf("pref") > -1 ? "Prefiltro" : "Entrevista";
+    var tl = String(p.tipo || "").toLowerCase();
+    var tipo = tl.indexOf("pref") > -1 ? "Prefiltro" : (tl.indexOf("pengu") > -1 ? "Operario Penguin" : "Entrevista");
+    // Botón cancelar: solo si sigue pendiente (no enviada, no cancelada) y tenemos la fila
+    var accion = "—";
+    if (!enviada && !cancelada && p.fila) {
+      var nombreSeguro = String(p.nombre || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+      accion = "<button onclick='cancelarProgramada(" + p.fila + ", \"" + nombreSeguro + "\", \"" + String(p.email||"").replace(/'/g,"\\'") + "\")' "
+        + "style='background:#fff;color:#b3261e;border:1.5px solid #d9463b;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;'>Cancelar</button>";
+    }
     return "<tr>"
       + "<td style='white-space:nowrap;'>" + (p.fechaProg || "—") + "</td>"
       + "<td>" + (p.nombre || "—") + "</td>"
@@ -4506,8 +4516,29 @@ function renderTablaProgramadas(){
       + "<td>" + (p.cargo || "—") + "</td>"
       + "<td>" + tipo + "</td>"
       + "<td><span style='background:" + estBg + ";color:" + estFg + ";font-size:12px;font-weight:600;border-radius:20px;padding:4px 11px;white-space:nowrap;'>" + est + "</span></td>"
+      + "<td>" + accion + "</td>"
       + "</tr>";
   }).join("");
+}
+
+// Cancela una entrevista programada (pide confirmación y avisa al backend)
+async function cancelarProgramada(fila, nombre, email){
+  if (!confirm("¿Cancelar la entrevista programada de " + (nombre || "este candidato") + "?\n\nNo se enviará. Esta acción no se puede deshacer.")) return;
+  try {
+    await fetch(APPS_URL_ENTREVISTA, {
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ action:"cancelarProgramada", fila: fila, email: email || "" })
+    });
+    // Actualizar en memoria al instante y recargar del servidor
+    if (Array.isArray(programadasData)) {
+      programadasData.forEach(function(p){ if (p.fila === fila) p.estado = "Cancelada"; });
+    }
+    renderTablaProgramadas();
+    setTimeout(cargarProgramadas, 1200);
+  } catch(e){
+    alert("No se pudo cancelar. Intenta de nuevo.");
+  }
 }
 
 async function cargarTablaAgr(){
